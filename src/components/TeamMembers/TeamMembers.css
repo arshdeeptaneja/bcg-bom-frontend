@@ -1,0 +1,272 @@
+.team-members {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-radius: 10px;
+}
+
+.role-allocator-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.role-allocator-card div{
+  display: flex;
+  width: 100%;
+}
+
+.allocator-header {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.allocator-label {
+  font-size: 12px;
+  display: block;
+  text-align: left;
+}
+
+.allocator-header h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #0389d0;
+  margin: 4px 0;
+  text-align: left;
+}
+
+.team-info {
+  font-size: 12px;
+  color: #000;
+  text-align: left;
+}
+
+.total-members {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  margin-bottom: 20px;
+  padding: 0 16px;
+  border-radius: 8px;
+
+}
+
+.member-count {
+  font-size: 32px;
+  font-weight: bold;
+  color: #0389d0;
+}
+
+.member-label {
+  font-size: 12px;
+  color: #666;
+}
+
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 12px;
+}
+
+.status-count {
+  font-weight: bold;
+  color: #333;
+  min-width: 20px;
+}
+
+.status-label {
+  flex: 1;
+  text-align: left;
+  margin-left: 12px;
+  color: #000;
+}
+
+.status-indicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+.status-image{
+  height:100%;
+  width:100%;
+}
+
+.status-indicator.completed {
+  background: #4caf50;
+}
+
+.status-indicator.pending {
+  background: #f44336;
+}
+
+.status-indicator.flagged {
+  background: #ff9800;
+}
+
+.status-indicator.acceptance {
+  background: #000;
+}
+/* 
+.team-list {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  max-height: 250px;
+  overflow-y: scroll;
+}
+
+.team-list h3 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  margin: 0 0 16px 0;
+}
+
+.member-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+} */
+
+.team-list {
+  background: white;
+  border-radius: 8px;
+  max-height: 300px;  /* Adjust the height as needed */
+  overflow-y: auto;    /* Only the list scrolls */
+  overflow-x: hidden;
+}
+
+.team-list h3 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  margin: 0;
+  z-index: 10;
+}
+
+.team-members-wrapper {
+  /* This ensures the scroll happens inside this div */
+  display: flex;
+  flex-direction: column;
+}
+
+.member-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+
+.member-card:last-child {
+  border-bottom: none;
+}
+
+.member-card:hover {
+  background: #f9f9f9;
+  margin: 0 -12px;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 12px;
+}
+
+.member-avatar.status-red {background-color: #9f1d35 !important;}
+.member-avatar.status-green {background-color: #008001 !important;}
+.member-avatar.status-yellow {background-color: #f69f29 !important;}
+.member-avatar.status-black {background-color: #000 !important;}
+
+.member-info {
+  flex: 1;
+}
+
+.member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.member-role {
+  font-size: 12px;
+  color: #000;
+}
+
+.member-action {
+  color: #000;
+  font-size: 18px;
+}
+
+.roles-allocated {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.roles-allocated h3 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  margin: 0 0 16px 0;
+}
+
+.allocation-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.allocation-item:last-child {
+  border-bottom: none;
+}
+
+.allocation-role {
+  color: #000;
+}
+
+.allocation-count {
+  font-weight: bold;
+  color: #333;
+}
+
+.member-status-flag {
+  position: absolute;
+  right: 8px;
+  z-index: 1;
+  border-radius: 50%;
+  padding: 1px;
+  line-height: 0;
+  top: 0;
+  background: #fff;
+}
+
+.no-data-found{
+    color: #666;
+    text-align: center;
+    font-size: 14px;
+}

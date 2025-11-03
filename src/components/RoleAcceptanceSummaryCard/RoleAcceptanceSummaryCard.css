@@ -1,0 +1,43 @@
+
+.role-summary.card {
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f8f9fc;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+.role-primary {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #4e73df;
+}
+
+.additional-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detail-item img {
+  width: 24px;
+  height: 24px;
+}
+
+.detail-item span {
+  font-weight: 500;
+  color: #555;
+  margin-right: 5px;
+}
+
+.detail-item p {
+  margin: 0;
+  color: #333;
+}
+

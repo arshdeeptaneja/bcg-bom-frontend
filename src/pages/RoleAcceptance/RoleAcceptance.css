@@ -1,0 +1,186 @@
+.role-acceptance-container {
+  /* width: 100%; */
+  padding: 20px;
+  box-sizing: border-box;
+
+  margin-left: 80px;
+  margin-top: 72px;
+  padding: 24px;
+  background-color: #fff;
+  min-height: calc(100vh - 72px);
+}
+
+.role-acceptance-wrapper {
+  display: flex;
+  gap: 20px;
+  /* space between table & graph */
+}
+
+/* Table Section = 60% */
+.role-acceptance-table-section {
+  flex: 0 0 60%;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* background-color: red; */
+}
+
+/* Graph Section = 40% */
+.role-acceptance-graph-section {
+  flex: 0 0 40%;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  max-height: 90vh;
+  overflow-y: scroll;
+}
+
+/* ✅ Responsive: for tablets & mobiles */
+@media (max-width: 992px) {
+  .role-acceptance-wrapper {
+    flex-direction: column;
+  }
+
+  .role-acceptance-table-section,
+  .role-acceptance-graph-section {
+    flex: 0 0 100%;
+    width: 100%;
+    padding: 15px;
+    /* padding for small screens */
+  }
+}
+
+
+.role-kras {
+  padding: 20px;
+  overflow-x: auto;
+  outline: none;
+}
+
+.role-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+
+
+/* Buttons */
+.btn-wrapper {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-blue {
+  background-color: #0389d0;
+  color: #fff;
+}
+
+.btn-blue:hover {
+  background-color: #3b5fc0;
+}
+
+.btn-green {
+  background-color: #1cc88a;
+  color: #fff;
+}
+
+.btn-green:hover {
+  background-color: #17a673;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .role-graph {
+    padding: 15px;
+  }
+
+  .table-primary th,
+  .table-primary td {
+    padding: 10px;
+  }
+
+  .btn-wrapper {
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+.table-primary {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* make header & footer fixed */
+.table-primary thead,
+.table-primary tfoot {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  /* aligns with body */
+  position: sticky;
+  z-index: 2;
+}
+
+.table-primary thead {
+  top: 0;
+  background: #fff;
+  /* white background so it doesn’t overlap */
+}
+
+.table-primary tfoot {
+  bottom: 0;
+  background: #f1f1f1;
+  font-weight: bold;
+}
+
+/* scrollable body */
+.table-primary tbody {
+  display: block;
+  max-height: 455px;
+  /* adjust as per requirement */
+  overflow-y: auto;
+  width: 100%;
+}
+
+.table-primary thead tr,
+.table-primary tfoot tr {
+  display: table;
+  width: 100%;
+  /* table-layout: fixed; */
+}
+
+.table-primary tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* optional styling */
+.table-primary th,
+.table-primary td {
+  /* padding: 8px; */
+  /* text-align: left; */
+  /* border: 1px solid #ddd; */
+}

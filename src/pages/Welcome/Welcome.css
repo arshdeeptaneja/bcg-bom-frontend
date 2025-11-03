@@ -1,0 +1,116 @@
+/* Welcome Page Styles */
+.welcome-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.welcome-content {
+  margin-left: 80px;
+  margin-top: 75px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.welcome-container {
+  min-height: calc(100vh - 75px);
+}
+
+.welcome-header h1 {
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+.user-info-card {
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+
+.user-info-card:hover {
+  transform: translateY(-2px);
+}
+
+.my-tools-nav .list-group-item {
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.my-tools-nav .list-group-item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(5px);
+  color: #0d6efd;
+}
+
+.my-tools-nav .list-group-item i {
+  width: 20px;
+  text-align: center;
+}
+
+.quote-card h2 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.quote-card p {
+  opacity: 0.9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .welcome-container .row {
+    flex-direction: column;
+  }
+  
+  .quote-card {
+    min-height: 200px;
+    margin-top: 2rem;
+  }
+  
+  .quote-card h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Animation for smooth entrance */
+.welcome-container {
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-separator {
+  width: 100%;
+  height: 1px;
+}
+.user-info-card .card-separator::after, .user-info-card .card-separator::before {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: red;
+  border-radius: 100%;
+  background-color: #F8F8F8;
+  transform: translateY(-50%);
+}
+.user-info-card .card-separator::after {
+  left: -12px;
+  box-shadow: inset -5px 0px 5px rgba(0,0,0,0.05);
+}
+.user-info-card .card-separator::before {
+  right: -12px;
+  box-shadow: inset 5px 0px 5px rgba(0,0,0,0.05);
+}
+
+.quote-section {
+  background: url('../../assets/welcome-section-bg.png') no-repeat center center;
+  background-size: cover;
+}

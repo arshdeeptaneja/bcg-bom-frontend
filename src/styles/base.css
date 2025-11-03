@@ -1,0 +1,145 @@
+.page {
+    background-color: var(--secondary-color);
+}
+
+.text-button {
+    background: none;
+    border: none;
+    padding: var(--default-padding);
+    color: var(--accent-color);
+}
+
+.back-button {
+    border: var(--default-border);
+    padding: var(--default-padding);
+    color: var(--secondary-color);
+    box-shadow: 0cqmin;
+}
+
+.primary-button {
+    background: var(--accent-color);
+    border: none;
+    padding: var(--default-padding);
+    color: var(--primary-color);
+}
+
+.delete-button {
+    background: var(--danger-color);
+    border: none;
+    padding: var(--default-padding);
+    color: var(--primary-color);
+}
+
+.edit-button {
+    background: var(--warning-color);
+    border: none;
+    padding: var(--default-padding);
+    color: var(--primary-color);
+}
+
+section {
+    background-color: var(--primary-color);
+    border-radius: 20px;
+    box-shadow: 0cqmin;
+    padding: 20px;
+}
+
+section h2 {
+    color: var(--accent-color);
+}
+
+.role-bar {
+    border-left: 10px solid var(--accent-color);
+    background-color: var(--primary-color);
+    box-shadow: 0cqmin;
+}
+
+input {
+    border: var(--default-border);
+    background-color: transparent;
+    color: var(--secondary-color);
+    border-radius: var();
+}
+
+ul.loop-border {}
+
+ul.loop-border li {
+    border: var(--default-border);
+    color: var(--secondary-color);
+}
+
+ul.base-loop {
+    padding: var(--default-padding);
+}
+
+.card {
+    background-color: var(--primary-color);
+    border-radius: 20px;
+    box-shadow: 0cqmin;
+    padding: 20px;
+    border: var(--default-border);
+}
+
+table thead {
+    background-color: var(--accent-color);
+    padding: 20px;
+}
+table tbody {
+    padding: 20px;
+}
+
+// nav
+.nav {
+    background-color: var(--secondary-color);
+    position: fixed; 
+    top: 0;
+    left: 0;
+    padding-top: calc(var(--default-padding) * 2);
+}
+
+.nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav li {
+    margin-bottom: 5px;
+}
+
+.nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: var(--default-padding);
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+
+
+//header
+
+.main-nav {
+    background-color: var(--accent-color);
+    box-shadow: var(--shadows); 
+    color: var(--primary-color);
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    gap: var(--default-spacing);
+    padding: 0 var(--default-padding);
+    margin: 0;
+}
+
+.main-nav a {
+    display: block;
+    padding: 15px 0;
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: 500;
+    position: relative;
+}

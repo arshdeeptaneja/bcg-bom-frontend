@@ -1,0 +1,242 @@
+.user-profile {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.user-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #2e7d32;
+}
+
+.user-profile-header h2 {
+  color: #2e7d32;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.user-profile-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.loading-spinner {
+  font-size: 18px;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c62828;
+  font-weight: 500;
+}
+
+.profile-section,
+.roles-section,
+.kra-section,
+.team-section,
+.dashboard-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-section h3,
+.roles-section h3,
+.kra-section h3,
+.team-section h3,
+.dashboard-section h3 {
+  color: #2e7d32;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.refresh-btn {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+.refresh-btn-small {
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn-small:hover {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.profile-data,
+.kra-data,
+.dashboard-data {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.profile-data p,
+.kra-data p,
+.dashboard-data p {
+  margin: 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+}
+
+.profile-data p strong,
+.kra-data p strong,
+.dashboard-data p strong {
+  color: #2e7d32;
+  display: inline-block;
+  min-width: 120px;
+}
+
+.roles-data {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.role-item {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+}
+
+.role-item p {
+  margin: 8px 0;
+}
+
+.role-item p strong {
+  color: #2e7d32;
+  display: inline-block;
+  min-width: 100px;
+}
+
+.team-data {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.team-member {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+}
+
+.team-member p {
+  margin: 8px 0;
+}
+
+.team-member p strong {
+  color: #2e7d32;
+  display: inline-block;
+  min-width: 100px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .user-profile {
+    padding: 15px;
+  }
+
+  .user-profile-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .section-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .profile-data,
+  .kra-data,
+  .dashboard-data {
+    grid-template-columns: 1fr;
+  }
+
+  .roles-data,
+  .team-data {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-section,
+  .roles-section,
+  .kra-section,
+  .team-section,
+  .dashboard-section {
+    padding: 16px;
+  }
+}
+
+/* Animation for loading states */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-section,
+.roles-section,
+.kra-section,
+.team-section,
+.dashboard-section {
+  animation: fadeIn 0.5s ease-out;
+}

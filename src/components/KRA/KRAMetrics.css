@@ -1,0 +1,70 @@
+.kra-metrics {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.kra-metrics h2 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 20px 0;
+}
+
+.kra-tables {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+}
+
+.kra-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  border-right: 1px solid #8080803b;
+}
+
+.kra-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #000;
+}
+
+.kra-table td {
+  padding: 12px;
+  color: #000;
+
+}
+
+.kra-table tr:hover {
+  background: #f9f9f9;
+}
+
+.total-row {
+  font-weight: 600;
+}
+
+.total-row td {
+  color: #0389d0;
+}
+
+
+.kra-details .kra-table td:first-child {
+  max-width: 300px;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .kra-tables {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kra-list {
+  height: 270px;
+  overflow: auto;
+  overflow-x: hidden;
+}
