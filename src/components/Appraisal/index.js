@@ -5,3 +5,4 @@ export { default as FinalScoreSummaryTable } from './CheckInTables/FinalScoreSum
 export { default as MeasurableKra } from './CheckInTables/MeasurableKra/MeasurableKra';
 export { default as NonMeasurableKra } from './CheckInTables/NonMeasurableKra/NonMeasurableKra';
 export { default as DevelopmentInputs } from './CheckInTables/DevelopmentInputs/DevelopmentInputs';
+export { default as ExceptionListTable } from './ExceptionListTable/ExceptionListTable';

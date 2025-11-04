@@ -53,7 +53,13 @@ const AppraisalDashboard = () => {
           heading="Exception Resolution"
           body="Click here for Exception Resolution"
           image={<HiOutlineDocumentCheck />}
-          onClick={() => console.log('RectangleTab clicked')}
+          onClick={() => navigate('/appraisal/exception-home')}
+        />
+        <ImageTab
+          heading="Exception Validation"
+          body="Click here for Exception Validation"
+          image={<HiOutlineDocumentCheck />}
+          onClick={() => navigate('/appraisal/exceptions-home')}
         />
       </div>
 

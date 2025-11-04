@@ -7,3 +7,5 @@ export { default as AppraisalDashboard } from './Appraisal/AppraisalDashboard/Ap
 export { default as AppraisalHome } from './Appraisal/AppraisalHome/AppraisalHome';
 export { default as AppraiseeCheckIn } from './Appraisal/AppraiseeCheckIn/AppraiseeCheckIn';
 export { default as AppraisalCheckInForm } from './Appraisal/AppraisalCheckInForm/AppraisalCheckInForm';
+export { default as ExceptionHome } from './Appraisal/ExceptionHome/ExceptionHome';
+export { default as ExceptionsList } from './Appraisal/ExceptionsList/ExceptionsList';
