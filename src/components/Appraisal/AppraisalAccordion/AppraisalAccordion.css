@@ -1,0 +1,30 @@
+.accordion-button {
+    background-color: white;
+    color: black;
+  }
+  
+/* Default (collapsed) state: white */
+.accordion .accordion-button {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Expanded (selected) state: primary color */
+.accordion .accordion-button:not(.collapsed) {
+  background-color: var(--bs-primary) !important;
+  color: #ffffff !important;
+  box-shadow: none;
+}
+
+/* Optional: remove default chevron color mismatch */
+.accordion .accordion-button::after {
+  filter: invert(0);
+}
+.accordion .accordion-button:not(.collapsed)::after {
+  filter: invert(1);
+}
+  
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+  

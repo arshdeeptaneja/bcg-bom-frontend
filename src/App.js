@@ -1,22 +1,25 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import './App.css';
 import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import "./App.css";
-import { Login, Dashboard, Welcome, RoleAllocation } from "./pages";
-import { TopBar, LeftNavigation } from "./components/common";
-import UserProfile from "./components/UserProfile/UserProfile";
-import ApiTest from "./components/ApiTest";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import RoleAcceptance from "./pages/RoleAcceptance/RoleAcceptance";
-import { ToastWrapper } from "./components/common/ToastMessage";
-import { Provider } from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
-import { store, persistor } from "./store/store";
-import JobFamily from "./pages/JobFamily/JobFamily";
+  Login,
+  Dashboard,
+  Welcome,
+  RoleAllocation,
+  AppraisalDashboard,
+  AppraisalHome,
+  AppraiseeCheckIn,
+} from './pages';
+import { TopBar, LeftNavigation } from './components/common';
+import UserProfile from './components/UserProfile/UserProfile';
+import ApiTest from './components/ApiTest';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import RoleAcceptance from './pages/RoleAcceptance/RoleAcceptance';
+import { ToastWrapper } from './components/common/ToastMessage';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './store/store';
+import JobFamily from './pages/JobFamily/JobFamily';
 
 function App() {
   return (
@@ -32,8 +35,10 @@ function App() {
 
 // App content that uses AuthContext
 function AppContent() {
-  const { isAuthenticated, loading, login, logout, setTeamDashboardData } =
-    useAuth();
+  let { isAuthenticated, loading, login, logout, setTeamDashboardData } = useAuth();
+
+  // TODO: For testing purposes, remove this later
+  isAuthenticated = true;
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -66,18 +71,14 @@ function AppContent() {
             <Route
               path="/login"
               element={
-                isAuthenticated ? (
-                  <Navigate to="/" replace />
-                ) : (
-                  <Login onLogin={handleLogin} />
-                )
+                isAuthenticated ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />
               }
             />
             <Route
               path="/welcome"
               element={
                 // isAuthenticated ? (
-                  <WelcomeLayout onLogout={handleLogout} />
+                <WelcomeLayout onLogout={handleLogout} />
                 // ) : (
                 //   <Navigate to="/login" replace />
                 // )
@@ -87,7 +88,7 @@ function AppContent() {
               path="/rc/role-clarity"
               element={
                 // isAuthenticated ? (
-                  <DashboardLayout onLogout={handleLogout} />
+                <DashboardLayout onLogout={handleLogout} />
                 // ) : (
                 //   <Navigate to="/login" replace />
                 // )
@@ -116,12 +117,7 @@ function AppContent() {
             <Route path="/api-test" element={<ApiTest />} />
             <Route
               path="/"
-              element={
-                <Navigate
-                  to={isAuthenticated ? "/welcome" : "/login"}
-                  replace
-                />
-              }
+              element={<Navigate to={isAuthenticated ? '/welcome' : '/login'} replace />}
             />
             <Route
               path="/rc/role-allocation"
@@ -138,6 +134,36 @@ function AppContent() {
               element={
                 isAuthenticated ? (
                   <JobFamily onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraisal/dashboard"
+              element={
+                isAuthenticated ? (
+                  <AppraisalDashboardLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraisal/home"
+              element={
+                isAuthenticated ? (
+                  <AppraisalHomeLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraisal/appraisee-check-in"
+              element={
+                isAuthenticated ? (
+                  <AppraiseeCheckInLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )
@@ -198,6 +224,36 @@ const ProfileLayout = ({ onLogout }) => {
   );
 };
 
+// Appraisal Dashboard Layout Component
+const AppraisalDashboardLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraisalDashboard />
+    </>
+  );
+};
+
+const AppraisalHomeLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraisalHome />
+    </>
+  );
+};
+
+const AppraiseeCheckInLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraiseeCheckIn />
+    </>
+  );
+};
 // JobFamily Layout
 // const JobFamily = ({ onLogout }) => (
 //   <>

@@ -1,0 +1,45 @@
+.rectangle-tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 400px;
+  gap: 16px;
+  padding: 24px;
+  background-image: url('../../../assets/rectangle-tab-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  min-height: 160px;
+  cursor: pointer;
+}
+
+.rectangle-tab:hover {
+  transform: translateY(-4px);
+  filter: brightness(1.15);
+}
+
+.rectangle-tab-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.rectangle-tab-heading {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.rectangle-tab-body {
+  font-size: 20px;
+  opacity: 0.95;
+}
+
+.rectangle-tab-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px; /* for react-icons */
+}
+
+

@@ -1,0 +1,53 @@
+.employee-appraisal-card {
+    background-color: white;
+}
+
+.toggle-button {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.toggle-button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Smooth expand/collapse for actions */
+.actions-collapse {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 300ms ease, opacity 250ms ease 50ms;
+}
+
+.actions-collapse.open {
+    max-height: 400px; /* increased to accommodate role description section */
+    opacity: 1;
+}
+
+/* Role Description Styles */
+.roles-timeline {
+    height: 1px;
+}
+
+.role-dot {
+    transform: translateX(-50%);
+}
+
+.role-description {
+    padding-right: 2rem;
+}
+
+.button-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.badge {
+    color: white;
+    /* Background color is set dynamically via inline styles based on status */
+}
+
+.btn-primary:hover {
+    color: #ffffff;
+}
