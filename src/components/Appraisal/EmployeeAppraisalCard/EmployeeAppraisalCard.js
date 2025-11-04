@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import './EmployeeAppraisalCard.css';
 import { useState } from 'react';
 import Modal from '../../common/Modal/Modal';
-
+import { RoleTimeline } from '..';
 /**
  * Employee Appraisal summary card
  * Accepts an EmployeeModel instance (`employee`) and renders key details with actions.
@@ -227,38 +227,7 @@ export default function EmployeeAppraisalCard({
           </div>
 
           {/* Additional Roles Timeline */}
-          <div className="additional-roles-section mb-3">
-            <div className="d-flex align-items-center mb-2">
-              <span className="text-muted fw-semibold me-3">Roles</span>
-              <div className="roles-timeline flex-grow-1 position-relative d-flex align-items-center">
-                <hr className="m-0 flex-grow-1" style={{ borderTop: '1px solid #000000' }} />
-                <div className="d-flex justify-content-between position-absolute w-100">
-                  {[1, 2, 3, 4].map((index) => (
-                    <div className="role-dot-container">
-                      <div
-                        key={index}
-                        className="role-dot bg-dark rounded-circle"
-                        style={{ width: '8px', height: '8px', transform: 'translateX(-50%)' }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="d-flex justify-content-between mt-3">
-              {[1, 2, 3, 4].map((index) => {
-                const role = additionalRoles[index - 1];
-                return (
-                  <div key={index} className="text-center">
-                    <div className="text-muted small">
-                      Additional Role {String(index).padStart(2, '0')}
-                    </div>
-                    <div className="fw-semibold mt-1">{role || 'none'}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <RoleTimeline additionalRoles={additionalRoles} />
 
           {/* Organization */}
           <div className="organization-section">

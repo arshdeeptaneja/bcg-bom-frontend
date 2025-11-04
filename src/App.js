@@ -9,6 +9,7 @@ import {
   AppraisalDashboard,
   AppraisalHome,
   AppraiseeCheckIn,
+  AppraisalCheckInForm,
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -169,6 +170,16 @@ function AppContent() {
                 )
               }
             />
+            <Route
+              path="/appraisal/check-in-form"
+              element={
+                isAuthenticated ? (
+                  <AppraisalCheckInFormLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
           </Routes>
         </div>
       </Router>
@@ -251,6 +262,16 @@ const AppraiseeCheckInLayout = ({ onLogout }) => {
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
       <AppraiseeCheckIn />
+    </>
+  );
+};
+
+const AppraisalCheckInFormLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraisalCheckInForm />
     </>
   );
 };
