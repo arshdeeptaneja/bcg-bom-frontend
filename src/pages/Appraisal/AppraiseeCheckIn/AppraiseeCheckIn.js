@@ -77,6 +77,8 @@ export default function AppraiseeCheckIn() {
           appraisalStatus="PENDING AT APPRAISEE"
           exceptionStatus="COMPLETED"
           organization="Dhanetha"
+          quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
+          appraisalPeriod={appraisalPeriod}
           onAddCheckIn={() => {}}
           onViewSummary={() => {}}
           onAddException={() => {}}

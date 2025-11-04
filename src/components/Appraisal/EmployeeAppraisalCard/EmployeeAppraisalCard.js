@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import './EmployeeAppraisalCard.css';
 import { useState } from 'react';
+import Modal from '../../common/Modal/Modal';
 
 /**
  * Employee Appraisal summary card
@@ -9,6 +10,8 @@ import { useState } from 'react';
 export default function EmployeeAppraisalCard({
   employee,
   dateRange,
+  quarter,
+  appraisalPeriod,
   primaryRole,
   additionalRoles = [],
   organization,
@@ -66,6 +69,35 @@ export default function EmployeeAppraisalCard({
 
   return (
     <section className="employee-appraisal-card p-3 mt-4">
+      {/** Bootstrap modal trigger wiring via id */}
+      {(() => {
+        const addCheckInModalId = `addCheckInModal-${employee.empNo}`;
+        return (
+          <>
+            <div className="d-none" />
+            <Modal
+              id={addCheckInModalId}
+              title="Alert"
+              body={`${employee.appraiser} is your appraising authority for ${quarter} ${appraisalPeriod} Performance Appraisal. If it is found correct, Please click on "Yes" for submission of appraisal. Click on "NO" If it is not correct and raise the issue through the HO HR.`}
+              actions={{
+                primary: {
+                  label: 'Yes',
+                  onClick: () => {
+                    onAddCheckIn();
+                  },
+                },
+                secondary: {
+                  label: 'No',
+                  onClick: () => {
+                    // Close modal
+                    document.getElementById(addCheckInModalId).dataset.bsDismiss = 'modal';
+                  },
+                },
+              }}
+            />
+          </>
+        );
+      })()}
       {/* Top detail grid */}
       <div className="row g-3 align-items-center">
         <div className="col-md-1">
@@ -243,7 +275,12 @@ export default function EmployeeAppraisalCard({
         {/* Action Buttons Section */}
         <div className="action-buttons col-md-5 col-12 d-flex flex-column">
           <div className="button-row">
-            <button type="button" className="btn btn-primary px-4" onClick={onAddCheckIn}>
+            <button
+              type="button"
+              className="btn btn-primary px-4"
+              data-bs-toggle="modal"
+              data-bs-target={`#${`addCheckInModal-${employee.empNo}`}`}
+            >
               Add Check-In Summary
               <span className="ms-2">→</span>
             </button>
