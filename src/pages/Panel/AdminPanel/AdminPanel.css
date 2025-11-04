@@ -1,0 +1,15 @@
+.dashboard-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #000;
+    margin: 0 0 8px 0;
+  }
+
+/* Specific grey for FY selector row */
+.fy-row {
+  background-color: #e9ecef;
+}
+
+.appraisal-tabs {
+  height: 200px;
+}

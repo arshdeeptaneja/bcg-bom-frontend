@@ -54,7 +54,7 @@ export default function AppraisalHome() {
           <button
             type="button"
             className={`btn px-2 ${
-              appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primary'
+              appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primarys'
             }`}
             onClick={() => setAppraisalPeriod('Annual')}
           >
@@ -63,7 +63,7 @@ export default function AppraisalHome() {
           <button
             type="button"
             className={`btn px-2 ${
-              appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primary'
+              appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primarys'
             }`}
             onClick={() => setAppraisalPeriod('Quarterly')}
           >

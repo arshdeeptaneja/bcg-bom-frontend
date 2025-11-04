@@ -6,3 +6,6 @@ export { default as RoleAllocation } from './RoleAllocation/RoleAllocation';
 export { default as AppraisalDashboard } from './Appraisal/AppraisalDashboard/AppraisalDashboard';
 export { default as AppraisalHome } from './Appraisal/AppraisalHome/AppraisalHome';
 export { default as AppraiseeCheckIn } from './Appraisal/AppraiseeCheckIn/AppraiseeCheckIn';
+export {default as AdminPanel} from './Panel/AdminPanel/AdminPanel';
+export { default as HrDashboard} from './Appraisal/AppraisalHRDashboard/HrDashboard';
+export { default as AppariserUpdate} from './Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate'

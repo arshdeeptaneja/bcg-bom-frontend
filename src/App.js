@@ -9,6 +9,7 @@ import {
   AppraisalDashboard,
   AppraisalHome,
   AppraiseeCheckIn,
+  AdminPanel,
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -20,6 +21,8 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './store/store';
 import JobFamily from './pages/JobFamily/JobFamily';
+import HrDashboard from './pages/Appraisal/AppraisalHRDashboard/HrDashboard';
+import AppraiserUpdate from './pages/Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate';
 
 function App() {
   return (
@@ -169,6 +172,39 @@ function AppContent() {
                 )
               }
             />
+
+                <Route
+              path="/appraisal/admin-panel"
+              element={
+                isAuthenticated ? (
+                  <AppraisalAdminPanel onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+                <Route
+              path="/appraisal/hr-dashboard"
+              element={
+                isAuthenticated ? (
+                  <AppraisaHrDashboard onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+                 <Route
+              path="/appraisal/hr-dashboard/appraisal-update"
+              element={
+                isAuthenticated ? (
+                  <AppraisaUpdated onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
           </Routes>
         </div>
       </Router>
@@ -245,6 +281,7 @@ const AppraisalHomeLayout = ({ onLogout }) => {
   );
 };
 
+
 const AppraiseeCheckInLayout = ({ onLogout }) => {
   return (
     <>
@@ -254,6 +291,43 @@ const AppraiseeCheckInLayout = ({ onLogout }) => {
     </>
   );
 };
+
+// Appraisa Admin Panel
+const AppraisalAdminPanel = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+    <AdminPanel/>
+    </>
+  );
+};
+
+// Appraisal Hr Dashboard
+const AppraisaHrDashboard = ({onLogout})=>{
+
+  return(
+    <>
+    <TopBar onLogout={onLogout}/>
+    <LeftNavigation/>
+    <HrDashboard/>
+    
+    </>
+  )
+}
+//appraisal update
+const AppraisaUpdated = ({onLogout})=>{
+
+  return(
+    <>
+    <TopBar onLogout={onLogout}/>
+    <LeftNavigation/>
+    <AppraiserUpdate/>
+    
+    </>
+  )
+}
+
 // JobFamily Layout
 // const JobFamily = ({ onLogout }) => (
 //   <>

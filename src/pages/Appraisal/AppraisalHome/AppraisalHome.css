@@ -19,18 +19,18 @@
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary {
   /* background-color: #e9ecef; */
   border-color: var(--bs-primary);
   color: var(--bs-primary); /* optional, keeps text visible on grey */
 }
 
-.btn-outline-primary {
+.btn-outline-primarys {
   background-color: white;
   color: var(--bs-primary);
 }
 
-.btn-outline-primary:hover {
+.btn-outline-primarys {
   background-color: #e9ecef;
   color: var(--bs-primary);
 }

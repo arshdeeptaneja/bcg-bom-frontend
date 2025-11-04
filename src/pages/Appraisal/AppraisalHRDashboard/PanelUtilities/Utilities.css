@@ -1,0 +1,40 @@
+:root {
+  --bs-primary: #fff;
+  --bs-secondary: #f8f9fc;
+  --bs-success: #008000;
+  --bs-info: #0dcaf0;
+  --bs-warning: #ffc107;
+  --bs-danger: #ff0000;
+  --bs-light: #f8f9fa;
+  --bs-dark: #000;
+  --accent-color: #0389d0;
+  --default-padding: 25px;
+  --default-spacing: 20px;
+  --default-margin: 25px;
+  --border-radius: 8px;
+  --shadows: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --border: 1px solid #dee2e6;
+}
+
+/* Section */
+section {
+  background-color: var(--bs-primary);
+  border-radius: var(--border-radius);
+  padding: 20px;
+}
+
+/* section h2 {
+  color: var(--accent-color);
+} */
+
+/* Utility boxes */
+.utility-box {
+  border: 1px solid var(--accent-color);
+  border-radius: var(--border-radius);
+  padding: 10px 15px;
+  color: var(--accent-color);
+  font-weight: 500;
+  font-size: 0.95rem;
+  background-color: transparent; /* no background */
+}
+
