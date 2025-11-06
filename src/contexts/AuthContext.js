@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Create the AuthContext
 const AuthContext = createContext();
@@ -7,7 +7,7 @@ const AuthContext = createContext();
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
@@ -25,8 +25,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        const userData = localStorage.getItem("userData");
+        const token = localStorage.getItem('accessToken');
+        const userData = localStorage.getItem('userData');
 
         if (token && userData) {
           const parsedUserData = JSON.parse(userData);
@@ -34,10 +34,10 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(true);
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        console.error('Error initializing auth:', error);
         // Clear invalid data
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("userData");
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userData');
       } finally {
         setLoading(false);
       }
@@ -49,48 +49,79 @@ export const AuthProvider = ({ children }) => {
   // Login function - handles complete login response data
   const login = (loginResponseData) => {
     try {
+      console.log('AuthContext.login called with:', loginResponseData);
+
       // Extract data from login response
-      const { accessToken, refreshToken, user, userDetailedInfo } =
-        loginResponseData;
+      const { accessToken, refreshToken, user, userDetailedInfo } = loginResponseData;
+
+      // Validate required fields
+      if (!accessToken) {
+        console.error('Login failed: accessToken is missing');
+        return false;
+      }
+
+      console.log('Login data extracted:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        hasUser: !!user,
+        hasUserDetailedInfo: !!userDetailedInfo,
+      });
 
       // Store tokens
       if (accessToken) {
-        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem('accessToken', accessToken);
       }
       if (refreshToken) {
-        localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem('refreshToken', refreshToken);
       }
 
       // Combine user data from both user and userDetailedInfo
+      // Handle null/undefined values safely
+      const userData = user || {};
+      const detailedInfo = userDetailedInfo[0] || {};
+
       const combinedUserData = {
-        ...user,
-        ...userDetailedInfo,
+        ...userData,
+        ...detailedInfo,
         // Map essential fields for API calls
-        empNo: userDetailedInfo?.empNo || user?.empNo || user?.employeeId,
-        name: userDetailedInfo?.name || user?.name || user?.fullName,
-        sol: userDetailedInfo?.sol || user?.sol,
-        unitType: userDetailedInfo?.unitType || user?.unitType,
-        department: userDetailedInfo?.department || user?.department,
-        designation: userDetailedInfo?.designation || user?.designation,
-        corporation: userDetailedInfo?.corporation || user?.corporation,
+        empNo: detailedInfo?.EMP_ID || userData?.EMP_ID || userData?.employeeId,
+        name: detailedInfo?.EMP_NAME || userData?.EMP_NAME || userData?.fullName,
+        sol: detailedInfo?.sol || userData?.sol,
+        unitType: detailedInfo?.BRANCH_UNIT_TYPE || userData?.BRANCH_UNIT_TYPE,
+        department: detailedInfo?.departmentuserData || userData?.department,
+        designation: detailedInfo?.POSITION_DESIGNATION || userData?.ROLE_NAME,
+        corporation: detailedInfo?.corporation || userData?.corporation,
       };
 
       // Store combined user data
-      localStorage.setItem("userData", JSON.stringify(combinedUserData));
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem(
-        "userDetailedInfo",
-        JSON.stringify(userDetailedInfo)
-      );
+      localStorage.setItem('userData', JSON.stringify(combinedUserData));
+
+      // Only store user and userDetailedInfo if they exist
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+      if (userDetailedInfo) {
+        localStorage.setItem('userDetailedInfo', JSON.stringify(userDetailedInfo));
+      }
+
+      // Verify what was stored in localStorage
+      console.log('localStorage after login:', {
+        hasUserData: !!localStorage.getItem('userData'),
+        hasUser: !!localStorage.getItem('user'),
+        hasUserDetailedInfo: !!localStorage.getItem('userDetailedInfo'),
+        userData: localStorage.getItem('userData'),
+        user: localStorage.getItem('user'),
+        userDetailedInfo: localStorage.getItem('userDetailedInfo'),
+      });
 
       // Update state
       setUser(combinedUserData);
       setIsAuthenticated(true);
 
-      console.log("Login successful - User data saved:", combinedUserData);
+      console.log('Login successful - User data saved:', combinedUserData);
       return true;
     } catch (error) {
-      console.error("Error during login:", error);
+      console.error('Error during login:', error);
       return false;
     }
   };
@@ -99,9 +130,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     try {
       // Clear localStorage
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("userData");
-      localStorage.removeItem("refreshToken");
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('userData');
+      localStorage.removeItem('refreshToken');
 
       // Reset state
       setUser(null);
@@ -110,7 +141,7 @@ export const AuthProvider = ({ children }) => {
 
       return true;
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error('Error during logout:', error);
       return false;
     }
   };
@@ -119,11 +150,11 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (updatedUserData) => {
     try {
       const newUserData = { ...user, ...updatedUserData };
-      localStorage.setItem("userData", JSON.stringify(newUserData));
+      localStorage.setItem('userData', JSON.stringify(newUserData));
       setUser(newUserData);
       return true;
     } catch (error) {
-      console.error("Error updating user data:", error);
+      console.error('Error updating user data:', error);
       return false;
     }
   };
@@ -157,13 +188,11 @@ export const AuthProvider = ({ children }) => {
       currentUser: user,
       currentDashboardData: dashboardData,
       localStorage: {
-        accessToken: localStorage.getItem("accessToken"),
-        refreshToken: localStorage.getItem("refreshToken"),
-        userData: JSON.parse(localStorage.getItem("userData") || "null"),
-        user: JSON.parse(localStorage.getItem("user") || "null"),
-        userDetailedInfo: JSON.parse(
-          localStorage.getItem("userDetailedInfo") || "null"
-        ),
+        accessToken: localStorage.getItem('accessToken'),
+        refreshToken: localStorage.getItem('refreshToken'),
+        userData: JSON.parse(localStorage.getItem('userData') || 'null'),
+        user: JSON.parse(localStorage.getItem('user') || 'null'),
+        userDetailedInfo: JSON.parse(localStorage.getItem('userDetailedInfo') || 'null'),
       },
       isAuthenticated,
       employeeDetails: getEmployeeDetails(),
