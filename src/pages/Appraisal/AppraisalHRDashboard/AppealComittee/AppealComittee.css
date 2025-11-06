@@ -10,6 +10,10 @@
   background: none;
   border-radius: var(--border-radius);
 }
+ .container-fluids{
+padding-right: 2rem;
+    padding-left: 6rem;
+ }
 
 .card {
   background-color: var(--bs-primary);

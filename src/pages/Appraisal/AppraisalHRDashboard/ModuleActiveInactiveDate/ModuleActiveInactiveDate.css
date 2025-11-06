@@ -1,0 +1,41 @@
+
+
+section {
+  border: var(--border);
+}
+.reset-btn{
+        padding: 8px 20px;
+            margin-top: 1.7rem;
+    background-color: var(--accent-color);
+    color: #fff;
+}
+#table-head {
+  /* background-color: var(--accent-color) !important;
+  color: var(--primary-color); */
+  border: 1px solid var(--accent-color)
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.primary-button {
+  border-radius: 8px;
+  padding: 8px 20px;
+}
+
+.edit-button {
+  background-color: var(--accent-color);
+  color: var(--bs-light);
+}
+
+.delete-button {
+ border: 2px solid var(--accent-color);
+  color:var(--accent-color);
+      padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    background-color: transparent;
+}

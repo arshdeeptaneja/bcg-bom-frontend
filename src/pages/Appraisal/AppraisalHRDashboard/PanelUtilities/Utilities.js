@@ -1,34 +1,59 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./Utilities.css";
 
 const utilities = [
-  "Update Quarterly Appraiser details in bulk",
-  "Change Quarterly/Annual Appraisal Status",
-  "Annual Appeal Deletion",
-  "Update Appellate Authority details in bulk",
-  "Insert Annual Roles",
-  "Update annual appraiser details in bulk",
-  "Update discretionary KRA scores in bulk",
-  "Appraiser and Reviewer update by Emp Number",
-  "Update module active & inactive date",
-  "Exception Score Updation Utility",
-  "Update Validator details in bulk",
- 
+  {
+    name: "Appraisal Status Change Utility",
+    path: "/appraisal/hr-dashboard/appraisal-status-change-utility",
+  },
+  {
+    name: "Reporting & Reviewing Authority Update by Emp Number",
+    path: "/appraisal/hr-dashboard/appraisal-update",
+  },
+  {
+    name: "Appeal Committee",
+    path: "/appraisal/hr-dashboard/appeal-comittee",
+  },
+  {
+    name: "Reporting Authority update in bulk",
+    path: "/appraisal/hr-dashboard/reporting-authority-reviewing-auth-bulk",
+  },
+  {
+    name: "Validator Update Utility",
+    path: "/appraisal/hr-dashboard/validator-update-utility",
+  },
+  {
+    name: "Exception Delection Utility",
+    path: "/appraisal/hr-dashboard/exception-delection-utility",
+  },
+  {
+    name: "Appraiser & Reviewer update by Emp Number",
+     path: "/appraisal/hr-dashboard/reporting-authority-reviewing-auth-bulk",
+  },
+  {
+    name: "Update module active & inactive date",
+    path: "/appraisal/hr-dashboard/module-active-inactive-date",
+  },
 ];
 
 const UtilitiesSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="container my-4">
       <h2 className="mb-4 fw-semibold">Utilities</h2>
       <div className="row g-3">
-        {utilities.map((item, index) => (
+        {utilities.map((utility, index) => (
           <div className="col-md-4" key={index}>
             <div
               className={`utility-box text-center ${
                 index === 0 ? "highlight" : ""
               }`}
+              onClick={() => navigate(utility.path)}
+              style={{ cursor: "pointer" }}
             >
-              {item}
+              {utility.name}
             </div>
           </div>
         ))}

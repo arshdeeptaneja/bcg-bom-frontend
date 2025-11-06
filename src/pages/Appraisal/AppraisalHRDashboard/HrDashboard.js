@@ -4,13 +4,14 @@ import './HrDashboard.css';
 import { KpiTab } from '../../../components/common';
 import { BackButton } from '../../../components/common';
 import UtilitiesSection from './PanelUtilities/Utilities';
-import ReportingAuthority from './ReportingAuthority/ReportingAuthority';
+import ReportingAuthority from './AppealComittee/AppealComittee';
 import AppraiserUpdate from './AppraiserUpdate/AppraiserUpdate';
 import { useNavigate } from 'react-router-dom';
+import LogsAndAutoAnnuals from './LogsAndAutoAnnuals/LogsAndAutoAnnual ';
 
 
 const HrDashboard = () => {
- 
+
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
 
@@ -32,119 +33,113 @@ const HrDashboard = () => {
 
 
   return (
-    <div className="page">
+    <div className="pageWrapper">
       <div className="dashboard-wrapper">
-       <div className="pageWrapper-header">
-        <BackButton />
-        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Home</h1>
-      </div>
-
-      {/* Filters Selection Row */}
-
-      {/* Filter Selection Row */}
-      <div className="filters-row border rounded-2 px-3 py-2 mt-3 align-items-center d-flex gap-3">
-        <span className="text-muted fw-semibold">FY Selection</span>
-        <select
-          className="form-select w-auto text-primary"
-          value={financialYear}
-          onChange={(e) => setFinancialYear(e.target.value)}
-        >
-          {financialYears.map((fy) => (
-            <option key={fy} value={fy}>
-              {fy}
-            </option>
-          ))}
-        </select>
-
-        {/* Appraisal Period Selection */}
-        <span className="text-muted fw-semibold ms-4">Appraisal HR Dashboard</span>
-        <div className="btn-group" role="group" aria-label="Appraisal period selector">
-          <button
-            type="button"
-            className={`btn px-2 ${
-              appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primary'
-            }`}
-            onClick={() => setAppraisalPeriod('Annual')}
-          >
-            Annual Year
-          </button>
-          <button
-            type="button"
-            className={`btn px-2 ${
-              appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primary'
-            }`}
-            onClick={() => setAppraisalPeriod('Quarterly')}
-          >
-            Quarterly
-          </button>
+        <div className="pageWrapper-header">
+          <BackButton />
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Home</h1>
         </div>
 
-        {/* Quarter Selection */}
-        {appraisalPeriod === 'Quarterly' && (
-          <>
-            <span className="text-muted fw-semibold ms-4">Quarter</span>
-            <div className="btn-group" role="group" aria-label="Quarter selector">
-              <button
-                type="button"
-                className={`btn px-2 ${
-                  selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+        {/* Filters Selection Row */}
+
+        {/* Filter Selection Row */}
+        <div className="filters-row border rounded-2 px-3 py-2 mt-3 align-items-center d-flex gap-3">
+          <span className="text-muted fw-semibold">FY Selection</span>
+          <select
+            className="form-select w-auto text-primary"
+            value={financialYear}
+            onChange={(e) => setFinancialYear(e.target.value)}
+          >
+            {financialYears.map((fy) => (
+              <option key={fy} value={fy}>
+                {fy}
+              </option>
+            ))}
+          </select>
+
+          {/* Appraisal Period Selection */}
+          <span className="text-muted fw-semibold ms-4">Appraisal HR Dashboard</span>
+          <div className="btn-group" role="group" aria-label="Appraisal period selector">
+            <button
+              type="button"
+              className={`btn px-2 ${appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primary'
                 }`}
-                onClick={() => setSelectedQuarter('Q1')}
-              >
-                Q1
-              </button>
-              <button
-                type="button"
-                className={`btn px-2 ${
-                  selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+              onClick={() => setAppraisalPeriod('Annual')}
+            >
+              Annual Year
+            </button>
+            <button
+              type="button"
+              className={`btn px-2 ${appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primary'
                 }`}
-                onClick={() => setSelectedQuarter('Q2')}
-              >
-                Q2
-              </button>
-              <button
-                type="button"
-                className={`btn px-2 ${
-                  selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
-                }`}
-                onClick={() => setSelectedQuarter('Q3')}
-              >
-                Q3
-              </button>
-              <button
-                type="button"
-                className={`btn px-2 ${
-                  selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
-                }`}
-                onClick={() => setSelectedQuarter('Q4')}
-              >
-                Q4
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+              onClick={() => setAppraisalPeriod('Quarterly')}
+            >
+              Quarterly
+            </button>
+          </div>
+
+          {/* Quarter Selection */}
+          {appraisalPeriod === 'Quarterly' && (
+            <>
+              <span className="text-muted fw-semibold ms-4">Quarter</span>
+              <div className="btn-group" role="group" aria-label="Quarter selector">
+                <button
+                  type="button"
+                  className={`btn px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    }`}
+                  onClick={() => setSelectedQuarter('Q1')}
+                >
+                  Q1
+                </button>
+                <button
+                  type="button"
+                  className={`btn px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    }`}
+                  onClick={() => setSelectedQuarter('Q2')}
+                >
+                  Q2
+                </button>
+                <button
+                  type="button"
+                  className={`btn px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    }`}
+                  onClick={() => setSelectedQuarter('Q3')}
+                >
+                  Q3
+                </button>
+                <button
+                  type="button"
+                  className={`btn px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    }`}
+                  onClick={() => setSelectedQuarter('Q4')}
+                >
+                  Q4
+                </button>
+              </div>
+            </>
+          )}
+        </div>
         {/* Overall Summary Section */}
         <section className="overall-summary-gradient">
           <h2 className="summary-heading">Overall Summary</h2>
           <div className="summary-content-grid">
             <div className="summary-stat-box">
               <div className="stat-number-large">1839</div>
-              <div className="stat-label-white">Total Number of<br/>Employees</div>
+              <div className="stat-label-white">Total Number of<br />Employees</div>
             </div>
 
             <div className="vertical-divider"></div>
 
             <div className="summary-stat-box">
               <div className="stat-number-large">1839</div>
-              <div className="stat-label-white">The Number of<br/>Pending Employees</div>
+              <div className="stat-label-white">The Number of<br />Pending Employees</div>
             </div>
 
             <div className="vertical-divider"></div>
 
             <div className="summary-stat-box">
               <div className="stat-number-large">0</div>
-              <div className="stat-label-white">Number of Days to<br/>Deadline</div>
+              <div className="stat-label-white">Number of Days to<br />Deadline</div>
             </div>
 
             <div className="vertical-divider"></div>
@@ -250,13 +245,13 @@ const HrDashboard = () => {
             </button>
           </div>
         </section>
-         <UtilitiesSection/>
+        <UtilitiesSection />
+         <LogsAndAutoAnnuals/>
+        {/* <ReportingAuthority /> */}
 
-         <ReportingAuthority/>
-
-         {/* <AppraiserUpdate/> */}
+        {/* <AppraiserUpdate/> */}
       </div>
-     
+
     </div>
   );
 };

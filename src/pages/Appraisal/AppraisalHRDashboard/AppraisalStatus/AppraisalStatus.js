@@ -2,10 +2,10 @@
 import { BackButton } from '../../../../components/common';
 import { FaInfoCircle } from "react-icons/fa";
 
-import "./AppraiserUpdate.css";
+import "./AppraisalStatus.css";
 import { useState } from 'react';
 
-const AppraiserUpdate = () => {
+const AppraiserStatus = () => {
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
 
@@ -19,32 +19,26 @@ const AppraiserUpdate = () => {
           <span className="breadcrumb-separator">/</span>
           <span className="breadcrumb-link">Appraisal HR Dashboard</span>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-active">Reporting & Reviewing Authority Update by Emp Number </span>
+          <span className="breadcrumb-active">Appraisal Status Change Utility</span>
         </div>
 
         {/* Right Side: Info Section */}
         <div className="breadcrumb-info d-flex align-items-center">
           <span className="breadcrumb-fy me-2">FY 2025-2026</span>
-          <button className="blue-button m-0 d-inline-flex align-items-center gap-1 fw-medium shadow-sm bg-white px-2 py-1 shadow-sm border border-opacity-10 border-dark"
+          <button className="blue-button m-0 d-inline-flex align-items-center gap-1 fw-medium shadow-sm bg-white  shadow-sm border border-opacity-10 border-dark"
 
           >
             <FaInfoCircle size={13} /> Info
           </button>
         </div>
       </div>
-       <div className="pageWrapper-header">
+
+        <div className="pageWrapper-header">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Reporting & Reviewing Authority Update by Emp Number </h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Status Change Utility</h1>
           </div>
       <div className="appraiser-page container-fluid p-4">
 
-
-        {/* Top row: Back + Title + FY badge */}
-        <div className="d-flex align-items-center mb-4">
-         
-
-
-        </div>
 
         {/* Controls row */}
         <div className="row gx-4 align-items-center mb-3">
@@ -160,9 +154,31 @@ const AppraiserUpdate = () => {
                   <th>Branch</th>
                 </tr>
               </thead>
-              <tbody>
-                {/* empty body (matching "No data found!") */}
-              </tbody>
+            <tbody>
+              <tr>
+                <td className="text-center">
+                  <input type="checkbox" />
+                </td>
+                <td>U-16695</td>
+                <td>R19305</td>
+                <td>RAJESHWAR PRASAD</td>
+                <td>Branch Manager</td>
+                <td>220</td>
+                <td>Central Zone</td>
+                <td>Completed</td>
+                <td>66.7</td>
+                <td>28 APR 25</td>
+                <td>30 JUN 25</td>
+                <td>
+                  <select className="form-select custom-select">
+                    <option>-Select-</option>
+                    <option>Approved</option>
+                    <option>Rejected</option>
+                  </select>
+                </td>
+                <td></td>
+              </tr>
+            </tbody>
             </table>
           </div>
 
@@ -174,4 +190,4 @@ const AppraiserUpdate = () => {
   );
 };
 
-export default AppraiserUpdate;
+export default AppraiserStatus;

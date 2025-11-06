@@ -1,8 +1,8 @@
 /* Dashboard Wrapper */
 .dashboard-wrapper {
   /* padding: 20px 30px; */
-  padding-top: 61px;
-  padding-left: 88px;
+  /* padding-top: 61px; */
+  /* padding-left: 88px; */
   max-width: 100%;
 }
 
@@ -103,6 +103,7 @@
   margin-bottom: 20px;
   position: relative;
   overflow: hidden;
+  margin-top: 1.3rem;
 }
 
 .overall-summary-gradient::before {
@@ -270,7 +271,7 @@
   font-weight: 500;
   border: 1px solid #d1d5db;
   border-radius: 5px;
-  background-color: var(--bs-primary);
+  background-color: var(--accent-color);
   color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;

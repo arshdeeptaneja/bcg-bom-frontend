@@ -1,0 +1,68 @@
+:root {
+  --accent-color: #0389d0;
+  --border-gray: #ddd;
+  --table-bg: #ffffff;
+}
+
+/* Page background */
+.page {
+  background-color: var(--secondary-color, #f6f6f6);
+}
+
+/* Table Styling */
+.appraisal-table {
+  border: 1px solid var(--border-gray);
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  background-color: var(--table-bg);
+  font-size: 14px;
+}
+
+.appraisal-table thead tr {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-weight: 500;
+}
+
+.appraisal-table th,
+.appraisal-table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+
+.appraisal-table th {
+  white-space: nowrap;
+}
+
+/* Checkbox alignment */
+.appraisal-table input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Dropdown select box */
+.custom-select {
+  border: 1px solid #ccc;
+  background-color: #fdfdfd;
+  font-size: 13.5px;
+  padding: 3px 6px;
+  color: #333;
+  height: 32px;
+  line-height: 20px;
+}
+
+.custom-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: none;
+}
+
+/* Card border & layout */
+.card {
+  border-radius: 4px;
+}
+
+.card-body {
+  overflow-x: auto;
+}

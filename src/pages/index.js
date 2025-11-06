@@ -9,3 +9,10 @@ export { default as AppraiseeCheckIn } from './Appraisal/AppraiseeCheckIn/Apprai
 export {default as AdminPanel} from './Panel/AdminPanel/AdminPanel';
 export { default as HrDashboard} from './Appraisal/AppraisalHRDashboard/HrDashboard';
 export { default as AppariserUpdate} from './Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate'
+export {default as Appraisalstatus} from './Appraisal/AppraisalHRDashboard/AppraisalStatus/AppraisalStatus'
+export { default as AppealComittee} from './Appraisal/AppraisalHRDashboard/AppealComittee/AppealComittee';
+export {default as ReportingReviewBulk} from './Appraisal/AppraisalHRDashboard/ReportingReviewBulk/ReportingReviewBulk';
+export {default as ValidatorUpdateUtility} from './Appraisal/AppraisalHRDashboard/ValidatorUpdate/ValidatorUpdateUtility';
+export {default as ExceptionDelection} from './Appraisal/AppraisalHRDashboard/ExceptionDelection/ExceptionDelection';
+export {default as AppealDelection} from './Appraisal/AppraisalHRDashboard/AppealDelection/AppealDelection';
+export {default as ModuleActiveInactiveDate} from './Appraisal/AppraisalHRDashboard/ModuleActiveInactiveDate/ModuleActiveInactiveDate'

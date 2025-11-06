@@ -10,6 +10,13 @@ import {
   AppraisalHome,
   AppraiseeCheckIn,
   AdminPanel,
+  Appraisalstatus,
+  ReportingAuthority,
+  ValidatorUpdateUtility,
+  ExceptionDelection,
+  ModuleActiveInactiveDate,
+  AppealComittee,
+
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -23,6 +30,8 @@ import { store, persistor } from './store/store';
 import JobFamily from './pages/JobFamily/JobFamily';
 import HrDashboard from './pages/Appraisal/AppraisalHRDashboard/HrDashboard';
 import AppraiserUpdate from './pages/Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate';
+import ReportingReviewBulk from './pages/Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityBulk';
+import AppealDeletion from './pages/Appraisal/AppraisalHRDashboard/AppealDelection/AppealDelection';
 
 function App() {
   return (
@@ -173,7 +182,7 @@ function AppContent() {
               }
             />
 
-                <Route
+            <Route
               path="/appraisal/admin-panel"
               element={
                 isAuthenticated ? (
@@ -184,7 +193,7 @@ function AppContent() {
               }
             />
 
-                <Route
+            <Route
               path="/appraisal/hr-dashboard"
               element={
                 isAuthenticated ? (
@@ -195,7 +204,7 @@ function AppContent() {
               }
             />
 
-                 <Route
+            <Route
               path="/appraisal/hr-dashboard/appraisal-update"
               element={
                 isAuthenticated ? (
@@ -205,6 +214,81 @@ function AppContent() {
                 )
               }
             />
+               <Route
+              path="/appraisal/hr-dashboard/appraisal-status-change-utility"
+              element={
+                isAuthenticated ? (
+                  <AppraisalStatusChangeUtility onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+              <Route
+              path="/appraisal/hr-dashboard/appeal-comittee"
+              element={
+                isAuthenticated ? (
+                  <AppraisalAppealComittee onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+               <Route
+              path="/appraisal/hr-dashboard/reporting-authority-reviewing-auth-bulk"
+              element={
+                isAuthenticated ? (
+                  <ReportingAuthorityReviewBulk onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+               <Route
+              path="/appraisal/hr-dashboard/validator-update-utility"
+              element={
+                isAuthenticated ? (
+                  <ValidatorUpdateUtilities onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+   <Route
+              path="/appraisal/hr-dashboard/exception-delection-utility"
+              element={
+                isAuthenticated ? (
+                  <ExceptionDelectionUtilities onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+               <Route
+              path="/appraisal/hr-dashboard/Appeal-delection-utility"
+              element={
+                isAuthenticated ? (
+                  <AppealDelectionUtilities onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+               <Route
+              path="/appraisal/hr-dashboard/module-active-inactive-date"
+              element={
+                isAuthenticated ? (
+                  <MoulesActiveInactiveDate onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
           </Routes>
         </div>
       </Router>
@@ -298,35 +382,117 @@ const AppraisalAdminPanel = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-    <AdminPanel/>
+      <AdminPanel />
     </>
   );
 };
 
 // Appraisal Hr Dashboard
-const AppraisaHrDashboard = ({onLogout})=>{
+const AppraisaHrDashboard = ({ onLogout }) => {
 
-  return(
+  return (
     <>
-    <TopBar onLogout={onLogout}/>
-    <LeftNavigation/>
-    <HrDashboard/>
-    
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <HrDashboard />
+
     </>
   )
 }
 //appraisal update
-const AppraisaUpdated = ({onLogout})=>{
+const AppraisaUpdated = ({ onLogout }) => {
 
-  return(
+  return (
     <>
-    <TopBar onLogout={onLogout}/>
-    <LeftNavigation/>
-    <AppraiserUpdate/>
-    
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraiserUpdate />
     </>
   )
 }
+
+//Appraisal Status Change Utility
+const AppraisalStatusChangeUtility = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+    <Appraisalstatus/>
+    </>
+  )
+}
+
+//Reporting & Reviewing Authority Update by Emp Number
+const AppraisalAppealComittee = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+    <AppealComittee/>
+    </>
+  )
+}
+
+//ReportingAuthorityBulk
+const ReportingAuthorityReviewBulk = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+  <ReportingReviewBulk/>
+    </>
+  )
+}
+
+//ValidatorUpdateUtility
+const ValidatorUpdateUtilities = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+ <ValidatorUpdateUtility/>
+    </>
+  )
+}
+//ExceptionDelection
+const ExceptionDelectionUtilities = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+<ExceptionDelection/>
+    </>
+  )
+}
+
+//ExceptionDelection
+const AppealDelectionUtilities = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+<AppealDeletion/>
+    </>
+  )
+}
+ // ModuleActiveInactiveDate
+ const MoulesActiveInactiveDate = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+<ModuleActiveInactiveDate/>
+    </>
+  )
+}
+
 
 // JobFamily Layout
 // const JobFamily = ({ onLogout }) => (

@@ -11,7 +11,7 @@
 }
 
 .blue-button{
- 
+   border-radius: 4px;
   border: var(--border);
   padding: 8px 20px;
   color: #fff;
@@ -90,8 +90,8 @@
 .period-btn {
   font-size: 13px;
   font-weight: 600;
-  color: var(--accent-color);
-  background-color: #ffffff;
+  color: var(--bs-dark);
+  background-color: transparent;
   border: 1px solid var(--accent-color);
   border-radius: 2px !important;
   padding: 4px 12px;
@@ -99,16 +99,30 @@
 }
 
 /* Active button (filled green like your screenshot) */
-.period-btn.active {
+.active {
   background-color:var(--accent-color);
   color: #fff;
 }
 
+.btns{
+      /* padding: 6px 14px; */
+    /* border-radius: 4px; */
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+}
 /* Spacing between buttons */
 .btn-group .btn + .btn {
   margin-left: 5px;
-}
 
+}
+.btn-groups{
+    position: relative;
+    display: flex;
+    vertical-align: middle;
+
+}
 /* Responsive tweak */
 @media (max-width: 576px) {
   .appraisal-box {
@@ -131,8 +145,8 @@
 .ec-input {
   border: 3px solid transparent; /* default */
   background-clip: padding-box;
-  padding: 0.6rem 0.9rem;
-  border-radius: 2px;
+    padding: 0.3rem 0.9rem;
+    border-radius: 4px;
   box-shadow: none;
   position: relative;
 }

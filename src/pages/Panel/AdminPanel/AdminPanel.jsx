@@ -8,9 +8,6 @@ import { useNavigate } from 'react-router-dom';
  * @returns
  */
 const AdminPanel = () => {
- 
-
-
 
   const navigate = useNavigate();
 
@@ -18,15 +15,14 @@ const AdminPanel = () => {
     <div className="pageWrapper">
       <h1 className="dashboard-title text-primary fw-bold mb-0">Admin Panel</h1>
 
-    
 
       {/* Appraisal Tabs */}
-      <div className="appraisal-tabs mt-3 d-flex flex-row gap-3">
+      <div className="appraisal-tabs mt-3 d-flex flex-wrap gap-3">
         <ImageTab
           heading="Appraisal Tracking"
           body="Click here for Appraisal Tracking"
           image={<HiOutlineDocumentCheck />}
-          onClick={() => navigate('/appraisal/..')}//path not created
+          onClick={() => navigate('/appraisal/hr-dashboard')}//path not created
         />
         <ImageTab
           heading="Scorecard Issues"
@@ -36,8 +32,8 @@ const AdminPanel = () => {
         />
       </div>
 
-   
-    
+
+
     </div>
   );
 };

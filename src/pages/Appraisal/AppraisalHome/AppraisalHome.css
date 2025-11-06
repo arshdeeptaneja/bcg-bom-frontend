@@ -15,7 +15,7 @@
 }
 
 .btn-primary {
-  background-color: var(--bs-primary);
+  background-color: #027ab8;
   color: white;
 }
 
@@ -25,12 +25,8 @@
   color: var(--bs-primary); /* optional, keeps text visible on grey */
 }
 
-.btn-outline-primarys {
-  background-color: white;
-  color: var(--bs-primary);
+.btn-outline-primary {
+  background-color: transparent;
+  color: var(--bs-secondary-color);
 }
 
-.btn-outline-primarys {
-  background-color: #e9ecef;
-  color: var(--bs-primary);
-}

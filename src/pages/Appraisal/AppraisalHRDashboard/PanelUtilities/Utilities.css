@@ -23,9 +23,9 @@ section {
   padding: 20px;
 }
 
-/* section h2 {
-  color: var(--accent-color);
-} */
+section h2 {
+  color: #475670 !important;
+}
 
 /* Utility boxes */
 .utility-box {
@@ -36,5 +36,26 @@ section {
   font-weight: 500;
   font-size: 0.95rem;
   background-color: transparent; /* no background */
+}
+
+.utility-box {
+  border: 1px solid var(--accent-color);
+  border-radius: var(--border-radius);
+  padding: 10px 20px;
+  color: var(--accent-color);
+  font-weight: 500;
+  font-size: 0.95rem;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.utility-box:hover {
+  background-color: var(--accent-color);
+  color: white;
+  box-shadow: var(--shadows);
+}
+
+.utility-box:active {
+  transform: scale(0.98);
 }
 
