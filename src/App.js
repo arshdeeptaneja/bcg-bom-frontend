@@ -16,7 +16,9 @@ import {
   ExceptionDelection,
   ModuleActiveInactiveDate,
   AppealComittee,
-
+  AppraisalCheckInForm,
+  ExceptionHome,
+  ExceptionsList,
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -172,6 +174,26 @@ function AppContent() {
               }
             />
             <Route
+              path="/appraisal/exception-home"
+              element={
+                isAuthenticated ? (
+                  <ExceptionHomeLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraisal/exceptions-list"
+              element={
+                isAuthenticated ? (
+                  <ExceptionsListLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
               path="/appraisal/appraisee-check-in"
               element={
                 isAuthenticated ? (
@@ -187,6 +209,11 @@ function AppContent() {
               element={
                 isAuthenticated ? (
                   <AppraisalAdminPanel onLogout={handleLogout} />
+            <Route
+              path="/appraisal/check-in-form"
+              element={
+                isAuthenticated ? (
+                  <AppraisalCheckInFormLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )

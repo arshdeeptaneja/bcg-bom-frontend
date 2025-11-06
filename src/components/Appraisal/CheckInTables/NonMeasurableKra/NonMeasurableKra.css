@@ -1,0 +1,22 @@
+.table-header-bar {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.non-measurable-kra-section-headline {
+    color: var(--bs-primary);
+    border: 1px solid var(--bs-primary);
+    border-radius: 10px;
+}
+
+/* Score buttons styling */
+.score-btn {
+    min-width: 40px;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Final score box */
+.final-score-box {
+    min-width: 60px;
+    background-color: white;
+}

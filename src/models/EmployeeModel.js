@@ -8,12 +8,13 @@
  * @param {string} props.appraiser - The employee appraiser.
  */
 export default class User {
-  constructor({ empNo, employeeName, employeeScale, roles, appraiser }) {
+  constructor({ empNo, employeeName, employeeScale, additionalRoles, appraiser, primaryRole }) {
     this.empNo = empNo;
     this.employeeName = employeeName;
     this.employeeScale = employeeScale;
-    this.roles = roles;
+    this.additionalRoles = additionalRoles;
     this.appraiser = appraiser;
+    this.primaryRole = primaryRole;
   }
 
   getFirstName() {

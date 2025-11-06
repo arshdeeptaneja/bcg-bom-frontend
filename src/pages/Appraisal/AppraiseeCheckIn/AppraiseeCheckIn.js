@@ -1,5 +1,5 @@
 import { BackButton } from '../../../components/common';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import './AppraiseeCheckIn.css';
 import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
 import EmployeeModel from '../../../models/EmployeeModel';
@@ -13,6 +13,7 @@ import EmployeeModel from '../../../models/EmployeeModel';
  * @returns
  */
 export default function AppraiseeCheckIn() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const financialYear = searchParams.get('financialYear');
   const appraisalPeriod = searchParams.get('appraisalPeriod');
@@ -79,7 +80,24 @@ export default function AppraiseeCheckIn() {
           organization="Dhanetha"
           quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
           appraisalPeriod={appraisalPeriod}
-          onAddCheckIn={() => {}}
+          onAddCheckIn={() => {
+            navigate('/appraisal/check-in-form', {
+              state: {
+                financialYear,
+                appraisalPeriod,
+                quarter,
+                dateRange: '2024-01-01 to 2024-12-31',
+                employee: {
+                  empNo: '123456',
+                  employeeName: 'John Doe',
+                  employeeScale: '10',
+                  roles: ['Role 1', 'Role 2'],
+                  primaryRole: 'Role 1',
+                  appraiser: 'Jane Doe',
+                },
+              },
+            });
+          }}
           onViewSummary={() => {}}
           onAddException={() => {}}
         />

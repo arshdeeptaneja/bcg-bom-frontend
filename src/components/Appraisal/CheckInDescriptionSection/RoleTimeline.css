@@ -1,0 +1,12 @@
+/* Role Description Styles */
+.roles-timeline {
+    height: 1px;
+}
+
+.role-dot {
+    transform: translateX(-50%);
+}
+
+.role-description {
+    padding-right: 2rem;
+}
