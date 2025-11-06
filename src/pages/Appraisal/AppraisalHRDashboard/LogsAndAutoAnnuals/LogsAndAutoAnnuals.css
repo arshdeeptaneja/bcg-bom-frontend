@@ -1,0 +1,54 @@
+
+
+/* White page background */
+.page {
+  background: #fff;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #475670 !important;
+}
+.blue-text{
+    color: var(--accent-color);
+}
+/* Logs Buttons */
+.log-btn {
+  border: 1px solid var( --accent-color);
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var( --accent-color);
+  background: transparent;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.log-btn:hover {
+  background: var( --accent-color);
+  color: #fff;
+}
+
+/* Download icon arrow */
+.download-icon {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Auto Submit Buttons */
+.action-btn {
+  border: 1px solid var( --accent-color);
+  padding: 8px 6px;
+  background: transparent;
+  font-size: 14px;
+  color: var( --accent-color);
+  cursor: pointer;
+  transition: 0.2s;
+  text-align: center;
+}
+
+.action-btn:hover {
+  background: var( --accent-color);
+  color: #fff;
+}

@@ -9,6 +9,13 @@ import {
   AppraisalDashboard,
   AppraisalHome,
   AppraiseeCheckIn,
+  AdminPanel,
+  Appraisalstatus,
+  ReportingAuthority,
+  ValidatorUpdateUtility,
+  ExceptionDelection,
+  ModuleActiveInactiveDate,
+  AppealComittee,
   AppraisalCheckInForm,
   ExceptionHome,
   ExceptionsList,
@@ -23,6 +30,10 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './store/store';
 import JobFamily from './pages/JobFamily/JobFamily';
+import HrDashboard from './pages/Appraisal/AppraisalHRDashboard/HrDashboard';
+import AppraiserUpdate from './pages/Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate';
+import ReportingReviewBulk from './pages/Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityBulk';
+import AppealDeletion from './pages/Appraisal/AppraisalHRDashboard/AppealDelection/AppealDelection';
 
 function App() {
   return (
@@ -192,6 +203,12 @@ function AppContent() {
                 )
               }
             />
+
+            <Route
+              path="/appraisal/admin-panel"
+              element={
+                isAuthenticated ? (
+                  <AppraisalAdminPanel onLogout={handleLogout} />
             <Route
               path="/appraisal/check-in-form"
               element={
@@ -202,6 +219,103 @@ function AppContent() {
                 )
               }
             />
+
+            <Route
+              path="/appraisal/hr-dashboard"
+              element={
+                isAuthenticated ? (
+                  <AppraisaHrDashboard onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraisal/hr-dashboard/appraisal-update"
+              element={
+                isAuthenticated ? (
+                  <AppraisaUpdated onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+               <Route
+              path="/appraisal/hr-dashboard/appraisal-status-change-utility"
+              element={
+                isAuthenticated ? (
+                  <AppraisalStatusChangeUtility onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+              <Route
+              path="/appraisal/hr-dashboard/appeal-comittee"
+              element={
+                isAuthenticated ? (
+                  <AppraisalAppealComittee onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+               <Route
+              path="/appraisal/hr-dashboard/reporting-authority-reviewing-auth-bulk"
+              element={
+                isAuthenticated ? (
+                  <ReportingAuthorityReviewBulk onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+               <Route
+              path="/appraisal/hr-dashboard/validator-update-utility"
+              element={
+                isAuthenticated ? (
+                  <ValidatorUpdateUtilities onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+   <Route
+              path="/appraisal/hr-dashboard/exception-delection-utility"
+              element={
+                isAuthenticated ? (
+                  <ExceptionDelectionUtilities onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+               <Route
+              path="/appraisal/hr-dashboard/Appeal-delection-utility"
+              element={
+                isAuthenticated ? (
+                  <AppealDelectionUtilities onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+               <Route
+              path="/appraisal/hr-dashboard/module-active-inactive-date"
+              element={
+                isAuthenticated ? (
+                  <MoulesActiveInactiveDate onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
           </Routes>
         </div>
       </Router>
@@ -278,6 +392,7 @@ const AppraisalHomeLayout = ({ onLogout }) => {
   );
 };
 
+
 const AppraiseeCheckInLayout = ({ onLogout }) => {
   return (
     <>
@@ -288,35 +403,124 @@ const AppraiseeCheckInLayout = ({ onLogout }) => {
   );
 };
 
-const AppraisalCheckInFormLayout = ({ onLogout }) => {
+// Appraisa Admin Panel
+const AppraisalAdminPanel = ({ onLogout }) => {
   return (
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-      <AppraisalCheckInForm />
+      <AdminPanel />
     </>
   );
 };
 
-const ExceptionHomeLayout = ({ onLogout }) => {
-  return (
-    <>
-      <TopBar onLogout={onLogout} />
-      <LeftNavigation />
-      <ExceptionHome />
-    </>
-  );
-};
+// Appraisal Hr Dashboard
+const AppraisaHrDashboard = ({ onLogout }) => {
 
-const ExceptionsListLayout = ({ onLogout }) => {
   return (
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-      <ExceptionsList />
+      <HrDashboard />
+
     </>
-  );
-};
+  )
+}
+//appraisal update
+const AppraisaUpdated = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraiserUpdate />
+    </>
+  )
+}
+
+//Appraisal Status Change Utility
+const AppraisalStatusChangeUtility = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+    <Appraisalstatus/>
+    </>
+  )
+}
+
+//Reporting & Reviewing Authority Update by Emp Number
+const AppraisalAppealComittee = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+    <AppealComittee/>
+    </>
+  )
+}
+
+//ReportingAuthorityBulk
+const ReportingAuthorityReviewBulk = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+  <ReportingReviewBulk/>
+    </>
+  )
+}
+
+//ValidatorUpdateUtility
+const ValidatorUpdateUtilities = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+ <ValidatorUpdateUtility/>
+    </>
+  )
+}
+//ExceptionDelection
+const ExceptionDelectionUtilities = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+<ExceptionDelection/>
+    </>
+  )
+}
+
+//ExceptionDelection
+const AppealDelectionUtilities = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+<AppealDeletion/>
+    </>
+  )
+}
+ // ModuleActiveInactiveDate
+ const MoulesActiveInactiveDate = ({ onLogout }) => {
+
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+<ModuleActiveInactiveDate/>
+    </>
+  )
+}
+
+
 // JobFamily Layout
 // const JobFamily = ({ onLogout }) => (
 //   <>

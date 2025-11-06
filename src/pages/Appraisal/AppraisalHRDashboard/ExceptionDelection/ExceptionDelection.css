@@ -1,0 +1,43 @@
+.enter-emp-container {
+    width: 45%;
+    /* matches screenshot proportion */
+}
+
+.enter-emp-input {
+    border: var(--default-border);
+    background: transparent;
+    color: var(--secondary-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.search-btn {
+    background-color: var(--bs-success);
+    /* Green Search button */
+    border: none;
+    color: #fff;
+    font-weight: 500;
+    padding: 8px 22px;
+    border-radius: 4px;
+}
+
+.search-btn:hover {
+    opacity: 0.9;
+}
+
+
+.btn-accents {
+    background-color: #0389d0;
+    color: #fff;
+    border: 1px solid var(--accent-color);
+}
+
+.btn-accents:hover {
+    background-color: #026ea8 !important;
+    color: #fff;
+}
+
+.btn-accents:active {
+    background-color: #026ea8 !important;
+    color: #fff;
+}
