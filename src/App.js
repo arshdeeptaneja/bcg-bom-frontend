@@ -209,6 +209,11 @@ function AppContent() {
               element={
                 isAuthenticated ? (
                   <AppraisalAdminPanel onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
             <Route
               path="/appraisal/check-in-form"
               element={
@@ -519,8 +524,35 @@ const AppealDelectionUtilities = ({ onLogout }) => {
     </>
   )
 }
+const AppraisalCheckInFormLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraisalCheckInForm />
+    </>
+  );
+};
 
+const ExceptionHomeLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <ExceptionHome />
+    </>
+  );
+};
 
+const ExceptionsListLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <ExceptionsList />
+    </>
+  );
+};
 // JobFamily Layout
 // const JobFamily = ({ onLogout }) => (
 //   <>
