@@ -2,12 +2,30 @@ import AppraisalAccordion from '../../../components/Appraisal/AppraisalAccordion
 import { KpiTab } from '../../../components/common';
 import './AppraisalHome.css';
 import { BackButton } from '../../../components/common';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { appraisalAPI } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+import LoadingSpinner from '../../../components/Spinner';
+import { toast } from 'react-toastify';
 
 export default function AppraisalHome() {
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
+  const navigate = useNavigate();
+  // Extract empNo and user info from AuthContext
+  const { getEmployeeDetails, getUserProperty, user } = useAuth();
+  const employeeDetails = getEmployeeDetails();
+  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '36663');
+  console.log('Employee Number:', empNo);
+  const role = user?.roles?.[0] || 'emp'; // Get first role or default to 'emp'
+
+  // Helper function to extract year from "FY 2024-25" format
+  const extractYear = (fy) => {
+    const match = fy.match(/FY (\d{4})/);
+    return match ? match[1] : new Date().getFullYear().toString();
+  };
 
   const getFinancialYears = () => {
     const years = [];
@@ -23,7 +41,40 @@ export default function AppraisalHome() {
 
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
-  const navigate = useNavigate();
+
+  // React Query to fetch dashboard data
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['appraisalHomeDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
+    queryFn: () => appraisalAPI.getAppraisalHomeDashboard({
+      empNo: empNo,
+      role: role,
+      appraisalPeriod: appraisalPeriod.toLowerCase(),
+      financialYear: extractYear(financialYear),
+      quarter: selectedQuarter
+    }),
+    enabled: !!empNo,
+  });
+
+  // Error handling
+  useEffect(() => {
+    if (isError) {
+      toast.error(`Failed to fetch dashboard data: ${error?.message || 'Unknown error'}`);
+    }
+  }, [isError, error]);
+
+  // Show loading spinner while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="pageWrapper">
+        <div className="pageWrapper-header">
+          <BackButton />
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Home</h1>
+        </div>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="pageWrapper">
       <div className="pageWrapper-header">
@@ -122,8 +173,18 @@ export default function AppraisalHome() {
         <KpiTab
           heading="Appraisee Check-in"
           kpiData={[
-            { value: 100, label: 'Appraisals to be filled' },
-            { value: 200, label: 'Pending Appraisals(s)' },
+            {
+              value: appraisalPeriod === 'Quarterly'
+                ? (data?.data?.self_count_quarterly ?? 0)
+                : (data?.data?.completed_appraisal_count ?? 0),
+              label: 'Appraisals to be filled'
+            },
+            {
+              value: appraisalPeriod === 'Quarterly'
+                ? (data?.data?.self_pending_appraisal_count ?? 0)
+                : (data?.data?.pending_appraisal_count ?? 0),
+              label: 'Pending Appraisals(s)'
+            },
           ]}
           onClick={() => {
             navigate(
@@ -135,7 +196,10 @@ export default function AppraisalHome() {
 
       {/* Accordion for My Final Score */}
       <div className="myFinalScore-accordion mt-3">
-        <AppraisalAccordion accordionItems={[{ heading: 'My Final Score' }]} />
+        <AppraisalAccordion
+          accordionItems={[{ heading: 'My Final Score' }]}
+          scoreData={data?.data?.appraisal_score_dash || []}
+        />
       </div>
 
       {/* Foot Note */}

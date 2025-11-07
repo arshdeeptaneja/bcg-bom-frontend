@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL = 'http://localhost:8090';
+const API_BASE_URL = 'http://localhost:8084';
 
 const unauthClient = axios.create({
   baseURL: API_BASE_URL,
@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer eyJhbGciOiJIUzM4NCJ9.eyJlbXBJZCI6IjM2NjYzIiwicm9sZXMiOiJBZG1pbmlzdHJhdGl2ZSBPZmZpY2VycyIsInN1YiI6IjM2NjYzIiwiaWF0IjoxNzYyNTMyMDU4LCJleHAiOjE3NjI2MTg0NTh9.VG1ed1xVac-KtKUXSoLb9r8U6uSifKuBfIyz9tdcJEWrhbglnz4ZAIWGbXLLQhPU`;
     }
     return config;
   },
@@ -316,6 +316,24 @@ export const appraisalAPI = {
       const response = await apiClient.get(`/appraisal/v1/appraisal/exception_validator/dashboard?${params.toString()}`);
       return response.data;
     } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET: Get appraisal home dashboard data
+  getAppraisalHomeDashboard: async ({ empNo, role, appraisalPeriod, financialYear, quarter }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo,
+        role: role,
+        appraisalPeriod: appraisalPeriod,
+        financialYear: financialYear,
+        quarter: quarter
+      });
+      const response = await apiClient.get(`/appraisal/home/dashboard?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.log('error',error);
       throw error;
     }
   }
