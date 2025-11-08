@@ -246,7 +246,7 @@ function AppContent() {
                 )
               }
             />
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/appraisal-status-change-utility"
               element={
                 isAuthenticated ? (
@@ -257,7 +257,7 @@ function AppContent() {
               }
             />
 
-              <Route
+            <Route
               path="/appraisal/hr-dashboard/appeal-comittee"
               element={
                 isAuthenticated ? (
@@ -267,7 +267,7 @@ function AppContent() {
                 )
               }
             />
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/reporting-authority-reviewing-auth-bulk"
               element={
                 isAuthenticated ? (
@@ -277,7 +277,7 @@ function AppContent() {
                 )
               }
             />
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/validator-update-utility"
               element={
                 isAuthenticated ? (
@@ -288,7 +288,7 @@ function AppContent() {
               }
             />
 
-   <Route
+            <Route
               path="/appraisal/hr-dashboard/exception-delection-utility"
               element={
                 isAuthenticated ? (
@@ -299,7 +299,7 @@ function AppContent() {
               }
             />
 
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/Appeal-delection-utility"
               element={
                 isAuthenticated ? (
@@ -310,7 +310,7 @@ function AppContent() {
               }
             />
 
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/module-active-inactive-date"
               element={
                 isAuthenticated ? (
@@ -450,7 +450,7 @@ const AppraisalStatusChangeUtility = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-    <Appraisalstatus/>
+      <Appraisalstatus />
     </>
   )
 }
@@ -462,7 +462,7 @@ const AppraisalAppealComittee = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-    <AppealComittee/>
+      <AppealComittee />
     </>
   )
 }
@@ -474,7 +474,7 @@ const ReportingAuthorityReviewBulk = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-  <ReportingReviewBulk/>
+      <ReportingReviewBulk />
     </>
   )
 }
@@ -486,7 +486,7 @@ const ValidatorUpdateUtilities = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
- <ValidatorUpdateUtility/>
+      <ValidatorUpdateUtility />
     </>
   )
 }
@@ -497,7 +497,7 @@ const ExceptionDelectionUtilities = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-<ExceptionDelection/>
+      <ExceptionDelection />
     </>
   )
 }
@@ -509,18 +509,18 @@ const AppealDelectionUtilities = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-<AppealDeletion/>
+      <AppealDeletion />
     </>
   )
 }
- // ModuleActiveInactiveDate
- const MoulesActiveInactiveDate = ({ onLogout }) => {
+// ModuleActiveInactiveDate
+const MoulesActiveInactiveDate = ({ onLogout }) => {
 
   return (
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-<ModuleActiveInactiveDate/>
+      <ModuleActiveInactiveDate />
     </>
   )
 }
