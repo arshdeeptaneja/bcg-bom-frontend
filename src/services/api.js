@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL = 'http://180.149.245.93:8090';
+const API_BASE_URL = 'http://localhost:8090';
 
 const unauthClient = axios.create({
   baseURL: API_BASE_URL,
@@ -280,6 +280,40 @@ export const dashboardAPI = {
         unitType: unitType
       });
       const response = await apiClient.get(`/rct/dashboard?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+export const appraisalAPI = {
+  // GET: Get exception dashboard data
+  getExceptionDashboard: async ({ fy, quarter, exception_period, empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        fy: fy,
+        quarter: quarter,
+        exception_period,
+        empNo: empNo
+      });
+      const response = await apiClient.get(`/appraisal/v1/appraisal/exception_verify/dashboard?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET: Get exception validator dashboard data
+  getExceptionValidatorDashboard: async ({ fy, quarter, exceptionPeriod, empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        fy: fy,
+        quarter: quarter,
+        exceptionPeriod,
+        empNo: empNo
+      });
+      const response = await apiClient.get(`/appraisal/v1/appraisal/exception_validator/dashboard?${params.toString()}`);
       return response.data;
     } catch (error) {
       throw error;

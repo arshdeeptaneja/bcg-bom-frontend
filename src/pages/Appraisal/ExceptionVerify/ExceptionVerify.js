@@ -1,6 +1,6 @@
 import AppraisalAccordion from '../../../components/Appraisal/AppraisalAccordion/AppraisalAccordion';
 import { KpiTab } from '../../../components/common';
-import './ExceptionHome.css';
+import './ExceptionVerify.css';
 import { BackButton } from '../../../components/common';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
 import { toast } from 'react-toastify';
 
-export default function ExceptionHome() {
+export default function ExceptionVerify() {
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
   const { getEmployeeDetails, getUserProperty } = useAuth();
@@ -42,13 +42,13 @@ export default function ExceptionHome() {
     return match ? match[1] : new Date().getFullYear().toString();
   };
 
-  // React Query to fetch exception dashboard data
+  // React Query to fetch exception validator dashboard data
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['exceptionDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
-    queryFn: () => appraisalAPI.getExceptionDashboard({
+    queryKey: ['exceptionValidatorDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
+    queryFn: () => appraisalAPI.getExceptionValidatorDashboard({
       fy: extractYear(financialYear),
       quarter: selectedQuarter,
-      exception_period: appraisalPeriod.toLowerCase(),
+      exceptionPeriod: appraisalPeriod.toLowerCase(),
       empNo: empNo
     }),
     enabled: !!empNo, // Only run query if empNo is available
@@ -70,7 +70,7 @@ export default function ExceptionHome() {
       <div className="pageWrapper">
         <div className="pageWrapper-header">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Resolution</h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Verification</h1>
         </div>
         <LoadingSpinner />
       </div>
@@ -81,7 +81,7 @@ export default function ExceptionHome() {
     <div className="pageWrapper">
       <div className="pageWrapper-header">
         <BackButton />
-        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exceptions</h1>
+        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Verification</h1>
       </div>
       <div className="filters-row border rounded-2 px-3 py-2 mt-3 align-items-center d-flex gap-3">
         <span className="text-muted fw-semibold">FY Selection</span>
@@ -182,9 +182,9 @@ export default function ExceptionHome() {
         />
       </div>
 
-      {/* Accordion for My Exceptions */}
+      {/* Accordion for My Verifications */}
       <div className="myFinalScore-accordion mt-3">
-        <AppraisalAccordion accordionItems={[{ heading: 'My Exceptions' }]} />
+        <AppraisalAccordion accordionItems={[{ heading: 'My Verifications' }]} />
       </div>
 
       {/* Foot Note */}

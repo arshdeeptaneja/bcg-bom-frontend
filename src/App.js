@@ -18,6 +18,7 @@ import {
   AppealComittee,
   AppraisalCheckInForm,
   ExceptionHome,
+  ExceptionVerify,
   ExceptionsList,
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
@@ -34,14 +35,30 @@ import HrDashboard from './pages/Appraisal/AppraisalHRDashboard/HrDashboard';
 import AppraiserUpdate from './pages/Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate';
 import ReportingReviewBulk from './pages/Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityBulk';
 import AppealDeletion from './pages/Appraisal/AppraisalHRDashboard/AppealDelection/AppealDelection';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <AppContent />
+            {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+          </AuthProvider>
+        </QueryClientProvider>
       </PersistGate>
     </Provider>
   );
@@ -174,10 +191,20 @@ function AppContent() {
               }
             />
             <Route
-              path="/appraisal/exception-home"
+              path="/appraisal/exception-resolution"
               element={
                 isAuthenticated ? (
                   <ExceptionHomeLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraisal/exception-verify"
+              element={
+                isAuthenticated ? (
+                  <ExceptionVerifyLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )
@@ -540,6 +567,16 @@ const ExceptionHomeLayout = ({ onLogout }) => {
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
       <ExceptionHome />
+    </>
+  );
+};
+
+const ExceptionVerifyLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <ExceptionVerify />
     </>
   );
 };
