@@ -3,9 +3,10 @@
  * @param {Object[]} accordionItems - List of Accordion Items. Each item must contain:
  *    @param {string} item.heading - The heading/title of the accordion section.
  *    @param {number} item.pendingCount - The number of pending items for this section.
+ * @param {Object[]} scoreData - Optional array of score data objects containing CYCLE, PERCENTAGE_SCORE, WEIGHTAGE, WEIGHTED_SCORE
  * @returns
  */
-export default function AppraisalAccordion({ accordionItems = [] }) {
+export default function AppraisalAccordion({ accordionItems = [], scoreData = [] }) {
   return (
     <div className="accordion" id="appraisalAccordion">
       {accordionItems.map((item, index) => {
@@ -34,7 +35,34 @@ export default function AppraisalAccordion({ accordionItems = [] }) {
               aria-labelledby={`heading-${index}`}
               data-bs-parent="#appraisalAccordion"
             >
-              <div className="accordion-body">Content for Self Appraisal goes here...</div>
+              <div className="accordion-body">
+                {scoreData && scoreData.length > 0 ? (
+                  <div className="table-responsive">
+                    <table className="table table-striped table-bordered">
+                      <thead className="table-primary">
+                        <tr>
+                          <th>Cycle</th>
+                          <th>Percentage Score</th>
+                          <th>Weightage</th>
+                          <th>Weighted Score</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {scoreData.map((score, scoreIndex) => (
+                          <tr key={scoreIndex}>
+                            <td>{score.CYCLE || '-'}</td>
+                            <td>{score.PERCENTAGE_SCORE ?? 0}</td>
+                            <td>{score.WEIGHTAGE ?? 0}</td>
+                            <td>{score.WEIGHTED_SCORE ?? 0}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-muted">No score data available.</p>
+                )}
+              </div>
             </div>
           </div>
         );
