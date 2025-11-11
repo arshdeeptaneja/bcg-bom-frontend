@@ -1,0 +1,100 @@
+.exception-list-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-family: "Inter", sans-serif;
+}
+
+/* Header */
+.text-accent {
+  color: var(--accent-color);
+}
+
+.back-btn {
+  font-weight: 600;
+  border-radius: 30px;
+}
+
+.info-btn {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+/* Filters */
+.filter-section select {
+  min-width: 180px;
+  border-radius: 6px;
+}
+
+.search-btn {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+}
+
+.clear-btn {
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  background: transparent;
+  font-weight: 600;
+}
+
+/* Table */
+.table thead {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  font-size: 14px;
+}
+.table tbody td {
+  font-size: 14px;
+}
+
+.table tbody tr td{
+    padding: 0px 0px
+}
+
+.tbody, td, tfoot, th, thead, tr{
+border:none !important;
+}
+
+.table th,
+.table td {
+  text-align: center;
+}
+
+.view-btn {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+.review-btn {
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+/* Pagination */
+.pagination-section .btn {
+  border-radius: 6px;
+  min-width: 35px;
+}
+
+.pagination-section .active-page {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+}

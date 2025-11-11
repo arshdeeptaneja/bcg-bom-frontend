@@ -131,6 +131,19 @@ export default function AppraisalHome() {
             );
           }}
         />
+
+          <KpiTab
+          heading="Appraiser Check-in"
+          kpiData={[
+            { value: 100, label: 'Appraisals to be filled' },
+            { value: 200, label: 'Pending Appraisals(s)' },
+          ]}
+          onClick={() => {
+            navigate(
+              `/appraisal/appraiser-check-in?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+            );
+          }}
+        />
       </div>
 
       {/* Accordion for My Final Score */}

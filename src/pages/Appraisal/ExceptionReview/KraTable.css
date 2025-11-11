@@ -1,0 +1,325 @@
+:root {
+    --accent-color: #0389d0;
+    --header-bg: #0389d0;
+    /* optional if you want green header in some places */
+    --text: #222;
+    --muted: #888;
+}
+
+/* Root */
+.kra-root {
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    padding: 18px;
+    background: #fff;
+}
+
+/* Top title */
+.kra-title-top {
+    margin: 4px 0 12px 6px;
+    font-weight: 600;
+    color: #213;
+}
+
+/* Table wrapper - keep everything contained and no scrollbars */
+.kra-table-wrap {
+    width: 100%;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: visible;
+    /* avoid scrollbars */
+}
+
+/* Header row - compact and aligned */
+.kra-header-row {
+    display: flex;
+    /* grid-template-columns: 48px 1.6fr 140px 70px 150px 150px 84px 84px 80px 120px 70px 160px; */
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #eee;
+    background: var(--accent-color);
+    font-size: 13px;
+    color: #fff;
+    text-transform: none;
+}
+
+/* Each data row */
+.kra-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 14px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+/* Compact KRA text */
+.kra-text {
+    font-size: 13px;
+    line-height: 1.2;
+    color: #0b2b2b;
+}
+.vertical-line{
+    border-left: 1px solid #e6e6e6;
+    height: 142px;
+    margin-left: 8px;
+}
+
+/* Roles column styling */
+.roles-col,
+.roles-col .role {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    color: #282828;
+}
+
+.roles-col .divider {
+    height: 1px;
+    background: #e9e9e9;
+    margin: 4px 0;
+}
+
+/* Inputs - readonly vs editable */
+input.readonly {
+    border: none;
+    border-bottom: 1.5px solid var(--accent-color);
+    padding: 6px 8px;
+    font-size: 13px;
+    color: #222;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+input.editable,
+input.editable.single,
+textarea:not([readonly]) {
+    border: 1px solid var(--accent-color);
+    outline: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+/* Single small inputs */
+input.single {
+    padding: 8px;
+    text-align: center;
+}
+
+/* Column specific tweaks */
+.select-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kra-col {
+    padding-left: 6px;
+}
+
+.unit-col {
+    font-size: 13px;
+    color: #333;
+}
+
+.comment-col {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* comment icon */
+.comment-icon {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    padding: 6px;
+    cursor: pointer;
+    color: var(--accent-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comment-icon i {
+    font-size: 18px;
+}
+
+/* action radios */
+.action-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.radio-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 10px;
+    color: #155;
+}
+
+.radio-row input[type="radio"] {
+    accent-color: var(--accent-color);
+}
+
+/* comment block */
+.comment-block {
+    grid-column: 1 / -1;
+    padding: 12px 18px;
+    background: #fff;
+    border-top: 1px solid #f3f3f3;
+}
+
+.comment-inner {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.comment-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+}
+
+.self-box {
+    width: 85%;
+    padding: 8px;
+    font-size: 13px;
+}
+
+.comment-right {
+    width: 100%;
+}
+
+.comment-right .lbl {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #222;
+}
+
+.required {
+    color: #d33;
+    margin-left: 4px;
+}
+
+.comment-right textarea {
+    min-height: 80px;
+    max-height: 200px;
+    resize: vertical;
+}
+
+.comment-foot {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* Submit area */
+.submit-wrap {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 12px;
+}
+
+.submit-btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.submit-btn.inactive {
+    background: rgba(3, 137, 208, 0.18);
+    color: #2f3f45;
+    cursor: not-allowed;
+    border-color: rgba(3, 137, 208, 0.18);
+}
+
+.submit-btn.active {
+    background: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+/* modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.36);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-card {
+    background: #fff;
+    padding: 28px 34px;
+    border-radius: 4px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
+    min-width: 420px;
+    text-align: center;
+}
+
+.modal-body {
+    font-size: 16px;
+    margin-bottom: 18px;
+    color: #1a2b2b;
+}
+
+.ok-btn {
+    padding: 8px 18px;
+    border: 1px solid var(--accent-color);
+    background: #fff;
+    color: #0b0b0b;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.ok-btn:hover {
+    background: rgba(3, 137, 208, 0.06);
+}
+
+
+.text-area{
+    width: 100%;
+    min-height: 80px;
+    border: 1.5px solid #d1d1d1;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 13px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+.text-area:hover{
+    border-color: var(--accent-color);
+}
+
+
+/* small responsive safety but avoid scrolls */
+@media (max-width: 1100px) {
+    .kra-title-top {
+        font-size: 15px;
+    }
+
+    .kra-header-row,
+    .kra-row {
+        grid-template-columns: 40px 1.4fr 120px 60px 120px 120px 70px 70px 70px 100px 60px 140px;
+    }
+}

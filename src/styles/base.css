@@ -1,4 +1,4 @@
-.page {
+ .page {
     background-color: var(--secondary-color);
 }
 
@@ -13,7 +13,7 @@
     border: var(--default-border);
     padding: var(--default-padding);
     color: var(--secondary-color);
-    box-shadow: 0cqmin;
+    box-shadow: var(--shadows);
 }
 
 .primary-button {
@@ -38,10 +38,10 @@
 }
 
 section {
-    background-color: var(--primary-color);
-    border-radius: 20px;
-    box-shadow: 0cqmin;
-    padding: 20px;
+    background-color: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadows);
+    padding: var(--space-lg);
 }
 
 section h2 {
@@ -51,14 +51,14 @@ section h2 {
 .role-bar {
     border-left: 10px solid var(--accent-color);
     background-color: var(--primary-color);
-    box-shadow: 0cqmin;
+    box-shadow: var(--shadows);
 }
 
 input {
     border: var(--default-border);
     background-color: transparent;
     color: var(--secondary-color);
-    border-radius: var();
+    border-radius: var(--border-radius);
 }
 
 ul.loop-border {}
@@ -74,23 +74,23 @@ ul.base-loop {
 
 .card {
     background-color: var(--primary-color);
-    border-radius: 20px;
-    box-shadow: 0cqmin;
-    padding: 20px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadows);
+    padding: var(--space-lg);
     border: var(--default-border);
 }
 
 table thead {
     background-color: var(--accent-color);
-    padding: 20px;
+    padding: var(--default-padding);
+    color: var(--primary-color);
 }
 table tbody {
-    padding: 20px;
+    padding: var(--default-padding);
 }
 
-// nav
 .nav {
-    background-color: var(--secondary-color);
+    background-color: var(--accent-color);
     position: fixed; 
     top: 0;
     left: 0;
@@ -104,22 +104,20 @@ table tbody {
 }
 
 .nav li {
-    margin-bottom: 5px;
+    margin-bottom: var(--space-3xs);
 }
 
 .nav a {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--space-xs);
     padding: var(--default-padding);
     text-decoration: none;
-    color: var(--secondary-color);
+    color: var(--primary-color);
     font-size: 1.1rem;
 }
 
 
-
-//header
 
 .main-nav {
     background-color: var(--accent-color);
@@ -137,9 +135,32 @@ table tbody {
 
 .main-nav a {
     display: block;
-    padding: 15px 0;
+    padding: var(--space-sm) 0;
     text-decoration: none;
-    color: var(--secondary-color);
+    color: var(--primary-color);
     font-weight: 500;
     position: relative;
+}
+/* Enhanced Input Styles for Forms */
+select.form-select,
+input.form-control {
+    border: var(--default-border);
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border-radius: var(--radius-xs);
+    padding: var(--space-xs) var(--space-12);
+    font-size: var(--font-sm);
+    transition: all 0.3s ease;
+}
+
+select.form-select:focus,
+input.form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(3, 137, 208, 0.1);
+}
+
+input.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
 }

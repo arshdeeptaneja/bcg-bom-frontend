@@ -27,6 +27,6 @@
 
 .btn-outline-primary {
   background-color: transparent;
-  color: var(--bs-secondary-color);
+  color: var(--bs-dark);
 }
 

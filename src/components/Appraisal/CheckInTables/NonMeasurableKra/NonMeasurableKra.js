@@ -113,7 +113,7 @@ export default function NonMeasurableKra({
                             <span className="text-danger">*</span>
                             <i className="bi bi-info-circle text-primary"></i>
                           </div>
-                          <div className="text-primary small">{kra.KraDescription}</div>
+                          <div className="text-primary small d-flex align-items-start">{kra.KraDescription}</div>
                         </div>
                       </td>
 
@@ -158,7 +158,7 @@ export default function NonMeasurableKra({
                     {isOpen && (
                       <tr key={`${kraId}-comment`}>
                         <td colSpan={4}>
-                          <div className="px-4 py-3 bg-light rounded">
+                          <div className="px-4 py-3 bg-light rounded d-flex flex-column align-items-start">
                             <div className="mb-2">
                               <label className="fw-semibold text-muted me-2">
                                 Appraisee Comment:

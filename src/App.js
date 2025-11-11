@@ -19,6 +19,10 @@ import {
   AppraisalCheckInForm,
   ExceptionHome,
   ExceptionsList,
+  QuarterlyException,
+  EmployeeExceptionList,
+  ReviewQuarterlyException,
+  EmployeeQuarterlyExceptions,
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -34,6 +38,9 @@ import HrDashboard from './pages/Appraisal/AppraisalHRDashboard/HrDashboard';
 import AppraiserUpdate from './pages/Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate';
 import ReportingReviewBulk from './pages/Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityBulk';
 import AppealDeletion from './pages/Appraisal/AppraisalHRDashboard/AppealDelection/AppealDelection';
+import AppraiserCheckInDashboard from './pages/Appraiser/AppraiserDashboard/AppraiserCheckInDashboard';
+import EmployeeAppraisalCard from './components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
+import EmployeeQuarterlyException from './pages/Appraisal/QuarterlyException/EmployeeQuarterlyException';
 
 function App() {
   return (
@@ -203,6 +210,16 @@ function AppContent() {
                 )
               }
             />
+                <Route
+              path="/appraisal/appraiser-check-in"
+              element={
+                isAuthenticated ? (
+                  <AppraiserCheckInLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
 
             <Route
               path="/appraisal/admin-panel"
@@ -321,6 +338,52 @@ function AppContent() {
               }
             />
 
+
+                  <Route
+              path="/appraisal/exception-quarterly"
+              element={
+                isAuthenticated ? (
+                  <ExceptionQuarterly onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+                   <Route
+              path="/appraisal/review-exception-list"
+              element={
+                isAuthenticated ? (
+                  <ReviewExceptionList onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+                <Route
+              path="/appraisal/review-quarterly-exception"
+              element={
+                isAuthenticated ? (
+                  <ReviewQuarterlyExceptionLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />  
+
+
+                <Route
+              path="/appraisal/employee-review-quarterly-exception"
+              element={
+                isAuthenticated ? (
+                  <EmployeeQuarterlyExceptionListLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />  
+              
+
           </Routes>
         </div>
       </Router>
@@ -407,6 +470,36 @@ const AppraiseeCheckInLayout = ({ onLogout }) => {
     </>
   );
 };
+
+const AppraiserCheckInLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraiserCheckInDashboard />
+    </>
+  );
+};
+
+
+const ExceptionQuarterly = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <QuarterlyException/>
+    </>
+  );
+};
+const ReviewExceptionList = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <EmployeeExceptionList/>
+    </>
+  );
+}
 
 // Appraisa Admin Panel
 const AppraisalAdminPanel = ({ onLogout }) => {
@@ -553,6 +646,36 @@ const ExceptionsListLayout = ({ onLogout }) => {
     </>
   );
 };
+
+
+// ReviewQuarterlyException
+
+const ReviewQuarterlyExceptionLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <ReviewQuarterlyException />
+    </>
+  );
+};
+
+//Employee Quarterly Exception
+const EmployeeQuarterlyExceptionListLayout = ({ onLogout }) => {
+  return (
+    <>    
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      {/* <EmployeeQuarterlyExceptions /> */}
+<EmployeeQuarterlyException/>
+      </>
+  );
+}
+   
+
+
+
+//
 // JobFamily Layout
 // const JobFamily = ({ onLogout }) => (
 //   <>

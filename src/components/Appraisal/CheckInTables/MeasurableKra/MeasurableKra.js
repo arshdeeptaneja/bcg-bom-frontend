@@ -50,11 +50,11 @@ export default function MeasurableKra({ totalActualScore, totalMaxScore, kraList
             {kraListData.map((kra) => (
               <>
                 <tr key={`${kra.KraName}-row`}>
-                  <td>{kra.KraName}</td>
-                  <td>{kra.KraActualScore}</td>
-                  <td>{kra.KraTarget}</td>
-                  <td>{kra.KraWeight}</td>
-                  <td>{kra.KraFinalScore}</td>
+                  <td className='table-td'>{kra.KraName}</td>
+                  <td className='table-td'>{kra.KraActualScore}</td>
+                  <td className='table-td'>{kra.KraTarget}</td>
+                  <td className='table-td'>{kra.KraWeight}</td>
+                  <td className='table-td'>{kra.KraFinalScore}</td>
                   <td>
                     <button
                       type="button"

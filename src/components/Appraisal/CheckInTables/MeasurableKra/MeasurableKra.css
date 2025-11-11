@@ -2,3 +2,10 @@
   background: none;
   border: none;
 }
+.table th, .table td {
+    text-align: left;
+}
+
+.table-td {
+    padding:15px 4px;
+}

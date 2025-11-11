@@ -39,7 +39,7 @@ export default function Modal({ id, title, body, actions }) {
             */}
             <button
               type="button"
-              class="btn btn-primary"
+              class=" butns"
               onClick={() => {
                 // Get the modal element by id
                 const modalEl = document.getElementById(id);
