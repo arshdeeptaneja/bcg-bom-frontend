@@ -26,56 +26,7 @@ function ReviewQuarterlyException() {
 
  
 
-    // useEffect(() => {
-    //     setKraData([
-    //         { KraName: 'KRA 1', KraWeight: 10 },
-    //         { KraName: 'KRA 2', KraWeight: 20 },
-    //         { KraName: 'KRA 3', KraWeight: 30 },
-    //     ]);
-
-    //     setMeasurableKraListData([
-    //         {
-    //             KraName: 'KRA 1',
-    //             KraActualScore: 10,
-    //             KraTarget: 100,
-    //             KraWeight: 10,
-    //             KraFinalScore: 10,
-    //             comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //         },
-    //         {
-    //             KraName: 'KRA 2',
-    //             KraActualScore: 20,
-    //             KraTarget: 200,
-    //             KraWeight: 20,
-    //             KraFinalScore: 20,
-    //             comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //         },
-    //     ]);
-
-    //     setNonMeasurableKraListData({
-    //         'Section 1': [
-    //             {
-    //                 KraName: 'KRA 1',
-    //                 KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-    //                 comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //             },
-    //         ],
-    //         'Section 2': [
-    //             {
-    //                 KraName: 'KRA 2',
-    //                 KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-    //                 comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //             },
-    //         ],
-    //         'Section 3': [
-    //             {
-    //                 KraName: 'KRA 3',
-    //                 KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-    //                 comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //             },
-    //         ],
-    //     });
-    // }, []);
+    
 
 
 
@@ -89,7 +40,7 @@ function ReviewQuarterlyException() {
             <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
                 <div className="headline d-flex flex-row justify-content-between align-items-center">
                     <BackButton />
-                    <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3"></h1>
+                    <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Review Quarterly Exception</h1>
                 </div>
 
 

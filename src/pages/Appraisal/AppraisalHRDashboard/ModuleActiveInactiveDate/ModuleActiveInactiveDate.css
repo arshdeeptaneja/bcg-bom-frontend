@@ -4,6 +4,9 @@ section {
   border: var(--border);
 }
 .reset-btn{
+      border-radius: 8px;
+    font-weight: 600;
+    border: none;
         padding: 8px 20px;
             margin-top: 1.7rem;
     background-color: var(--accent-color);

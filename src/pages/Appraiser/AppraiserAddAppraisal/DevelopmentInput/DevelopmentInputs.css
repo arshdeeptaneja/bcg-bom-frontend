@@ -1,0 +1,121 @@
+:root {
+  --accent-color: #0389d0;
+  --muted-color: #6c757d;
+  --text-dark: #111;
+}
+
+/* Container card styling */
+.development-inputs .dev-card {
+  background: #fff;
+  border: 1px solid rgba(3, 137, 208, 0.06);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+}
+
+/* Heading */
+.dev-heading {
+  color: var(--accent-color);
+  font-weight: 700;
+  font-size: 1.125rem; /* ~18px */
+  margin: 0;
+  padding-bottom: 6px;
+  border-bottom: 2px solid rgba(3,137,208,0.06);
+  display: inline-block;
+}
+
+/* Each question block */
+.dev-item {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+/* Question text */
+.dev-question {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+
+.dev-index {
+  color: var(--text-dark);
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.dev-question-text {
+  color: var(--text-dark);
+}
+
+/* Appraisee label */
+.appraisee-label {
+  font-size: 0.85rem;
+  color: var(--muted-color);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* Appraisee response */
+.appraisee-response {
+  font-size: 0.9rem;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+}
+
+.score-section {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadows);
+  /* padding: var(--space-lg); */
+}
+
+.final-score {
+  font-weight: 600;
+  color: var(--accent-color);
+  margin-bottom: 12px;
+}
+
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.score-table thead tr {
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.score-table th {
+  padding: var(--space-sm);
+  font-size: var(--font-base);
+}
+
+.score-table td {
+  padding: var(--space-sm);
+  font-size: var(--font-sm);
+  border-bottom: var(--default-border);
+}
+
+.score-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Total row bold and highlighted subtly */
+.total-row td {
+  background-color: #f5faff;
+  font-size: var(--font-base);
+}
+
+
+
+/* Small responsiveness tweaks */
+@media (min-width: 992px) {
+  .dev-heading { font-size: 1.25rem; }
+}
+
+/* Optional small visual polish to match screenshot: roomy left gutter */
+.development-inputs .dev-card .dev-list {
+  padding-left: 4px;
+}

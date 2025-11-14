@@ -1,10 +1,42 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./ModuleActiveInactiveDate.css"; // your custom CSS
 import { BackButton } from "../../../../components/common";
 import { FaInfoCircle } from "react-icons/fa";
+import AppealTable from "../../../../components/AppealTable/AppealTable";
 
-const ModuleActiveInactiveDate = () => {
+const Data = [
+  {
+    ticketId: 1,
+    empNumber: "R25494",
+    empName: "RAMA M.S.",
+    primaryRole: "ZO Retail/MSME Loans Officer",
+    branch: "CHENNAI ZO",
+    preAppeal: "1.6/30 A",
+    postAppeal: "1.4/30",
+    appealStatus: "Accepted",
+  },
+  {
+    ticketId: 22,
+    empNumber: "R12992",
+    empName: "RAJIV KUMAR BANSAL",
+    primaryRole: "Zonal Head",
+    branch: "CHENNAI ZO",
+    preAppeal: "2.8/5.0",
+    postAppeal: "3.4/5.0",
+    appealStatus: "Pending",
+  },
+  {
+    ticketId: 81,
+    empNumber: "N12875",
+    empName: "NISHA",
+    primaryRole: "Deposit Officer",
+    branch: "VERPAL",
+    preAppeal: "3.2/5.0",
+    postAppeal: "4.4/5.0",
+    appealStatus: "Pending",
+  },
+];
+const EmployeeAppealList = () => {
     const [filters, setFilters] = useState({
         moduleName: "",
         financialYear: "",
@@ -12,44 +44,15 @@ const ModuleActiveInactiveDate = () => {
         scale: "",
     });
 
-    const data = [
-        {
-            moduleName: "Appeal",
-            quarter: "ANNUAL",
-            scale: "N/A",
-            financialYear: "2026",
-            activeDate: "01-SEP-25",
-            inactiveDate: "30-NOV-25",
-        },
-        {
-            moduleName: "REPA Appraisal",
-            quarter: "Q4",
-            scale: "3",
-            financialYear: "2025",
-            activeDate: "01-JUL-24",
-            inactiveDate: "01-NOV-25",
-        },
-        {
-            moduleName: "REPA Appraisal",
-            quarter: "Q1",
-            scale: "N/A",
-            financialYear: "2026",
-            activeDate: "01-SEP-25",
-            inactiveDate: "30-NOV-25",
-        },
-    ];
-
-    // sample data (empty for demonstration)
-  const [datas, setDatas] = useState([]);
+ 
 
   // pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   // derived pagination data
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil(Data.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = data.slice(startIndex, startIndex + itemsPerPage);
 
 
 
@@ -73,11 +76,7 @@ const ModuleActiveInactiveDate = () => {
             <div className="breadcrumb-header d-flex justify-content-between align-items-center px-3 py-2">
                 {/* Left Side: Breadcrumb */}
                 <div className="breadcrumb-path">
-                    <span className="breadcrumb-link">Dashboard</span>
-                    <span className="breadcrumb-separator">/</span>
-                    <span className="breadcrumb-link">Appraisal HR Dashboard</span>
-                    <span className="breadcrumb-separator">/</span>
-                    <span className="breadcrumb-active"> Module Active Inactive Date </span>
+
                 </div>
 
                 {/* Right Side: Info Section */}
@@ -90,12 +89,11 @@ const ModuleActiveInactiveDate = () => {
                     </button>
                 </div>
             </div>
-            <div className="d-flex justify-content-between align-items-center mb-3 px-2">
+            <div className="d-flex justify-content-between align-items-center  px-2">
                 <div className="pageWrapper-header">
                     <BackButton />
-                    <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3"> Module Active Inactive Date </h1>
+                    <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3"> Employee Appeal List </h1>
                 </div>
-                <button className="btn btn-success primary-button">Add Module</button>
             </div>
 
 
@@ -166,7 +164,7 @@ const ModuleActiveInactiveDate = () => {
                     </div>
                     <div className="col-md-2">
                         
-                         <button className=" reset-btn me-2" onClick={handleReset}>
+                         <button className="btn reset-btn me-2" onClick={handleReset}>
                         Reset ↻
                     </button>
 
@@ -174,53 +172,14 @@ const ModuleActiveInactiveDate = () => {
                     </div>
                       
                 </div>
+                <AppealTable data={Data} />
 
-                {/* <div className="d-flex justify-content-end mt-3">
-                    <button className="btn btn-outline-secondary me-2" onClick={handleReset}>
-                        Reset ↻
-                    </button>
-                </div> */}
-
-                 <div className="d-flex justify-content-end mt-5">
-                <table className="table mb-0 align-middle">
-                    <thead className="table-header">
-                        <tr>
-                            <th>Module Name</th>
-                            <th>Quarter</th>
-                            <th>Scale</th>
-                            <th>Financial Year</th>
-                            <th>Active Date</th>
-                            <th>Inactive Date</th>
-                            <th className="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.map((row, index) => (
-                            <tr key={index}>
-                                <td>{row.moduleName}</td>
-                                <td>{row.quarter}</td>
-                                <td>{row.scale}</td>
-                                <td>{row.financialYear}</td>
-                                <td>{row.activeDate}</td>
-                                <td>{row.inactiveDate}</td>
-                                <td className="text-center">
-                                    <button className="btn btn-sm edit-button me-2">Edit</button>
-                                    <button className=" btn-sm delete-button">Delete</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
- 
-
-                
-            </div>
+              
               {/* pagination */}
         <div className="d-flex justify-content-between align-items-center px-4 py-3">
           <small className="text-muted">
-            Showing {data.length === 0 ? 0 : startIndex + 1} to{" "}
-            {Math.min(startIndex + itemsPerPage, data.length)} of {data.length} entries
+            Showing {Data.length === 0 ? 0 : startIndex + 1} to{" "}
+            {Math.min(startIndex + itemsPerPage, Data.length)} of {Data.length} entries
           </small>
           <div>
             <button
@@ -246,4 +205,4 @@ const ModuleActiveInactiveDate = () => {
     );
 };
 
-export default ModuleActiveInactiveDate;
+export default EmployeeAppealList;

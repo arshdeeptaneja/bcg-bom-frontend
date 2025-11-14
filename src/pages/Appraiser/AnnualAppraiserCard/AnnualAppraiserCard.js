@@ -1,15 +1,15 @@
 import PropTypes from 'prop-types';
-import './EmployeeAppraisalCard.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './AnnualAppraiserCard.css';
 
-import Modal from '../../common/Modal/Modal';
-import  RoleTimeline  from '../../../components/Appraisal/CheckInDescriptionSection/RoleTimeline';
+import Modal from '../../../components/common/Modal/Modal';
+import RoleTimeline from '../../../components/Appraisal/CheckInDescriptionSection/RoleTimeline';
 /**
  * Employee Appraisal summary card
  * Accepts an EmployeeModel instance (`employee`) and renders key details with actions.
  */
-export default function EmployeeAppraisalCard({
+export default function AnnualAppraiserCard({
   employee,
   dateRange,
   quarter,
@@ -20,6 +20,8 @@ export default function EmployeeAppraisalCard({
   appraisalStatus = 'PENDING AT APPRAISEE',
   exceptionStatus = 'NOT CREATED',
   onAddCheckIn,
+  onAddAppraisal,
+  annualButtons = false,
   onViewSummary,
   onAddException,
 }) {
@@ -67,6 +69,13 @@ export default function EmployeeAppraisalCard({
     // Default
     return '#800000';
   };
+
+  //download PDF handler
+  const onDownloadPDF = () => {
+    // window.open(`${BaseUrl}/api/v1/download-report/${employee.empNo}`, "_blank");
+    alert('Download PDF functionality to be implemented.');
+  };
+
 
   if (!employee) return null;
 
@@ -247,38 +256,91 @@ export default function EmployeeAppraisalCard({
         {/* Action Buttons Section */}
         <div className="action-buttons col-md-5 col-12 d-flex flex-column">
           <div className="button-row">
-            <button
+ {/* <button
               type="button"
               className="butns "
               data-bs-toggle="modal"
-              data-bs-target={`#${`addCheckInModal-${employee.empNo}`}`}
             >
-              Add Check-In Summary
+              View Appraisal Summary
               <span className="ms-2">→</span>
             </button>
-            <button type="button" className="btn-fade" onClick={onViewSummary}>
-              View Check-In Summary
-              <span className="ms-2">→</span>
-            </button>
-          </div>
-          <div className="button-row">
             <button
               type="button"
               className="btn-fade"
-              onClick={() => navigate('/appraisal/exception-quarterly')}
+              onClick={() => {
+                if (typeof onAddAppraisal === "function") {
+                  onAddAppraisal(); // calls parent function
+                } else {
+                  console.warn("onAddAppraisal not provided");
+                }
+              }}
             >
-              Add Exception
+              Add Appraisal
               <span className="ms-2">→</span>
-            </button>
+            </button> */}
+
+            {annualButtons && (
+              <div className="annual-buttons-wrapper mt-3">
+
+                {/* Row 1 */}
+                <div className="d-flex gap-3 mb-3 flex-wrap">
+
+                  {/* Download PDF */}
+                  <button
+                    className="annual-btn outline-btn"
+                    onClick={onDownloadPDF}
+                  >
+                    Download PDF Report
+                    <span className="ms-2 arrow">→</span>
+                  </button>
+
+                  {/* Add Appeal */}
+                  <button
+                    className="annual-btn filled-btn"
+                    onClick={() => navigate('/annual/add-appeal')}
+                  >
+                    Add Appeal
+                    <span className="ms-2 arrow">→</span>
+                  </button>
+
+                </div>
+
+                {/* Row 2 */}
+                <div className="d-flex gap-3 flex-wrap">
+
+                  {/* Add Appraisal */}
+                  <button
+                    className="annual-btn grey-btn"
+                    onClick={() => navigate('/appraisal/add')}
+                  >
+                    Add Appraisal
+                    <span className="ms-2 arrow">→</span>
+                  </button>
+
+                  {/* View Summary */}
+                  <button
+                    className="annual-btn outline-btn"
+                    onClick={() => navigate('/appraisal/summary')}
+                  >
+                    View Appraisal Summary
+                    <span className="ms-2 arrow">→</span>
+                  </button>
+
+                </div>
+
+              </div>
+            )}
+
 
           </div>
+
         </div>
       </div>
     </section>
   );
 }
 
-EmployeeAppraisalCard.propTypes = {
+AnnualAppraiserCard.propTypes = {
   employee: PropTypes.shape({
     empNo: PropTypes.string,
     employeeName: PropTypes.string,
@@ -295,4 +357,6 @@ EmployeeAppraisalCard.propTypes = {
   onAddCheckIn: PropTypes.func,
   onViewSummary: PropTypes.func,
   onAddException: PropTypes.func,
+  onAddAppraisal: PropTypes.func,
+    annualButtons: PropTypes.bool,
 };

@@ -146,7 +146,7 @@ export default function KraTable() {
               <div className="col kra-col">
                 <div className="kra-text">{r.kra}</div>
               </div>
-              <div className="col roles-col">
+              <div className="vertical-divider">
 </div>
               <div className="col roles-col">
                 <div className="role">Actual</div>

@@ -1,100 +1,11 @@
 import { BackButton } from '../../../components/common';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-// import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
-// import EmployeeModel from '../../../models/EmployeeModel';
-
-// /**
-//  *
-//  * @param {Object} props - The component props.
-//  * @param {string} props.financialYear - The financial year.
-//  * @param {string} props.appraisalPeriod - The appraisal period.
-//  * @param {string} props.quarter - The quarter.
-//  * @returns
-//  */
-// export default function EmployeeExceptionList() {
-//   const navigate = useNavigate();
-//   const [searchParams] = useSearchParams();
-//   const financialYear = searchParams.get('financialYear');
-//   const appraisalPeriod = searchParams.get('appraisalPeriod');
-//   const quarter = searchParams.get('quarter');
-
-//   // TODO: Get the average score and max score from the API
-//   const averageScore = 70;
-//   const maxScore = 100;
-
-//   if (!financialYear || !appraisalPeriod || !quarter) {
-//     return (
-//       <div className="pageWrapper">
-//         <div>No financial year, appraisal period, or quarter found</div>
-//       </div>
-//     );
-//   }
-//   return (
-//     <div className="pageWrapper">
-//       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
-//         <div className="headline d-flex flex-row justify-content-between align-items-center">
-//           <BackButton />
-//           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-//             Appraiser Check-In Dashboard
-//           </h1>
-//         </div>
-//         <h4 className="text-muted fw-bold mb-0 ms-3">
-//           {`${
-//             appraisalPeriod === 'Quarterly' ? `${quarter}, ` : '' // Show Quarter only for Quarterly appraisal periods, else directly show the FY
-//           } ${financialYear} ${appraisalPeriod} Check-In`}
-//         </h4>
-//       </div>
-
-//       {/* --Appraisee Check-In Filters Row --*/}
-//   <div class="row g-3 mb-4 appraiser-filter-bar">
-//     <div class="col-md-2">
-//       <label class="form-label fw-semibold">EMPLOYEE NUMBER</label>
-//       <select class="form-select">
-//         <option>-Select-</option>
-//       </select>
-//     </div>
-//     <div class="col-md-2">
-//       <label class="form-label fw-semibold">EMPLOYEE NAME</label>
-//       <select class="form-select">
-//         <option>-Select-</option>
-//       </select>
-//     </div>
-//     <div class="col-md-2">
-//       <label class="form-label fw-semibold">PRIMARY ROLE</label>
-//       <select class="form-select">
-//         <option>-Select-</option>
-//       </select>
-//     </div>
-//     <div class="col-md-2">
-//       <label class="form-label fw-semibold">APPRAISER</label>
-//       <select class="form-select">
-//         <option>-Select-</option>
-//       </select>
-//     </div>
-//     <div class="col-md-2">
-//       <label class="form-label fw-semibold">STATUS</label>
-//       <select class="form-select">
-//         <option>-Select-</option>
-//       </select>
-//     </div>
-//     <div class="col-md-2 d-flex align-items-end">
-//       <button class="btn primary-button px-4 w-100">
-//         Reset <i class="bi bi-arrow-repeat ms-1"></i>
-//       </button>
-//     </div>
-//   </div>
-
-     
-//     </div>
-//   );
-// }
-
 import React, { useState } from "react";
 import "./EmployeeExceptionList.css";
 
 const EmployeeExceptionList = () => {
 
-      const navigate = useNavigate();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const financialYear = searchParams.get('financialYear');
   const appraisalPeriod = searchParams.get('appraisalPeriod');
@@ -138,13 +49,12 @@ const EmployeeExceptionList = () => {
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-            Appraiser Check-In Dashboard
+            Exmployee Exception List
           </h1>
         </div>
         <h4 className="text-muted fw-bold mb-0 ms-3">
-          {`${
-            appraisalPeriod === 'Quarterly' ? `${quarter}, ` : '' // Show Quarter only for Quarterly appraisal periods, else directly show the FY
-          } ${financialYear} ${appraisalPeriod} Check-In`}
+          {`${appraisalPeriod === 'Quarterly' ? `${quarter}, ` : '' // Show Quarter only for Quarterly appraisal periods, else directly show the FY
+            } ${financialYear} ${appraisalPeriod} Check-In`}
         </h4>
       </div>
 
@@ -232,7 +142,7 @@ const EmployeeExceptionList = () => {
               <th>Exception Details</th>
             </tr>
           </thead>
-          <tbody style={{marginTop:"0.5rem"}}>
+          <tbody style={{ marginTop: "0.5rem" }}>
             {data.length === 0 ? (
               <tr>
                 <td colSpan="9" className="text-center text-muted">
@@ -242,18 +152,21 @@ const EmployeeExceptionList = () => {
             ) : (
               data.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.ticketId}</td>
-                  <td>{item.empNumber}</td>
-                  <td>{item.empName}</td>
-                  <td>{item.primaryRole}</td>
-                  <td>{item.branch}</td>
-                  <td>{item.preScore}</td>
-                  <td>{item.postScore}</td>
-                  <td>{item.status}</td>
+                  <td className='Tds'>{item.ticketId}</td>
+                  <td className='Tds'>{item.empNumber}</td>
+                  <td className='Tds'>{item.empName}</td>
+                  <td className='Tds'>{item.primaryRole}</td>
+                  <td className='Tds'>{item.branch}</td>
+                  <td className='Tds'>{item.preScore}</td>
+                  <td className='Tds'>{item.postScore}</td>
+                  <td className='Tds'>{item.status}</td>
                   <td>
                     <div className="d-flex flex-column gap-2">
                       <button className="btn view-btn">View Appraisal</button>
-                      <button className="btn review-btn">Review Exception</button>
+                      <button className="btn review-btn"
+                        onClick={() => navigate("/appraisal/review-quarterly-exception")}
+
+                      >Review Exception</button>
                     </div>
                   </td>
                 </tr>
