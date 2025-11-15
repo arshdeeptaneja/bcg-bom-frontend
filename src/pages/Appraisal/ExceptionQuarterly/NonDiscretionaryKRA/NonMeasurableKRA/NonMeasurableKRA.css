@@ -9,6 +9,7 @@
   font-size: var(--font-sm);
 }
 
+
 .non-measurable-table thead {
   background-color: var(--accent-color);
   color: var(--primary-color);

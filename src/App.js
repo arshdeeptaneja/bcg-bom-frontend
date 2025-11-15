@@ -28,7 +28,9 @@ import {
   AnnualAppraisalHome,
   AppraiserAddAppraisal,
   AppraiseeDashboard,
-  AddAppeal
+  AddAppeal,
+  QuarterlyAppraisee,
+  QuaterlyAppraiseeCheckIn
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -422,7 +424,7 @@ function AppContent() {
             />
 
 
-            
+
             <Route
               path="/appraiser/add-appraisal"
               element={
@@ -435,22 +437,44 @@ function AppContent() {
             />
 
 
-               <Route path="/annual/appraisee/appraisee-dashboard"
-                      element={
-                      isAuthenticated ? (
-                     <AppraiseeDashboardLayout onLogout={handleLogout} />
-                       ) : (
-                      <Navigate to="/login" replace />
+            <Route path="/annual/appraisee/appraisee-dashboard"
+              element={
+                isAuthenticated ? (
+                  <AppraiseeDashboardLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
                 )
               }
             />
 
-     <Route path="/annual/add-appeal"
-                      element={
-                      isAuthenticated ? (
-                     <AddAppealLayout onLogout={handleLogout} />
-                       ) : (
-                      <Navigate to="/login" replace />
+            <Route path="/annual/add-appeal"
+              element={
+                isAuthenticated ? (
+                  <AddAppealLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+
+             <Route path="/quarterly/quarterly-appraisee"
+              element={
+                isAuthenticated ? (
+                  <QuarterlyAppraiseeLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/quarterly/quaterly-appraisee-check-in"
+              element={
+                isAuthenticated ? (
+                  <QuaterlyAppraiseeCheckInLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
                 )
               }
             />
@@ -775,29 +799,50 @@ const AppraiserAddAppraisalLayout = ({ onLogout }) => (
   <>
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
-    <AppraiserAddAppraisal/>
+    <AppraiserAddAppraisal />
   </>
-); 
+);
 
 
 //AppraiseeDashboard
 
-const AppraiseeDashboardLayout= ({ onLogout }) => (
+const AppraiseeDashboardLayout = ({ onLogout }) => (
   <>
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
-   <AppraiseeDashboard/>
+    <AppraiseeDashboard />
   </>
-); 
+);
 
 //Add appeal (Annual)
 
-const AddAppealLayout= ({ onLogout }) => (
+const AddAppealLayout = ({ onLogout }) => (
   <>
-    <TopBar onLogout={onLogout} />    
+    <TopBar onLogout={onLogout} />
     <LeftNavigation />
-   <AddAppeal/>
+    <AddAppeal />
   </>
 );
+
+
+//  Quaererly Appraisee
+const QuarterlyAppraiseeLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+  <QuarterlyAppraisee />
+  </>
+);  
+
+
+//Quaterly  Appraisee Check In
+const QuaterlyAppraiseeCheckInLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+ <QuaterlyAppraiseeCheckIn />
+  </>
+);  
+
 
 export default App;

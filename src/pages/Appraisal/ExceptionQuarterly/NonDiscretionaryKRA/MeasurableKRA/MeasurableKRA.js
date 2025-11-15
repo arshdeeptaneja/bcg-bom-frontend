@@ -223,7 +223,7 @@ const MeasurableKRA = () => {
                   <tr className="comment-row">
                     <td colSpan="9">
                       <div className="px-3 py-2">
-                        <label className="fw-semibold mb-2">Appraisee Comment:</label>
+                        <label className="fw-semibold mb-2 d-flex">Appraisee Comment:</label>
                         <textarea
                           className="form-control"
                           rows="3"

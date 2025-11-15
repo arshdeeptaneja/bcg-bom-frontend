@@ -90,7 +90,7 @@ const NonMeasurableKRA = () => {
                     <tr className="comment-row">
                       <td colSpan="7">
                         <div className="px-3 py-2">
-                          <label className="fw-semibold mb-2">
+                          <label className="fw-semibold mb-2" >
                             Appraisee Comment:
                           </label>
                           <textarea

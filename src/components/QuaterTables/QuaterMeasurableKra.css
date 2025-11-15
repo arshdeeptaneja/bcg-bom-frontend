@@ -1,0 +1,71 @@
+:root {
+  --accent-color: #0389d0; /* your main theme color */
+}
+
+.Q-tds{
+    padding: 1.65rem 0.9rem;
+}
+.nav-items{
+        display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1px 2px;
+    cursor: pointer;
+    transition: all 0.3s 
+ease;
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 0;
+    margin: 0 8px;
+    position: relative;
+}
+/* Tabs Styling */
+.month-tabs{
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+.month-tabs .nav-link {
+  color: var(--accent-color);
+  font-weight: 600;
+  border: none;
+  border-bottom: 3px solid transparent;
+}
+
+.month-tabs .nav-link.active {
+  border-bottom: 3px solid var(--accent-color);
+  color: var(--accent-color) !important;
+}
+
+/* Table Styling */
+.measurable-table thead th {
+  color: white !important;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.measurable-table tbody td {
+  padding: 10px 12px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* Improve Table Border Look */
+.measurable-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.measurable-table th,
+.measurable-table td {
+  border-right: 1px solid #e1e1e1;
+}
+
+.measurable-table tr td:last-child,
+.measurable-table tr th:last-child {
+  border-right: none;
+}
+
+/* Hover Effect */
+.measurable-table tbody tr:hover {
+  background-color: #f8f9fa;
+}

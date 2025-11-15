@@ -30,3 +30,5 @@ export { default as AnnualAppraisalHome } from './Appraiser/Annual/AnnualApprais
 export {default as AppraiserAddAppraisal} from './Appraiser/AppraiserAddAppraisal/AppraiserAddAppraisal';
 export { default as AppraiseeDashboard } from './Appraisee/AppraiseeDashBoard/AppraiseeDashboard';
 export { default as AddAppeal } from './Appraisee/AppraiseeDashBoard/AddAppeal/Addappeal';
+export { default as QuarterlyAppraisee } from './Appraisal/QuarterlyCheckIn/QuarterlyAppraisee';
+export { default as QuaterlyAppraiseeCheckIn } from './Appraisal/QuarterlyCheckIn/QuaterlyAppraiseeCheckIn/QuaterAppraiseeCheckIn';
