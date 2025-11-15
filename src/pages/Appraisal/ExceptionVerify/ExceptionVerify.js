@@ -1,6 +1,6 @@
 import AppraisalAccordion from '../../../components/Appraisal/AppraisalAccordion/AppraisalAccordion';
 import { KpiTab } from '../../../components/common';
-import './AppraisalHome.css';
+import './ExceptionVerify.css';
 import { BackButton } from '../../../components/common';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,22 +10,15 @@ import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
 import { toast } from 'react-toastify';
 
-export default function AppraisalHome() {
+export default function ExceptionVerify() {
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
+  const { getEmployeeDetails, getUserProperty } = useAuth();
   const navigate = useNavigate();
-  // Extract empNo and user info from AuthContext
-  const { getEmployeeDetails, getUserProperty, user } = useAuth();
-  const employeeDetails = getEmployeeDetails();
-  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '36663');
-  console.log('Employee Number:', empNo);
-  const role = user?.roles?.[0] || 'emp'; // Get first role or default to 'emp'
 
-  // Helper function to extract year from "FY 2024-25" format
-  const extractYear = (fy) => {
-    const match = fy.match(/FY (\d{4})/);
-    return match ? match[1] : new Date().getFullYear().toString();
-  };
+  // Get employee number from auth context
+  const employeeDetails = getEmployeeDetails();
+  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
 
   const getFinancialYears = () => {
     const years = [];
@@ -42,33 +35,42 @@ export default function AppraisalHome() {
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
 
-  // React Query to fetch dashboard data
+
+  // Extract year from financial year format (e.g., "FY 2025-26" -> "2025")
+  const extractYear = (fy) => {
+    const match = fy.match(/FY (\d{4})/);
+    return match ? match[1] : new Date().getFullYear().toString();
+  };
+
+  // React Query to fetch exception validator dashboard data
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['appraisalHomeDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
-    queryFn: () => appraisalAPI.getAppraisalHomeDashboard({
-      empNo: empNo,
-      role: role,
-      appraisalPeriod: appraisalPeriod.toLowerCase(),
-      financialYear: extractYear(financialYear),
-      quarter: selectedQuarter
+    queryKey: ['exceptionValidatorDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
+    queryFn: () => appraisalAPI.getExceptionValidatorDashboard({
+      fy: extractYear(financialYear),
+      quarter: selectedQuarter,
+      exceptionPeriod: appraisalPeriod.toLowerCase(),
+      empNo: empNo
     }),
-    enabled: !!empNo,
+    enabled: !!empNo, // Only run query if empNo is available
   });
 
-  // Error handling
+  // Show error toast when API fails
   useEffect(() => {
     if (isError) {
-      toast.error(`Failed to fetch dashboard data: ${error?.message || 'Unknown error'}`);
+      toast.error(`Failed to fetch exception data: ${error?.message || 'Unknown error'}`);
     }
   }, [isError, error]);
 
-  // Show loading spinner while data is being fetched
+  // Extract counts from API response
+  const totalCount = data?.data?.TOTAL_COUNT || 0;
+  const pendingCount = data?.data?.PENDING_COUNT || 0;
+
   if (isLoading) {
     return (
       <div className="pageWrapper">
         <div className="pageWrapper-header">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Home</h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Verification</h1>
         </div>
         <LoadingSpinner />
       </div>
@@ -79,12 +81,8 @@ export default function AppraisalHome() {
     <div className="pageWrapper">
       <div className="pageWrapper-header">
         <BackButton />
-        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Home</h1>
+        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Verification</h1>
       </div>
-
-      {/* Filters Selection Row */}
-
-      {/* Filter Selection Row */}
       <div className="filters-row border rounded-2 px-3 py-2 mt-3 align-items-center d-flex gap-3">
         <span className="text-muted fw-semibold">FY Selection</span>
         <select
@@ -99,21 +97,23 @@ export default function AppraisalHome() {
           ))}
         </select>
 
-        {/* Appraisal Period Selection */}
-        <span className="text-muted fw-semibold ms-4">Appraisal Period</span>
-        <div className="btn-group" role="group" aria-label="Appraisal period selector">
+        {/* Exception Period Selection */}
+        <span className="text-muted fw-semibold ms-4">Exception Period</span>
+        <div className="btn-group" role="group" aria-label="Exception period selector">
           <button
             type="button"
-            className={`btn px-2 ${appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primarys'
-              }`}
+            className={`btn px-2 ${
+              appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primary'
+            }`}
             onClick={() => setAppraisalPeriod('Annual')}
           >
             Annual Year
           </button>
           <button
             type="button"
-            className={`btn px-2 ${appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primarys'
-              }`}
+            className={`btn px-2 ${
+              appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primary'
+            }`}
             onClick={() => setAppraisalPeriod('Quarterly')}
           >
             Quarterly
@@ -127,32 +127,36 @@ export default function AppraisalHome() {
             <div className="btn-group" role="group" aria-label="Quarter selector">
               <button
                 type="button"
-                className={`btn px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
-                  }`}
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
                 onClick={() => setSelectedQuarter('Q1')}
               >
                 Q1
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
-                  }`}
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
                 onClick={() => setSelectedQuarter('Q2')}
               >
                 Q2
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
-                  }`}
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
                 onClick={() => setSelectedQuarter('Q3')}
               >
                 Q3
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
-                  }`}
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
                 onClick={() => setSelectedQuarter('Q4')}
               >
                 Q4
@@ -165,50 +169,22 @@ export default function AppraisalHome() {
       {/* KPI Tabs */}
       <div className="kpi-tabs mt-3 d-flex flex-row gap-3">
         <KpiTab
-          heading="Appraisee Check-in"
+          heading="Exceptions"
           kpiData={[
-            {
-              value: appraisalPeriod === 'Quarterly'
-                ? (data?.data?.self_count_quarterly ?? 0)
-                : (data?.data?.completed_appraisal_count ?? 0),
-              label: 'Appraisals to be filled'
-            },
-            {
-              value: appraisalPeriod === 'Quarterly'
-                ? (data?.data?.self_pending_appraisal_count ?? 0)
-                : (data?.data?.pending_appraisal_count ?? 0),
-              label: 'Pending Appraisals(s)'
-            },
+            { value: totalCount, label: 'Total Exceptions' },
+            { value: pendingCount, label: 'Pending Exception' },
           ]}
           onClick={() => {
             navigate(
-              appraisalPeriod === 'Annual'
-                ? `/appraisal/appraisee-check-in?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
-                : `/quarterly/quarterly-appraisee?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
-            );
-          }}
-        />
-
-        <KpiTab
-          heading="Appraiser Check-in"
-          kpiData={[
-            { value: 100, label: 'Appraisals to be filled' },
-            { value: 200, label: 'Pending Appraisals(s)' },
-          ]}
-          onClick={() => {
-            navigate(
-              `/appraisal/appraiser-check-in?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+              `/appraisal/exceptions-list?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
             );
           }}
         />
       </div>
 
-      {/* Accordion for My Final Score */}
+      {/* Accordion for My Verifications */}
       <div className="myFinalScore-accordion mt-3">
-        <AppraisalAccordion
-          accordionItems={[{ heading: 'My Final Score' }]}
-          scoreData={data?.data?.appraisal_score_dash || []}
-        />
+        <AppraisalAccordion accordionItems={[{ heading: 'My Verifications' }]} />
       </div>
 
       {/* Foot Note */}
@@ -216,8 +192,8 @@ export default function AppraisalHome() {
         <span className="note text-muted fw-bold">Note: </span>
         <span className="note-content">
           Only roles where an employee has completed 90 days in service during the performance cycle
-          will be considered for annual appraisal and 31 days in service during the quarter for
-          quarterly check-in.
+          will be considered for annual exceptions and 31 days in service during the quarter for
+          quarterly exceptions.
         </span>
       </div>
     </div>

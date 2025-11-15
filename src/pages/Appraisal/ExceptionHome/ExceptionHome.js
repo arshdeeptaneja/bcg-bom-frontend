@@ -2,12 +2,23 @@ import AppraisalAccordion from '../../../components/Appraisal/AppraisalAccordion
 import { KpiTab } from '../../../components/common';
 import './ExceptionHome.css';
 import { BackButton } from '../../../components/common';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { appraisalAPI } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+import LoadingSpinner from '../../../components/Spinner';
+import { toast } from 'react-toastify';
 
 export default function ExceptionHome() {
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
+  const { getEmployeeDetails, getUserProperty } = useAuth();
+  const navigate = useNavigate();
+
+  // Get employee number from auth context
+  const employeeDetails = getEmployeeDetails();
+  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
 
   const getFinancialYears = () => {
     const years = [];
@@ -23,17 +34,55 @@ export default function ExceptionHome() {
 
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
-  const navigate = useNavigate();
+
+
+  // Extract year from financial year format (e.g., "FY 2025-26" -> "2025")
+  const extractYear = (fy) => {
+    const match = fy.match(/FY (\d{4})/);
+    return match ? match[1] : new Date().getFullYear().toString();
+  };
+
+  // React Query to fetch exception dashboard data
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['exceptionDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
+    queryFn: () => appraisalAPI.getExceptionDashboard({
+      fy: extractYear(financialYear),
+      quarter: selectedQuarter,
+      exception_period: appraisalPeriod.toLowerCase(),
+      empNo: empNo
+    }),
+    enabled: !!empNo, // Only run query if empNo is available
+  });
+
+  // Show error toast when API fails
+  useEffect(() => {
+    if (isError) {
+      toast.error(`Failed to fetch exception data: ${error?.message || 'Unknown error'}`);
+    }
+  }, [isError, error]);
+
+  // Extract counts from API response
+  const totalCount = data?.data?.TOTAL_COUNT || 0;
+  const pendingCount = data?.data?.PENDING_COUNT || 0;
+
+  if (isLoading) {
+    return (
+      <div className="pageWrapper">
+        <div className="pageWrapper-header">
+          <BackButton />
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Resolution</h1>
+        </div>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="pageWrapper">
       <div className="pageWrapper-header">
         <BackButton />
         <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exceptions</h1>
       </div>
-
-      {/* Filters Selection Row */}
-
-      {/* Filter Selection Row */}
       <div className="filters-row border rounded-2 px-3 py-2 mt-3 align-items-center d-flex gap-3">
         <span className="text-muted fw-semibold">FY Selection</span>
         <select
@@ -122,8 +171,8 @@ export default function ExceptionHome() {
         <KpiTab
           heading="Exceptions"
           kpiData={[
-            { value: 100, label: 'Total Exceptions' },
-            { value: 50, label: 'Pending Exception' },
+            { value: totalCount, label: 'Total Exceptions' },
+            { value: pendingCount, label: 'Pending Exception' },
           ]}
           onClick={() => {
             navigate(

@@ -18,6 +18,7 @@ export {default as AppealDelection} from './Appraisal/AppraisalHRDashboard/Appea
 export {default as ModuleActiveInactiveDate} from './Appraisal/AppraisalHRDashboard/ModuleActiveInactiveDate/ModuleActiveInactiveDate'
 export { default as AppraisalCheckInForm } from './Appraisal/AppraisalCheckInForm/AppraisalCheckInForm';
 export { default as ExceptionHome } from './Appraisal/ExceptionHome/ExceptionHome';
+export { default as ExceptionVerify } from './Appraisal/ExceptionVerify/ExceptionVerify';
 export { default as ExceptionsList } from './Appraisal/ExceptionsList/ExceptionsList';
 export { default as AppraiserCheckInDashboard } from './Appraiser/AppraiserDashboardCheckIn/AppraiserCheckInDashboard';
 export {default as QuarterlyException } from './Appraisal/ExceptionQuarterly/QuarterlyException';
