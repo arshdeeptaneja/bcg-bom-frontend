@@ -1,0 +1,19 @@
+.summary-row {
+    background-color: white;
+  }
+
+  .summary-card-headline {
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  .summary-card-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .summary-card-content-value {
+    font-weight: 600;
+    font-size: 20px;    
+  }

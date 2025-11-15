@@ -10,6 +10,7 @@ import {
   AppraisalHome,
   AppraiseeCheckIn,
   AdminPanel,
+  AppraiserCheckIn,
   Appraisalstatus,
   ReportingAuthority,
   ValidatorUpdateUtility,
@@ -230,7 +231,16 @@ function AppContent() {
                 )
               }
             />
-
+            <Route
+              path="/appraisal/appraiser-check-in"
+              element={
+                isAuthenticated ? (
+                  <AppraiserCheckInLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
             <Route
               path="/appraisal/admin-panel"
               element={
@@ -434,6 +444,16 @@ const AppraiseeCheckInLayout = ({ onLogout }) => {
     </>
   );
 };
+
+const AppraiserCheckInLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <AppraiserCheckIn />
+    </>
+  );
+}
 
 // Appraisa Admin Panel
 const AppraisalAdminPanel = ({ onLogout }) => {
