@@ -7,6 +7,8 @@ import './RoleTimeline.css';
  * @returns
  */
 export default function RoleTimeline({ additionalRoles }) {
+    const safeRoles = Array.isArray(additionalRoles) ? additionalRoles : [];
+
   return (
     <div className="additional-roles-section">
       <div className="d-flex align-items-center mb-2">
@@ -28,7 +30,7 @@ export default function RoleTimeline({ additionalRoles }) {
       </div>
       <div className="d-flex justify-content-between mt-3">
         {[1, 2, 3, 4].map((index) => {
-          const role = additionalRoles[index - 1];
+          const role = safeRoles[index - 1];
           return (
             <div key={index} className="text-center">
               <div className="text-muted small">

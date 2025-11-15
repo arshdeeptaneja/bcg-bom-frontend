@@ -1,0 +1,61 @@
+:root {
+  --accent-color: #0389d0;
+}
+
+.annual-btn {
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  transition: 0.2s;
+}
+
+.outline-btn {
+  border: 2px solid var(--accent-color);
+  color: var(--accent-color);
+}
+
+.outline-btn:hover {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+.filled-btn {
+  background: var(--accent-color);
+  color: white;
+}
+
+.filled-btn:hover {
+  opacity: 0.85;
+}
+
+.grey-btn {
+  background: #b3b3b3; 
+  color: white;
+}
+
+.grey-btn:hover {
+  background: #9a9a9a;
+}
+
+.arrow {
+  color: white;  
+  font-weight: bold;
+}
+
+.outline-btn .arrow {
+  color: var(--accent-color);
+}
+
+.outline-btn:hover .arrow {
+  color: white;
+}
+
+/* Spacing same as screenshot */
+.annual-buttons-wrapper .d-flex {
+  justify-content: flex-start;
+}

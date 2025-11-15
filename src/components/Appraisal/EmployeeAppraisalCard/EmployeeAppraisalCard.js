@@ -1,8 +1,10 @@
 import PropTypes from 'prop-types';
 import './EmployeeAppraisalCard.css';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Modal from '../../common/Modal/Modal';
-import { RoleTimeline } from '..';
+import  RoleTimeline  from '../../../components/Appraisal/CheckInDescriptionSection/RoleTimeline';
 /**
  * Employee Appraisal summary card
  * Accepts an EmployeeModel instance (`employee`) and renders key details with actions.
@@ -22,6 +24,7 @@ export default function EmployeeAppraisalCard({
   onAddException,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
 
   // Helper method to toggle the expansion state
   const toggleExpand = () => setIsExpanded(!isExpanded);
@@ -246,23 +249,28 @@ export default function EmployeeAppraisalCard({
           <div className="button-row">
             <button
               type="button"
-              className="btn btn-primary px-4"
+              className="butns "
               data-bs-toggle="modal"
               data-bs-target={`#${`addCheckInModal-${employee.empNo}`}`}
             >
               Add Check-In Summary
               <span className="ms-2">→</span>
             </button>
-            <button type="button" className="btn btn-outline-primary px-4" onClick={onViewSummary}>
+            <button type="button" className="btn-fade" onClick={onViewSummary}>
               View Check-In Summary
               <span className="ms-2">→</span>
             </button>
           </div>
           <div className="button-row">
-            <button type="button" className="btn btn-outline-primary px-4" onClick={onAddException}>
+            <button
+              type="button"
+              className="btn-fade"
+              onClick={() => navigate('/appraisal/exception-quarterly')}
+            >
               Add Exception
               <span className="ms-2">→</span>
             </button>
+
           </div>
         </div>
       </div>

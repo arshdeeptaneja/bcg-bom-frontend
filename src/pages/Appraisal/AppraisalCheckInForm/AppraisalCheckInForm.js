@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import './AppraisalCheckInForm.css';
 import { BackButton } from '../../../components/common';
 import { useLocation } from 'react-router-dom';
@@ -10,116 +11,126 @@ import {
   DevelopmentInputs,
 } from '../../../components/Appraisal';
 
-/**
- * This is the main check-in form for the Appraisal Process.
- * It will eventually be loaded with different FormStates depending on different purpose, stage and role of the user.
- * @param {Object} props - The properties of the component.
- * @param {string} props.appraisalPeriod - The period of the appraisal (Quarterly or Yearly).
- * @param {string} props.quarter - The quarter of the appraisal (Q1, Q2, Q3, Q4).
- * @param {string} props.financialYear - The financial year of the appraisal.
- * @returns
- */
 function AppraisalCheckInForm() {
   const location = useLocation();
-  const { financialYear, appraisalPeriod, quarter, dateRange, employee } = location.state || {};
 
-  const handleSave = () => {
-    console.log('Save');
+  // ✅ FIXED: role added in destructuring
+  // const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {};
+  const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {
+    financialYear: "2024-2025",
+    appraisalPeriod: "Mid-Year",
+    quarter: "Q2",
+    dateRange: "01 Jul 2024 - 30 Sep 2024",
+    employee: { name: "John Doe", id: "EMP123" },
+    role: "APPRAISEE",
   };
-  const handleSubmit = () => {
-    console.log('Submit');
+
+  // Role State (Appraisee / Appraiser / Reviewer)
+  const [currentRole, setCurrentRole] = useState(role || 'APPRAISEE');
+
+  // ------------------------------------------------------------------------
+  // Temporary Role Switcher (for testing)
+  // ------------------------------------------------------------------------
+  const handleRoleChange = (e) => {
+    setCurrentRole(e.target.value);
   };
+  // ------------------------------------------------------------------------
 
-  // FIXME: Remove this once we have the actual KRA list data from the SPs
-  const kraListData = [
-    {
-      KraName: 'KRA 1',
-      KraWeight: 10,
-    },
-    {
-      KraName: 'KRA 2',
-      KraWeight: 20,
-    },
-    {
-      KraName: 'KRA 3',
-      KraWeight: 30,
-    },
-  ];
+  const [kraData, setKraData] = useState([]);
+  const [comments, setComments] = useState({
+    appraisee: '',
+    appraiser: '',
+    reviewer: '',
+  });
+  const [measurableKraListData, setMeasurableKraListData] = useState([]);
+  const [nonMeasurableKraListData, setNonMeasurableKraListData] = useState({});
+  const [developmentInputsData, setDevelopmentInputsData] = useState([]);
 
-  const measurableKraListData = [
-    {
-      KraName: 'KRA 1',
-      KraActualScore: 10,
-      KraTarget: 100,
-      KraWeight: 10,
-      KraFinalScore: 10,
-    },
-    {
-      KraName: 'KRA 2',
-      KraActualScore: 20,
-      KraTarget: 200,
-      KraWeight: 20,
-      KraFinalScore: 20,
-    },
-  ];
+  useEffect(() => {
+    setKraData([
+      { KraName: 'KRA 1', KraWeight: 10 },
+      { KraName: 'KRA 2', KraWeight: 20 },
+      { KraName: 'KRA 3', KraWeight: 30 },
+    ]);
 
-  const nonMeasurableKraListData = {
-    'Section 1': [
+    setMeasurableKraListData([
       {
         KraName: 'KRA 1',
-        KraDescription:
-          'lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.',
+        KraActualScore: 10,
+        KraTarget: 100,
+        KraWeight: 10,
+        KraFinalScore: 10,
+        comments: { appraisee: '', appraiser: '', reviewer: '' },
       },
       {
         KraName: 'KRA 2',
-        KraDescription: 'KRA 2 Description',
+        KraActualScore: 20,
+        KraTarget: 200,
+        KraWeight: 20,
+        KraFinalScore: 20,
+        comments: { appraisee: '', appraiser: '', reviewer: '' },
       },
-    ],
-    'Section 2': [
-      {
-        KraName: 'KRA 3',
-        KraDescription: 'KRA 3 Description',
-      },
-      {
-        KraName: 'KRA 4',
-        KraDescription: 'KRA 4 Description',
-      },
-    ],
-  };
-  // FIXME: Remove this once we have the actual score data from the SPs
-  const actualScoreData = {
-    January: 10,
-    February: 20,
-    March: 30,
-  };
-  const maxScoreData = {
-    January: 100,
-    February: 200,
-    March: 300,
+    ]);
+
+    setNonMeasurableKraListData({
+      'Section 1': [
+        {
+          KraName: 'KRA 1',
+          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
+          comments: { appraisee: '', appraiser: '', reviewer: '' },
+        },
+      ],
+      'Section 2': [
+        {
+          KraName: 'KRA 2',
+          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
+          comments: { appraisee: '', appraiser: '', reviewer: '' },
+        },
+      ],
+      'Section 3': [
+        {
+          KraName: 'KRA 3',
+          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
+          comments: { appraisee: '', appraiser: '', reviewer: '' },
+        },
+      ],
+    });
+  }, []);
+
+  const isEditableBy = (fieldOwner) => {
+    switch (currentRole) {
+      case 'APPRAISEE':
+        return fieldOwner === 'appraisee';
+      case 'APPRAISER':
+        return fieldOwner === 'appraiser';
+      case 'REVIEWER':
+        return fieldOwner === 'reviewer';
+      default:
+        return false;
+    }
   };
 
+  const handleSave = () => {
+    console.log('Saving draft as', currentRole);
+    alert(`Saved as ${currentRole}`);
+  };
+
+  const handleSubmit = () => {
+    console.log('Submitting as', currentRole);
+    alert(`Submitted by ${currentRole}`);
+  };
+
+  const actualScoreData = { January: 10, February: 20, March: 30 };
+  const maxScoreData = { January: 100, February: 200, March: 300 };
   const developmentInputsQuestions = [
-    {
-      question: 'What is your name?',
-      required: true,
-    },
-    {
-      question: 'Do you have any development inputs?',
-      required: true,
-      options: ['Yes', 'No'],
-    },
+    { question: 'What is your name?', required: true },
+    { question: 'Do you have any development inputs?', required: true, options: ['Yes', 'No'] },
   ];
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return <div>No financial year, appraisal period, or quarter found</div>;
   }
-  if (!financialYear || !appraisalPeriod || !quarter) {
-    return (
-      <div className="pageWrapper">
-        <div>No financial year, appraisal period, or quarter found</div>
-      </div>
-    );
-  }
+
   return (
     <div className="pageWrapper">
       {/* Header Section */}
@@ -128,13 +139,29 @@ function AppraisalCheckInForm() {
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
         </div>
-        <h2 className="text-muted fw-bold mb-0 ms-3">
-          {`${
-            appraisalPeriod === 'Quarterly' ? `${quarter}, ` : '' // Show Quarter only for Quarterly appraisal periods, else directly show the FY
-          } ${financialYear} ${appraisalPeriod} Check-In`}
-        </h2>
+
+        {/* ✅ Role Switcher (for testing only) */}
+        <div className="d-flex flex-row align-items-center">
+          <label htmlFor="roleSelect" className="me-2 text-muted fw-bold">
+            Role:
+          </label>
+          <select
+            id="roleSelect"
+            value={currentRole}
+            onChange={handleRoleChange}
+            className="form-select form-select-sm"
+            style={{ width: '180px' }}
+          >
+            <option value="APPRAISEE">Appraisee (Self)</option>
+            <option value="APPRAISER">Appraiser (Level 1)</option>
+            <option value="REVIEWER">Reviewer (Final)</option>
+          </select>
+        </div>
+        {/* ✅ END Role Switcher */}
+
       </div>
 
+      {/* Rest of your UI unchanged below */}
       <div className="pageWrapper-content d-flex flex-column m-1 p-3">
         <CheckInDescriptionSection employee={employee} dateRange={dateRange} />
 
@@ -145,54 +172,84 @@ function AppraisalCheckInForm() {
           </span>
         </div>
 
-        {/* Final Score Summary Table */}
+        <div class="table-container">
+          <table class="table-accent">
+            <thead>
+              <tr>
+                <th style={{width:"55%"}}>Month</th>
+                <th style={{width:"25%"}}>Actual</th>
+                <th style={{width:"25%"}}>Max</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>April</td>
+                <td>13.9</td>
+                <td>65.0</td>
+              </tr>
+              <tr>
+                <td>May</td>
+                <td>9.1</td>
+                <td>65.0</td>
+              </tr>
+              <tr>
+                <td>June</td>
+                <td>17.7</td>
+                <td>65.0</td>
+              </tr>
+              <tr>
+                <td><b>Average</b></td>
+                <td>13.6</td>
+                <td>65.0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+
         <div className="final-score-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
-          <FinalScoreSummaryTable kraListData={kraListData} />
+          <FinalScoreSummaryTable kraListData={kraData} />
         </div>
 
-        {/* Monthly Score Summary Table */}
         <div className="check-in-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Monthly Score Summary</h5>
-          <CheckInSummaryTable
-            actualScoreData={actualScoreData}
-            maxScoreData={maxScoreData}
-            className="mt-5"
-          />
+          <CheckInSummaryTable actualScoreData={actualScoreData} maxScoreData={maxScoreData} />
         </div>
-        {/* Discretionary KRA Section */}
+
         <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Discretionary KRA</h5>
-          <div className="discretionary-kra-list">
-            <MeasurableKra
-              totalActualScore={5.0}
-              totalMaxScore={10.0}
-              kraListData={measurableKraListData}
-            />
-          </div>
-
-          {/* Non-Measurable KRA Section */}
+          <MeasurableKra
+            totalActualScore={5.0}
+            totalMaxScore={10.0}
+            kraListData={measurableKraListData}
+            role={currentRole}
+            isEditableBy={isEditableBy}
+          />
           <NonMeasurableKra
             totalActualScore={5.0}
             totalMaxScore={10.0}
             kraListData={nonMeasurableKraListData}
+            role={currentRole}
+            isEditableBy={isEditableBy}
           />
         </div>
 
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Development Inputs</h5>
-          <div className="development-inputs-list">
-            <DevelopmentInputs questions={developmentInputsQuestions} />
-          </div>
+          <DevelopmentInputs
+            questions={developmentInputsQuestions}
+            role={currentRole}
+            isEditableBy={isEditableBy}
+          />
         </div>
       </div>
 
-      {/* Save and Submit Button */}
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button className="btn btn-outline-primary" onClick={handleSave}>
           Save
         </button>
-        <button className="btn btn-primary" onClick={handleSubmit}>
+        <button className="btns btn-primarys" onClick={handleSubmit}>
           Submit
         </button>
       </div>

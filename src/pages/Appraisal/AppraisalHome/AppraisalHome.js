@@ -104,18 +104,16 @@ export default function AppraisalHome() {
         <div className="btn-group" role="group" aria-label="Appraisal period selector">
           <button
             type="button"
-            className={`btn px-2 ${
-              appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primarys'
-            }`}
+            className={`btn px-2 ${appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primarys'
+              }`}
             onClick={() => setAppraisalPeriod('Annual')}
           >
             Annual Year
           </button>
           <button
             type="button"
-            className={`btn px-2 ${
-              appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primarys'
-            }`}
+            className={`btn px-2 ${appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primarys'
+              }`}
             onClick={() => setAppraisalPeriod('Quarterly')}
           >
             Quarterly
@@ -129,36 +127,32 @@ export default function AppraisalHome() {
             <div className="btn-group" role="group" aria-label="Quarter selector">
               <button
                 type="button"
-                className={`btn px-2 ${
-                  selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
-                }`}
+                className={`btn px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+                  }`}
                 onClick={() => setSelectedQuarter('Q1')}
               >
                 Q1
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${
-                  selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
-                }`}
+                className={`btn px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+                  }`}
                 onClick={() => setSelectedQuarter('Q2')}
               >
                 Q2
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${
-                  selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
-                }`}
+                className={`btn px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
+                  }`}
                 onClick={() => setSelectedQuarter('Q3')}
               >
                 Q3
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${
-                  selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
-                }`}
+                className={`btn px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
+                  }`}
                 onClick={() => setSelectedQuarter('Q4')}
               >
                 Q4
@@ -188,7 +182,22 @@ export default function AppraisalHome() {
           ]}
           onClick={() => {
             navigate(
-              `/appraisal/appraisee-check-in?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+              appraisalPeriod === 'Annual'
+                ? `/appraisal/appraisee-check-in?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+                : `/quarterly/quarterly-appraisee?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+            );
+          }}
+        />
+
+        <KpiTab
+          heading="Appraiser Check-in"
+          kpiData={[
+            { value: 100, label: 'Appraisals to be filled' },
+            { value: 200, label: 'Pending Appraisals(s)' },
+          ]}
+          onClick={() => {
+            navigate(
+              `/appraisal/appraiser-check-in?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
             );
           }}
         />

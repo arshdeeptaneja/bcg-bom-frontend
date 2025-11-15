@@ -1,0 +1,107 @@
+/* ========== Base Container ========== */
+.appeal-table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 10px;
+}
+
+/* ========== Table ========== */
+.appeal-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    font-family: "Poppins", sans-serif;
+}
+
+/* ========== Table Header ========== */
+.appeal-table-head {
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 5px;
+}
+
+.appeal-table-header {
+    padding: 8px;
+    font-weight: 600;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* ========== Table Body ========== */
+.appeal-table-row {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.appeal-table-cell {
+    padding: 8px 0px;
+    font-size: 14px;
+    color: #333;
+}
+
+
+
+
+
+/* ========== Status Colors ========== */
+/* .appeal-status-accepted {
+  color: #28a745;
+  font-weight: 600;
+} */
+
+/* .appeal-status-pending {
+  color: #ff9800;
+  font-weight: 600;
+}
+
+.appeal-status-rejected {
+  color: #;
+  font-weight: 600;
+} */
+
+/* ========== Buttons ========== */
+.appeal-table-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+}
+
+.appeal-btn {
+    border: none;
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.appeal-btn-view {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.appeal-btn-view:hover {
+    background-color: darken(var(--accent-color), 1%);
+}
+
+.appeal-btn-review {
+    border: 1px solid var(--accent-color);
+    background-color: transparent;
+    color: var(--accent-color);
+}
+
+.appeal-btn-review:hover {
+    background-color: #e6f4eb;
+}
+
+/* ========== Empty State ========== */
+.appeal-table-empty {
+    text-align: center;
+    color: #888;
+    padding: 20px;
+}

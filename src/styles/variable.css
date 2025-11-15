@@ -1,30 +1,77 @@
-:root{
-  --bs-primary: #fff;
+:root {
+  /* Base palette (bootstrap-inspired) */
+  --bs-primary: #ffffff;
   --bs-secondary: #f8f9fc;
   --bs-success: #008000;
   --bs-info: #0dcaf0;
   --bs-warning: #ffc107;
   --bs-danger: #ff0000;
   --bs-light: #f8f9fa;
-  --bs-dark: #000;
-   --accent-color: #0389d0;
-  --default-padding: 25px;
-  --default-spacing: 20px;
-  --default-margin: 25px;
-}
+  --bs-dark: #000000;
 
-  --typography
-  --primary-font : var(--accent-color)
-  --secondary-font : var(--secondary-color)
-  --heading-font
-  --base-font-size
-  --h1-font-size: '2.5rem', 
-  --h2-font-size: '2rem', 
-  --h3-font-size: '1.75rem', 
-  --h4-font-size: '1.5rem', 
-  --default-var,
-  --bg-color-primary,
-   --bg-color-secondary,
-   --border-radius : '8px',
-   --shadows :'0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)',
-   --border: '1px solid #dee2e6',
+  /* Design tokens used across base.css */
+  --accent-color: #0389d0;
+  --main-color: #185f73;
+  --primary-color: white;
+  --secondary-color: var(--bs-secondary);
+  --success-color: var(--bs-success);
+  --info-color: var(--bs-info);
+  --warning-color: var(--bs-warning);
+  --danger-color: var(--bs-danger);
+  --text-color: var(--bs-dark);
+  --text-muted: #6c757d;
+
+  /* Spacing tokens */
+  --default-padding: 20px; /* base unit */
+  --default-spacing: 20px; /* alias of base */
+  --default-margin: 25px;
+  --margin-sm: calc(var(--default-margin) / 1.5)
+
+  /* Derived spacing scale (based on base unit) */
+  --space-half: calc(var(--default-padding) / 2);   /* 50% of base */
+  --space-lg: calc(var(--default-padding) * 1.5);   /* 30px */
+  --space-md: var(--default-padding);               /* 20px */
+  --space-sm: calc(var(--default-padding) * 0.75);  /* 15px */
+  --space-xs: calc(var(--default-padding) * 0.5);   /* 10px */
+  --space-2xs: calc(var(--default-padding) * 0.4);  /* 8px */
+  --space-3xs: calc(var(--default-padding) * 0.25); /* 5px */
+  --space-24: calc(var(--default-padding) * 1.2);   /* 24px */
+  --space-16: calc(var(--default-padding) * 0.8);   /* 16px */
+  --space-12: calc(var(--default-padding) * 0.6);   /* 12px */
+  --space-6: calc(var(--default-padding) * 0.3);    /* 6px */
+  --space-2: calc(var(--default-padding) * 0.1);    /* 2px */
+
+  /* Shape + shadow tokens */
+  --border-radius: 8px; /* base radius */
+  --radius-lg: 20px;    /* large radius */
+  --radius-sm: 10px;    /* small radius */
+  --radius-md: var(--border-radius);
+  --radius-xs: 4px;
+  --shadows: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --default-border: 1px solid #dee2e6;
+
+  /* Component metrics */
+  --nav-width: 80px;
+  --topbar-height: 20px;
+  --left-nav-top-offset: 75px;
+  --icon-size: 40px;
+  --icon-font-size: 24px;
+  --submenu-min-width: 220px;
+  --table-body-max-height: 300px;
+  --employee-tab-min-width: 270px;
+
+  /* Typography scale */
+  --font-sm: 14px;
+  --font-base: 16px;
+  --font-lg: 18px;
+  --font-md: 20px;
+  --font-xl: 28px;
+  --font-xxl: 48px;
+  --font-3xl: 36px;
+  --font-2xl: 32px;
+  --font-xs: 10px;
+  --font-2xs: 11px;
+
+  /* Component-specific sizes */
+  --status-indicator-size: 14px;
+}

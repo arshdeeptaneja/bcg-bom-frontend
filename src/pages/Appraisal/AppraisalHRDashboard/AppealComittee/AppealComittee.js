@@ -40,7 +40,7 @@ const AppealComittee = () => {
 
           {/* Upload Section */}
           <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
-            <div className="d-flex align-items-center gap-2">
+            <div className="d-flex align-items-center" style={{ border: "1px solid #3fa8e7" ,borderRadius: "9px"}}>
               <label className="btn btn-outline-secondary">
                 SELECT A FILE
                 <input type="file" hidden />

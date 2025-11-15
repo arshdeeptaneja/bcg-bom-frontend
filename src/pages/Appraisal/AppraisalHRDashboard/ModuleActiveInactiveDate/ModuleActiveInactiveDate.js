@@ -166,7 +166,7 @@ const ModuleActiveInactiveDate = () => {
                     </div>
                     <div className="col-md-2">
                         
-                         <button className="btn reset-btn me-2" onClick={handleReset}>
+                         <button className=" reset-btn me-2" onClick={handleReset}>
                         Reset ↻
                     </button>
 
