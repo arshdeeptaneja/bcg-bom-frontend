@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      config.headers.Authorization = `Bearer eyJhbGciOiJIUzM4NCJ9.eyJlbXBJZCI6IjM2NjYzIiwicm9sZXMiOiJBZG1pbmlzdHJhdGl2ZSBPZmZpY2VycyIsInN1YiI6IjM2NjYzIiwiaWF0IjoxNzYyNTMyMDU4LCJleHAiOjE3NjI2MTg0NTh9.VG1ed1xVac-KtKUXSoLb9r8U6uSifKuBfIyz9tdcJEWrhbglnz4ZAIWGbXLLQhPU`;
+      config.headers.Authorization = `Bearer eyJhbGciOiJIUzM4NCJ9.eyJlbXBJZCI6IjM2NjYzIiwicm9sZXMiOiJBZG1pbmlzdHJhdGl2ZSBPZmZpY2VycyIsInN1YiI6IjM2NjYzIiwiaWF0IjoxNzYyNjk4Njk0LCJleHAiOjE3NjI3ODUwOTR9.VYFCfy0wPLbyvf5mXKLl05gY7Qf9LnaPj5f_VI1sjRlZo4G9StSa484pdXXoDnR9`;
     }
     return config;
   },
@@ -330,10 +330,65 @@ export const appraisalAPI = {
         financialYear: financialYear,
         quarter: quarter
       });
-      const response = await apiClient.get(`/appraisal/home/dashboard?${params.toString()}`);
+      const response = await apiClient.get(`/appraisal/home/dashboard?${params.toString()}`);      
       return response.data;
     } catch (error) {
       console.log('error',error);
+      throw error;
+    }
+  },
+
+  // GET: Get appraiser check-in dashboard data
+  getAppraiserCheckInDashboard: async ({ empNo, financialYear, quarter, appraisalPeriod }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo,
+        financialYear: financialYear,
+        quarter: quarter,
+        appraisalPeriod: appraisalPeriod
+      });
+      const response = await apiClient.get(`/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
+  // GET: Get appraisee check-in dashboard data (my appraisal dashboard)
+  getAppraiseeCheckInDashboard: async ({ empNo, financialYear, appraisalPeriod }) => {
+    try {
+      const params = new URLSearchParams({
+        fy: financialYear,
+        empNo: empNo,
+        appraisalPeriod: appraisalPeriod
+      });
+      const response = await apiClient.get(`/appraisal/my_appraisal_dashboard?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
+  // GET: Get employee self-appraisal data for check-in form
+  getEmployeeSelfAppraisal: async ({ empNo, url, zoneName, roleId, roleType, financialYear, quarter, pageType, appraisalStatus }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo,
+        url: url,
+        zoneName: zoneName,
+        roleId: roleId,
+        roleType: roleType,
+        financialYear: financialYear,
+        quarter: quarter || '',
+        pageType: pageType,
+        appraisalStatus: appraisalStatus
+      });
+      const response = await apiClient.get(`/appraisal/employee_self_appraisal?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
       throw error;
     }
   }

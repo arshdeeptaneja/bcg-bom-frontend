@@ -43,7 +43,7 @@ export default function AppraisalHome() {
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
 
   // React Query to fetch dashboard data
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading} = useQuery({
     queryKey: ['appraisalHomeDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
     queryFn: () => appraisalAPI.getAppraisalHomeDashboard({
       empNo: empNo,
@@ -54,13 +54,7 @@ export default function AppraisalHome() {
     }),
     enabled: !!empNo,
   });
-
-  // Error handling
-  useEffect(() => {
-    if (isError) {
-      toast.error(`Failed to fetch dashboard data: ${error?.message || 'Unknown error'}`);
-    }
-  }, [isError, error]);
+console.log(data);
 
   // Show loading spinner while data is being fetched
   if (isLoading) {
@@ -81,10 +75,6 @@ export default function AppraisalHome() {
         <BackButton />
         <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Home</h1>
       </div>
-
-      {/* Filters Selection Row */}
-
-      {/* Filter Selection Row */}
       <div className="filters-row border rounded-2 px-3 py-2 mt-3 align-items-center d-flex gap-3">
         <span className="text-muted fw-semibold">FY Selection</span>
         <select
@@ -169,14 +159,14 @@ export default function AppraisalHome() {
           kpiData={[
             {
               value: appraisalPeriod === 'Quarterly'
-                ? (data?.data?.self_count_quarterly ?? 0)
-                : (data?.data?.completed_appraisal_count ?? 0),
+                ? (data?.self_count_quarterly ?? 0)
+                : (data?.completed_appraisal_count ?? 0),
               label: 'Appraisals to be filled'
             },
             {
               value: appraisalPeriod === 'Quarterly'
-                ? (data?.data?.self_pending_appraisal_count ?? 0)
-                : (data?.data?.pending_appraisal_count ?? 0),
+                ? (data?.self_pending_appraisal_count ?? 0)
+                : (data?.pending_appraisal_count ?? 0),
               label: 'Pending Appraisals(s)'
             },
           ]}
@@ -202,12 +192,11 @@ export default function AppraisalHome() {
           }}
         />
       </div>
-
       {/* Accordion for My Final Score */}
       <div className="myFinalScore-accordion mt-3">
         <AppraisalAccordion
           accordionItems={[{ heading: 'My Final Score' }]}
-          scoreData={data?.data?.appraisal_score_dash || []}
+          scoreData={data?.appraisal_score_dash || []}
         />
       </div>
 

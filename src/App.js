@@ -10,6 +10,7 @@ import {
   AppraisalHome,
   AppraiseeCheckIn,
   AdminPanel,
+  AppraiserCheckIn,
   Appraisalstatus,
   ReportingAuthority,
   ValidatorUpdateUtility,
@@ -599,6 +600,7 @@ const AppraiserCheckInLayout = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
+      {/* <AppraiserCheckIn /> */}
       <AppraiserCheckInDashboard />
     </>
   );
