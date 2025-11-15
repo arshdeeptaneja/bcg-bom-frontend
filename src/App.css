@@ -28,3 +28,17 @@ html,body, p, span, applet, object, iframe,button{
   font-family: 'Lato', Arial, sans-serif;
 }
 
+/* Small utility: underline-only input used in KRA score cells */
+.underlined-input {
+  border: none !important;
+  border-bottom: 1px solid #ccc !important;
+  border-radius: 0 !important;
+  padding: 4px 0 !important;
+  background-color: transparent !important;
+}
+
+.underlined-input:disabled {
+  color: #6c757d;
+  opacity: 1;
+}
+

@@ -1,0 +1,53 @@
+/* Training Required Box */
+.training-box {
+  background-color: #e3e2e5;
+  border-radius: var(--radius-md);
+  height: 80px;
+  display: flex;
+  align-items: center;
+  font-size: var(--font-base);
+  color: var(--text-color);
+}
+
+/* Integrity Section Wrapper */
+.integrity-section {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadows);
+}
+
+.integrity-title {
+  color: var(--success-color);
+  font-weight: 700;
+}
+
+/* Radio Inputs */
+.form-check-input {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+/* .form-check-label {
+  font-size: var(--font-base);
+  color: var(--text-dark);
+  margin-left: 8px;
+  cursor: pointer;
+} */
+
+
+.training-box {
+  background-color: #e3e2e5;
+  border-radius: var(--radius-md);
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  font-size: var(--font-base);
+  color: var(--text-color);
+}
+
+.remark-row {
+  background: white;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadows);
+}

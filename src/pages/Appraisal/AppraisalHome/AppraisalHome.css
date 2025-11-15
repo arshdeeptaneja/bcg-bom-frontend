@@ -14,19 +14,16 @@
   height: 300px;
 }
 
-.btn-primary {
-  background-color: #027ab8;
-  color: white;
-}
+
 
 .btn-primary {
   /* background-color: #e9ecef; */
-  border-color: var(--bs-primary);
-  color: var(--bs-primary); /* optional, keeps text visible on grey */
+  border-color: var(--accent-color);
+  color: var(--accent-color); /* optional, keeps text visible on grey */
 }
 
 .btn-outline-primary {
   background-color: transparent;
-  color: var(--bs-secondary-color);
+  color: var(--bs-dark);
 }
 

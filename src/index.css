@@ -5,8 +5,8 @@
 }
 
 .pageWrapper{
-    margin-left: 80px;
-    margin-top: 72px;
+      margin-left: 75px;
+    margin-top: 34px;
     padding: 24px;
     min-height: calc(100vh - 72px);
 }
@@ -17,10 +17,10 @@
     display: flex;
 }
 
-.back-button {
+.back-button:hover {
     background: none;
     border: none;
-    color: #000;
+    color: #888787;
     font-size: 14px;
     cursor: pointer;
     margin-bottom: 8px;

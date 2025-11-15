@@ -1,0 +1,35 @@
+.appraiser-dashboard .appraiser-filter-bar label {
+  color: var(--accent-color);
+  font-size: var(--font-sm);
+}
+
+.appraiser-dashboard .appraiser-card {
+  border: var(--default-border);
+  transition: all 0.3s ease;
+}
+
+.appraiser-dashboard .appraiser-card:hover {
+  box-shadow: 0 4px 10px rgba(3, 137, 208, 0.15);
+  transform: translateY(-2px);
+}
+
+.appraiser-dashboard .appraisal-status {
+  font-weight: 600;
+  border-radius: 20px;
+  font-size: var(--font-sm);
+  letter-spacing: 0.3px;
+}
+
+.appraiser-dashboard .pending-appraiser {
+  background-color: #800000; /* dark red */
+  color: white;
+}
+
+.appraiser-dashboard .pending-appraisee {
+  background-color: #a31515; /* slightly lighter red */
+  color: white;
+}
+
+.appraiser-dashboard .form-select {
+  min-width: 100%;
+}

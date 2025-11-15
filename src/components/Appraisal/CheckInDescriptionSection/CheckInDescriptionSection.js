@@ -1,19 +1,31 @@
 import { RoleTimeline } from '..';
 import './CheckInDescriptionSection.css';
-/**
- * This is the description section of the check-in form.
- * @param {Object} props - The properties of the component.
- * @param {Object} props.employee - The employee object.
- * @param {string} props.dateRange - The date range of the appraisal.
- * @returns
- */
-export default function CheckInDescriptionSection({ employee, dateRange }) {
-  console.log(employee);
-  console.log(dateRange);
+
+export default function CheckInDescriptionSection({ employee, dateRange, showDownloadButton = false, onDownload }) {
   return (
     <div className="check-in-description-section">
+
+      {/* ✅ Download Button Positioned Top-Right (Only When Enabled) */}
+      {showDownloadButton && (
+        <div className="text-end mb-3">
+          <button
+            className="btn"
+            style={{
+              backgroundColor: "var(--accent-color)",
+              color: "#fff",
+              borderRadius: "20px",
+              padding: "6px 18px",
+              fontSize: "14px"
+            }}
+            onClick={onDownload}
+          >
+            Download Attachment
+          </button>
+        </div>
+      )}
+
       <div className="row">
-        {/* Column 1: Employee Number and Duration */}
+        {/* Column 1 */}
         <div className="col-md-3">
           <div className="d-flex align-items-start gap-3">
             <div
@@ -26,7 +38,9 @@ export default function CheckInDescriptionSection({ employee, dateRange }) {
               <div className="text-muted small">Employee Number</div>
               <div className="fw-semibold">{employee.empNo}</div>
             </div>
+     
           </div>
+
           <div className="d-flex align-items-start gap-3 mt-3">
             <div
               className="rounded bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
@@ -39,9 +53,12 @@ export default function CheckInDescriptionSection({ employee, dateRange }) {
               <div className="fw-semibold">{dateRange}</div>
             </div>
           </div>
+
+          
+
         </div>
 
-        {/* Column 2: Employee Name and Branch/Office */}
+        {/* Column 2 */}
         <div className="col-md-3">
           <div className="d-flex align-items-start gap-3">
             <div
@@ -55,6 +72,7 @@ export default function CheckInDescriptionSection({ employee, dateRange }) {
               <div className="fw-semibold">{employee.employeeName}</div>
             </div>
           </div>
+
           <div className="d-flex align-items-start gap-3 mt-3">
             <div
               className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
@@ -69,7 +87,7 @@ export default function CheckInDescriptionSection({ employee, dateRange }) {
           </div>
         </div>
 
-        {/* Column 3: Primary Role and Appraiser */}
+        {/* Column 3 */}
         <div className="col-md-3">
           <div className="d-flex align-items-start gap-3">
             <div
@@ -83,6 +101,7 @@ export default function CheckInDescriptionSection({ employee, dateRange }) {
               <div className="fw-semibold">{employee.employeeName}</div>
             </div>
           </div>
+
           <div className="d-flex align-items-start gap-3 mt-3">
             <div
               className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
@@ -97,7 +116,7 @@ export default function CheckInDescriptionSection({ employee, dateRange }) {
           </div>
         </div>
 
-        {/* Column 3: Appraiser */}
+        {/* Column 4 */}
         <div className="col-md-3">
           <div className="d-flex align-items-start gap-3">
             <div
@@ -113,11 +132,17 @@ export default function CheckInDescriptionSection({ employee, dateRange }) {
               </div>
             </div>
           </div>
-          <div className="d-flex align-items-start gap-3"></div>
         </div>
+
+        {/* column5 */}
+<div>
+  
+</div>
+
+
+
       </div>
 
-      {/* Additional Roles Timeline */}
       <div className="additional-roles-timeline mt-5">
         <RoleTimeline additionalRoles={employee.roles} />
       </div>

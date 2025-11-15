@@ -9,7 +9,7 @@ export default function ExceptionsList() {
   const financialYear = searchParams.get('financialYear');
   const appraisalPeriod = searchParams.get('appraisalPeriod');
   const quarter = searchParams.get('quarter');
-
+// con
   const exceptionListData = [
     {
       exceptionId: '1',

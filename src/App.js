@@ -21,6 +21,18 @@ import {
   ExceptionHome,
   ExceptionVerify,
   ExceptionsList,
+  QuarterlyException,
+  EmployeeExceptionList,
+  ReviewQuarterlyException,
+  EmployeeQuarterlyExceptions,
+  EmployeeAppealList,
+  AppraiserDashboard,
+  AnnualAppraisalHome,
+  AppraiserAddAppraisal,
+  AppraiseeDashboard,
+  AddAppeal,
+  QuarterlyAppraisee,
+  QuaterlyAppraiseeCheckIn
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -36,6 +48,9 @@ import HrDashboard from './pages/Appraisal/AppraisalHRDashboard/HrDashboard';
 import AppraiserUpdate from './pages/Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate';
 import ReportingReviewBulk from './pages/Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityBulk';
 import AppealDeletion from './pages/Appraisal/AppraisalHRDashboard/AppealDelection/AppealDelection';
+import AppraiserCheckInDashboard from './pages/Appraiser/AppraiserDashboardCheckIn/AppraiserCheckInDashboard';
+import EmployeeAppraisalCard from './components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
+import EmployeeQuarterlyException from './pages/Appraisal/QuarterlyException/EmployeeQuarterlyException';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
@@ -241,6 +256,7 @@ function AppContent() {
                 )
               }
             />
+
             <Route
               path="/appraisal/admin-panel"
               element={
@@ -283,7 +299,7 @@ function AppContent() {
                 )
               }
             />
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/appraisal-status-change-utility"
               element={
                 isAuthenticated ? (
@@ -294,7 +310,7 @@ function AppContent() {
               }
             />
 
-              <Route
+            <Route
               path="/appraisal/hr-dashboard/appeal-comittee"
               element={
                 isAuthenticated ? (
@@ -304,7 +320,7 @@ function AppContent() {
                 )
               }
             />
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/reporting-authority-reviewing-auth-bulk"
               element={
                 isAuthenticated ? (
@@ -314,7 +330,7 @@ function AppContent() {
                 )
               }
             />
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/validator-update-utility"
               element={
                 isAuthenticated ? (
@@ -325,7 +341,7 @@ function AppContent() {
               }
             />
 
-   <Route
+            <Route
               path="/appraisal/hr-dashboard/exception-delection-utility"
               element={
                 isAuthenticated ? (
@@ -336,7 +352,7 @@ function AppContent() {
               }
             />
 
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/Appeal-delection-utility"
               element={
                 isAuthenticated ? (
@@ -347,7 +363,7 @@ function AppContent() {
               }
             />
 
-               <Route
+            <Route
               path="/appraisal/hr-dashboard/module-active-inactive-date"
               element={
                 isAuthenticated ? (
@@ -357,6 +373,140 @@ function AppContent() {
                 )
               }
             />
+
+
+            <Route
+              path="/appraisal/exception-quarterly"
+              element={
+                isAuthenticated ? (
+                  <ExceptionQuarterly onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraisal/review-exception-list"
+              element={
+                isAuthenticated ? (
+                  <ReviewExceptionList onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraisal/review-quarterly-exception"
+              element={
+                isAuthenticated ? (
+                  <ReviewQuarterlyExceptionLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+
+            <Route
+              path="/appraisal/employee-review-quarterly-exception"
+              element={
+                isAuthenticated ? (
+                  <EmployeeQuarterlyExceptionListLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appeal-resolutions/annual-appeal/employee-appeal-list"
+              element={
+                isAuthenticated ? (
+                  <AnnualEmployeeAppealListLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraiser/dashboard"
+              element={
+                isAuthenticated ? (
+                  <AppraiserDashboardLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraiser/annual-appraisal-home"
+              element={
+                isAuthenticated ? (
+                  <AnnualAppraisalHomeLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+
+
+            <Route
+              path="/appraiser/add-appraisal"
+              element={
+                isAuthenticated ? (
+                  <AppraiserAddAppraisalLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+
+            <Route path="/annual/appraisee/appraisee-dashboard"
+              element={
+                isAuthenticated ? (
+                  <AppraiseeDashboardLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route path="/annual/add-appeal"
+              element={
+                isAuthenticated ? (
+                  <AddAppealLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+
+             <Route path="/quarterly/quarterly-appraisee"
+              element={
+                isAuthenticated ? (
+                  <QuarterlyAppraiseeLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/quarterly/quaterly-appraisee-check-in"
+              element={
+                isAuthenticated ? (
+                  <QuaterlyAppraiseeCheckInLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
 
           </Routes>
         </div>
@@ -450,7 +600,28 @@ const AppraiserCheckInLayout = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-      <AppraiserCheckIn />
+      {/* <AppraiserCheckIn /> */}
+      <AppraiserCheckInDashboard />
+    </>
+  );
+};
+
+
+const ExceptionQuarterly = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <QuarterlyException />
+    </>
+  );
+};
+const ReviewExceptionList = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <EmployeeExceptionList />
     </>
   );
 }
@@ -497,7 +668,7 @@ const AppraisalStatusChangeUtility = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-    <Appraisalstatus/>
+      <Appraisalstatus />
     </>
   )
 }
@@ -509,7 +680,7 @@ const AppraisalAppealComittee = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-    <AppealComittee/>
+      <AppealComittee />
     </>
   )
 }
@@ -521,7 +692,7 @@ const ReportingAuthorityReviewBulk = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-  <ReportingReviewBulk/>
+      <ReportingReviewBulk />
     </>
   )
 }
@@ -533,7 +704,7 @@ const ValidatorUpdateUtilities = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
- <ValidatorUpdateUtility/>
+      <ValidatorUpdateUtility />
     </>
   )
 }
@@ -544,7 +715,7 @@ const ExceptionDelectionUtilities = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-<ExceptionDelection/>
+      <ExceptionDelection />
     </>
   )
 }
@@ -556,18 +727,18 @@ const AppealDelectionUtilities = ({ onLogout }) => {
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-<AppealDeletion/>
+      <AppealDeletion />
     </>
   )
 }
- // ModuleActiveInactiveDate
- const MoulesActiveInactiveDate = ({ onLogout }) => {
+// ModuleActiveInactiveDate
+const MoulesActiveInactiveDate = ({ onLogout }) => {
 
   return (
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
-<ModuleActiveInactiveDate/>
+      <ModuleActiveInactiveDate />
     </>
   )
 }
@@ -610,13 +781,107 @@ const ExceptionsListLayout = ({ onLogout }) => {
     </>
   );
 };
-// JobFamily Layout
-// const JobFamily = ({ onLogout }) => (
-//   <>
-//     <TopBar onLogout={onLogout} />
-//     <LeftNavigation />
-//     <JobFamily />
-//   </>
-// );
+
+
+// ReviewQuarterlyException
+
+const ReviewQuarterlyExceptionLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <ReviewQuarterlyException />
+    </>
+  );
+};
+
+//Employee Quarterly Exception
+const EmployeeQuarterlyExceptionListLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      {/* <EmployeeQuarterlyExceptions /> */}
+      <EmployeeQuarterlyException />
+    </>
+  );
+}
+
+// Annual Employee Appeal List
+const AnnualEmployeeAppealListLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <EmployeeAppealList />
+  </>
+);
+
+// Appraiser Dashboard 
+const AppraiserDashboardLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AppraiserDashboard />
+  </>);
+
+//AnnualAppraisalHome
+const AnnualAppraisalHomeLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AnnualAppraisalHome />
+  </>
+);
+//AppraiserAddAppraisal
+
+const AppraiserAddAppraisalLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AppraiserAddAppraisal />
+  </>
+);
+
+
+//AppraiseeDashboard
+
+const AppraiseeDashboardLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AppraiseeDashboard />
+  </>
+);
+
+//Add appeal (Annual)
+
+const AddAppealLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AddAppeal />
+  </>
+);
+
+
+//  Quaererly Appraisee
+const QuarterlyAppraiseeLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+  <QuarterlyAppraisee />
+  </>
+);  
+
+
+//Quaterly  Appraisee Check In
+const QuaterlyAppraiseeCheckInLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+ <QuaterlyAppraiseeCheckIn />
+  </>
+);  
+
 
 export default App;
