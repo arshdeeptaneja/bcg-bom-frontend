@@ -43,18 +43,19 @@ export default function AppraisalHome() {
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
 
   // React Query to fetch dashboard data
-  const { data, isLoading} = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['appraisalHomeDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
-    queryFn: () => appraisalAPI.getAppraisalHomeDashboard({
-      empNo: empNo,
-      role: role,
-      appraisalPeriod: appraisalPeriod.toLowerCase(),
-      financialYear: extractYear(financialYear),
-      quarter: selectedQuarter
-    }),
+    queryFn: () =>
+      appraisalAPI.getAppraisalHomeDashboard({
+        empNo: empNo,
+        role: role,
+        appraisalPeriod: appraisalPeriod.toLowerCase(),
+        financialYear: extractYear(financialYear),
+        quarter: selectedQuarter,
+      }),
     enabled: !!empNo,
   });
-console.log(data);
+  console.log(data);
 
   // Show loading spinner while data is being fetched
   if (isLoading) {
@@ -94,16 +95,18 @@ console.log(data);
         <div className="btn-group" role="group" aria-label="Appraisal period selector">
           <button
             type="button"
-            className={`btn px-2 ${appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primarys'
-              }`}
+            className={`btn px-2 ${
+              appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primarys'
+            }`}
             onClick={() => setAppraisalPeriod('Annual')}
           >
             Annual Year
           </button>
           <button
             type="button"
-            className={`btn px-2 ${appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primarys'
-              }`}
+            className={`btn px-2 ${
+              appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primarys'
+            }`}
             onClick={() => setAppraisalPeriod('Quarterly')}
           >
             Quarterly
@@ -117,32 +120,36 @@ console.log(data);
             <div className="btn-group" role="group" aria-label="Quarter selector">
               <button
                 type="button"
-                className={`btn px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
-                  }`}
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
                 onClick={() => setSelectedQuarter('Q1')}
               >
                 Q1
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
-                  }`}
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
                 onClick={() => setSelectedQuarter('Q2')}
               >
                 Q2
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
-                  }`}
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
                 onClick={() => setSelectedQuarter('Q3')}
               >
                 Q3
               </button>
               <button
                 type="button"
-                className={`btn px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
-                  }`}
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
                 onClick={() => setSelectedQuarter('Q4')}
               >
                 Q4
@@ -158,16 +165,29 @@ console.log(data);
           heading="Appraisee Check-in"
           kpiData={[
             {
-              value: appraisalPeriod === 'Quarterly'
-                ? (data?.self_count_quarterly ?? 0)
-                : (data?.completed_appraisal_count ?? 0),
-              label: 'Appraisals to be filled'
+              value:
+                appraisalPeriod === 'Quarterly'
+                  ? data?.self_count_quarterly === undefined || data?.self_count_quarterly === ''
+                    ? 0
+                    : data?.self_count_quarterly
+                  : data?.pending_appraisal_count === undefined ||
+                    data?.pending_appraisal_count === ''
+                  ? 0
+                  : data?.pending_appraisal_count,
+              label: 'Appraisal(s) to be filled',
             },
             {
-              value: appraisalPeriod === 'Quarterly'
-                ? (data?.self_pending_appraisal_count ?? 0)
-                : (data?.pending_appraisal_count ?? 0),
-              label: 'Pending Appraisals(s)'
+              value:
+                appraisalPeriod === 'Quarterly'
+                  ? data?.self_pending_appraisal_count === undefined ||
+                    data?.self_pending_appraisal_count === ''
+                    ? 0
+                    : data?.self_pending_appraisal_count
+                  : data?.pending_appraisal_count === undefined ||
+                    data?.pending_appraisal_count === ''
+                  ? 0
+                  : data?.pending_appraisal_count,
+              label: 'Pending Appraisal(s)',
             },
           ]}
           onClick={() => {
@@ -195,8 +215,18 @@ console.log(data);
       {/* Accordion for My Final Score */}
       <div className="myFinalScore-accordion mt-3">
         <AppraisalAccordion
-          accordionItems={[{ heading: 'My Final Score' }]}
-          scoreData={data?.appraisal_score_dash || []}
+          accordionItems={[
+            {
+              heading: 'My Final Score',
+              tableData: data?.appraisal_score_dash?.map((item) => ({
+                Cycle: item?.CYCLE ?? '-',
+                Weightage: item?.WEIGHTAGE ?? '-',
+                'Actual Score': item?.PERCENTAGE_SCORE ?? '-',
+                Performance: item?.PERFORMANCE ?? '-',
+              })),
+            },
+          ]}
+          columns={['Cycle', 'Weightage', 'Actual Score', 'Performance']}
         />
       </div>
 

@@ -35,7 +35,6 @@ export default function ExceptionVerify() {
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
 
-
   // Extract year from financial year format (e.g., "FY 2025-26" -> "2025")
   const extractYear = (fy) => {
     const match = fy.match(/FY (\d{4})/);
@@ -44,13 +43,20 @@ export default function ExceptionVerify() {
 
   // React Query to fetch exception validator dashboard data
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['exceptionValidatorDashboard', financialYear, appraisalPeriod, selectedQuarter, empNo],
-    queryFn: () => appraisalAPI.getExceptionValidatorDashboard({
-      fy: extractYear(financialYear),
-      quarter: selectedQuarter,
-      exceptionPeriod: appraisalPeriod.toLowerCase(),
-      empNo: empNo
-    }),
+    queryKey: [
+      'exceptionValidatorDashboard',
+      financialYear,
+      appraisalPeriod,
+      selectedQuarter,
+      empNo,
+    ],
+    queryFn: () =>
+      appraisalAPI.getExceptionValidatorDashboard({
+        fy: extractYear(financialYear),
+        quarter: selectedQuarter,
+        exceptionPeriod: appraisalPeriod.toLowerCase(),
+        empNo: empNo,
+      }),
     enabled: !!empNo, // Only run query if empNo is available
   });
 
@@ -70,7 +76,7 @@ export default function ExceptionVerify() {
       <div className="pageWrapper">
         <div className="pageWrapper-header">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Verification</h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Validation</h1>
         </div>
         <LoadingSpinner />
       </div>
@@ -81,7 +87,7 @@ export default function ExceptionVerify() {
     <div className="pageWrapper">
       <div className="pageWrapper-header">
         <BackButton />
-        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Verification</h1>
+        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Validation</h1>
       </div>
       <div className="filters-row border rounded-2 px-3 py-2 mt-3 align-items-center d-flex gap-3">
         <span className="text-muted fw-semibold">FY Selection</span>
@@ -180,11 +186,6 @@ export default function ExceptionVerify() {
             );
           }}
         />
-      </div>
-
-      {/* Accordion for My Verifications */}
-      <div className="myFinalScore-accordion mt-3">
-        <AppraisalAccordion accordionItems={[{ heading: 'My Verifications' }]} />
       </div>
 
       {/* Foot Note */}

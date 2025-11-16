@@ -7,7 +7,7 @@ const unauthClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'Cache-Control': 'no-cache',
   },
 });
@@ -18,7 +18,7 @@ const apiClient = axios.create({
   // timeout: 10000, // 10 seconds
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'Cache-Control': 'no-cache',
   },
 });
@@ -26,9 +26,9 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT'; //  localStorage.getItem('accessToken');
     if (token) {
-      config.headers.Authorization = `Bearer eyJhbGciOiJIUzM4NCJ9.eyJlbXBJZCI6IjM2NjYzIiwicm9sZXMiOiJBZG1pbmlzdHJhdGl2ZSBPZmZpY2VycyIsInN1YiI6IjM2NjYzIiwiaWF0IjoxNzYyNjk4Njk0LCJleHAiOjE3NjI3ODUwOTR9.VYFCfy0wPLbyvf5mXKLl05gY7Qf9LnaPj5f_VI1sjRlZo4G9StSa484pdXXoDnR9`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -52,7 +52,7 @@ apiClient.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken: refreshToken
+            refreshToken: refreshToken,
           });
 
           const { accessToken } = response.data;
@@ -87,15 +87,15 @@ export const authAPI = {
         method: 'POST',
         credentials: {
           ...credentials,
-          password: '[REDACTED]' // Don't log actual password
-        }
+          password: '[REDACTED]', // Don't log actual password
+        },
       });
 
       const response = await apiClient.post('/identity/auth/login', credentials);
       console.log('Login response received:', {
         status: response.status,
         statusText: response.statusText,
-        data: response.data
+        data: response.data,
       });
 
       return response.data;
@@ -106,7 +106,7 @@ export const authAPI = {
         statusText: error.response?.statusText,
         data: error.response?.data,
         url: error.config?.url,
-        method: error.config?.method
+        method: error.config?.method,
       });
       throw error;
     }
@@ -130,7 +130,7 @@ export const authAPI = {
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
 
 export const userAPI = {
@@ -172,7 +172,7 @@ export const userAPI = {
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
 
 // Captcha API methods
@@ -183,7 +183,7 @@ export const generateCaptchaAPI = {
       const response = await apiClient.get('/identity/captcha/generate');
       return {
         id: response.data.captchaId,
-        image: response.data.captchaImg
+        image: response.data.captchaImg,
       };
     } catch (error) {
       console.error('CAPTCHA API error:', error);
@@ -193,23 +193,18 @@ export const generateCaptchaAPI = {
 
   validateCaptcha: async (captchaId, userInput) => {
     try {
-      const response = await apiClient.post(
-        '/identity/captcha/validate',
-        null,
-        {
-          params: {
-            captchaId: captchaId,
-            userInput: userInput
-          }
-        }
-      );
+      const response = await apiClient.post('/identity/captcha/validate', null, {
+        params: {
+          captchaId: captchaId,
+          userInput: userInput,
+        },
+      });
 
       if (response.data === false || response.data === 'false') {
         throw new Error('Invalid Captcha');
       }
 
       return true;
-
     } catch (error) {
       console.error('CAPTCHA validation API error:', error);
       throw error;
@@ -221,7 +216,7 @@ export const generateCaptchaAPI = {
       const response = await apiClient.get(`/identity/captcha/refresh/${captchaIdToRefresh}`);
       return {
         id: response.data.captchaId,
-        image: response.data.captchaImg
+        image: response.data.captchaImg,
       };
     } catch (error) {
       console.error('CAPTCHA Refresh API error:', error);
@@ -277,17 +272,34 @@ export const dashboardAPI = {
       const params = new URLSearchParams({
         empNo: empNo,
         sol: sol,
-        unitType: unitType
+        unitType: unitType,
       });
       const response = await apiClient.get(`/rct/dashboard?${params.toString()}`);
       return response.data;
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
 
+const appraisalBaseUrl = '/appraisal'; //'/appraisal/v1/appraisal';
 export const appraisalAPI = {
+  // GET: Get appraisal dashboard data
+  getAppraisalDashboard: async ({ fy, empNo, sol, roleType }) => {
+    try {
+      const params = new URLSearchParams({
+        current_fy: fy,
+        empNo: empNo,
+        sol: sol,
+        role_type: roleType,
+      });
+      const response = await apiClient.get(`${appraisalBaseUrl}/dashboard?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // GET: Get exception dashboard data
   getExceptionDashboard: async ({ fy, quarter, exception_period, empNo }) => {
     try {
@@ -295,9 +307,11 @@ export const appraisalAPI = {
         fy: fy,
         quarter: quarter,
         exception_period,
-        empNo: empNo
+        empNo: empNo,
       });
-      const response = await apiClient.get(`/appraisal/v1/appraisal/exception_verify/dashboard?${params.toString()}`);
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/exception_verify/dashboard?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -311,9 +325,28 @@ export const appraisalAPI = {
         fy: fy,
         quarter: quarter,
         exceptionPeriod,
-        empNo: empNo
+        empNo: empNo,
       });
-      const response = await apiClient.get(`/appraisal/v1/appraisal/exception_validator/dashboard?${params.toString()}`);
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/exception_validator/dashboard?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET: Get exception validator dashboard data
+  getExceptionQuarterlyVerify: async ({ fy, quarter, empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        fy: fy,
+        quarter: quarter,
+        empNo: empNo,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/exception_quarterly_verify?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -328,12 +361,14 @@ export const appraisalAPI = {
         role: role,
         appraisalPeriod: appraisalPeriod,
         financialYear: financialYear,
-        quarter: quarter
+        quarter: quarter,
       });
-      const response = await apiClient.get(`/appraisal/home/dashboard?${params.toString()}`);      
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/home/dashboard?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
-      console.log('error',error);
+      console.log('error', error);
       throw error;
     }
   },
@@ -345,9 +380,11 @@ export const appraisalAPI = {
         empNo: empNo,
         financialYear: financialYear,
         quarter: quarter,
-        appraisalPeriod: appraisalPeriod
+        appraisalPeriod: appraisalPeriod,
       });
-      const response = await apiClient.get(`/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`);
+      const response = await apiClient.get(
+        `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
       console.log('error', error);
@@ -361,9 +398,11 @@ export const appraisalAPI = {
       const params = new URLSearchParams({
         fy: financialYear,
         empNo: empNo,
-        appraisalPeriod: appraisalPeriod
+        appraisalPeriod: appraisalPeriod,
       });
-      const response = await apiClient.get(`/appraisal/my_appraisal_dashboard?${params.toString()}`);
+      const response = await apiClient.get(
+        `/appraisal/my_appraisal_dashboard?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
       console.log('error', error);
@@ -372,7 +411,17 @@ export const appraisalAPI = {
   },
 
   // GET: Get employee self-appraisal data for check-in form
-  getEmployeeSelfAppraisal: async ({ empNo, url, zoneName, roleId, roleType, financialYear, quarter, pageType, appraisalStatus }) => {
+  getEmployeeSelfAppraisal: async ({
+    empNo,
+    url,
+    zoneName,
+    roleId,
+    roleType,
+    financialYear,
+    quarter,
+    pageType,
+    appraisalStatus,
+  }) => {
     try {
       const params = new URLSearchParams({
         empNo: empNo,
@@ -383,15 +432,17 @@ export const appraisalAPI = {
         financialYear: financialYear,
         quarter: quarter || '',
         pageType: pageType,
-        appraisalStatus: appraisalStatus
+        appraisalStatus: appraisalStatus,
       });
-      const response = await apiClient.get(`/appraisal/employee_self_appraisal?${params.toString()}`);
+      const response = await apiClient.get(
+        `/appraisal/employee_self_appraisal?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
       console.log('error', error);
       throw error;
     }
-  }
+  },
 };
 
 // Generic API methods
@@ -434,7 +485,7 @@ export const api = {
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
 
 export const accessService = {
@@ -444,15 +495,15 @@ export const accessService = {
         params: {
           empId: empId,
           unitType: unitType,
-          role: role
-        }
+          role: role,
+        },
       });
       return response.data;
     } catch (error) {
       console.error('Error in getAccessModuleWise:', error);
       throw error;
     }
-  }
+  },
 };
 
 export default apiClient;
