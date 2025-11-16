@@ -3,10 +3,11 @@
  * @param {Object[]} accordionItems - List of Accordion Items. Each item must contain:
  *    @param {string} item.heading - The heading/title of the accordion section.
  *    @param {number} item.pendingCount - The number of pending items for this section.
- * @param {Object[]} scoreData - Optional array of score data objects containing CYCLE, PERCENTAGE_SCORE, WEIGHTAGE, WEIGHTED_SCORE
+ *    @param {Object[]} item.tableData - Optional array of table rows. Each row should have:
+ * @param {string[]} columns - Optional array of column names containing:
  * @returns
  */
-export default function AppraisalAccordion({ accordionItems = [], scoreData = [] }) {
+export default function AppraisalAccordion({ accordionItems = [], columns = [] }) {
   return (
     <div className="accordion" id="appraisalAccordion">
       {accordionItems.map((item, index) => {
@@ -24,7 +25,7 @@ export default function AppraisalAccordion({ accordionItems = [], scoreData = []
                 <div className="d-flex flex-row justify-content-between align-items-center w-100 px-3">
                   <span>{item.heading}</span>
                   <span className="fw-semibold">
-                    {item.pendingCount ? `Pending ${item.pendingCount}` : ''}
+                    {item.pendingCount != null ? `Pending ${item.pendingCount}` : ''}
                   </span>
                 </div>
               </button>
@@ -36,24 +37,24 @@ export default function AppraisalAccordion({ accordionItems = [], scoreData = []
               data-bs-parent="#appraisalAccordion"
             >
               <div className="accordion-body">
-                {scoreData && scoreData.length > 0 ? (
+                {columns && columns.length > 0 ? (
                   <div className="table-responsive">
-                    <table className="table table-striped table-bordered">
+                    <table className="table align-middle">
                       <thead className="table-primary">
                         <tr>
-                          <th>Cycle</th>
-                          <th>Percentage Score</th>
-                          <th>Weightage</th>
-                          <th>Weighted Score</th>
+                          {columns.map((column) => (
+                            <th className="text-center" key={column}>
+                              {column}
+                            </th>
+                          ))}
                         </tr>
                       </thead>
-                      <tbody>
-                        {scoreData.map((score, scoreIndex) => (
-                          <tr key={scoreIndex}>
-                            <td>{score.CYCLE || '-'}</td>
-                            <td>{score.PERCENTAGE_SCORE ?? 0}</td>
-                            <td>{score.WEIGHTAGE ?? 0}</td>
-                            <td>{score.WEIGHTED_SCORE ?? 0}</td>
+                      <tbody className="text-center">
+                        {item.tableData.map((row, rowIndex) => (
+                          <tr key={rowIndex}>
+                            {columns.map((column) => (
+                              <td key={column}>{row[column] ?? '-'}</td>
+                            ))}
                           </tr>
                         ))}
                       </tbody>

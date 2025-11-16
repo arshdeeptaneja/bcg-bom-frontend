@@ -28,25 +28,36 @@ export default function ExceptionListTable({ exceptionListData }) {
             <th className="text-center">Exception Details</th>
           </tr>
         </thead>
-        <tbody>
-          {exceptionListData.map((exception) => (
-            <tr key={exception.exceptionId}>
-              <td className="text-start">{exception.exceptionId}</td>
-              <td className="text-center">{exception.employee.empNo}</td>
-              <td className="text-center">{exception.employee.name}</td>
-              <td className="text-center">{exception.exceptionDescription}</td>
-              <td className="text-center">{exception.preExceptionScore}</td>
-              <td className="text-center">{exception.postExceptionScore}</td>
-              <td className="text-center">{exception.exceptionStatus}</td>
-              <td className="text-center">
-                <div className="action-buttons d-flex flex-column gap-2">
-                  <div className="btn btn-primary">View Appraisal</div>
-                  <div className="btn btn-outline-primary">Review Exception</div>
-                </div>
+        {exceptionListData.length == 0 && (
+          <tbody>
+            <tr>
+              <td colSpan="8" className="text-center bg-danger bg-opacity-10 text-danger">
+                No data found
               </td>
             </tr>
-          ))}
-        </tbody>
+          </tbody>
+        )}
+        {exceptionListData.length > 0 && (
+          <tbody>
+            {exceptionListData.map((exception) => (
+              <tr key={exception.exceptionId}>
+                <td className="text-start">{exception.exceptionId}</td>
+                <td className="text-center">{exception.employee.empNo}</td>
+                <td className="text-center">{exception.employee.name}</td>
+                <td className="text-center">{exception.exceptionDescription}</td>
+                <td className="text-center">{exception.preExceptionScore}</td>
+                <td className="text-center">{exception.postExceptionScore}</td>
+                <td className="text-center">{exception.exceptionStatus}</td>
+                <td className="text-center">
+                  <div className="action-buttons d-flex flex-column gap-2">
+                    <div className="btn btn-primary">View Appraisal</div>
+                    <div className="btn btn-outline-primary">Review Exception</div>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        )}
       </table>
     </div>
   );
