@@ -83,10 +83,7 @@ export default function AppraiserCheckIn() {
     enabled: !!empNo && !!financialYear && !!appraisalPeriod && !!quarter,
   });
 
-  // TODO: Get the average score and max score from the API
-  const averageScore = 70;
-  const maxScore = 100;
-
+  console.log('Fetched Appraiser Check-In Dashboard Data:', data);
   // Apply filters whenever filter state or data changes
   useEffect(() => {
     if (!data || !data.results) {
@@ -174,7 +171,7 @@ export default function AppraiserCheckIn() {
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
             <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-              Appraisee Check-In Dashboard
+              Appraiser Check-In Dashboard
             </h1>
           </div>
         </div>
