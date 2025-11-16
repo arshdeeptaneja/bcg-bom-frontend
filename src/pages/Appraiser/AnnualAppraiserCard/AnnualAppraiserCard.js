@@ -256,7 +256,7 @@ export default function AnnualAppraiserCard({
         {/* Action Buttons Section */}
         <div className="action-buttons col-md-5 col-12 d-flex flex-column">
           <div className="button-row">
- {/* <button
+            <button
               type="button"
               className="butns "
               data-bs-toggle="modal"
@@ -277,7 +277,7 @@ export default function AnnualAppraiserCard({
             >
               Add Appraisal
               <span className="ms-2">→</span>
-            </button> */}
+            </button>
 
             {annualButtons && (
               <div className="annual-buttons-wrapper mt-3">
@@ -358,5 +358,5 @@ AnnualAppraiserCard.propTypes = {
   onViewSummary: PropTypes.func,
   onAddException: PropTypes.func,
   onAddAppraisal: PropTypes.func,
-    annualButtons: PropTypes.bool,
+  annualButtons: PropTypes.bool,
 };
