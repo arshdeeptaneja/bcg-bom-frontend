@@ -1,28 +1,188 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FaDownload } from "react-icons/fa";
 // import "./ReportingReviewBulk.css";
 import { BackButton } from "../../../../components/common";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { appraisalAPI } from "../../../../services/api";
+import LoadingSpinner from "../../../../components/Spinner";
+import { useQuery } from "@tanstack/react-query";
 import { FaInfoCircle } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const ReportingReviewBulk = () => {
-    const tableData = [
-        {
-            id: 1,
-            fileName: "admin_hr_update_repa_reva_surl_sample_success_log_2025-10-21-15-48-50.xlsx",
-            date: "21-OCT-2025 03:48 PM",
-            status: "FAILED",
-            records: 5,
-            uploadedBy: "ANCHAL NAYAR"
-        },
-        {
-            id: 2,
-            fileName: "admin_hr_update_repa_reva_failed_2025-10-21-16-12-11.xlsx",
-            date: "21-OCT-2025 04:12 PM",
-            status: "FAILED",
-            records: 0,
-            uploadedBy: "RAHUL KHANNA"
+
+    const { getEmployeeDetails, getUserProperty } = useAuth();
+    const [selectedFile, setSelectedFile] = useState(null);
+      // Get employee number from auth context
+    const employeeDetails = getEmployeeDetails();
+    const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
+    const sol = getUserProperty('sol', employeeDetails?.currentUser?.[0]?.LOCATION || '');
+    const roleName = getUserProperty('roleType', employeeDetails?.currentUser?.[0]?.ROLE_TYPE || '');
+
+
+    // ---- Financial year dropdown logic (same as ExceptionVerify.jsx) ----
+    const getFinancialYears = () => {
+        const years = [];
+        const now = new Date();
+        const currentYear =
+        now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+
+        for (let i = 0; i < 6; i++) {
+        const start = currentYear - i;
+        const end = (start + 1).toString().slice(2);
+        years.push(`FY ${start}-${end}`);
         }
-    ];
+        return years;
+    };
+
+    const financialYears = getFinancialYears();
+    const [financialYear, setFinancialYear] = useState(financialYears[0]);
+
+    // Extract the year as "2025"
+    const extractYear = (fy) => {
+        const match = fy.match(/FY (\d{4})/);
+        return match ? match[1] : new Date().getFullYear().toString();
+    };
+    
+    //handles file upload
+    const handleUpload = async () => {
+        if (!selectedFile) {
+          toast.error("Please select a file first.");
+          return;
+        }
+      
+        try {
+          await appraisalAPI.reportingAuthorityBulkUpload({
+            file: selectedFile,
+            sol: sol,
+            roleName: roleName,
+            empNo: empNo,
+          });
+      
+          toast.success("Upload successful!");
+        } catch (err) {
+          toast.error("Upload failed.");
+          console.error(err);
+        }
+    };
+
+    //CANNOT FIND QUARTER.
+
+    // downloads sample file
+    const handleDownloadSample = async () => {
+        try {
+          const blob = await appraisalAPI.reportingAuthorityBulkDownloadSample({
+            roleName: roleName,   
+            regionCode: sol,  
+            quarter: "Q1",         
+            financialYear: extractYear(financialYear),
+          });
+      
+          const url = window.URL.createObjectURL(new Blob([blob]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute(
+            "download",
+            `reporting_authority_bulk_sample_${Date.now()}.xlsx`
+          );
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      
+          toast.success("File downloaded.");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to download sample file.");
+        }
+      };
+      
+      // downloads data table
+      const handleDownloadDataTable = async () => {
+        try {
+          const blob = await appraisalAPI.reportingAuthorityBulkDownloadDataTable({
+            roleName: roleName,
+            regionCode: sol,
+            quarter: "Q1",
+            financialYear: extractYear(financialYear),
+          });
+      
+          const url = window.URL.createObjectURL(new Blob([blob]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute(
+            "download",
+            `reporting_authority_bulk_data_table_${Date.now()}.xlsx`
+          );
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      
+          toast.success("Data table downloaded.");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to download data table.");
+        }
+      };
+      
+
+    const {
+        data: errorLogs,
+        isLoading,
+        isError,
+        error,
+      } = useQuery({
+        queryKey: ["reportingAuthorityBulkErrorLogs", financialYear],
+        queryFn: () =>
+          appraisalAPI.reportingAuthorityBulkErrorLogs({
+            financialYear: extractYear(financialYear),
+          }),
+        enabled: !!financialYear,
+      });
+
+    // Show toast if API fails
+    useEffect(() => {
+        if (isError) {
+        toast.error(
+            `Failed to fetch error logs: ${error?.message || "Unknown error"}`
+        );
+        }
+    }, [isError, error]);
+
+    const tableData = errorLogs?.files || [];
+
+
+    if (isLoading) {
+        return (
+        <div className="pageWrapper">
+            <div className="pageWrapper-header">
+            <BackButton />
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                Reporting Authority update in bulk
+            </h1>
+            </div>
+            <LoadingSpinner />
+        </div>
+        );
+    }
+
+    // const tableData = [
+    //     {
+    //         id: 1,
+    //         fileName: "admin_hr_update_repa_reva_surl_sample_success_log_2025-10-21-15-48-50.xlsx",
+    //         date: "21-OCT-2025 03:48 PM",
+    //         status: "FAILED",
+    //         records: 5,
+    //         uploadedBy: "ANCHAL NAYAR"
+    //     },
+    //     {
+    //         id: 2,
+    //         fileName: "admin_hr_update_repa_reva_failed_2025-10-21-16-12-11.xlsx",
+    //         date: "21-OCT-2025 04:12 PM",
+    //         status: "FAILED",
+    //         records: 0,
+    //         uploadedBy: "RAHUL KHANNA"
+    //     }
+    // ];
 
 
     return (
@@ -60,15 +220,15 @@ const ReportingReviewBulk = () => {
                     <div className="d-flex gap-2">
                         <label className="btn btn-outline-secondary">
                             SELECT A FILE
-                            <input type="file" hidden />
+                            <input type="file" hidden  onChange={(e) => setSelectedFile(e.target.files[0])}/>
                         </label>
 
-                        <button className="primary-button">UPLOAD</button>
+                        <button className="primary-button" onClick={handleUpload}>UPLOAD</button>
                     </div>
 
                     <div className="d-flex gap-2">
-                        <button className="btn primary-button">Download Sample</button>
-                        <button className="btn primary-button">Download Data Table</button>
+                        <button className="btn primary-button" onClick={handleDownloadSample} >Download Sample</button>
+                        <button className="btn primary-button" onClick={handleDownloadDataTable}>Download Data Table</button>
                     </div>
                 </div>
 
