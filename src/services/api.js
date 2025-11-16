@@ -26,7 +26,9 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT'; //  localStorage.getItem('accessToken');
+
+    //const token = localStorage.getItem('accessToken');
+    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT'; 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -443,6 +445,240 @@ export const appraisalAPI = {
       throw error;
     }
   },
+
+  appraisalStatusChange: async ({ ecNumber, appraisalPeriod, quarter, financialYear }) => {
+    try {
+      const params = new URLSearchParams({
+        ecNumber,
+        appraisalPeriod,       // Quarterly or Annual
+        financialYear,         // FY 2025-2026 (always passed)
+        quarter: appraisalPeriod === "Quarterly" ? quarter : "", // Only send quarter for Quarterly
+      });
+  
+      const response = await apiClient.get(
+        `/appraisal//status-change/search?${params.toString()}`
+      );
+  
+      return response.data;
+    } catch (error) {
+      console.error("Error searching appraisal status:", error);
+      throw error;
+    }
+  },
+
+  // Reporting and reviewing authority update by emp number
+  appraisalUpdate: async ({ ecNumber, appraisalPeriod, quarter, financialYear }) => {
+    try {
+      const params = new URLSearchParams({
+        ecNumber,
+        appraisalPeriod,       // Quarterly or Annual
+        financialYear,         // FY 2025-2026 (always passed)
+        quarter: appraisalPeriod === "Quarterly" ? quarter : "", // Only send quarter for Quarterly
+      });
+  
+      const response = await apiClient.get(
+        `/appraisal//status-change/search?${params.toString()}`
+      );
+  
+      return response.data;
+    } catch (error) {
+      console.error("Error searching appraisal status:", error);
+      throw error;
+    }
+  },
+
+    // Fetch reporting authority bulk upload history
+  reportingAuthorityBulkList: async ({ financialYear }) => {
+    try {
+      const params = new URLSearchParams({
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/hr/reporting-authority-bulk/files?${params.toString()}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching reporting authority bulk list:", error);
+      throw error;
+    }
+  },
+
+  // Bulk upload for reporting authority update
+  reportingAuthorityBulkUpload: async ({ file, sol, roleName, empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        sol,
+        roleName,
+        empNo,
+      });
+
+      const formData = new FormData();
+      formData.append("file", file); 
+
+      const response = await apiClient.post(
+        `/appraisal/admin/hr_update_quarterly_repa_reva_surl/upload?${params.toString()}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error uploading Reporting Authority Bulk file:", error);
+      throw error;
+    }
+  },
+
+  // Download sample Excel for reporting authority bulk update
+  reportingAuthorityBulkDownloadSample: async ({
+    roleName,
+    regionCode,
+    quarter,
+    financialYear,
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        roleName,
+        regionCode,
+        quarter,
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_sample?${params.toString()}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      return response.data; // XLSX blob
+    } catch (error) {
+      console.error("Error downloading sample file:", error);
+      throw error;
+    }
+  },
+
+    // Download sample Excel for reporting authority bulk update
+  reportingAuthorityBulkDownloadDataTable: async ({
+    roleName,
+    regionCode,
+    quarter,
+    financialYear,
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        roleName,
+        regionCode,
+        quarter,
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_data_table?${params.toString()}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error downloading sample file:", error);
+      throw error;
+    }
+  },
+
+    // Get error logs for reporting authority bulk update
+  reportingAuthorityBulkErrorLogs: async ({ financialYear }) => {
+    try {
+      const params = new URLSearchParams({
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_quarterly_repa_reva_surl/error_logs?${params.toString()}`
+      );
+
+      return response.data; // JSON logs
+    } catch (error) {
+      console.error("Error fetching reporting authority error logs:", error);
+      throw error;
+    }
+  },
+
+    // Annual reporting authority bulk update error logs
+  reportingAuthorityAndReviewAnnualErrorLogs: async ({ financialYear }) => {
+    try {
+      const params = new URLSearchParams({
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_annual_repa_reva_surl/error_logs?${params.toString()}`
+      );
+
+      return response.data; // JSON error logs list
+    } catch (error) {
+      console.error("Error fetching annual reporting authority error logs:", error);
+      throw error;
+    }
+  },
+
+  // Annual reporting authority bulk update - Download Data Table
+  reportingAuthorityAndReviewAnnualDownloadDataTable: async ({
+    roleName,
+    regionCode,
+    financialYear,
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        roleName,
+        regionCode,
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_annual_repa_reva_surl/download_data_table?${params.toString()}`,
+        {
+          responseType: "blob", // XLSX file
+        }
+      );
+
+      return response.data; // Return blob
+    } catch (error) {
+      console.error("Error downloading annual data table:", error);
+      throw error;
+    }
+  },
+
+    // Upload Annually reporting and reviewing
+    reportingAuthorityAndReviewAnnualUpload: async ({ file, sol, roleName, empNo }) => {
+      try {
+        const params = new URLSearchParams({
+          sol,
+          roleName,
+          empNo,
+        });
+  
+        const formData = new FormData();
+        formData.append("file", file); 
+  
+        const response = await apiClient.post(
+          `/appraisal/admin/hr_update_annual_repa_reva_surl/upload?${params.toString()}`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+  
+        return response.data;
+      } catch (error) {
+        console.error("Error uploading Reporting Authority Bulk file:", error);
+        throw error;
+      }
+    },
 };
 
 // Generic API methods
