@@ -19,6 +19,7 @@ export default function EmployeeAppraisalCard({
   organization,
   appraisalStatus = 'PENDING AT APPRAISEE',
   exceptionStatus = 'NOT CREATED',
+  scoreData = [],
   onAddCheckIn,
   onViewSummary,
   onAddException,
@@ -219,6 +220,35 @@ export default function EmployeeAppraisalCard({
         className={`actions-collapse row mt-5 ${isExpanded ? 'open' : ''}`}
         aria-hidden={!isExpanded}
       >
+        {/* Score Breakdown Section */}
+        {scoreData && scoreData.length > 0 && (
+          <div className="score-breakdown-section col-12 mb-4">
+            <h5 className="text-primary fw-bold mb-3">Score Breakdown</h5>
+            <div className="table-responsive">
+              <table className="table table-striped table-bordered">
+                <thead className="table-primary">
+                  <tr>
+                    <th>Cycle</th>
+                    <th>Percentage Score</th>
+                    <th>Weightage</th>
+                    <th>Weighted Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {scoreData.map((score, scoreIndex) => (
+                    <tr key={scoreIndex}>
+                      <td>{score.CYCLE || '-'}</td>
+                      <td>{score.PERCENTAGE_SCORE ?? 0}</td>
+                      <td>{score.WEIGHTAGE ?? 0}</td>
+                      <td>{score.WEIGHTED_SCORE ?? 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* Role Description Section */}
         <div className="role-description col-md-6 col-12">
           {/* Primary Role */}
@@ -292,6 +322,12 @@ EmployeeAppraisalCard.propTypes = {
   organization: PropTypes.string,
   appraisalStatus: PropTypes.string,
   exceptionStatus: PropTypes.string,
+  scoreData: PropTypes.arrayOf(PropTypes.shape({
+    CYCLE: PropTypes.string,
+    PERCENTAGE_SCORE: PropTypes.number,
+    WEIGHTAGE: PropTypes.number,
+    WEIGHTED_SCORE: PropTypes.number,
+  })),
   onAddCheckIn: PropTypes.func,
   onViewSummary: PropTypes.func,
   onAddException: PropTypes.func,
