@@ -1,121 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React from 'react';
 
-const STORAGE_KEY = "kra-table-v1";
+export default function ValidatorTable({ rows = [], onRowChange, onSubmit, isSubmitting }) {
+  const anyChecked = rows.some((row) => row.checked);
 
-const initialDemoData = [
-  {
-    id: 1,
-    checked: false,
-    kra: "Achievement in no. of PMJJBY accounts opened vs target",
-    unit: "Number",
-    actual: 6,
-    appraisee: 10.0,
-    appraiserActual: 10,
-    target: 40.0,
-    appraiserTarget: 40.0,
-    validatorActual: 0,
-    validatorTarget: 0,
-    maxScore: 3.0,
-    score: 0.5,
-    validatorScore: 0.5,
-    month: "April",
-    category: "Measurable",
-    selfComment: "",
-    appraiserComment: "",
-    commentOpen: true,
-    action: "accept",
-  },
-  {
-    id: 2,
-    checked: false,
-    kra: "% Growth in Terminal Total o/s advances",
-    unit: "%",
-    actual: -8.1,
-    appraisee: 0.1,
-    appraiserActual: 0.2,
-    target: 0.9,
-    appraiserTarget: 0.9,
-    validatorActual: 0,
-    validatorTarget: 0,
-    maxScore: 4.0,
-    score: 0.0,
-    validatorScore: 0.0,
-    month: "April",
-    category: "Measurable",
-    selfComment: "",
-    appraiserComment: "",
-    commentOpen: true,
-    action: "accept",
-  },
-];
+  const updateRow = (id, patch) => {
+    if (!onRowChange) return;
+    onRowChange(id, patch);
+  };
 
-export default function ValidatorTable() {
-  const [rows, setRows] = useState(initialDemoData);
-  const [showModal, setShowModal] = useState(false);
-
-  // load saved data from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setRows(JSON.parse(saved));
-      } catch {
-        setRows(initialDemoData);
-      }
-    }
-  }, []);
-
-  const anyChecked = rows.some((r) => r.checked);
-
-  const updateRow = (id, patch) =>
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-
-  const handleCheckbox = (id) =>
-    updateRow(id, { checked: !rows.find((r) => r.id === id).checked });
+  const handleCheckbox = (id) => {
+    const current = rows.find((row) => row.id === id);
+    updateRow(id, { checked: !current?.checked });
+  };
 
   const handleAction = (id, action) => updateRow(id, { action });
 
   const handleInput = (id, field, value) => updateRow(id, { [field]: value });
 
-  const toggleComment = (id) =>
-    updateRow(id, { commentOpen: !rows.find((r) => r.id === id).commentOpen });
-
-  const handleSubmit = () => {
-    if (!anyChecked) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-    setShowModal(true);
+  const toggleComment = (id) => {
+    const current = rows.find((row) => row.id === id);
+    updateRow(id, { commentOpen: !current?.commentOpen });
   };
 
-  const closeModal = () => setShowModal(false);
+  const handleSubmit = () => {
+    if (!anyChecked || !onSubmit) return;
+    onSubmit();
+  };
+
+  if (!rows.length) {
+    return <div className="empty-kra">No exception rows available for validation.</div>;
+  }
 
   return (
     <div className="kra-root">
-
- <div>
-    <h5 className="fw-semibold mb-1" style={{ color: "var(--accent-color)" }}>
-      Non-discretionary KRA
-    </h5>
-
-    <div className="d-flex justify-content-between align-items-start mb-3">
-      <h6 className="fw-semibold text-dark mb-0" style={{marginTop:"3rem"}}>Measurable</h6>
-     {/* Right Side */}
-
-  <div className="text-end">
-    <div className="fw-semibold text-secondary mb-1">Non-discretionary Score</div>
-    <div className="text-dark fw-semibold">
-      <div>
-        Old Score: <span className="fw-bold">0.5/7.0</span>
-      </div>
-      <div>
-        New Score: <span className="fw-bold">1.2/7.0</span>
-      </div>
-    </div>
-  </div>
-
-    </div>
-
-  </div>
-
+      <h4 className="kra-title-top">Validator Review</h4>
 
       <div className="kra-table-wrap" role="table">
         <div className="kra-header-row table-header">
@@ -133,22 +51,24 @@ export default function ValidatorTable() {
           <div className="col action-col">Action</div>
         </div>
 
-        {rows.map((r) => {
-          const isEditable = r.checked && r.action === "edit"; // validator edit only
+        {rows.map((row) => {
+          const valueEditable = row.checked && row.action === 'edit';
+          const commentEditable = row.checked && row.action !== 'accept';
 
           return (
-            <div key={r.id} className="d-flex flex-column">
+            <div key={row.id} className="d-flex flex-column">
               <div className="kra-row">
                 <div className="col select-col">
                   <input
                     type="checkbox"
-                    checked={r.checked}
-                    onChange={() => handleCheckbox(r.id)}
+                    checked={row.checked}
+                    onChange={() => handleCheckbox(row.id)}
+                    aria-label={`select-${row.id}`}
                   />
                 </div>
 
                 <div className="col kra-col">
-                  <div className="kra-text">{r.kra}</div>
+                  <div className="kra-text">{row.kra}</div>
                 </div>
 
                 <div className="col roles-col">
@@ -161,65 +81,55 @@ export default function ValidatorTable() {
                   <div className="role">Validator</div>
                 </div>
 
-                <div className="col unit-col">{r.unit}</div>
+                <div className="col unit-col">{row.unit}</div>
 
-                {/* Actual values */}
                 <div className="col actual-col">
-                  <input className="readonly" value={r.actual} readOnly />
-                  <input className="readonly" value={r.appraisee} readOnly />
-                  <input className="readonly" value={r.appraiserActual} readOnly />
+                  <input className="readonly" value={row.actual} readOnly />
+                  <input className="readonly" value={row.appraisee} readOnly />
+                  <input className="readonly" value={row.appraiserActual} readOnly />
                   <input
-                    className={isEditable ? "editable" : "readonly"}
-                    value={r.validatorActual}
-                    onChange={(e) =>
-                      handleInput(r.id, "validatorActual", e.target.value)
-                    }
-                    readOnly={!isEditable}
+                    className={valueEditable ? 'editable' : 'readonly'}
+                    value={row.validatorActual}
+                    onChange={(e) => handleInput(row.id, 'validatorActual', e.target.value)}
+                    readOnly={!valueEditable}
                   />
                 </div>
 
-                {/* Target values */}
                 <div className="col target-col">
-                  <input className="readonly" value={r.target} readOnly />
-                  <input className="readonly" value={r.target} readOnly />
-                  <input className="readonly" value={r.appraiserTarget} readOnly />
+                  <input className="readonly" value={row.target} readOnly />
+                  <input className="readonly" value={row.target} readOnly />
+                  <input className="readonly" value={row.appraiserTarget} readOnly />
                   <input
-                    className={isEditable ? "editable" : "readonly"}
-                    value={r.validatorTarget}
-                    onChange={(e) =>
-                      handleInput(r.id, "validatorTarget", e.target.value)
-                    }
-                    readOnly={!isEditable}
+                    className={valueEditable ? 'editable' : 'readonly'}
+                    value={row.validatorTarget}
+                    onChange={(e) => handleInput(row.id, 'validatorTarget', e.target.value)}
+                    readOnly={!valueEditable}
                   />
                 </div>
 
-                {/* Max Score */}
                 <div className="col max-col">
-                  <input className="readonly single" value={r.maxScore} readOnly />
+                  <input className="readonly single" value={row.maxScore} readOnly />
                 </div>
 
-                {/* Score */}
                 <div className="col score-col">
                   <input
-                    className={isEditable ? "editable single" : "readonly single"}
-                    value={r.validatorScore}
-                    onChange={(e) =>
-                      handleInput(r.id, "validatorScore", e.target.value)
-                    }
-                    readOnly={!isEditable}
+                    className={valueEditable ? 'editable single' : 'readonly single'}
+                    value={row.validatorScore}
+                    onChange={(e) => handleInput(row.id, 'validatorScore', e.target.value)}
+                    readOnly={!valueEditable}
                   />
                 </div>
 
                 <div className="col month-col">
-                  <input className="readonly single" value={r.month} readOnly />
+                  <input className="readonly single" value={row.month} readOnly />
                 </div>
 
-                <div className="col cat-col"></div>
+                <div className="col cat-col" />
 
                 <div className="col comment-col">
                   <button
                     className="comment-icon"
-                    onClick={() => toggleComment(r.id)}
+                    onClick={() => toggleComment(row.id)}
                     title="Toggle comments"
                   >
                     <i className="bi bi-chat-left-text-fill" />
@@ -230,66 +140,58 @@ export default function ValidatorTable() {
                   <label className="radio-row">
                     <input
                       type="radio"
-                      name={`action-${r.id}`}
+                      name={`action-${row.id}`}
                       value="accept"
-                      checked={r.action === "accept"}
-                      onChange={() => handleAction(r.id, "accept")}
+                      checked={row.action === 'accept'}
+                      onChange={() => handleAction(row.id, 'accept')}
                     />
                     <span>ACCEPT AS IT IS</span>
                   </label>
-
                   <label className="radio-row">
                     <input
                       type="radio"
-                      name={`action-${r.id}`}
+                      name={`action-${row.id}`}
                       value="edit"
-                      checked={r.action === "edit"}
-                      onChange={() => handleAction(r.id, "edit")}
+                      checked={row.action === 'edit'}
+                      onChange={() => handleAction(row.id, 'edit')}
                     />
                     <span>ACCEPT AND EDIT</span>
                   </label>
-
                   <label className="radio-row">
                     <input
                       type="radio"
-                      name={`action-${r.id}`}
+                      name={`action-${row.id}`}
                       value="reject"
-                      checked={r.action === "reject"}
-                      onChange={() => handleAction(r.id, "reject")}
+                      checked={row.action === 'reject'}
+                      onChange={() => handleAction(row.id, 'reject')}
                     />
                     <span>REJECT</span>
                   </label>
                 </div>
               </div>
 
-              {/* Comment Block */}
-              {r.commentOpen && (
+              {row.commentOpen && (
                 <div className="comment-block">
                   <div className="comment-inner">
                     <div className="comment-left">
                       <label className="lbl">Self Comment:</label>
-                      <div className="self-box">{r.selfComment || ""}</div>
+                      <div className="self-box">{row.selfComment || ''}</div>
                     </div>
-
                     <div className="comment-right">
                       <label className="lbl">
-                        Appraiser Comment:<span className="required">*</span>
+                        Validator Comment<span className="required">*</span>
                       </label>
                       <textarea
                         className="text-area"
-                        value={r.appraiserComment}
-                        onChange={(e) =>
-                          handleInput(r.id, "appraiserComment", e.target.value)
-                        }
+                        value={row.validatorComment || ''}
+                        onChange={(e) => handleInput(row.id, 'validatorComment', e.target.value)}
                         placeholder="write here"
-                        readOnly={!isEditable}
+                        readOnly={!commentEditable}
                         maxLength={300}
                       />
                       <div className="comment-foot">
-                        <div className="min-note">Minimum 20 character.</div>
-                        <div className="counter">
-                          {(r.appraiserComment || "").length} / 300
-                        </div>
+                        <div className="min-note">Minimum 20 characters.</div>
+                        <div className="counter">{(row.validatorComment || '').length} / 300</div>
                       </div>
                     </div>
                   </div>
@@ -300,32 +202,15 @@ export default function ValidatorTable() {
         })}
       </div>
 
-      {/* Submit */}
       <div className="submit-wrap">
         <button
-          className={`submit-btn ${anyChecked ? "active" : "inactive"}`}
+          className={`submit-btn ${anyChecked ? 'active' : 'inactive'}`}
           onClick={handleSubmit}
-          disabled={!anyChecked}
+          disabled={!anyChecked || isSubmitting}
         >
-          Submit
+          {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-body">
-              Exception Reviewed by Validator successfully!
-            </div>
-            <div className="modal-actions">
-              <button className="ok-btn" onClick={closeModal}>
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

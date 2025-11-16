@@ -61,11 +61,12 @@ export default function AppraiseeCheckIn() {
 
   // React Query to fetch dashboard data
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['myAppraisalDashboard', financialYear, appraisalPeriod, empNo],
+    queryKey: ['myAppraisalDashboard', financialYear, appraisalPeriod, quarter, empNo],
     queryFn: () => appraisalAPI.getAppraiseeCheckInDashboard({
       empNo: empNo,
       financialYear: extractYear(financialYear),
-      appraisalPeriod: appraisalPeriod.toLowerCase()
+      appraisalPeriod: appraisalPeriod.toLowerCase(),
+      quarter: appraisalPeriod.toLowerCase() === 'quarterly' ? quarter : '',
     }),
     enabled: !!empNo && !!financialYear && !!appraisalPeriod,
   });

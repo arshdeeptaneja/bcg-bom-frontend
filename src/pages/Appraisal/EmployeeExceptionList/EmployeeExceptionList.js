@@ -1,7 +1,7 @@
 import { BackButton } from '../../../components/common';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import React, { useState } from "react";
-import "./EmployeeExceptionList.css";
+import React, { useState } from 'react';
+import './EmployeeExceptionList.css';
 
 const EmployeeExceptionList = () => {
 
@@ -41,6 +41,26 @@ const EmployeeExceptionList = () => {
 
   const handleClear = () => {
     setFilters({ employee: "", role: "", branch: "", status: "" });
+  };
+
+  const buildQuarterDateRange = (fyLabel, quarterLabel) => {
+    if (!fyLabel || !quarterLabel) return '';
+    const match = `${fyLabel}`.match(/(\d{4})/);
+    const baseYear = match ? parseInt(match[1], 10) : NaN;
+    if (!baseYear) return '';
+
+    switch (quarterLabel) {
+      case 'Q1':
+        return `01 Apr ${baseYear} - 30 Jun ${baseYear}`;
+      case 'Q2':
+        return `01 Jul ${baseYear} - 30 Sep ${baseYear}`;
+      case 'Q3':
+        return `01 Oct ${baseYear} - 31 Dec ${baseYear}`;
+      case 'Q4':
+        return `01 Jan ${baseYear + 1} - 31 Mar ${baseYear + 1}`;
+      default:
+        return '';
+    }
   };
 
   return (
@@ -163,10 +183,32 @@ const EmployeeExceptionList = () => {
                   <td>
                     <div className="d-flex flex-column gap-2">
                       <button className="btn view-btn">View Appraisal</button>
-                      <button className="btn review-btn"
-                        onClick={() => navigate("/appraisal/review-quarterly-exception")}
-
-                      >Review Exception</button>
+                      <button
+                        className="btn review-btn"
+                        onClick={() =>
+                          navigate('/appraisal/employee-review-quarterly-exception', {
+                            state: {
+                              financialYear,
+                              appraisalPeriod,
+                              quarter,
+                              dateRange: buildQuarterDateRange(financialYear, quarter),
+                              employee: {
+                                empNo: item.empNumber,
+                                employeeName: item.empName,
+                                branch: item.branch,
+                                primaryRole: item.primaryRole,
+                              },
+                              role: 'VALIDATOR',
+                              roleName: 'VALIDATOR',
+                              roleId: 'VALIDATOR',
+                              custTicketId: item.ticketId,
+                              exceptionId: item.ticketId,
+                            },
+                          })
+                        }
+                      >
+                        Review Exception
+                      </button>
                     </div>
                   </td>
                 </tr>

@@ -494,6 +494,54 @@ export const appraisalAPI = {
     }
   },
 
+  // GET: Fetch acceptor (reviewer) appraisal payload
+  getAcceptorAppraisal: async ({
+    empNo,
+    urlId,
+    roleName,
+    roleId,
+    zoneName,
+    financialYear,
+    appraisalPeriod,
+    quarter,
+    appraisalStatus,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'urlId', urlId);
+      appendQueryParam(params, 'roleName', roleName);
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'appraisalPeriod', appraisalPeriod);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
+
+      const response = await apiClient.get(
+        `/appraisal/acceptor_appraisal?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getAcceptorAppraisal error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit reviewer/acceptor appraisal response
+  submitAcceptorAppraisal: async (payload = {}, { endpoint } = {}) => {
+    try {
+      const response = await apiClient.post(
+        endpoint || '/appraisal/acceptor_appraisal/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitAcceptorAppraisal error', error);
+      throw error;
+    }
+  },
+
   submitSelfAppraisal: async (payload) => {
     try {
       const params = new URLSearchParams();
@@ -578,6 +626,94 @@ export const appraisalAPI = {
       return response.data;
     } catch (error) {
       console.error('submitQuarterlyExceptionReport error', error);
+      throw error;
+    }
+  },
+
+  // GET: Review exception payload used by exception resolution reviewers
+  getExceptionQuarterlyReview: async ({
+    fy,
+    quarter,
+    empNo,
+    roleName,
+    roleId,
+    zone,
+    custTicketId,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'fy', fy);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'roleName', roleName);
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'zone', zone);
+      appendQueryParam(params, 'custTicketId', custTicketId);
+
+      const response = await apiClient.get(
+        `/appraisal/exception_quarterly_verify/review?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getExceptionQuarterlyReview error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit reviewer decision for quarterly exception
+  submitExceptionQuarterlyReview: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/exception_quarterly_verify/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitExceptionQuarterlyReview error', error);
+      throw error;
+    }
+  },
+
+  // GET: Fetch validator view of exception for review
+  getExceptionQuarterlyValidatorReview: async ({
+    fy,
+    quarter,
+    empNo,
+    roleName,
+    roleId,
+    zone,
+    custTicketId,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'fy', fy);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'roleName', roleName);
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'zone', zone);
+      appendQueryParam(params, 'custTicketId', custTicketId);
+
+      const response = await apiClient.get(
+        `/appraisal/exception_quarterly_validator/review?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getExceptionQuarterlyValidatorReview error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit validator decision for quarterly exception
+  submitExceptionQuarterlyValidatorReview: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/exception_quarterly_validator/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitExceptionQuarterlyValidatorReview error', error);
       throw error;
     }
   },

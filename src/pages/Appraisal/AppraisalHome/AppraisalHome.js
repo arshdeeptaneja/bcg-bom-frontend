@@ -211,6 +211,33 @@ export default function AppraisalHome() {
             );
           }}
         />
+
+        <KpiTab
+          heading="Reviewer Mode"
+          kpiData={[
+            {
+              value:
+                data?.reviewer_pending_appraisals === undefined ||
+                data?.reviewer_pending_appraisals === ''
+                  ? 0
+                  : data?.reviewer_pending_appraisals,
+              label: 'Pending Reviews',
+            },
+            {
+              value:
+                data?.reviewer_completed_appraisals === undefined ||
+                data?.reviewer_completed_appraisals === ''
+                  ? 0
+                  : data?.reviewer_completed_appraisals,
+              label: 'Completed Reviews',
+            },
+          ]}
+          onClick={() => {
+            navigate(
+              `/appraiser/reviewer-dashboard?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+            );
+          }}
+        />
       </div>
       {/* Accordion for My Final Score */}
       <div className="myFinalScore-accordion mt-3">
