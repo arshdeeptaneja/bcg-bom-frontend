@@ -8,6 +8,8 @@ import { useState } from 'react';
 const AppraiserStatus = () => {
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
+  const [showReasonComment, setShowReasonComment] = useState(false);
+
 
 
   return (
@@ -33,10 +35,10 @@ const AppraiserStatus = () => {
         </div>
       </div>
 
-        <div className="pageWrapper-header">
-            <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Status Change Utility</h1>
-          </div>
+      <div className="pageWrapper-header">
+        <BackButton />
+        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Status Change Utility</h1>
+      </div>
       <div className="appraiser-page container-fluid p-4">
 
 
@@ -66,59 +68,57 @@ const AppraiserStatus = () => {
 
           {/* Right boxed options */}
           <div className="col-12 col-md-5">
-            <div className="appraisal-box d-flex justify-content-between align-items-start p-2">
+            <div className="appraisal-box d-flex justify-content-between align-items-start p-3">
               {/* Appraisal Period */}
               <div className="period-section">
                 <label className="period-title">Appraisal Period</label>
-                <div className="btn-groups mt-2" role="group">
-                  <button
-                    type="button"
+                <div className="period-btns mt-2" role="group">
+                  <div
                     onClick={() => setAppraisalPeriod('Quarterly')}
-                    className={`btn ${appraisalPeriod === 'Quarterly' ? 'active' : 'period-btn'}`}>
+                    className={`period-btn ${appraisalPeriod === 'Quarterly' ? 'active' : ''}`}>
                     Quarterly
-                  </button>
-                  <button
+                  </div>
+                  <div
                     onClick={() => setAppraisalPeriod('Annual')}
-                    type="button"
-                    className={`btn ${appraisalPeriod === 'Annual' ? 'active' : 'period-btn'}`}>
+                    className={`period-btn ${appraisalPeriod === 'Annual' ? 'active' : ''}`}>
                     Annual Year
-                  </button>
+                  </div>
                 </div>
               </div>
 
               {/* Quarterly Period */}
               {appraisalPeriod === 'Quarterly' &&
-                <div className="period-section text-end">
+                <div className="period-section">
                   <label className="period-title">Quarterly Period</label>
-                  <div className="btn-group mt-2" role="group">
-                    <button type="button"
-                     className={`btns px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
-                    }`}
-                  onClick={() => setSelectedQuarter('Q1')}
+                  <div className="period-btns mt-2" role="group">
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q1' ? 'active' : ''
+                        }`}
+                      onClick={() => setSelectedQuarter('Q1')}
                     >
                       Q1
-                    </button>
-                    <button type="button"
-                       className={`btns px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
-                    }`}
-                  onClick={() => setSelectedQuarter('Q2')}
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q2' ? 'active' : ''
+                        }`}
+                      onClick={() => setSelectedQuarter('Q2')}
                     >
                       Q2
-                    </button>
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
-                    }`}
-                  onClick={() => setSelectedQuarter('Q3')}
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q3' ? 'active' : ''
+                        }`}
+                      onClick={() => setSelectedQuarter('Q3')}
                     >
                       Q3
-                    </button>
-                    <button type="button"
-                     className={`btns px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
-                    }`}
-                  onClick={() => setSelectedQuarter('Q4')}
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q4' ? 'active' : ''
+                        }`}
+                      onClick={() => setSelectedQuarter('Q4')}
                     >
                       Q4
-                    </button>
+                    </div>
                   </div>
                 </div>
               }
@@ -134,57 +134,79 @@ const AppraiserStatus = () => {
         {/* Table */}
         <div className="table-wrap">
           <div className="table-responsive">
-            <table className="table table-bordered align-middle mb-0">
-              <thead className="table-header">
+            <table className="table appraisal-table align-middle mb-0">
+              <thead className='table-header'>
                 <tr>
-                  <th>ASSIGNMENT ID</th>
+                  <th></th>
                   <th>URL ID</th>
-                  <th>EC Number</th>
-                  <th>Employee Name</th>
+                  <th>EMP Number</th>
+                  <th>EMP Name</th>
                   <th>Main Role</th>
                   <th>SOL ID</th>
-                  <th>Repa EMP Number</th>
                   <th>Zone</th>
-                  <th>Action</th>
-                  <th>Additional Role 1</th>
-                  <th>Additional Role 2</th>
+                  <th>Appraisal Status</th>
+                  <th>Score</th>
                   <th>Start Date</th>
                   <th>End Date</th>
-                  <th>Repa Name</th>
-                  <th>Branch</th>
+                  <th>Select Status</th>
+                  <th>Reason Comment</th>
                 </tr>
               </thead>
-            <tbody>
-              <tr>
-                <td className="text-center">
-                  <input type="checkbox" />
-                </td>
-                <td>U-16695</td>
-                <td>R19305</td>
-                <td>RAJESHWAR PRASAD</td>
-                <td>Branch Manager</td>
-                <td>220</td>
-                <td>Central Zone</td>
-                <td>Completed</td>
-                <td>66.7</td>
-                <td>28 APR 25</td>
-                <td>30 JUN 25</td>
-                <td>
-                  <select className="form-select custom-select">
-                    <option>-Select-</option>
-                    <option>Approved</option>
-                    <option>Rejected</option>
-                  </select>
-                </td>
-                <td></td>
-              </tr>
-            </tbody>
+
+              <tbody>
+                <tr>
+                  <td className="text-center">
+                    <input type="checkbox" />
+                  </td>
+
+                  <td>U-16695</td>
+                  <td>R19305</td>
+                  <td>RAJESHWAR PRASAD</td>
+                  <td>Branch Manager</td>
+                  <td>220</td>
+                  <td>Central Zone</td>
+
+                  <td>Completed</td>
+                  <td>66.7</td>
+                  <td>28-APR-25</td>
+                  <td>30-JUN-25</td>
+
+                  {/* Select Status Dropdown */}
+                  <td>
+                    <select className="form-select status-select" style={{width:"200px"}}>
+                      <option>-Select-</option>
+                      <option>Approved</option>
+                      <option>Rejected</option>
+                    </select>
+                  </td>
+
+                  <td style={{ textAlign: "center" }}>
+                    <i
+                      className="bi bi-chat-left-text-fill text-primary align-middle"
+                      style={{ fontSize: "20px", cursor: "pointer" }}
+                      onClick={() => setShowReasonComment(!showReasonComment)}
+                    ></i>
+                  </td>
+                </tr>
+                <tr >
+                  <td colSpan="13">
+                    {showReasonComment && (
+                      <div className="mt-4 d-flex flex-column align-items-start">
+                        <label className="form-label fw-semibold">Reason Comment:</label>
+                        <textarea
+                          className="form-control reason-comment-box"
+                          rows="4"
+                          placeholder="Enter your comment"
+                        ></textarea>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
-
-          {/* horizontal green progress bar like in screenshot */}
-
         </div>
+
       </div>
     </div>
   );

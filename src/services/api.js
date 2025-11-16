@@ -26,7 +26,8 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT'; //  localStorage.getItem('accessToken');
+    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT'; 
+    // const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -443,6 +444,19 @@ export const appraisalAPI = {
       throw error;
     }
   },
+
+  // GET: Get Admin HR Dashboard data
+  getHrDashboard: async ({ empNo, appraisalPeriod, financialYear }) => {
+  const res = await axios.get(`/appraisal/admin/hr_dashboard`, {
+    params: {
+      empNo,
+      appraisalPeriod,
+      financialYear,
+    },
+  });
+  return res.data;
+},
+
 };
 
 // Generic API methods
@@ -505,5 +519,8 @@ export const accessService = {
     }
   },
 };
+
+
+
 
 export default apiClient;

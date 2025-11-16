@@ -1,15 +1,6 @@
-.page {
-  background-color: var(--bs-secondary);
-  min-height: 100vh;
-}
 
-.back-button {
-  border: var(--border);
-  padding: 8px 20px;
-  color: var(--accent-color);
-  background: none;
-  border-radius: var(--border-radius);
-}
+
+
  .container-fluids{
 padding-right: 2rem;
     padding-left: 6rem;

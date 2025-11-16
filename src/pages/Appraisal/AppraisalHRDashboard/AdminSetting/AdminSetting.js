@@ -1,27 +1,33 @@
 import React from "react";
 import { FaDownload } from "react-icons/fa";
-import "../ReportingReviewBulk/ReportingReviewBulk.css";
 import { BackButton } from "../../../../components/common";
 import { FaInfoCircle } from "react-icons/fa";
 import { IoMdDownload } from "react-icons/io";
 
 
-const ValidatorUpdateUtility = () => {
+const AdminSetting = () => {
     const tableData = [
         {
             id: 1,
-            fileName: "admin_hr_update_repa_sample_success_log_2025-10-21-15-48-50.xlsx",
+            fileName: "admin_hr_update_repa_reva_surl_sample_success_log_2025-10-21-15-48-50.xlsx",
             date: "21-OCT-2025 03:48 PM",
-            status: "SUCCESS",
+            status: "FAILED",
             records: 5,
             uploadedBy: "ANCHAL NAYAR"
         },
-      
+        {
+            id: 2,
+            fileName: "admin_hr_update_repa_reva_failed_2025-10-21-16-12-11.xlsx",
+            date: "21-OCT-2025 04:12 PM",
+            status: "FAILED",
+            records: 0,
+            uploadedBy: "RAHUL KHANNA"
+        }
     ];
 
 
     return (
-        <div className="AppraiserContaniner">
+        <div className="pageWrapper">
             <div className="breadcrumb-header d-flex justify-content-between align-items-center px-3 py-2">
                 {/* Left Side: Breadcrumb */}
                 <div className="breadcrumb-path">
@@ -29,7 +35,7 @@ const ValidatorUpdateUtility = () => {
                     <span className="breadcrumb-separator">/</span>
                     <span className="breadcrumb-link">Appraisal HR Dashboard</span>
                     <span className="breadcrumb-separator">/</span>
-                    <span className="breadcrumb-active"> Validator Update Utility</span>
+                    <span className="breadcrumb-active">Admin Setting to Discretionary KRA</span>
                 </div>
 
                 {/* Right Side: Info Section */}
@@ -45,7 +51,7 @@ const ValidatorUpdateUtility = () => {
 
             <div className="pageWrapper-header">
                 <BackButton />
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Validator Update Utility </h1>
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3"> Admin Setting to Discretionary KRA </h1>
             </div>
 
             <section className="mt-4 card">
@@ -72,42 +78,41 @@ const ValidatorUpdateUtility = () => {
             </div>
           </div>
 
+
                 <p className="text-muted small">NOTE: Please upload file with .xlsx extension only</p>
 
                 {/* Table */}
                 <div className="table-responsive mt-4">
                     <table className="table custom-table mb-0">
-  <thead className="table-header">
-    <tr>
-      <th className="text-center">Sr. No.</th>
-      <th className="text-start">Files Name</th>
-      <th className="text-center">Date</th>
-      <th className="text-center">Status</th>
-      <th className="text-center">No. Of Records Inserted</th>
-      <th className="text-center">Uploaded By</th>
-      <th className="text-center">Download File</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    {tableData.map((row) => (
-      <tr key={row.id}>
-        <td className="text-center">{row.id}</td>
-        <td className="text-start file-name">{row.fileName}</td>
-        <td className="text-center">{row.date}</td>
-        <td className={row.status === "SUCCESS" ? "status-success text-center" : "status-failed text-center"}>
-          {row.status}
-        </td>
-        <td className="text-center">{row.records}</td>
-        <td className="text-center">{row.uploadedBy}</td>
-        <td className="text-center">
-          <FaDownload className="download-icon" />
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
+                        <thead className="table-header">
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>Files Name</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>No. Of Records Inserted</th>
+                                <th>Uploaded By</th>
+                                <th>Download File</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tableData.map((row) => (
+                                <tr key={row.id}>
+                                    <td className="text-center">{row.id}</td>
+                                    <td className="file-name">{row.fileName}</td>
+                                    <td>{row.date}</td>
+                                    <td className={row.status === "SUCCESS" ? "status-success" : "status-failed"}>
+                                        {row.status}
+                                    </td>
+                                    <td>{row.records}</td>
+                                    <td>{row.uploadedBy}</td>
+                                    <td className="download-cell">
+                                        <FaDownload className="download-icon" />
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
 
 
@@ -116,4 +121,4 @@ const ValidatorUpdateUtility = () => {
     );
 };
 
-export default ValidatorUpdateUtility;
+export default AdminSetting;

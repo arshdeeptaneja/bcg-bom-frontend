@@ -19,7 +19,7 @@ const AppraiserUpdate = () => {
           <span className="breadcrumb-separator">/</span>
           <span className="breadcrumb-link">Appraisal HR Dashboard</span>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-active">Reporting & Reviewing Authority Update by Emp Number </span>
+          <span className="breadcrumb-active">Appraisal & Reviewing Update by Emp Number </span>
         </div>
 
         {/* Right Side: Info Section */}
@@ -34,7 +34,7 @@ const AppraiserUpdate = () => {
       </div>
        <div className="pageWrapper-header">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Reporting & Reviewing Authority Update by Emp Number </h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal & Reviewing Update by Emp Number </h1>
           </div>
       <div className="appraiser-page container-fluid p-4">
 
@@ -72,59 +72,57 @@ const AppraiserUpdate = () => {
 
           {/* Right boxed options */}
           <div className="col-12 col-md-5">
-            <div className="appraisal-box d-flex justify-content-between align-items-start p-2">
+             <div className="appraisal-box d-flex justify-content-between align-items-start p-3">
               {/* Appraisal Period */}
               <div className="period-section">
                 <label className="period-title">Appraisal Period</label>
-                <div className="btn-groups mt-2" role="group">
-                  <button
-                    type="button"
+                <div className="period-btns mt-2" role="group">
+                  <div
                     onClick={() => setAppraisalPeriod('Quarterly')}
-                    className={`btn ${appraisalPeriod === 'Quarterly' ? 'active' : 'period-btn'}`}>
+                    className={`period-btn ${appraisalPeriod === 'Quarterly' ? 'active' : ''}`}>
                     Quarterly
-                  </button>
-                  <button
+                  </div>
+                  <div
                     onClick={() => setAppraisalPeriod('Annual')}
-                    type="button"
-                    className={`btn ${appraisalPeriod === 'Annual' ? 'active' : 'period-btn'}`}>
+                    className={`period-btn ${appraisalPeriod === 'Annual' ? 'active' : ''}`}>
                     Annual Year
-                  </button>
+                  </div>
                 </div>
               </div>
 
               {/* Quarterly Period */}
               {appraisalPeriod === 'Quarterly' &&
-                <div className="period-section text-end">
+                <div className="period-section">
                   <label className="period-title">Quarterly Period</label>
-                  <div className="btn-group mt-2" role="group">
-                    <button type="button"
-                     className={`btns px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+                  <div className="period-btns mt-2" role="group">
+                    <div 
+                     className={`period-btn ${selectedQuarter === 'Q1' ? 'active' : ''
                     }`}
                   onClick={() => setSelectedQuarter('Q1')}
                     >
                       Q1
-                    </button>
-                    <button type="button"
-                       className={`btns px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div
+                       className={`period-btn ${selectedQuarter === 'Q2' ? 'active' : ''
                     }`}
                   onClick={() => setSelectedQuarter('Q2')}
                     >
                       Q2
-                    </button>
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div 
+                      className={`period-btn ${selectedQuarter === 'Q3' ? 'active' : ''
                     }`}
                   onClick={() => setSelectedQuarter('Q3')}
                     >
                       Q3
-                    </button>
-                    <button type="button"
-                     className={`btns px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div 
+                     className={`period-btn ${selectedQuarter === 'Q4' ? 'active' : ''
                     }`}
                   onClick={() => setSelectedQuarter('Q4')}
                     >
                       Q4
-                    </button>
+                    </div>
                   </div>
                 </div>
               }
