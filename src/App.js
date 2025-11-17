@@ -34,6 +34,7 @@ import {
   QuarterlyAppraisee,
   QuaterlyAppraiseeCheckIn,
   QuarterlyAppraiserBulk,
+  AppealDelection,
 } from './pages';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -86,11 +87,11 @@ function App() {
 // App content that uses AuthContext
 function AppContent() {
   let { isAuthenticated, loading, login, logout, setTeamDashboardData } = useAuth();
-  isAuthenticated = true
+  // isAuthenticated = true
   console.log('isAuthenticated', isAuthenticated);
 
   // TODO: For testing purposes, remove this later
-  // isAuthenticated = true;
+   isAuthenticated = true;
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -542,6 +543,17 @@ function AppContent() {
               }
             />
 
+            <Route
+              path="/appraisal/hr-dashboard/appeal-delection"
+              element={
+                isAuthenticated ? (
+                  <AppealDeletionLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
 
           </Routes>
         </div>
@@ -926,6 +938,14 @@ const AdminSettingLayout = ({ onLogout }) => (
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <AdminSetting />
+  </>
+);
+
+const AppealDeletionLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AppealDelection />
   </>
 );
 

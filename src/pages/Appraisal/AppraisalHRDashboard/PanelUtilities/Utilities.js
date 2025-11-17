@@ -45,9 +45,8 @@ const utilities = [
   // { name: "Update discretionary KRA scores in bulk", path: "" },
   // { name: "Quarterly Exception Deletion", path: "" },
 
-  // { name: "Annual Appeal Deletion", path: "" },
-  // { name: "Appraiser and Reviewer update by Emp Number", path: "" },
-  // { name: "Validator update by Emp Number", path: "" },
+  { name: "Annual Appeal Deletion", path: "/appraisal/hr-dashboard/appeal-delection" },
+  
 
   // { name: "Update Appellate Authority details in bulk", path: "" },
   // { name: "Update module active & inactive date", path: "" },
