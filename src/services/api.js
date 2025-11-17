@@ -377,6 +377,8 @@ export const appraisalAPI = {
   // GET: Get appraisal home dashboard data
   getAppraisalHomeDashboard: async ({ empNo, role, appraisalPeriod, financialYear, quarter }) => {
     try {
+
+      console.log("role in api is: ", role)
       const params = new URLSearchParams({
         empNo: empNo,
         role: role,
@@ -500,6 +502,7 @@ export const appraisalAPI = {
   getAppraiseeCheckInDashboard: async ({
     empNo,
     financialYear,
+    role,
     appraisalPeriod,
     quarter,
   }) => {
@@ -507,6 +510,7 @@ export const appraisalAPI = {
       const params = new URLSearchParams({
         fy: financialYear,
         empNo: empNo,
+        role: role,
         appraisalPeriod: appraisalPeriod,
         quarter: quarter || '',
       });
