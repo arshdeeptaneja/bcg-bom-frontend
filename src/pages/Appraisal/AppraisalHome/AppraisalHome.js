@@ -202,8 +202,6 @@ export default function AppraisalHome() {
         <KpiTab
           heading="Appraiser Check-in"
           kpiData={[
-            { value: 100, label: 'Appraisals to be filled' },
-            { value: 200, label: 'Pending Appraisals(s)' },
             { value: 0, label: 'Appraisals to be filled' },
             { value: 0, label: 'Pending Appraisals(s)' },
           ]}
