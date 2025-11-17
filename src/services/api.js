@@ -392,6 +392,25 @@ export const appraisalAPI = {
     }
   },
 
+  // GET: Get appraisee dashboard data
+  getAppraiseeDashboard: async ({ fy, quarter, appraisalPeriod, empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        fy: fy,
+        quarter: quarter || '',
+        appraisalPeriod: appraisalPeriod,
+        empNo: empNo,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/appraisee/dashboard?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
   // GET: Get appraisee check-in dashboard data (my appraisal dashboard)
   getAppraiseeCheckInDashboard: async ({ empNo, financialYear, appraisalPeriod }) => {
     try {
