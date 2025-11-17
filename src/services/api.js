@@ -446,17 +446,17 @@ export const appraisalAPI = {
     }
   },
 
-  appraisalStatusChange: async ({ ecNumber, appraisalPeriod, quarter, financialYear }) => {
+  appraisalStatusChange: async ({ empNo, appraisalPeriod, searchEmpNo, financialYear }) => {
     try {
       const params = new URLSearchParams({
-        ecNumber,
-        appraisalPeriod,       // Quarterly or Annual
-        financialYear,         // FY 2025-2026 (always passed)
-        quarter: appraisalPeriod === "Quarterly" ? quarter : "", // Only send quarter for Quarterly
+        empNo,
+        appraisalPeriod,
+        financialYear,
+        searchEmpNo
       });
   
       const response = await apiClient.get(
-        `/appraisal//status-change/search?${params.toString()}`
+        `/admin/hr_status_update_utility/search?${params.toString()}`
       );
   
       return response.data;
@@ -467,17 +467,22 @@ export const appraisalAPI = {
   },
 
   // Reporting and reviewing authority update by emp number
-  appraisalUpdate: async ({ ecNumber, appraisalPeriod, quarter, financialYear }) => {
+  appraisalUpdate: async ({ empNo, roleName, appraisalPeriod, quarter, empName, financialYear, sol, statusUpdates }) => {
     try {
-      const params = new URLSearchParams({
-        ecNumber,
-        appraisalPeriod,       // Quarterly or Annual
-        financialYear,         // FY 2025-2026 (always passed)
-        quarter: appraisalPeriod === "Quarterly" ? quarter : "", // Only send quarter for Quarterly
-      });
+      const body = {
+        empNo,
+        roleName,
+        appraisalPeriod,   // Quarterly or Annual
+        financialYear,    
+        quarter,
+        empName,
+        sol,
+        statusUpdates
+      };
   
       const response = await apiClient.get(
-        `/appraisal//status-change/search?${params.toString()}`
+        `/admin/hr_status_update_utility/update_status/search`,
+        body
       );
   
       return response.data;
@@ -679,6 +684,126 @@ export const appraisalAPI = {
         throw error;
       }
     },
+
+    // Upload Annually reporting and reviewing
+    moduleActiveInactiveDateGetList: async () => {
+      try {
+
+        const response = await apiClient.post(
+          `/admin/hr_module_active_inactive_date`
+        );
+  
+        return response.data;
+      } catch (error) {
+        console.error("Error getting data:", error);
+        throw error;
+      }
+    },
+
+    hrUploadValidatorUpload: async ({ file, sol, roleName, empNo }) => {
+      try {
+        const params = new URLSearchParams({
+          sol,
+          roleName,
+          empNo,
+        });
+  
+        const formData = new FormData();
+        formData.append("file", file); 
+  
+        const response = await apiClient.post(
+          `/appraisal/admin/hr_update_validator/upload?${params.toString()}`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+  
+        return response.data;
+      } catch (error) {
+        console.error("Error uploading Reporting Authority Bulk file:", error);
+        throw error;
+      }
+    },
+
+    hrValidatorListErrorLogs: async ({ financialYear, roleName }) => {
+      try {
+        const params = new URLSearchParams({
+          financialYear,
+          roleName
+        });
+  
+        const response = await apiClient.get(
+          `/appraisal/admin/hr_update_validator/error_logs?${params.toString()}`
+        );
+  
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching reporting authority bulk list:", error);
+        throw error;
+      }
+    },
+
+     // Download sample Excel for reporting authority bulk update
+  hrUpdateValidatorSampleDownload: async ({
+    roleName,
+    regionCode,
+    quarter,
+    financialYear,
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        roleName,
+        regionCode,
+        quarter,
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_validator/download_sample?${params.toString()}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      return response.data; // XLSX blob
+    } catch (error) {
+      console.error("Error downloading sample file:", error);
+      throw error;
+    }
+  },
+
+    // Download sample Excel for reporting authority bulk update
+  hrUpdateValidatorDataListDownload: async ({
+    roleName,
+    regionCode,
+    quarter,
+    financialYear,
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        roleName,
+        regionCode,
+        quarter,
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_validator/download_data_table?${params.toString()}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error downloading sample file:", error);
+      throw error;
+    }
+  },
+
+    
+
 };
 
 // Generic API methods
@@ -740,6 +865,7 @@ export const accessService = {
       throw error;
     }
   },
+
 };
 
 export default apiClient;
