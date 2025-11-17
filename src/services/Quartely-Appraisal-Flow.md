@@ -222,13 +222,750 @@ curl --request POST 'http://localhost:8084/appraisal/acceptor_appraisal/submit' 
 ```
 
 
+---
+
+## Mock API Response Payloads for Chrome DevTools
+
+Use these JSON responses in Chrome DevTools Network tab → Override content, or with tools like Mock Service Worker (MSW), Requestly, or Moesif.
+
+### 1. Appraisee Dashboard Response
+
+**GET** `/appraisal/my_appraisal_dashboard`
+
+```json
+{
+  "success": true,
+  "result": [
+    {
+      "EMP_ID": "36663",
+      "EMP_NAME": "Demo User",
+      "SCALE": "Senior Associate",
+      "MAIN_ROLE": "Branch Manager",
+      "APPRAISAL_STATUS": "IN_PROGRESS",
+      "START_DATE": "2024-04-01",
+      "END_DATE": "2024-06-30",
+      "REPORTING_AUTHORITY_NAME": "Jane Smith",
+      "ORGANIZATION": "BCG Bank",
+      "URL_ID": "URL-36663",
+      "ROLE_ID": "BRANCH_MANAGER",
+      "ZONE_NAME": "West Zone",
+      "QUARTER": "Q1",
+      "FINANCIAL_YEAR": "2024",
+      "AVERAGE_SCORE": 87.5
+    },
+    {
+      "EMP_ID": "36663",
+      "EMP_NAME": "Demo User",
+      "SCALE": "Senior Associate",
+      "MAIN_ROLE": "Branch Manager",
+      "APPRAISAL_STATUS": "COMPLETED",
+      "START_DATE": "2024-07-01",
+      "END_DATE": "2024-09-30",
+      "REPORTING_AUTHORITY_NAME": "Jane Smith",
+      "ORGANIZATION": "BCG Bank",
+      "URL_ID": "URL-36663-Q2",
+      "ROLE_ID": "BRANCH_MANAGER",
+      "ZONE_NAME": "West Zone",
+      "QUARTER": "Q2",
+      "FINANCIAL_YEAR": "2024",
+      "AVERAGE_SCORE": 92.3
+    }
+  ]
+}
+```
+
+---
+
+### 2. Appraiser Dashboard Response
+
+**GET** `/appraisal/quarterly_reportee_appraisal/dashboard`
+
+```json
+{
+  "success": true,
+  "result": [
+    {
+      "EMP_ID": "36664",
+      "EMP_NAME": "Alice Johnson",
+      "SCALE": "Associate",
+      "MAIN_ROLE": "Relationship Manager",
+      "APPRAISAL_STATUS": "Pending at Appraiser",
+      "START_DATE": "2024-04-01",
+      "END_DATE": "2024-06-30",
+      "URL_ID": "URL-36664",
+      "ROLE_ID": "RELATIONSHIP_MANAGER",
+      "ZONE_NAME": "West Zone",
+      "BRANCH_NAME": "Mumbai Main",
+      "REPORTING_AUTHORITY_NO": "EMP9000"
+    },
+    {
+      "EMP_ID": "36665",
+      "EMP_NAME": "Bob Williams",
+      "SCALE": "Senior Associate",
+      "MAIN_ROLE": "Operations Manager",
+      "APPRAISAL_STATUS": "COMPLETED",
+      "START_DATE": "2024-04-01",
+      "END_DATE": "2024-06-30",
+      "URL_ID": "URL-36665",
+      "ROLE_ID": "OPERATIONS_MANAGER",
+      "ZONE_NAME": "West Zone",
+      "BRANCH_NAME": "Mumbai Main",
+      "REPORTING_AUTHORITY_NO": "EMP9000"
+    }
+  ],
+  "appraisal_score_dash": {
+    "total_reviewed": 12,
+    "pending_review": 5,
+    "average_team_score": 78.3
+  },
+  "score_summary": {
+    "excellent": 3,
+    "good": 8,
+    "average": 4,
+    "below_average": 2
+  },
+  "filters": {
+    "EMP_NAME": ["Alice Johnson", "Bob Williams", "Charlie Brown"],
+    "PRIMARY_ROLE": ["Relationship Manager", "Operations Manager", "Branch Manager"],
+    "BRANCH_NAME": ["Mumbai Main", "Delhi North", "Bangalore East"],
+    "STATUS": ["Pending at Appraiser", "COMPLETED", "IN_PROGRESS"]
+  }
+}
+```
+
+---
+
+### 3. Quarterly Check-In Form Response (Appraisee & Appraiser)
+
+**GET** `/appraisal/quarterly_check_in_report`
+
+```json
+{
+  "success": true,
+  "data": {
+    "employeeDetails": {
+      "empNo": "36663",
+      "empName": "Demo User",
+      "designation": "Branch Manager",
+      "department": "Retail Banking",
+      "reportingAuthority": "Jane Smith",
+      "branch": "Mumbai Main",
+      "zone": "West Zone"
+    },
+    "measurableKRA": [
+      {
+        "kra_id": "KRA-001",
+        "kra": "CASA Growth",
+        "unit": "%",
+        "category": "Business",
+        "target": 15,
+        "actual": 14.2,
+        "score": 4.73,
+        "maxScore": 5,
+        "month": "April",
+        "appraiseeComment": "Achieved near target despite market challenges",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "KRA-002",
+        "kra": "NPA Recovery",
+        "unit": "INR Lakhs",
+        "category": "Business",
+        "target": 50,
+        "actual": 52,
+        "score": 5.0,
+        "maxScore": 5,
+        "month": "April",
+        "appraiseeComment": "Exceeded target through proactive follow-ups",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "KRA-003",
+        "kra": "CASA Growth",
+        "unit": "%",
+        "category": "Business",
+        "target": 15,
+        "actual": 15.8,
+        "score": 5.0,
+        "maxScore": 5,
+        "month": "May",
+        "appraiseeComment": "Strong performance with new customer acquisition",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "KRA-004",
+        "kra": "NPA Recovery",
+        "unit": "INR Lakhs",
+        "category": "Business",
+        "target": 50,
+        "actual": 48,
+        "score": 4.8,
+        "maxScore": 5,
+        "month": "May",
+        "appraiseeComment": "Slightly below target due to legal delays",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "KRA-005",
+        "kra": "CASA Growth",
+        "unit": "%",
+        "category": "Business",
+        "target": 15,
+        "actual": 16.5,
+        "score": 5.0,
+        "maxScore": 5,
+        "month": "June",
+        "appraiseeComment": "Best month with campaign success",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "KRA-006",
+        "kra": "NPA Recovery",
+        "unit": "INR Lakhs",
+        "category": "Business",
+        "target": 50,
+        "actual": 55,
+        "score": 5.0,
+        "maxScore": 5,
+        "month": "June",
+        "appraiseeComment": "Strong quarter-end push",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      }
+    ],
+    "nonMeasurableKRA": [
+      {
+        "kra_id": "NM-KRA-001",
+        "kra": "Team Leadership",
+        "category": "Behavioral",
+        "selfScore": 4,
+        "maxScore": 5,
+        "appraiseeComment": "Led team effectively during peak season",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "NM-KRA-002",
+        "kra": "Customer Service Excellence",
+        "category": "Behavioral",
+        "selfScore": 5,
+        "maxScore": 5,
+        "appraiseeComment": "Zero customer complaints this quarter",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "NM-KRA-003",
+        "kra": "Process Compliance",
+        "category": "Behavioral",
+        "selfScore": 4,
+        "maxScore": 5,
+        "appraiseeComment": "100% adherence to audit requirements",
+        "appraiserComment": "",
+        "reviewerComment": ""
+      }
+    ],
+    "monthlyScores": {
+      "April": { "total": 9.73, "max": 10, "percentage": 97.3 },
+      "May": { "total": 9.8, "max": 10, "percentage": 98.0 },
+      "June": { "total": 10.0, "max": 10, "percentage": 100.0 }
+    },
+    "developmentInputs": [
+      {
+        "question_id": "DEV-Q1",
+        "question": "What were your key achievements this quarter?",
+        "answer": "Successfully launched digital banking campaign, acquired 150+ new CASA accounts"
+      },
+      {
+        "question_id": "DEV-Q2",
+        "question": "What areas do you want to improve?",
+        "answer": "Want to enhance skills in wealth management products"
+      }
+    ],
+    "overallComments": {
+      "appraiseeComment": "Productive quarter with strong business performance",
+      "appraiserComment": "",
+      "reviewerComment": ""
+    },
+    "averageActual": 98.43,
+    "averageMax": 100,
+    "quarterlyScore": 29.53,
+    "maxQuarterlyScore": 30
+  }
+}
+```
+
+---
+
+### 4. Annual Self-Appraisal Response
+
+**GET** `/appraisal/employee_self_appraisal`
+
+```json
+{
+  "success": true,
+  "data": {
+    "employeeDetails": {
+      "empNo": "36663",
+      "empName": "Demo User",
+      "designation": "Branch Manager",
+      "department": "Retail Banking",
+      "branch": "Mumbai Main",
+      "zone": "West Zone",
+      "reportingAuthority": "Jane Smith"
+    },
+    "annual_score_summary": [
+      {
+        "CATEGORY": "Business Performance",
+        "SELF_SCORE": 85,
+        "MAX_SCORE": 100,
+        "APPRAISER_SCORE": 0,
+        "REVIEWER_SCORE": 0
+      },
+      {
+        "CATEGORY": "Behavioral Competencies",
+        "SELF_SCORE": 42,
+        "MAX_SCORE": 50,
+        "APPRAISER_SCORE": 0,
+        "REVIEWER_SCORE": 0
+      },
+      {
+        "CATEGORY": "Leadership & Initiative",
+        "SELF_SCORE": 38,
+        "MAX_SCORE": 50,
+        "APPRAISER_SCORE": 0,
+        "REVIEWER_SCORE": 0
+      }
+    ],
+    "unit_converter": {
+      "percentage": "%",
+      "count": "No.",
+      "currency": "INR",
+      "lakhs": "INR Lakhs"
+    },
+    "validation_text": "Please ensure all mandatory fields are completed before submission",
+    "quarterly_summary": {
+      "Q1": { "score": 29.53, "maxScore": 30, "status": "Completed", "percentage": 98.43 },
+      "Q2": { "score": 28.5, "maxScore": 30, "status": "Completed", "percentage": 95.0 },
+      "Q3": { "score": 27.9, "maxScore": 30, "status": "Completed", "percentage": 93.0 },
+      "Q4": { "score": 29.1, "maxScore": 30, "status": "Completed", "percentage": 97.0 }
+    },
+    "overall_annual_score": 115.03,
+    "max_annual_score": 120,
+    "annual_percentage": 95.86
+  }
+}
+```
+
+---
+
+### 5. Reviewer/Acceptor Appraisal Response
+
+**GET** `/appraisal/acceptor_appraisal`
+
+```json
+{
+  "success": true,
+  "data": {
+    "employeeDetails": {
+      "empNo": "36663",
+      "empName": "Demo User",
+      "designation": "Branch Manager",
+      "department": "Retail Banking",
+      "branch": "Mumbai Main",
+      "zone": "West Zone",
+      "appraiser": "Jane Smith",
+      "reviewer": "EMP7000"
+    },
+    "kraData": [
+      {
+        "kra_id": "KRA-001",
+        "kra": "CASA Growth",
+        "unit": "%",
+        "category": "Business",
+        "target": 15,
+        "actual": 15.5,
+        "selfScore": 4.9,
+        "appraiserScore": 4.8,
+        "reviewerScore": 0,
+        "maxScore": 5,
+        "appraiseeComment": "Strong quarter with consistent growth",
+        "appraiserComment": "Good performance, slight adjustment for market conditions",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "KRA-002",
+        "kra": "NPA Recovery",
+        "unit": "INR Lakhs",
+        "category": "Business",
+        "target": 50,
+        "actual": 51.5,
+        "selfScore": 5.0,
+        "appraiserScore": 5.0,
+        "reviewerScore": 0,
+        "maxScore": 5,
+        "appraiseeComment": "Exceeded targets consistently",
+        "appraiserComment": "Excellent recovery performance",
+        "reviewerComment": ""
+      },
+      {
+        "kra_id": "NM-KRA-001",
+        "kra": "Team Leadership",
+        "category": "Behavioral",
+        "selfScore": 4,
+        "appraiserScore": 4,
+        "reviewerScore": 0,
+        "maxScore": 5,
+        "appraiseeComment": "Led team through challenging times",
+        "appraiserComment": "Demonstrated strong leadership qualities",
+        "reviewerComment": ""
+      }
+    ],
+    "overallScores": {
+      "selfScore": 94.5,
+      "appraiserScore": 93.8,
+      "reviewerScore": 0,
+      "maxScore": 100
+    },
+    "appraiserRecommendation": "APPROVE",
+    "appraiserRemarks": "Strong overall performance. Recommend for merit increase."
+  }
+}
+```
+
+---
+
+### 6. Quarterly Exception Report Response
+
+**GET** `/appraisal/quarterly_exception_report`
+
+```json
+{
+  "success": true,
+  "data": {
+    "employeeDetails": {
+      "empNo": "36663",
+      "empName": "Demo User",
+      "branch": "Mumbai Main",
+      "primaryRole": "Branch Manager"
+    },
+    "kraData": [
+      {
+        "kra_id": "KRA-001",
+        "kra": "CASA Growth",
+        "unit": "%",
+        "target": 15,
+        "actual": 14.2,
+        "score": 4.73,
+        "maxScore": 5,
+        "month": "April",
+        "category": "Measurable",
+        "comment": ""
+      },
+      {
+        "kra_id": "KRA-002",
+        "kra": "NPA Recovery",
+        "unit": "INR Lakhs",
+        "target": 50,
+        "actual": 52,
+        "score": 5.0,
+        "maxScore": 5,
+        "month": "April",
+        "category": "Measurable",
+        "comment": ""
+      },
+      {
+        "kra_id": "KRA-003",
+        "kra": "CASA Growth",
+        "unit": "%",
+        "target": 15,
+        "actual": 15.8,
+        "score": 5.0,
+        "maxScore": 5,
+        "month": "May",
+        "category": "Measurable",
+        "comment": ""
+      }
+    ],
+    "monthlyScores": {
+      "April": 9.73,
+      "May": 9.8,
+      "June": 10.0
+    },
+    "measurableKRA": 6,
+    "nonMeasurableKRA": 3,
+    "averageActual": 98.43,
+    "averageMax": 100,
+    "totalScore": 29.53,
+    "maxScore": 30
+  }
+}
+```
+
+---
+
+### 7. Exception List Response
+
+**GET** `/appraisal/exception_quarterly_verify`
+
+```json
+{
+  "success": true,
+  "result": [
+    {
+      "exception_id": "EXC-001",
+      "cust_ticket_id": "TKT-2024-Q1-001",
+      "employee_no": "36664",
+      "employee_name": "Alice Johnson",
+      "branch_name": "Mumbai Main",
+      "primary_role": "Relationship Manager",
+      "exception_status": "Pending",
+      "created_date": "2024-05-15",
+      "exception_type": "Score Correction",
+      "url_id": "URL-EXC-001",
+      "zone": "West Zone",
+      "role_id": "RELATIONSHIP_MANAGER"
+    },
+    {
+      "exception_id": "EXC-002",
+      "cust_ticket_id": "TKT-2024-Q1-002",
+      "employee_no": "36665",
+      "employee_name": "Bob Williams",
+      "branch_name": "Delhi North",
+      "primary_role": "Operations Manager",
+      "exception_status": "Under Review",
+      "created_date": "2024-05-18",
+      "exception_type": "KRA Modification",
+      "url_id": "URL-EXC-002",
+      "zone": "North Zone",
+      "role_id": "OPERATIONS_MANAGER"
+    }
+  ],
+  "filters": {
+    "EMP_NAME": ["Alice Johnson", "Bob Williams", "Charlie Brown"],
+    "PRIMARY_ROLE": ["Relationship Manager", "Operations Manager", "Branch Manager"],
+    "BRANCH_NAME": ["Mumbai Main", "Delhi North", "Bangalore East"],
+    "TICKET_STATUS": ["Pending", "Under Review", "Approved", "Rejected"]
+  },
+  "total_count": 2,
+  "pending_count": 1
+}
+```
+
+---
+
+### 8. Exception Appraiser Review Response
+
+**GET** `/appraisal/exception_quarterly_verify/review`
+
+```json
+{
+  "success": true,
+  "data": {
+    "employeeDetails": {
+      "empNo": "36664",
+      "empName": "Alice Johnson",
+      "designation": "Relationship Manager",
+      "branch": "Mumbai Main",
+      "ticketId": "TKT-2024-Q1-001"
+    },
+    "kraData": [
+      {
+        "kra_id": "KRA-001",
+        "kra": "Customer Acquisition",
+        "unit": "Count",
+        "category": "Business",
+        "target": 25,
+        "actual": 20,
+        "score": 4.0,
+        "maxScore": 5,
+        "month": "April",
+        "appraiseeComment": "System recorded incorrect count due to technical glitch",
+        "appraiserComment": ""
+      },
+      {
+        "kra_id": "KRA-002",
+        "kra": "Revenue Generation",
+        "unit": "INR Lakhs",
+        "category": "Business",
+        "target": 10,
+        "actual": 9,
+        "score": 4.5,
+        "maxScore": 5,
+        "month": "May",
+        "appraiseeComment": "One transaction not credited due to backend delay",
+        "appraiserComment": ""
+      }
+    ],
+    "attachmentUrl": "https://storage.example.com/attachments/exc_001_proof.pdf",
+    "exceptionReason": "Score recalculation due to system error in data capture",
+    "requestedAdjustment": {
+      "original_score": 8.5,
+      "requested_score": 9.2
+    },
+    "declarationStatus": "AGREED",
+    "submittedDate": "2024-05-15"
+  }
+}
+```
+
+---
+
+### 9. Exception Validator Review Response
+
+**GET** `/appraisal/exception_quarterly_validator/review`
+
+```json
+{
+  "success": true,
+  "data": {
+    "employeeDetails": {
+      "empNo": "36664",
+      "empName": "Alice Johnson",
+      "designation": "Relationship Manager",
+      "branch": "Mumbai Main",
+      "ticketId": "TKT-2024-Q1-001"
+    },
+    "kraData": [
+      {
+        "kra_id": "KRA-001",
+        "kra": "Customer Acquisition",
+        "unit": "Count",
+        "category": "Business",
+        "target": 25,
+        "actual": 20,
+        "score": 4.0,
+        "maxScore": 5,
+        "month": "April",
+        "appraiseeComment": "System recorded incorrect count",
+        "appraiserComment": "Verified system logs, recommend adjustment to 23",
+        "validatorActual": 0,
+        "validatorTarget": 0,
+        "validatorScore": 0,
+        "validatorComment": ""
+      }
+    ],
+    "attachmentUrl": "https://storage.example.com/attachments/exc_001_proof.pdf",
+    "appraiserRecommendation": "Approve",
+    "validationStatus": "Pending Validation",
+    "appraiserRemarks": "System error confirmed. Supporting documents are valid."
+  }
+}
+```
+
+---
+
+### 10. Appraisal Home Dashboard Response
+
+**GET** `/appraisal/home/dashboard`
+
+```json
+{
+  "success": true,
+  "data": {
+    "self_count_quarterly": 3,
+    "pending_appraisal_count": 2,
+    "reviewer_pending_appraisals": 5,
+    "reviewer_completed_appraisals": 12,
+    "appraisal_score_dash": {
+      "total_score": 85.5,
+      "max_score": 100,
+      "grade": "A",
+      "rank_in_team": 3
+    },
+    "quarterly_status": {
+      "Q1": "Completed",
+      "Q2": "In Progress",
+      "Q3": "Not Started",
+      "Q4": "Not Started"
+    }
+  }
+}
+```
+
+---
+
+### 11. Exception Dashboard Response
+
+**GET** `/appraisal/exception_verify/dashboard`
+
+```json
+{
+  "success": true,
+  "data": {
+    "TOTAL_COUNT": 15,
+    "PENDING_COUNT": 8,
+    "APPROVED_COUNT": 5,
+    "REJECTED_COUNT": 2
+  }
+}
+```
+
+---
+
+### 12. Exception Validator Dashboard Response
+
+**GET** `/appraisal/exception_validator/dashboard`
+
+```json
+{
+  "success": true,
+  "data": {
+    "TOTAL_COUNT": 20,
+    "PENDING_COUNT": 12,
+    "VALIDATED_COUNT": 6,
+    "REJECTED_COUNT": 2
+  }
+}
+```
+
+---
+
+### How to Use These Mock Responses
+
+1. **Chrome DevTools Override:**
+   - Open DevTools (F12) → Network tab
+   - Make the actual API request
+   - Right-click on request → "Override content"
+   - Paste the JSON response
+
+2. **Local Overrides:**
+   - DevTools → Sources → Overrides
+   - Select a folder for overrides
+   - Create file structure matching API path
+   - Save JSON response in corresponding file
+
+3. **Mock Service Worker (MSW):**
+   ```javascript
+   import { http, HttpResponse } from 'msw'
+
+   export const handlers = [
+     http.get('http://localhost:8084/appraisal/my_appraisal_dashboard', () => {
+       return HttpResponse.json({ /* paste response here */ })
+     })
+   ]
+   ```
+
+4. **Requestly Chrome Extension:**
+   - Install extension
+   - Create "Modify Response" rule
+   - Match URL pattern
+   - Paste static JSON response
+
+---
+
 ## Quarterly Appraisal Flow
 
 ### Appraisee Dashboard
 
-**Route:** `/quarterly/quarterly-appraisee`  
-**Component:** `QuarterlyAppraisee` (`src/pages/Appraisee/QuarterlyAppraisee.js`)  
-**API Endpoint:** GET `/appraisal/my_appraisal_dashboard` (send quarter, fy, empNo) — <span style="color:#1f9d55;">✔ Integrated</span>  
+**Route:** `/quarterly/quarterly-appraisee`
+**Component:** `QuarterlyAppraisee` (`src/pages/Appraisee/QuarterlyAppraisee.js`)
+**API Endpoint:** GET `/appraisal/my_appraisal_dashboard` (send quarter, fy, empNo) — <span style="color:#1f9d55;">✔ Integrated</span>
 **Description:** Shows list of quarterly appraisals for the employee with average scores and employee cards.
 
 ### Appraiser Dashboard
