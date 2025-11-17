@@ -21,11 +21,12 @@ export default function QuarterlyAppraisee() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const financialYear = searchParams.get('financialYear');
+  const { getEmployeeDetails, getUserProperty, user } = useAuth();
   const appraisalPeriod = searchParams.get('appraisalPeriod');
   const quarter = searchParams.get('quarter');
+  const role = user?.roles?.[0] || 'admin'; 
 
   // Get employee details from auth context using getUserProperty
-  const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
   const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
 
@@ -46,6 +47,7 @@ export default function QuarterlyAppraisee() {
     queryFn: () =>
       appraisalAPI.getAppraiseeCheckInDashboard({
         empNo: empNo,
+        role: role,
         financialYear: parseInt(extractYear(financialYear)),
         appraisalPeriod: appraisalPeriod?.toLowerCase() || 'annual',
         quarter: quarter || '',
