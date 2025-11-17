@@ -1,0 +1,42 @@
+.appeal-committee-review .mini-comment-box {
+  background: #f6f9ff;
+  border: 1px solid #e3e7ff;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  min-height: 64px;
+  font-size: 0.9rem;
+  color: #444;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.appeal-committee-review .card {
+  border-radius: 16px;
+}
+
+.appeal-committee-review textarea {
+  resize: vertical;
+}
+
+.appeal-committee-review .appeal-kra-table .badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+}
+
+.appeal-committee-review .appeal-kra-table th {
+  font-weight: 600;
+  color: #495057;
+}
+
+.appeal-committee-review .appeal-kra-table td {
+  vertical-align: middle;
+}
+
+.appeal-committee-review .form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.appeal-committee-review .form-check-label {
+  font-size: 0.95rem;
+}

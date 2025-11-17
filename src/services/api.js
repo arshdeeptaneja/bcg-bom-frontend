@@ -756,6 +756,35 @@ export const appraisalAPI = {
       throw error;
     }
   },
+
+  // GET: Fetch appeal report for committee review
+  getAppealCommitteeReviewData: async ({ roleId, roleType, empNo, financialYear }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'financialYear', financialYear);
+      const response = await apiClient.get(
+        `/appraisal/appeal_report/review?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getAppealCommitteeReviewData error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit appeal committee review decision
+  submitAppealCommitteeReview: async (payload = {}) => {
+    try {
+      const response = await apiClient.post('/appraisal/appeal_committee/submit', payload);
+      return response.data;
+    } catch (error) {
+      console.error('submitAppealCommitteeReview error', error);
+      throw error;
+    }
+  },
 };
 
 // Generic API methods

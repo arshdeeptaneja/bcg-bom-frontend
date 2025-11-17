@@ -36,6 +36,7 @@ import {
   ReviewerDashboard,
   ReviewerMode,
 } from './pages';
+import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
 import ApiTest from './components/ApiTest';
@@ -423,6 +424,17 @@ function AppContent() {
               element={
                 isAuthenticated ? (
                   <AnnualEmployeeAppealListLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appeal/committee-review"
+              element={
+                isAuthenticated ? (
+                  <AppealCommitteeReviewLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )
@@ -899,6 +911,15 @@ const QuaterlyAppraiseeCheckInLayout = ({ onLogout }) => (
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <QuaterlyAppraiseeCheckIn />
+  </>
+);
+
+// Appeal Committee Review
+const AppealCommitteeReviewLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AppealCommitteeReview />
   </>
 );
 
