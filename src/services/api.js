@@ -717,6 +717,45 @@ export const appraisalAPI = {
       throw error;
     }
   },
+
+  // GET: Get reportee appraisal dashboard for appeal (KRA data)
+  getReporteeAppraisalDashboard: async ({ empNo, financialYear, quarter }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'quarter', quarter);
+      const response = await apiClient.get(
+        `/appraisal/reportee_appraisal/dashboard?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getReporteeAppraisalDashboard error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit appeal report with file attachment
+  submitAppealReport: async (payload, attachment) => {
+    try {
+      const formData = new FormData();
+      formData.append('payload', JSON.stringify(payload));
+      formData.append('attachment', attachment);
+      const response = await apiClient.post(
+        '/appraisal/appeal_report/submit',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitAppealReport error', error);
+      throw error;
+    }
+  },
 };
 
 // Generic API methods
