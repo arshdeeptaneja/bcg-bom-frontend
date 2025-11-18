@@ -72,7 +72,7 @@ const ReportingReviewBulk = () => {
     // downloads sample file
     const handleDownloadSample = async () => {
         try {
-          const blob = await appraisalAPI.reportingAuthorityBulkDownloadSample({
+          const blob = await appraisalAPI.reportingAuthorityReviewingAuthorityBulkDownloadSample({
             roleName: roleName,   
             regionCode: sol,  
             quarter: "Q1",         
@@ -127,6 +127,7 @@ const ReportingReviewBulk = () => {
         }
       };
       
+
 
     const {
         data: errorLogs,
@@ -229,7 +230,7 @@ const ReportingReviewBulk = () => {
                     </div>
 
                     <div className="d-flex gap-2">
-                        <button className="btn primary-button">Download Sample</button>
+                        <button className="btn primary-button" onClick={handleDownloadSample}>Download Sample</button>
                         <button className="btn primary-button" onClick={handleDownloadDataTable}>Download Data Table</button>
                     </div>
                 </div>

@@ -679,6 +679,74 @@ export const appraisalAPI = {
         throw error;
       }
     },
+
+      // Download sample Excel for Reporting Authority and Reviewing Authority update in bulk
+  reportingAuthorityReviewingAuthorityBulkDownloadSample: async ({
+    roleName,
+    regionCode,
+    quarter,
+    financialYear,
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        roleName,
+        regionCode,
+        quarter,
+        financialYear,
+      });
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_annual_repa_reva_surl/download_sample?${params.toString()}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      return response.data; // XLSX blob
+    } catch (error) {
+      console.error("Error downloading sample file:", error);
+      throw error;
+    }
+  },
+
+ // SEARCH EMPLOYEE STATUS CHANGE LIST
+  searchHRStatusUpdate: async ({ empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo || ""
+      });
+
+      const response = await apiClient.get(
+        `/admin/hr_status_update_utility?${params.toString()}`
+      );
+
+      return response.data; 
+    } catch (error) {
+      console.error("HR Status Search Error:", error);
+      throw error;
+    }
+  },
+
+
+  //Appraisal Status Change Utility--Update Status
+  updateHRStatus: async ({ assignmentId, newStatus }) => {
+  try {
+    const response = await apiClient.post(
+      `/admin/hr_status_update_utility/update_status`,
+      {
+        assignmentId,
+        newStatus,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating status:", error);
+    throw error;
+  }
+},
+
+
 };
 
 // Generic API methods
