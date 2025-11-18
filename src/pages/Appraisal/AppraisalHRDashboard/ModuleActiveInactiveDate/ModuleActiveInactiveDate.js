@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./ModuleActiveInactiveDate.css"; // your custom CSS
 import { BackButton } from "../../../../components/common";
+import { useQuery } from "@tanstack/react-query";
+import { appraisalAPI } from '../../../../services/api';
 import { FaInfoCircle } from "react-icons/fa";
+import LoadingSpinner from '../../../../components/Spinner';
 
 const ModuleActiveInactiveDate = () => {
     const [filters, setFilters] = useState({
@@ -38,6 +41,15 @@ const ModuleActiveInactiveDate = () => {
             inactiveDate: "30-NOV-25",
         },
     ];
+        // React Query to fetch dashboard data
+    const { data, isLoading } = useQuery({
+        queryKey: [],
+        queryFn: () => appraisalAPI.moduleActiveInactiveDateGetList()
+    });
+    console.log(data);
+
+    // const data = [
+    //     {
 
     // sample data (empty for demonstration)
   const [datas, setDatas] = useState([]);
@@ -64,6 +76,19 @@ const ModuleActiveInactiveDate = () => {
     const handleReset = () => {
         setFilters({ moduleName: "", financialYear: "", quarter: "", scale: "" });
     };
+
+      // Show loading spinner while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="pageWrapper">
+        <div className="pageWrapper-header">
+          <BackButton />
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal Home</h1>
+        </div>
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
     return (
         <div className="AppraiserContaniner ">

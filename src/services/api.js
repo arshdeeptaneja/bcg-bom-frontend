@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
   (config) => {
 
     //const token = localStorage.getItem('accessToken');
-    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT'; 
+    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -446,19 +446,19 @@ export const appraisalAPI = {
     }
   },
 
-  appraisalStatusChange: async ({ ecNumber, appraisalPeriod, quarter, financialYear }) => {
+  appraisalStatusChange: async ({ empNo, appraisalPeriod, searchEmpNo, financialYear }) => {
     try {
       const params = new URLSearchParams({
-        ecNumber,
-        appraisalPeriod,       // Quarterly or Annual
-        financialYear,         // FY 2025-2026 (always passed)
-        quarter: appraisalPeriod === "Quarterly" ? quarter : "", // Only send quarter for Quarterly
+        empNo,
+        appraisalPeriod,
+        financialYear,
+        searchEmpNo
       });
-  
+
       const response = await apiClient.get(
-        `/appraisal//status-change/search?${params.toString()}`
+        `/admin/hr_status_update_utility/search?${params.toString()}`
       );
-  
+
       return response.data;
     } catch (error) {
       console.error("Error searching appraisal status:", error);
@@ -467,19 +467,24 @@ export const appraisalAPI = {
   },
 
   // Reporting and reviewing authority update by emp number
-  appraisalUpdate: async ({ ecNumber, appraisalPeriod, quarter, financialYear }) => {
+  appraisalUpdate: async ({ empNo, roleName, appraisalPeriod, quarter, empName, financialYear, sol, statusUpdates }) => {
     try {
-      const params = new URLSearchParams({
-        ecNumber,
-        appraisalPeriod,       // Quarterly or Annual
-        financialYear,         // FY 2025-2026 (always passed)
-        quarter: appraisalPeriod === "Quarterly" ? quarter : "", // Only send quarter for Quarterly
-      });
-  
+      const body = {
+        empNo,
+        roleName,
+        appraisalPeriod,   // Quarterly or Annual
+        financialYear,
+        quarter,
+        empName,
+        sol,
+        statusUpdates
+      };
+
       const response = await apiClient.get(
-        `/appraisal//status-change/search?${params.toString()}`
+        `/admin/hr_status_update_utility/update_status/search`,
+        body
       );
-  
+
       return response.data;
     } catch (error) {
       console.error("Error searching appraisal status:", error);
@@ -487,7 +492,7 @@ export const appraisalAPI = {
     }
   },
 
-    // Fetch reporting authority bulk upload history
+  // Fetch reporting authority bulk upload history
   reportingAuthorityBulkList: async ({ financialYear }) => {
     try {
       const params = new URLSearchParams({
@@ -515,7 +520,7 @@ export const appraisalAPI = {
       });
 
       const formData = new FormData();
-      formData.append("file", file); 
+      formData.append("file", file);
 
       const response = await apiClient.post(
         `/appraisal/admin/hr_update_quarterly_repa_reva_surl/upload?${params.toString()}`,
@@ -561,7 +566,7 @@ export const appraisalAPI = {
     }
   },
 
-    // Download sample Excel for reporting authority bulk update
+  // Download sample Excel for reporting authority bulk update
   reportingAuthorityBulkDownloadDataTable: async ({
     roleName,
     regionCode,
@@ -590,7 +595,7 @@ export const appraisalAPI = {
     }
   },
 
-    // Get error logs for reporting authority bulk update
+  // Get error logs for reporting authority bulk update
   reportingAuthorityBulkErrorLogs: async ({ financialYear }) => {
     try {
       const params = new URLSearchParams({
@@ -608,7 +613,7 @@ export const appraisalAPI = {
     }
   },
 
-    // Annual reporting authority bulk update error logs
+  // Annual reporting authority bulk update error logs
   reportingAuthorityAndReviewAnnualErrorLogs: async ({ financialYear }) => {
     try {
       const params = new URLSearchParams({
@@ -653,39 +658,37 @@ export const appraisalAPI = {
     }
   },
 
-    // Upload Annually reporting and reviewing
-    reportingAuthorityAndReviewAnnualUpload: async ({ file, sol, roleName, empNo }) => {
-      try {
-        const params = new URLSearchParams({
-          sol,
-          roleName,
-          empNo,
-        });
-  
-        const formData = new FormData();
-        formData.append("file", file); 
-  
-        const response = await apiClient.post(
-          `/appraisal/admin/hr_update_annual_repa_reva_surl/upload?${params.toString()}`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-  
-        return response.data;
-      } catch (error) {
-        console.error("Error uploading Reporting Authority Bulk file:", error);
-        throw error;
-      }
-    },
+  // Upload Annually reporting and reviewing
+  reportingAuthorityAndReviewAnnualUpload: async ({ file, sol, roleName, empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        sol,
+        roleName,
+        empNo,
+      });
 
-      // Download sample Excel for Reporting Authority and Reviewing Authority update in bulk
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post(
+        `/appraisal/admin/hr_update_annual_repa_reva_surl/upload?${params.toString()}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error uploading Reporting Authority Bulk file:", error);
+      throw error;
+    }
+  },
+
+  // Download sample Excel for Reporting Authority and Reviewing Authority update in bulk
+  
   reportingAuthorityReviewingAuthorityBulkDownloadSample: async ({
-    roleName,
-    regionCode,
-    quarter,
-    financialYear,
+    roleName, regionCode, quarter, financialYear,
   }) => {
     try {
       const params = new URLSearchParams({
@@ -709,7 +712,7 @@ export const appraisalAPI = {
     }
   },
 
- // SEARCH EMPLOYEE STATUS CHANGE LIST
+  // SEARCH EMPLOYEE STATUS CHANGE LIST
   searchHRStatusUpdate: async ({ empNo }) => {
     try {
       const params = new URLSearchParams({
@@ -720,7 +723,7 @@ export const appraisalAPI = {
         `/admin/hr_status_update_utility?${params.toString()}`
       );
 
-      return response.data; 
+      return response.data;
     } catch (error) {
       console.error("HR Status Search Error:", error);
       throw error;
@@ -730,21 +733,21 @@ export const appraisalAPI = {
 
   //Appraisal Status Change Utility--Update Status
   updateHRStatus: async ({ assignmentId, newStatus }) => {
-  try {
-    const response = await apiClient.post(
-      `/admin/hr_status_update_utility/update_status`,
-      {
-        assignmentId,
-        newStatus,
-      }
-    );
+    try {
+      const response = await apiClient.post(
+        `/admin/hr_status_update_utility/update_status`,
+        {
+          assignmentId,
+          newStatus,
+        }
+      );
 
-    return response.data;
-  } catch (error) {
-    console.error("Error updating status:", error);
-    throw error;
-  }
-},
+      return response.data;
+    } catch (error) {
+      console.error("Error updating status:", error);
+      throw error;
+    }
+  },
 
 
 };
@@ -808,6 +811,7 @@ export const accessService = {
       throw error;
     }
   },
+
 };
 
 export default apiClient;
