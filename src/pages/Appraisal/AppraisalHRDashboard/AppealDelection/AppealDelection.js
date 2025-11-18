@@ -1,15 +1,72 @@
 import React, { useState } from "react";
-// import "./ExceptionDelection.css"; // custom overrides
+import { appraisalAPI } from "../../../../services/api";
 import { BackButton } from "../../../../components/common";
 import { FaInfoCircle } from "react-icons/fa";
 
 const AppealDeletion = () => {
     const [empNumber, setEmpNumber] = useState("");
+      const [loading, setLoading] = useState(false);
+        const [tableData, setTableData] = useState([]);
+        const [noData, setNoData] = useState(false);
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        console.log("Searching for EMP Number:", empNumber);
-    };
+    const handleSearch = async (e) => {
+          e.preventDefault();
+  
+          if (!empNumber.trim()) {
+              alert("Please enter EMP Number");
+              return;
+          }
+  
+          try {
+              setLoading(true);
+              setNoData(false);
+  
+              const res = await appraisalAPI.searchAppealDeleteURL({
+                  empNo: empNumber,
+              });
+  
+              if (res && res.length > 0) {
+                  setTableData(res);
+              } else {
+                  setTableData([]);
+                  setNoData(true);
+              }
+          } catch (error) {
+              console.error(error);
+              setNoData(true);
+          } finally {
+              setLoading(false);
+          }
+      };
+  
+      const handleDelete = async (urlId) => {
+          const confirmDelete = window.confirm(
+              "Are you sure you want to delete this exception?"
+          );
+  
+          if (!confirmDelete) return;
+  
+          try {
+              setLoading(true);
+  
+              const res = await appraisalAPI.deleteAppealDeleteURL({ urlId });
+  
+              alert("Exception deleted successfully!");
+  
+              // remove deleted row from UI
+              setTableData((prev) => prev.filter((row) => row.urlId !== urlId));
+  
+              if (tableData.length === 1) {
+                  setNoData(true);
+              }
+  
+          } catch (error) {
+              alert("Failed to delete exception!");
+              console.error(error);
+          } finally {
+              setLoading(false);
+          }
+      };
 
     return (
         <div className="exception-page pageWrapper">
@@ -45,7 +102,8 @@ const AppealDeletion = () => {
                         <label htmlFor="empNumber" className="form-label fw-semibold">
                             Enter EMP Number
                         </label>
-                        <div className="d-flex align-items-center gap-2" style={{width:"40%"}}>
+
+                        <div className="d-flex align-items-center gap-2" style={{ width: "40%" }}>
                             <input
                                 type="text"
                                 id="empNumber"
@@ -54,15 +112,63 @@ const AppealDeletion = () => {
                                 value={empNumber}
                                 onChange={(e) => setEmpNumber(e.target.value)}
                             />
-                            <button
-                                type="submit"
-                                className="btn btn-accents px-4 fw-semibold"
-                            >
-                                Search
+
+                            <button type="submit" className="btn btn-accents px-4 fw-semibold">
+                                {loading ? "Searching..." : "Search"}
                             </button>
                         </div>
                     </div>
                 </form>
+            </section>
+
+            {/* Table Section */}
+            <section className="p-4">
+                {loading && <p className="text-muted">Loading...</p>}
+
+                {!loading && noData && (
+                    <p className="text-danger fw-semibold">No data found!</p>
+                )}
+
+                {tableData.length > 0 && (
+                    <div className="table-responsive mt-3">
+                        <table className="table table-bordered align-middle">
+                            <thead className="table-header">
+                                <tr>
+                                    <th>EC Number</th>
+                                    <th>Employee Name</th>
+                                    <th>URL ID</th>
+                                    <th>Quarter</th>
+                                    <th>Zone</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {tableData.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>{item.ecNumber}</td>
+                                        <td>{item.employeeName}</td>
+                                        <td>{item.urlId}</td>
+                                        <td>{item.quarter}</td>
+                                        <td>{item.zoneName}</td>
+                                        <td>{item.status}</td>
+
+                                        {/* DELETE BUTTON */}
+                                        <td>
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={() => handleDelete(item.urlId)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+
+                        </table>
+                    </div>
+                )}
             </section>
         </div>
     );

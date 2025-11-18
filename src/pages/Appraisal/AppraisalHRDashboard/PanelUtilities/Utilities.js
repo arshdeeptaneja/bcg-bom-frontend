@@ -8,7 +8,7 @@ const utilities = [
     path: "/appraisal/hr-dashboard/appraisal-status-change-utility",
   },
   {
-    name: "Reporting & Reviewing Authority Update by Emp Number",
+    name: "Appraisal & Reviewing Update by Emp Number",
     path: "/appraisal/hr-dashboard/appraisal-update",
   },
   {
@@ -35,6 +35,26 @@ const utilities = [
     name: "Update module active & inactive date",
     path: "/appraisal/hr-dashboard/module-active-inactive-date",
   },
+
+    { name: "Update Quarterly Appraiser details in bulk", 
+      path: "/utility/quarterly-appraiser-bulk" },
+  { name: "Exception Score Update Utility", path: "/appraisal/exception-score" },
+  { name: "Admin Setting to Discretionary KRA", path: "/appraisal/hr-dashboard/admin-setting" },
+
+  // { name: "Change Quarterly/Annual Appraisal Status", path: "" },
+  // { name: "Update discretionary KRA scores in bulk", path: "" },
+  // { name: "Quarterly Exception Deletion", path: "" },
+
+  // { name: "Annual Appeal Deletion", path: "" },
+  // { name: "Appraiser and Reviewer update by Emp Number", path: "" },
+  // { name: "Validator update by Emp Number", path: "" },
+
+  // { name: "Update Appellate Authority details in bulk", path: "" },
+  // { name: "Update module active & inactive date", path: "" },
+  // { name: "Update module active & inactive date by emp number", path: "" },
+  { name: "Insert Annual Roles", path: "" },
+
+  // { name: "Exception Score Updation Utility", path: "" },
 ];
 
 const UtilitiesSection = () => {

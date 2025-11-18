@@ -749,6 +749,106 @@ export const appraisalAPI = {
     }
   },
 
+  // SEARCH EMP EXCEPTION DELETE URL LIST
+  searchExceptionDeleteURL: async ({ empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo || "",
+      });
+
+      const response = await apiClient.get(
+        `/admin/hr_exception_delete_urlid?${params.toString()}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching exception delete url:", error);
+      throw error;
+    }
+  },
+
+//EXCEPTION DELETE BUTTON TO DELETE 
+deleteExceptionURL: async ({ urlId }) => {
+  try {
+    const params = new URLSearchParams({
+      urlId: urlId
+    });
+
+    const response = await apiClient.delete(
+      `/admin/hr_exception_delete_urlid/delete?${params.toString()}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting exception URL:", error);
+    throw error;
+  }
+},
+
+//SEARCH APPEAL DELECTION
+  searchAppealDeleteURL: async ({ empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo || "",
+      });
+
+      const response = await apiClient.get(
+        `/admin/hr_appeal_delete_urlid?${params.toString()}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Appeal delete url:", error);
+      throw error;
+    }
+  },
+
+//Appeal DELETE BUTTON TO DELETE 
+deleteAppealURL: async ({ urlId }) => {
+  try {
+    const params = new URLSearchParams({
+      urlId: urlId
+    });
+
+    const response = await apiClient.delete(
+      `/admin/hr_appeal_delete_urlid/delete?${params.toString()}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting exception URL:", error);
+    throw error;
+  }
+},
+
+//Module Active Inactive Date
+// GET LIST 
+moduleActiveInactiveDateGetList: async () => {
+  try {
+    const response = await apiClient.get(
+      `/admin/hr_module_active_inactive_date`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching module active/inactive list:", error);
+    throw error;
+  }
+},
+
+// COMMON UPDATE API (INSERT / UPDATE / DELETE)
+moduleActiveInactiveDateUpdate: async ({ intent, payload }) => {
+  try {
+    const response = await apiClient.post(
+      `/admin/hr_module_active_inactive_date/${intent}`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Error in ${intent}:`, error);
+    throw error;
+  }
+},
+
 
 };
 
