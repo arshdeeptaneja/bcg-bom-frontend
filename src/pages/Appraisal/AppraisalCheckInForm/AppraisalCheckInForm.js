@@ -406,8 +406,6 @@ function AppraisalCheckInForm() {
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
         </div>
-
-        {/* ✅ Role Switcher (for testing only) */}
         <div className="d-flex flex-row align-items-center">
           <label htmlFor="roleSelect" className="me-2 text-muted fw-bold">
             Role:
@@ -424,70 +422,25 @@ function AppraisalCheckInForm() {
             <option value="REVIEWER">Reviewer (Final)</option>
           </select>
         </div>
-        {/* ✅ END Role Switcher */}
-
       </div>
-
-      {/* Rest of your UI unchanged below */}
       <div className="pageWrapper-content d-flex flex-column m-1 p-3">
         <CheckInDescriptionSection employee={employee} dateRange={dateRange} />
-
-        {/* Validation message banner */}
         {validationMessage && (
           <div className="alert alert-info mt-3" role="alert">
             <i className="bi bi-info-circle me-2"></i>
             {validationMessage}
           </div>
         )}
-
         <div className="note mt-5 mb-5">
           <span className="text-muted">Note: </span>
           <span className="text-muted">
             Please raise an exception if actual or target values are incorrect.
           </span>
         </div>
-
-        <div class="table-container">
-          <table class="table-accent">
-            <thead>
-              <tr>
-                <th style={{width:"55%"}}>Month</th>
-                <th style={{width:"25%"}}>Actual</th>
-                <th style={{width:"25%"}}>Max</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>April</td>
-                <td>13.9</td>
-                <td>65.0</td>
-              </tr>
-              <tr>
-                <td>May</td>
-                <td>9.1</td>
-                <td>65.0</td>
-              </tr>
-              <tr>
-                <td>June</td>
-                <td>17.7</td>
-                <td>65.0</td>
-              </tr>
-              <tr>
-                <td><b>Average</b></td>
-                <td>13.6</td>
-                <td>65.0</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-
         <div className="final-score-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
           <FinalScoreSummaryTable kraListData={kraData} />
         </div>
-
-        {/* Monthly Score Summary Table - only show if data exists */}
         {Object.keys(actualScoreData).length > 0 && (
           <div className="check-in-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
             <h5 className="text-primary fw-bold mb-3">Monthly Score Summary</h5>
@@ -498,7 +451,6 @@ function AppraisalCheckInForm() {
             />
           </div>
         )}
-        {/* Discretionary KRA Section - only show if data exists */}
         {(measurableKraListData.length > 0 || Object.keys(nonMeasurableKraListData).length > 0) && (
           <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
             <h5 className="text-primary fw-bold mb-3">Discretionary KRA</h5>
@@ -511,8 +463,6 @@ function AppraisalCheckInForm() {
                 />
               </div>
             )}
-
-            {/* Non-Measurable KRA Section */}
             {Object.keys(nonMeasurableKraListData).length > 0 && (
               <NonMeasurableKra
                 totalActualScore={totalNonMeasurableActual}
@@ -522,7 +472,6 @@ function AppraisalCheckInForm() {
             )}
           </div>
         )}
-
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Development Inputs</h5>
           <DevelopmentInputs
@@ -532,7 +481,6 @@ function AppraisalCheckInForm() {
           />
         </div>
       </div>
-
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button
           className="btn btn-outline-primary"

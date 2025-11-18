@@ -36,3 +36,4 @@ export { default as QuarterlyAppraisee } from './Appraisal/QuarterlyCheckIn/Quar
 export { default as QuaterlyAppraiseeCheckIn } from './Appraisal/QuarterlyCheckIn/QuaterlyAppraiseeCheckIn/QuaterAppraiseeCheckIn';
 export { default as ReviewerDashboard } from './Appraiser/ReviewerDashboard/ReviewerDashboard';
 export { default as ReviewerMode } from './Appraiser/ReviewerMode/ReviewerMode';
+export { default as AppealCommitteeReview } from './Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
