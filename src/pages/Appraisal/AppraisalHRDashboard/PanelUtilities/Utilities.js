@@ -1,5 +1,7 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate  } from "react-router-dom";
+import { appraisalAPI } from "../../../../services/api";
 import "./Utilities.css";
 
 const utilities = [
@@ -59,10 +61,46 @@ const utilities = [
 
 const UtilitiesSection = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  return (
+   const handleInsertAnnualRoles = async () => {
+    const confirmClick = window.confirm(
+      "Are you sure you want to insert annual roles?"
+    );
+    if (!confirmClick) return;
+
+    try {
+      setLoading(true);
+
+      const response = await appraisalAPI.insertAnnualRoles();
+
+      alert("Annual Roles inserted successfully!");
+      console.log("Insert Response:", response);
+
+    } catch (error) {
+      alert("Failed to insert Annual Roles!");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClick = (utility) => {
+    if (utility.name === "Insert Annual Roles") {
+      handleInsertAnnualRoles();
+    } else {
+      navigate(utility.path);
+    }
+  };
+
+ return (
     <section className="container my-4">
       <h2 className="mb-4 fw-semibold">Utilities</h2>
+
+      {loading && (
+        <p className="text-primary fw-semibold mb-3">Processing, please wait...</p>
+      )}
+
       <div className="row g-3">
         {utilities.map((utility, index) => (
           <div className="col-md-4" key={index}>
@@ -70,7 +108,7 @@ const UtilitiesSection = () => {
               className={`utility-box text-center ${
                 index === 0 ? "highlight" : ""
               }`}
-              onClick={() => navigate(utility.path)}
+              onClick={() => handleClick(utility)}
               style={{ cursor: "pointer" }}
             >
               {utility.name}
