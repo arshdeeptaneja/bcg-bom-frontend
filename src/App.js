@@ -33,7 +33,10 @@ import {
   AddAppeal,
   QuarterlyAppraisee,
   QuaterlyAppraiseeCheckIn,
+  ReviewerDashboard,
+  ReviewerMode,
 } from './pages';
+import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
 import ApiTest from './components/ApiTest';
@@ -82,12 +85,9 @@ function App() {
 
 // App content that uses AuthContext
 function AppContent() {
-  let { isAuthenticated, loading, login, logout, setTeamDashboardData } = useAuth();
+  const { isAuthenticated, loading, login, logout, setTeamDashboardData } = useAuth();
 
   console.log('isAuthenticated', isAuthenticated);
-
-  // TODO: For testing purposes, remove this later
-  // isAuthenticated = true;
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -429,11 +429,33 @@ function AppContent() {
                 )
               }
             />
+
+            <Route
+              path="/appeal/committee-review"
+              element={
+                isAuthenticated ? (
+                  <AppealCommitteeReviewLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
             <Route
               path="/appraiser/dashboard"
               element={
                 isAuthenticated ? (
                   <AppraiserDashboardLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraiser/reviewer-dashboard"
+              element={
+                isAuthenticated ? (
+                  <ReviewerDashboardLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )
@@ -456,6 +478,17 @@ function AppContent() {
               element={
                 isAuthenticated ? (
                   <AppraiserAddAppraisalLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraiser/reviewer-mode"
+              element={
+                isAuthenticated ? (
+                  <ReviewerModeLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )
@@ -809,6 +842,22 @@ const AppraiserDashboardLayout = ({ onLogout }) => (
   </>
 );
 
+const ReviewerDashboardLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <ReviewerDashboard />
+  </>
+);
+
+const ReviewerModeLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <ReviewerMode />
+  </>
+);
+
 //AnnualAppraisalHome
 const AnnualAppraisalHomeLayout = ({ onLogout }) => (
   <>
@@ -833,7 +882,7 @@ const AppraiseeDashboardLayout = ({ onLogout }) => (
   <>
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
-    <AppraiseeDashboard />
+    <AppraiseeCheckIn />
   </>
 );
 
@@ -862,6 +911,15 @@ const QuaterlyAppraiseeCheckInLayout = ({ onLogout }) => (
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <QuaterlyAppraiseeCheckIn />
+  </>
+);
+
+// Appeal Committee Review
+const AppealCommitteeReviewLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AppealCommitteeReview />
   </>
 );
 

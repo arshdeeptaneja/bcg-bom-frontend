@@ -50,7 +50,7 @@ export default function AppraisalAccordion({ accordionItems = [], columns = [] }
                         </tr>
                       </thead>
                       <tbody className="text-center">
-                        {item.tableData.map((row, rowIndex) => (
+                        {item?.tableData?.map((row, rowIndex) => (
                           <tr key={rowIndex}>
                             {columns.map((column) => (
                               <td key={column}>{row[column] ?? '-'}</td>

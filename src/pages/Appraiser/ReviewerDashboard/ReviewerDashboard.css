@@ -1,0 +1,22 @@
+.reviewer-dashboard .filters-card {
+  background: #fff;
+  border-radius: 12px;
+}
+
+.reviewer-table th,
+.reviewer-table td {
+  white-space: nowrap;
+}
+
+.reviewer-table th {
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.reviewer-table td {
+  font-size: 0.95rem;
+}
+
+.reviewer-table button {
+  min-width: 160px;
+}
