@@ -327,7 +327,7 @@ function AddAppeal() {
                       disabled={!selected[row.id]}
                       className={selected[row.id] ? 'form-control text-center' : 'form-control text-center underlined-input'}
                       placeholder={selected[row.id] ? '' : '—'}
-                      value={scores[row.id] || ''}
+                      // value={scores[row.id] || ''}
                       onChange={(e) => setScores({ ...scores, [row.id]: e.target.value })}
                     />
                   </td>
