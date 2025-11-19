@@ -15,20 +15,13 @@ const ModuleActiveInactiveDate = () => {
         scale: "",
     });
 
-<<<<<<< Updated upstream
     // React Query → DEFAULT VALUE ADDED (fixes undefined error)
     const { data = [], isLoading, refetch } = useQuery({
         queryKey: ["module-active-inactive"],
         queryFn: () => appraisalAPI.moduleActiveInactiveDateGetList(),
-=======
-        // React Query to fetch dashboard data
-    const { data, isLoading } = useQuery({
-        queryKey: [],
-        queryFn: () => appraisalAPI.moduleActiveInactiveDateGetList()
->>>>>>> Stashed changes
     });
 
-<<<<<<< Updated upstream
+
     // Add Module
     const handleAdd = async () => {
         const payload = {
@@ -37,7 +30,7 @@ const ModuleActiveInactiveDate = () => {
             quarter: filters.quarter,
             scale: filters.scale,
         };
-=======
+
     // const data = [
     //     {
     //         moduleName: "Appeal",
@@ -64,7 +57,6 @@ const ModuleActiveInactiveDate = () => {
     //         inactiveDate: "30-NOV-25",
     //     },
     // ];
->>>>>>> Stashed changes
 
         try {
             await appraisalAPI.moduleActiveInactiveDateUpdate({
