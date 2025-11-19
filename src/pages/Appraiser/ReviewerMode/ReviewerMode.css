@@ -1,0 +1,17 @@
+.reviewer-mode .mini-comment-box {
+  background: #f6f9ff;
+  border: 1px solid #e3e7ff;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  min-height: 64px;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.reviewer-mode .card {
+  border-radius: 16px;
+}
+
+.reviewer-mode textarea {
+  resize: vertical;
+}

@@ -35,6 +35,25 @@ const EmployeeExceptionList = () => {
     return yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
   };
 
+  const buildQuarterDateRange = (fyLabel, quarterLabel) => {
+    if (!fyLabel || !quarterLabel) return '';
+    const base = parseInt(extractYear(fyLabel), 10);
+    if (!base) return '';
+
+    switch (quarterLabel) {
+      case 'Q1':
+        return `01 Apr ${base} - 30 Jun ${base}`;
+      case 'Q2':
+        return `01 Jul ${base} - 30 Sep ${base}`;
+      case 'Q3':
+        return `01 Oct ${base} - 31 Dec ${base}`;
+      case 'Q4':
+        return `01 Jan ${base + 1} - 31 Mar ${base + 1}`;
+      default:
+        return '';
+    }
+  };
+
   // Get role and zone information using getUserProperty
   // @TODO: Confirm with Arsh - roleName, roleId, and zone field names
   const roleName = getUserProperty('roleName', 
@@ -292,10 +311,32 @@ const EmployeeExceptionList = () => {
                   <td>
                     <div className="d-flex flex-column gap-2">
                       <button className="btn view-btn">View Appraisal</button>
-                      <button className="btn review-btn"
-                        onClick={() => navigate("/appraisal/review-quarterly-exception")}
-
-                      >Review Exception</button>
+                      <button
+                        className="btn review-btn"
+                        onClick={() =>
+                          navigate('/appraisal/employee-review-quarterly-exception', {
+                            state: {
+                              financialYear,
+                              appraisalPeriod,
+                              quarter,
+                              dateRange: buildQuarterDateRange(financialYear, quarter),
+                              employee: {
+                                empNo: item.empNumber,
+                                employeeName: item.empName,
+                                branch: item.branch,
+                                primaryRole: item.primaryRole,
+                              },
+                              role: 'VALIDATOR',
+                              roleName: 'VALIDATOR',
+                              roleId: 'VALIDATOR',
+                              custTicketId: item.ticketId,
+                              exceptionId: item.ticketId,
+                            },
+                          })
+                        }
+                      >
+                        Review Exception
+                      </button>
                     </div>
                   </td>
                 </tr>

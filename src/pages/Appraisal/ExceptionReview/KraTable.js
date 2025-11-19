@@ -1,117 +1,44 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./KraTable.css";
-const STORAGE_KEY = "kra-table-v1";
 
-const initialDemoData = [
-  {
-    id: 1,
-    checked: false,
-    kra: "Achievement in no. of PMJJBY accounts opened vs target",
-    unit: "Number",
-    actual: 6,
-    appraisee: 10.0,
-    appraiserActual: 10,
-    target: 40.0,
-    appraiserTarget: 40.0,
-    maxScore: 3.0,
-    score: 0.5,
-    appraiserScore: 0.5,
-    month: "April",
-    category: "Measurable",
-    selfComment: "",
-    appraiserComment: "",
-    commentOpen: true, // default open
-    action: "accept", // 'accept' | 'edit' | 'reject'
-  },
-  {
-    id: 2,
-    checked: false,
-    kra: "% Growth in Terminal Total o/s advances",
-    unit: "%",
-    actual: -8.1,
-    appraisee: 0.1,
-    appraiserActual: 0.2,
-    target: 0.9,
-    appraiserTarget: 0.9,
-    maxScore: 4.0,
-    score: 0.0,
-    appraiserScore: 0.4,
-    month: "April",
-    category: "Measurable",
-    selfComment: "",
-    appraiserComment: "",
-    commentOpen: true,
-    action: "accept",
-  },
-  {
-    id: 3,
-    checked: false,
-    kra: "No. of SB accounts opened vs target",
-    unit: "Number",
-    actual: 8,
-    appraisee: 12.0,
-    appraiserActual: 12,
-    target: 50.0,
-    appraiserTarget: 50.0,
-    maxScore: 2.0,
-    score: 0.7,
-    appraiserScore: 0.7,
-    month: "May",
-    category: "Measurable",
-    selfComment: "",
-    appraiserComment: "",
-    commentOpen: true,
-    action: "accept",
-  },
-];
-
-export default function KraTable() {
-  const [rows, setRows] = useState(initialDemoData);
-  const [showModal, setShowModal] = useState(false);
-
-  // load saved data
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setRows(JSON.parse(saved));
-      } catch {
-        setRows(initialDemoData);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+export default function KraTable({ rows = [], onRowChange, onSubmit, isSubmitting }) {
   const anyChecked = rows.some((r) => r.checked);
 
-  const updateRow = (id, patch) =>
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  const updateRow = (id, patch) => {
+    if (!onRowChange) return;
+    onRowChange(id, patch);
+  };
 
   const handleCheckbox = (id) => {
-    updateRow(id, { checked: !rows.find((r) => r.id === id).checked });
+    const current = rows.find((r) => r.id === id);
+    updateRow(id, { checked: !current?.checked });
   };
 
   const handleAction = (id, action) => {
-    // action controls editability; reject keeps values but prevents edit
     updateRow(id, { action });
   };
 
   const handleInput = (id, field, value) => updateRow(id, { [field]: value });
 
-  const toggleComment = (id) =>
-    updateRow(id, { commentOpen: !rows.find((r) => r.id === id).commentOpen });
-
-  const handleSubmit = () => {
-    if (!anyChecked) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-    setShowModal(true);
+  const toggleComment = (id) => {
+    const current = rows.find((r) => r.id === id);
+    updateRow(id, { commentOpen: !current?.commentOpen });
   };
 
-  const closeModal = () => setShowModal(false);
+  const handleSubmit = () => {
+    if (!anyChecked || !onSubmit) return;
+    onSubmit();
+  };
+
+  const renderEmptyState = !rows.length;
 
   return (
     <div className="kra-root">
       <h4 className="kra-title-top">Measurable</h4>
+
+      {renderEmptyState && (
+        <div className="empty-kra">No KRA records available for review.</div>
+      )}
 
       <div className="kra-table-wrap" role="table">
         <div className="kra-header-row table-header" >
@@ -132,8 +59,8 @@ export default function KraTable() {
         {rows.map((r) => {
           const isEditable = r.checked && r.action === "edit";
           return (
-            <div className="d-flex flex-column">
-            <div className="kra-row" key={r.id}>
+            <div className="d-flex flex-column" key={r.id}>
+            <div className="kra-row">
               <div className="col select-col">
                 <input
                   type="checkbox"
@@ -207,14 +134,12 @@ export default function KraTable() {
                 <input className="readonly single" value={r.month} readOnly />
               </div>
 
-              <div className="col cat-col">
-                {/* <input className="readonly single" value={r.category} readOnly /> */}
-              </div>
+              <div className="col cat-col" />
 
               <div className="col comment-col">
                 <button
                   className="comment-icon"
-                  onClick={() => toggleComment(r.id)}
+                    onClick={() => toggleComment(r.id)}
                   title="Toggle comments"
                 >
                   <i className="bi bi-chat-left-text-fill" />
@@ -301,26 +226,11 @@ export default function KraTable() {
         <button
           className={`submit-btn ${anyChecked ? "active" : "inactive"}`}
           onClick={handleSubmit}
-          disabled={!anyChecked}
+          disabled={!anyChecked || isSubmitting}
         >
-          Submit
+          {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </div>
-
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-body">
-              Exception Reviewed by Appraiser successfully !
-            </div>
-            <div className="modal-actions">
-              <button className="ok-btn" onClick={closeModal}>
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
