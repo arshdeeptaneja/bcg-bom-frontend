@@ -7,6 +7,7 @@ import { appraisalAPI } from "../../../../services/api";
 import LoadingSpinner from "../../../../components/Spinner";
 import { useQuery } from "@tanstack/react-query";
 import { FaInfoCircle } from "react-icons/fa";
+import { IoMdDownload } from "react-icons/io";
 import { toast } from "react-toastify";
 
 const ReportingReviewBulk = () => {
@@ -216,21 +217,27 @@ const ReportingReviewBulk = () => {
             <section className="mt-4 card">
 
                 {/* Upload Row */}
-                <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                    <div className="d-flex gap-2">
-                        <label className="btn btn-outline-secondary">
-                            SELECT A FILE
-                            <input type="file" hidden  onChange={(e) => setSelectedFile(e.target.files[0])}/>
-                        </label>
+               <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
+            <div className="d-flex align-items-center" style={{ border: "1px solid #3fa8e7" , padding: "2px"}}>
+              <label className="btn" style={{ border: "1.5px solid #3fa8e7", borderRadius: "0px", color: "#3fa8e7"}}>
+                SELECT A FILE
+                <input type="file" hidden />
+              </label>           
+                 <button className="btn" style={{color:"#2a2929ff"}}>
+                  <IoMdDownload />
+                  UPLOAD</button>
+            </div>
 
-                        <button className="primary-button" onClick={handleUpload}>UPLOAD</button>
-                    </div>
+            <div className="d-flex gap-2">
+              <button className="btn btn-outline-primary text-button" style={{ border: "1.5px solid #3fa8e7", borderRadius: "0px", color: "#3fa8e7"}}>
+                Download Data Table
+              </button>
+              <button className="btn btn-outline-primary primary-button" style={{ border: "1.5px solid #3fa8e7", borderRadius: "0px", color: "#3fa8e7"}}>
+                Download Sample
+              </button>
+            </div>
+          </div>
 
-                    <div className="d-flex gap-2">
-                        <button className="btn primary-button" onClick={handleDownloadSample} >Download Sample</button>
-                        <button className="btn primary-button" onClick={handleDownloadDataTable}>Download Data Table</button>
-                    </div>
-                </div>
 
                 <p className="text-muted small">NOTE: Please upload file with .xlsx extension only</p>
 

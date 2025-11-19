@@ -39,7 +39,6 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-
     //const token = localStorage.getItem('accessToken');
     const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
     if (token) {
@@ -557,6 +556,17 @@ export const appraisalAPI = {
     }
   },
 
+  // GET: Get Admin HR Dashboard data
+  getHrDashboard: async ({ empNo, appraisalPeriod, financialYear }) => {
+  const res = await axios.get(`/appraisal/admin/hr_dashboard`, {
+    params: {
+      empNo,
+      appraisalPeriod,
+      financialYear,
+    },
+  });
+  return res.data;
+},
   appraisalStatusChange: async ({ empNo, appraisalPeriod, searchEmpNo, financialYear }) => {
     try {
       const params = new URLSearchParams({
@@ -1325,10 +1335,6 @@ export const appraisalAPI = {
 
   },
 
-
-
-
-  }
 };
 
 // Generic API methods
@@ -1392,5 +1398,8 @@ export const accessService = {
   },
 
 };
+
+
+
 
 export default apiClient;

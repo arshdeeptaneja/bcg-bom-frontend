@@ -18,7 +18,6 @@ function AddAppeal() {
     employee: { name: "John Doe", id: "EMP123", empNo: "36663", reportingAuthorityNo: "36664" },
     role: "APPRAISEE",
   };
-
   const [comments, setComments] = useState({});
   const [selected, setSelected] = useState({});
   const [scores, setScores] = useState({});
@@ -324,10 +323,11 @@ function AddAppeal() {
                   <td style={{ width: '10%' }}>
                     <div className="text-muted small mb-1">{!selected[row.id] ? row.currentScore || row.max : ''}</div>
                     <input
+                      value={row.max}
                       disabled={!selected[row.id]}
                       className={selected[row.id] ? 'form-control text-center' : 'form-control text-center underlined-input'}
                       placeholder={selected[row.id] ? '' : '—'}
-                      value={scores[row.id] || ''}
+                      // value={scores[row.id] || ''}
                       onChange={(e) => setScores({ ...scores, [row.id]: e.target.value })}
                     />
                   </td>

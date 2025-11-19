@@ -33,6 +33,8 @@ import {
   AddAppeal,
   QuarterlyAppraisee,
   QuaterlyAppraiseeCheckIn,
+  QuarterlyAppraiserBulk,
+  AppealDelection,
   ReviewerDashboard,
   ReviewerMode,
 } from './pages';
@@ -56,6 +58,8 @@ import EmployeeAppraisalCard from './components/Appraisal/EmployeeAppraisalCard/
 import EmployeeQuarterlyException from './pages/Appraisal/QuarterlyException/EmployeeQuarterlyException';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import ExceptionScore from './pages/Appraisal/AppraisalHRDashboard/ExceptionScore/ExceptionScore';
+import AdminSetting from './pages/Appraisal/AppraisalHRDashboard/AdminSetting/AdminSetting';
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -538,6 +542,52 @@ function AppContent() {
                 )
               }
             />
+
+
+              <Route
+              path="/utility/quarterly-appraiser-bulk"
+              element={
+                isAuthenticated ? (
+                  <QuarterlyAppraiserBulkLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraisal/exception-score"
+              element={
+                isAuthenticated ? (
+                  <ExceptionScoreLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraisal/hr-dashboard/admin-setting"
+              element={
+                isAuthenticated ? (
+                  <AdminSettingLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraisal/hr-dashboard/appeal-delection"
+              element={
+                isAuthenticated ? (
+                  <AppealDeletionLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+
           </Routes>
         </div>
       </Router>
@@ -911,6 +961,40 @@ const QuaterlyAppraiseeCheckInLayout = ({ onLogout }) => (
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <QuaterlyAppraiseeCheckIn />
+  </>
+);
+
+
+//Quarterly Appraiser details in bulk utility
+const QuarterlyAppraiserBulkLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+  <QuarterlyAppraiserBulk />
+  </>
+);
+
+const ExceptionScoreLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+   <ExceptionScore />
+  </>
+);
+
+const AdminSettingLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AdminSetting />
+  </>
+);
+
+const AppealDeletionLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AppealDelection />
   </>
 );
 

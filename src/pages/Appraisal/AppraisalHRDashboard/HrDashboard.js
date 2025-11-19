@@ -8,9 +8,13 @@ import ReportingAuthority from './AppealComittee/AppealComittee';
 import AppraiserUpdate from './AppraiserUpdate/AppraiserUpdate';
 import { useNavigate } from 'react-router-dom';
 import LogsAndAutoAnnuals from './LogsAndAutoAnnuals/LogsAndAutoAnnual ';
+import { useQuery } from '@tanstack/react-query';
+import { appraisalAPI } from '../../../services/api';
+
 
 
 const HrDashboard = () => {
+const employee = JSON.parse(localStorage.getItem("adminData"));
 
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
@@ -30,7 +34,28 @@ const HrDashboard = () => {
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
   const navigate = useNavigate();
+  
 
+ const { data: hrData, isLoading, isError } = useQuery({
+  queryKey: [
+    'hrDashboard',
+    employee?.empNo,
+    appraisalPeriod,
+    selectedQuarter,
+    financialYear
+  ],
+  queryFn: () =>
+    appraisalAPI.getHrDashboard({
+      empNo: employee?.empNo,
+      appraisalPeriod: appraisalPeriod.toLowerCase(),
+      financialYear: financialYear.replace("FY ", "").split("-")[0],
+    }),
+  enabled: !!employee?.empNo && !!financialYear && !!appraisalPeriod,
+});
+
+
+
+  
 
   return (
     <div className="pageWrapper">
@@ -124,21 +149,21 @@ const HrDashboard = () => {
           <h2 className="summary-heading">Overall Summary</h2>
           <div className="summary-content-grid">
             <div className="summary-stat-box">
-              <div className="stat-number-large">1839</div>
+              <div className="stat-number-large">  {hrData?.complete_data?.TOTAL_NO_EMP ?? 0}</div>
               <div className="stat-label-white">Total Number of<br />Employees</div>
             </div>
 
             <div className="vertical-divider"></div>
 
             <div className="summary-stat-box">
-              <div className="stat-number-large">1839</div>
+              <div className="stat-number-large">  {hrData?.complete_data?.NOOFPENDINGEMP ?? 0}</div>
               <div className="stat-label-white">The Number of<br />Pending Employees</div>
             </div>
 
             <div className="vertical-divider"></div>
 
             <div className="summary-stat-box">
-              <div className="stat-number-large">0</div>
+              <div className="stat-number-large">{hrData?.days_left ?? 0}</div>
               <div className="stat-label-white">Number of Days to<br />Deadline</div>
             </div>
 
@@ -151,7 +176,7 @@ const HrDashboard = () => {
             <div className="completion-circle-wrapper">
               <div className="completion-circle-border">
                 <div className="completion-inner">
-                  <div className="completion-percent">0.0%</div>
+                  <div className="completion-percent">{hrData?.complete_data?.PERCT_TOTAL_COMPLETION ?? 0}%</div>
                   <div className="completion-text">Completion</div>
                 </div>
               </div>
@@ -166,15 +191,15 @@ const HrDashboard = () => {
             <h2 className="card-title-accent">Appraisee Completion</h2>
             <div className="stats-row">
               <div className="stat-column">
-                <div className="stat-number-green">0.1%</div>
+                <div className="stat-number-green"> {hrData?.pending_officers_data?.SELF_PERCT ?? 0}%</div>
                 <div className="stat-description">Appraisee Completed Employees in Percentage</div>
               </div>
               <div className="stat-column">
-                <div className="stat-number-green">2</div>
+                <div className="stat-number-green">  {hrData?.pending_officers_data?.SELF_COMPLETED_COUNT ?? 0}</div>
                 <div className="stat-description">Appraisee Completed Employees</div>
               </div>
               <div className="stat-column">
-                <div className="stat-number-green">1837</div>
+                <div className="stat-number-green">{hrData?.pending_officers_data?.SELF_CNT ?? 0}</div>
                 <div className="stat-description">Pending Officers</div>
               </div>
             </div>
@@ -194,15 +219,15 @@ const HrDashboard = () => {
             <h2 className="card-title-accent">Appraiser Completion</h2>
             <div className="stats-row">
               <div className="stat-column">
-                <div className="stat-number-green">100.0%</div>
+                <div className="stat-number-green"> {hrData?.pending_officers_data?.AC_PERCT ?? 0}%</div>
                 <div className="stat-description">Appraiser Completed Employees in Percentage</div>
               </div>
               <div className="stat-column">
-                <div className="stat-number-green">2</div>
+                <div className="stat-number-green"> {hrData?.pending_officers_data?.AC_COMPLETED_COUNT ?? 0}</div>
                 <div className="stat-description">Appraiser Completed Employees</div>
               </div>
               <div className="stat-column">
-                <div className="stat-number-green">0</div>
+                <div className="stat-number-green"> {hrData?.pending_officers_data?.AC_CNT ?? 0}</div>
                 <div className="stat-description">Pending Officers</div>
               </div>
             </div>
@@ -223,15 +248,15 @@ const HrDashboard = () => {
           <h2 className="card-title-accent">Reviewer Completion</h2>
           <div className="stats-row">
             <div className="stat-column">
-              <div className="stat-number-green">100.0%</div>
+              <div className="stat-number-green">  {hrData?.pending_officers_data?.REPA_PERCT ?? 0}%</div>
               <div className="stat-description">Reviewer Completed Employees in Percentage</div>
             </div>
             <div className="stat-column">
-              <div className="stat-number-green">2</div>
+              <div className="stat-number-green">  {hrData?.pending_officers_data?.REPA_COMPLETED_COUNT ?? 0}</div>
               <div className="stat-description">Reviewer Completed Employees</div>
             </div>
             <div className="stat-column">
-              <div className="stat-number-green">0</div>
+              <div className="stat-number-green">  {hrData?.pending_officers_data?.REPA_CNT ?? 0}</div>
               <div className="stat-description">Pending Officers</div>
             </div>
           </div>

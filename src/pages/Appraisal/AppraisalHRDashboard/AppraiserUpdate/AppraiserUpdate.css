@@ -1,23 +1,24 @@
-
-.AppraiserContaniner{
-    padding-top: 61px;
+.AppraiserContaniner {
+  padding-top: 61px;
   padding-left: 88px;
   max-width: 100%;
 }
+
 .breadcrumb-nav {
   font-size: 14px;
   background-color: transparent;
   margin-bottom: 0;
 }
 
-.blue-button{
-   border-radius: 4px;
+.blue-button {
+  border-radius: 4px;
   border: var(--border);
   padding: 8px 20px;
   color: #fff;
-  background: var(--accent-color)!important;
+  background: var(--accent-color) !important;
 
 }
+
 /* Remove Bootstrap default background & padding */
 .breadcrumb {
   background: none;
@@ -30,7 +31,7 @@
   font-weight: 500;
 }
 
-.breadcrumb-item + .breadcrumb-item::before {
+.breadcrumb-item+.breadcrumb-item::before {
   content: " / ";
   color: #b8b8b8;
   font-weight: 500;
@@ -73,10 +74,19 @@
 
 /* Grey box container */
 .appraisal-box {
-  background-color: #f2f2f2; /* same soft grey */
+  background-color: #f2f2f2;
   border-radius: 4px;
   width: 100%;
-  max-width: 520px; /* fixed width for pixel precision */
+  max-width: 520px;
+
+
+}
+
+.period-section {
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 /* Label text */
@@ -86,43 +96,50 @@
   color: #6c6c6c;
 }
 
+.period-btns{
+  display: flex;
+  align-items: center;
+}
+
 /* Buttons group */
 .period-btn {
   font-size: 13px;
   font-weight: 600;
-  color: var(--bs-dark);
-  background-color: transparent;
-  border: 1px solid var(--accent-color);
-  border-radius: 2px !important;
+  color: var(--accent-color);
+  background-color: white;
   padding: 4px 12px;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 /* Active button (filled green like your screenshot) */
 .active {
-  background-color:var(--accent-color);
+  background-color: var(--accent-color);
   color: #fff;
 }
 
-.btns{
-      /* padding: 6px 14px; */
-    /* border-radius: 4px; */
-    font-size: 16px;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
+.btns {
+  /* padding: 6px 14px; */
+  /* border-radius: 4px; */
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
 }
+
 /* Spacing between buttons */
-.btn-group .btn + .btn {
+.btn-group .btn+.btn {
   margin-left: 5px;
 
 }
-.btn-groups{
-    position: relative;
-    display: flex;
-    vertical-align: middle;
+
+.btn-groups {
+  position: relative;
+  display: flex;
+  vertical-align: middle;
 
 }
+
 /* Responsive tweak */
 @media (max-width: 576px) {
   .appraisal-box {
@@ -143,10 +160,11 @@
 
 /* EC input with yellow highlight border like screenshot */
 .ec-input {
-  border: 3px solid transparent; /* default */
+  border: 3px solid transparent;
+  /* default */
   background-clip: padding-box;
-    padding: 0.3rem 0.9rem;
-    border-radius: 4px;
+  padding: 0.3rem 0.9rem;
+  border-radius: 4px;
   box-shadow: none;
   position: relative;
 }
@@ -163,7 +181,7 @@
 }
 
 .btn-reset {
-  background-color:var(--accent-color);
+  background-color: var(--accent-color);
   color: #fff;
   border: none;
   padding: 0.45rem 1.1rem;
@@ -203,6 +221,7 @@
   .page-title {
     font-size: 1.05rem;
   }
+
   .ec-wrap {
     min-width: 100%;
   }
@@ -215,5 +234,3 @@
   border-radius: 10px;
   overflow: hidden;
 }
-
-

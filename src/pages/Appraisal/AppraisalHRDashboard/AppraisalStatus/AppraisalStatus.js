@@ -145,29 +145,27 @@ const AppraiserStatus = () => {
 
           {/* Right boxed options */}
           <div className="col-12 col-md-5">
-            <div className="appraisal-box d-flex justify-content-between align-items-start p-2">
+            <div className="appraisal-box d-flex justify-content-between align-items-start p-3">
               {/* Appraisal Period */}
               <div className="period-section">
                 <label className="period-title">Appraisal Period</label>
-                <div className="btn-groups mt-2" role="group">
-                  <button
-                    type="button"
+                <div className="period-btns mt-2" role="group">
+                  <div
                     onClick={() => setAppraisalPeriod('Quarterly')}
-                    className={`btn ${appraisalPeriod === 'Quarterly' ? 'active' : 'period-btn'}`}>
+                    className={`period-btn ${appraisalPeriod === 'Quarterly' ? 'active' : ''}`}>
                     Quarterly
-                  </button>
-                  <button
+                  </div>
+                  <div
                     onClick={() => setAppraisalPeriod('Annual')}
-                    type="button"
-                    className={`btn ${appraisalPeriod === 'Annual' ? 'active' : 'period-btn'}`}>
+                    className={`period-btn ${appraisalPeriod === 'Annual' ? 'active' : ''}`}>
                     Annual Year
-                  </button>
+                  </div>
                 </div>
               </div>
 
               {/* Quarterly Period */}
               {appraisalPeriod === 'Quarterly' &&
-                <div className="period-section text-end">
+                <div className="period-section">
                   <label className="period-title">Quarterly Period</label>
                   <div className="btn-group mt-2" role="group">
                     <button type="button"
@@ -213,14 +211,13 @@ const AppraiserStatus = () => {
         {/* Table */}
         <div className="table-wrap">
           <div className="table-responsive">
-            <table className="table table-bordered align-middle mb-0">
-              <thead className="table-header">
+            <table className="table appraisal-table align-middle mb-0">
+              <thead className='table-header'>
                 <tr>
-
+                  <th>Select</th>
                   <th>URL ID</th>
                   <th>EMP Number</th>
                   <th>EMP Name</th>
-                  <th>Main Role</th>
                   <th>SOL ID</th>
                   <th>Zone</th>
                   <th>Appraisal Status</th>
@@ -266,7 +263,7 @@ const AppraiserStatus = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="16" className="text-center text-muted">
+                    <td colSpan="12" className="text-center text-muted">
                       {noData ? "No data found!" : "Enter EC & click Search"}
                     </td>
                   </tr>
@@ -275,10 +272,8 @@ const AppraiserStatus = () => {
 
             </table>
           </div>
-
-          {/* horizontal green progress bar like in screenshot */}
-
         </div>
+
       </div>
     </div>
   );
