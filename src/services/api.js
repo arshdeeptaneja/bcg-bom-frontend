@@ -3,6 +3,19 @@ import axios from 'axios';
 // Base API configuration
 const API_BASE_URL = 'http://localhost:8084';
 
+const appendQueryParam = (searchParams, key, value) => {
+  if (value === undefined || value === null) {
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((entry) => appendQueryParam(searchParams, key, entry));
+    return;
+  }
+
+  searchParams.append(key, String(value));
+};
+
 const unauthClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -354,27 +367,6 @@ export const appraisalAPI = {
     }
   },
 
-  // GET: Get quarterly exception review data
-  getExceptionQuarterlyReview: async ({ fy, quarter, empNo, roleName, roleId, zone }) => {
-    try {
-      const params = new URLSearchParams({
-        fy: fy,
-        quarter: quarter || 'Q1',
-        empNo: empNo,
-        roleName: roleName,
-        roleId: roleId,
-        zone: zone,
-      });
-      const response = await apiClient.get(
-        `${appraisalBaseUrl}/exception_quarterly_verify/review?${params.toString()}`
-      );
-      return response.data;
-    } catch (error) {
-      console.log('error', error);
-      throw error;
-    }
-  },
-
   // GET: Get appraisal home dashboard data
   getAppraisalHomeDashboard: async ({ empNo, role, appraisalPeriod, financialYear, quarter }) => {
     try {
@@ -448,7 +440,7 @@ export const appraisalAPI = {
     }
   },
 
-  // GET: Get quarterly exception report data
+    // GET: Get quarterly exception report data
   getQuarterlyExceptionReport: async ({ 
     empNo, 
     url, 
@@ -479,6 +471,8 @@ export const appraisalAPI = {
       throw error;
     }
   },
+
+  // POST: Submit quarterly exception report with file attachment
 
   // GET: Get appraisee dashboard data
   getAppraiseeDashboard: async ({ fy, quarter, appraisalPeriod, empNo }) => {
@@ -515,6 +509,9 @@ export const appraisalAPI = {
         appraisalPeriod: appraisalPeriod,
         quarter: quarter || '',
       });
+      if (quarter) {
+        params.append('quarter', quarter);
+      }
       const response = await apiClient.get(
         `/appraisal/my_appraisal_dashboard?${params.toString()}`
       );
@@ -571,6 +568,314 @@ export const appraisalAPI = {
   return res.data;
 },
 
+  // GET: Fetch acceptor (reviewer) appraisal payload
+  getAcceptorAppraisal: async ({
+    empNo,
+    urlId,
+    roleName,
+    roleId,
+    zoneName,
+    financialYear,
+    appraisalPeriod,
+    quarter,
+    appraisalStatus,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'urlId', urlId);
+      appendQueryParam(params, 'roleName', roleName);
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'appraisalPeriod', appraisalPeriod);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
+
+      const response = await apiClient.get(
+        `/appraisal/acceptor_appraisal?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getAcceptorAppraisal error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit reviewer/acceptor appraisal response
+  submitAcceptorAppraisal: async (payload = {}, { endpoint } = {}) => {
+    try {
+      const response = await apiClient.post(
+        endpoint || '/appraisal/acceptor_appraisal/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitAcceptorAppraisal error', error);
+      throw error;
+    }
+  },
+
+  submitSelfAppraisal: async (payload) => {
+    try {
+      const params = new URLSearchParams();
+
+      Object.entries(payload || {}).forEach(([key, value]) => {
+        appendQueryParam(params, key, value);
+      });
+
+      const response = await apiClient.post(
+        `/appraisal/submit-self-appraisal?${params.toString()}`,
+        null
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('submitSelfAppraisal error', error);
+      throw error;
+    }
+  },
+
+  saveQuarterlyCheckInReport: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/quarterly_check_in_report/save',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('saveQuarterlyCheckInReport error', error);
+      throw error;
+    }
+  },
+
+  submitQuarterlyCheckInReport: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/quarterly_check_in_report/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitQuarterlyCheckInReport error', error);
+      throw error;
+    }
+  },
+
+  // GET: Get reportee appraisal dashboard data
+  getReporteeAppraisalDashboard: async ({ empNo, financialYear, quarter }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo,
+        financialYear: financialYear,
+        quarter: quarter || '',
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/reportee_appraisal/dashboard?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit quarterly exception report with file attachment
+  submitQuarterlyExceptionReport: async (payload, attachment) => {
+    try {
+      const formData = new FormData();
+      formData.append('payload', JSON.stringify(payload));
+      if (attachment) {
+        formData.append('attachment', attachment);
+      }
+      const response = await apiClient.post(
+        '/appraisal/quarterly_exception_report/submit_exception',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitQuarterlyExceptionReport error', error);
+    }
+  },
+
+
+  // GET: Get appeal report data
+  getAppealReport: async ({ roleId, roleType }) => {
+    try {
+      const params = new URLSearchParams({
+        roleId: roleId,
+        roleType: roleType,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/appeal_report?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
+  // GET: Review exception payload used by exception resolution reviewers
+  getExceptionQuarterlyReview: async ({
+    fy,
+    quarter,
+    empNo,
+    roleName,
+    roleId,
+    zone,
+    custTicketId,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'fy', fy);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'roleName', roleName);
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'zone', zone);
+      appendQueryParam(params, 'custTicketId', custTicketId);
+
+      const response = await apiClient.get(
+        `/appraisal/exception_quarterly_verify/review?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getExceptionQuarterlyReview error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit reviewer decision for quarterly exception
+  submitExceptionQuarterlyReview: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/exception_quarterly_verify/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitExceptionQuarterlyReview error', error);
+      throw error;
+    }
+  },
+
+  // GET: Fetch validator view of exception for review
+  getExceptionQuarterlyValidatorReview: async ({
+    fy,
+    quarter,
+    empNo,
+    roleName,
+    roleId,
+    zone,
+    custTicketId,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'fy', fy);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'roleName', roleName);
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'zone', zone);
+      appendQueryParam(params, 'custTicketId', custTicketId);
+
+      const response = await apiClient.get(
+        `/appraisal/exception_quarterly_validator/review?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getExceptionQuarterlyValidatorReview error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit validator decision for quarterly exception
+  submitExceptionQuarterlyValidatorReview: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/exception_quarterly_validator/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitExceptionQuarterlyValidatorReview error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit appeal report with file attachment
+  submitAppealReport: async (payload, attachment) => {
+    try {
+      const formData = new FormData();
+      formData.append('payload', JSON.stringify(payload));
+      formData.append('attachment', attachment);
+      const response = await apiClient.post(
+        '/appraisal/appeal_report/submit',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitAppealReport error', error);
+      throw error;
+    }
+  },
+
+  // GET: Fetch appeal report for committee review
+  getAppealCommitteeReviewData: async ({ roleId, roleType, empNo, financialYear }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'financialYear', financialYear);
+      const response = await apiClient.get(
+        `/appraisal/appeal_report/review?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getAppealCommitteeReviewData error', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit appeal committee review decision
+  submitAppealCommitteeReview: async (payload = {}) => {
+    try {
+      const response = await apiClient.post('/appraisal/appeal_committee/submit', payload);
+      return response.data;
+    } catch (error) {
+      console.error('submitAppealCommitteeReview error', error);
+      throw error;
+    }
+  },
+
+  // GET: Get appeal committee data
+  getAppealCommittee: async ({ empNo, financialYear }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo,
+        financialYear: financialYear,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/appeal_committee?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  }
 };
 
 // Generic API methods

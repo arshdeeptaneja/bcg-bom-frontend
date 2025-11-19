@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react";
 import { loadAppraisalData, saveAppraisalData } from "../../localStorageHelpers";
 import "./MeasurableKRA.css";
 
-const MeasurableKRA = () => {
+const MeasurableKRA = ({ initialData }) => {
   const [selectedMonth, setSelectedMonth] = useState("April");
   const [openCommentIndex, setOpenCommentIndex] = useState(null);
   const [kraData, setKraData] = useState({});
   const [editedData, setEditedData] = useState({});
   const [message, setMessage] = useState("");
 
-  // ✅ Load from localStorage safely
+  // ✅ Load from localStorage or API data safely
   useEffect(() => {
     const stored = loadAppraisalData();
 
+    // Priority: 1. localStorage, 2. API initialData, 3. default
     if (
       stored.measurableKRA &&
       typeof stored.measurableKRA === "object" &&
@@ -20,6 +21,10 @@ const MeasurableKRA = () => {
     ) {
       setKraData(stored.measurableKRA);
       setEditedData(JSON.parse(JSON.stringify(stored.measurableKRA))); // copy for editing
+    } else if (initialData && typeof initialData === "object" && Object.keys(initialData).length > 0) {
+      setKraData(initialData);
+      setEditedData(JSON.parse(JSON.stringify(initialData)));
+      saveAppraisalData({ measurableKRA: initialData });
     } else {
       const defaultData = {
         April: [

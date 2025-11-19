@@ -1,76 +1,140 @@
-import { BackButton } from '../../../components/common';
+import { useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { BackButton } from '../../../components/common';
 import './AppraiserCheckInDashboard.css';
 import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
 import EmployeeModel from '../../../models/EmployeeModel';
-import { useEffect } from 'react';
-import { useAuth } from '../../../contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
-import { toast } from 'react-toastify';
 
-/**
- *
- * @param {Object} props - The component props.
- * @param {string} props.financialYear - The financial year.
- * @param {string} props.appraisalPeriod - The appraisal period.
- * @param {string} props.quarter - The quarter.
- * @returns
- */
+const STATUS_MAPPING = {
+  complete_reva: 'Pending at Acceptor',
+  complete_self: 'Pending at Appraiser',
+  complete_repa: 'Pending at Reviewer',
+  pending: 'Pending at Appraisee',
+  submitted_appraisal: 'Completed',
+  completed: 'Completed',
+  complete_ac: 'Completed',
+};
+
+const getDisplayStatus = (backendStatus) => {
+  if (!backendStatus) return 'Pending';
+  const normalized = String(backendStatus).toLowerCase();
+  return STATUS_MAPPING[normalized] || backendStatus;
+};
+
+const pickNumericValue = (source, keys = []) => {
+  if (!source) return NaN;
+  for (const key of keys) {
+    const raw = source[key];
+    if (raw === undefined || raw === null || raw === '') continue;
+    const parsed = Number(raw);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+  return NaN;
+};
+
+const computeAverageFromScoreTable = (scoreEntries) => {
+  if (!Array.isArray(scoreEntries) || scoreEntries.length === 0) {
+    return 0;
+  }
+  const total = scoreEntries.reduce((sum, entry) => {
+    const value = Number(entry?.PERCENTAGE_SCORE ?? entry?.percentageScore ?? entry?.SCORE);
+    return sum + (Number.isNaN(value) ? 0 : value);
+  }, 0);
+  return Number((total / scoreEntries.length).toFixed(2));
+};
+
+const extractYear = (fyLabel) => {
+  if (!fyLabel) {
+    return new Date().getFullYear().toString();
+  }
+  const match = fyLabel.match(/FY\s+(\d{4})/i);
+  return match ? match[1] : fyLabel;
+};
+
+const buildAdditionalRoles = (record) => {
+  const roles = [record?.ADDITIONAL_ROLE_1, record?.ADDITIONAL_ROLE_2, record?.ADDITIONAL_ROLE_3]
+    .filter(Boolean)
+    .map((role) => String(role));
+  return roles;
+};
+
+const buildDateRange = (start, end) => {
+  if (!start || !end) {
+    return '';
+  }
+  return `${start} to ${end}`;
+};
+
 export default function AppraiserCheckInDashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const financialYear = searchParams.get('financialYear');
   const appraisalPeriod = searchParams.get('appraisalPeriod');
   const quarter = searchParams.get('quarter');
-
-  // Get employee number from auth context
   const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
-  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
+  const authEmpNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
 
-  // Extract year from financial year format (e.g., "FY 2025-26" -> "2025")
-  const extractYear = (fy) => {
-    const match = fy?.match(/FY (\d{4})/);
-    return match ? match[1] : new Date().getFullYear().toString();
-  };
+  const isQuarterlyFlow = appraisalPeriod?.toLowerCase() === 'quarterly';
 
-  // React Query to fetch appraiser check-in dashboard data
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['appraiserCheckInDashboard', financialYear, appraisalPeriod, quarter, empNo],
+    queryKey: ['appraiserCheckInDashboard', financialYear, quarter, authEmpNo],
     queryFn: () =>
       appraisalAPI.getAppraiserCheckInDashboard({
-        empNo: empNo,
+        empNo: authEmpNo,
         financialYear: extractYear(financialYear),
-        quarter: quarter || '',
-        appraisalPeriod: appraisalPeriod?.toLowerCase() || '',
+        quarter,
+        appraisalPeriod: 'quarterly',
       }),
-    enabled: !!empNo && !!financialYear && !!appraisalPeriod && !!quarter, // Only run query if required params are available
+    enabled: Boolean(authEmpNo && financialYear && quarter && isQuarterlyFlow),
   });
-console.log("data", data);
-  // Show error toast when API fails
-  useEffect(() => {
-    if (isError) {
-      toast.error(`Failed to fetch appraiser check-in dashboard data: ${error?.message || 'Unknown error'}`);
+
+  const reportees = data?.result || data?.reportees || [];
+  const scoreTable = data?.appraisal_score_dash || [];
+  const scoreSummary = data?.score_summary || data?.scoreSummary || {};
+
+  const averageScore = useMemo(() => {
+    const summaryAverage = pickNumericValue(scoreSummary, ['averageScore', 'avgScore', 'AVERAGE_SCORE']);
+    return Number.isNaN(summaryAverage) ? computeAverageFromScoreTable(scoreTable) : summaryAverage;
+  }, [scoreSummary, scoreTable]);
+
+  const maxScore = useMemo(() => {
+    const summaryMax = pickNumericValue(scoreSummary, ['maxScore', 'MAX_SCORE']);
+    if (!Number.isNaN(summaryMax)) {
+      return summaryMax;
     }
-  }, [isError, error]);
+    return scoreTable.reduce((maxValue, entry) => {
+      const candidate = Number(entry?.MAX_SCORE ?? entry?.WEIGHTAGE ?? 0);
+      return Number.isNaN(candidate) ? maxValue : Math.max(maxValue, candidate);
+    }, 0);
+  }, [scoreSummary, scoreTable]);
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return (
       <div className="pageWrapper">
-        <div className="pageWrapper-header">
-          <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser Check-In Dashboard</h1>
-        </div>
         <div className="text-center mt-5">
-          <p className="text-danger fw-semibold">Missing required parameters: Financial Year, Appraisal Period, or Quarter</p>
+          <p className="text-danger fw-semibold">Missing financial year, appraisal period, or quarter</p>
         </div>
       </div>
     );
   }
 
-  // Show loading spinner while data is being fetched
+  if (!isQuarterlyFlow) {
+    return (
+      <div className="pageWrapper">
+        <div className="text-center mt-5">
+          <p className="text-danger fw-semibold">This route is only available for quarterly flows.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="pageWrapper">
@@ -87,63 +151,25 @@ console.log("data", data);
     );
   }
 
-  // Extract data from API response
-  // Handle both wrapped (data.data) and direct (data) response structures
-  const responseData = data?.data || data;
-  const results = responseData?.result || [];
-  const scoreData = responseData?.appraisal_score_dash || [];
+  if (isError) {
+    return (
+      <div className="pageWrapper">
+        <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
+          <div className="headline d-flex flex-row justify-content-between align-items-center">
+            <BackButton />
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+              Appraiser Check-In Dashboard
+            </h1>
+          </div>
+        </div>
+        <div className="text-center mt-5">
+          <p className="text-danger fw-semibold">Failed to load reportee data</p>
+          <p className="text-muted">{error?.message || 'Please try again later.'}</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Status mapping for display transformation
-  const STATUS_MAPPING = {
-    'complete_reva': 'Pending at Acceptor',
-    'complete_self': 'Pending at Appraiser',
-    'complete_repa': 'Pending at Reviewer',
-    'pending': 'Pending at Appraisee',
-    'submitted_appraisal': 'Completed',
-    'completed': 'Completed',
-    'complete_ac': 'Completed'
-  };
-
-  // Helper function to get display status from backend status
-  const getDisplayStatus = (backendStatus) => {
-    if (!backendStatus) return 'Pending';
-    const status = backendStatus.toLowerCase();
-    return STATUS_MAPPING[status] || 'Pending';
-  };
-
-  // Calculate date range based on financial year and quarter
-  const getDateRange = (startDate, endDate) => {
-    if (startDate && endDate) {
-      return `${startDate} to ${endDate}`;
-    }
-    // Fallback: calculate from financial year and quarter
-    if (!financialYear) return '';
-    const year = extractYear(financialYear);
-    const startYear = parseInt(year);
-    const endYear = startYear + 1;
-    
-    if (appraisalPeriod === 'Quarterly' && quarter) {
-      const quarterMonths = {
-        'Q1': { start: '04', end: '06', endDay: '30' }, // April to June
-        'Q2': { start: '07', end: '09', endDay: '30' }, // July to September
-        'Q3': { start: '10', end: '12', endDay: '31' }, // October to December
-        'Q4': { start: '01', end: '03', endDay: '31' }, // January to March (next year)
-      };
-      const q = quarterMonths[quarter];
-      if (q) {
-        const startDate = quarter === 'Q4' 
-          ? `${endYear}-${q.start}-01` 
-          : `${startYear}-${q.start}-01`;
-        const endDate = quarter === 'Q4'
-          ? `${endYear}-${q.end}-${q.endDay}`
-          : `${startYear}-${q.end}-${q.endDay}`;
-        return `${startDate} to ${endDate}`;
-      }
-    } else if (appraisalPeriod === 'Annual') {
-      return `${startYear}-04-01 to ${endYear}-03-31`;
-    }
-    return '';
-  };
   return (
     <div className="pageWrapper">
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
@@ -153,106 +179,121 @@ console.log("data", data);
             Appraiser Check-In Dashboard
           </h1>
         </div>
-        <h4 className="text-muted fw-bold mb-0 ms-3">
-          {`${
-            appraisalPeriod === 'Quarterly' ? `${quarter}, ` : '' // Show Quarter only for Quarterly appraisal periods, else directly show the FY
-          } ${financialYear} ${appraisalPeriod} Check-In`}
-        </h4>
+        <h4 className="text-muted fw-bold mb-0 ms-3">{`${quarter}, ${financialYear} Quarterly Check-In`}</h4>
       </div>
 
-      {/* --Appraisee Check-In Filters Row --*/}
       <div className="row g-3 mb-4 appraiser-filter-bar">
         <div className="col-md-2">
           <label className="form-label fw-semibold">EMPLOYEE NUMBER</label>
-          <select className="form-select">
+          <select className="form-select" disabled>
             <option>-Select-</option>
           </select>
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">EMPLOYEE NAME</label>
-          <select className="form-select">
+          <select className="form-select" disabled>
             <option>-Select-</option>
           </select>
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">PRIMARY ROLE</label>
-          <select className="form-select">
+          <select className="form-select" disabled>
             <option>-Select-</option>
           </select>
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">APPRAISER</label>
-          <select className="form-select">
+          <select className="form-select" disabled>
             <option>-Select-</option>
           </select>
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">STATUS</label>
-          <select className="form-select">
+          <select className="form-select" disabled>
             <option>-Select-</option>
           </select>
         </div>
         <div className="col-md-2 d-flex align-items-end">
-          <button className="btn primary-button px-4 w-100">
-            Reset <i className="bi bi-arrow-repeat ms-1"></i>
+          <button className="btn primary-button px-4 w-100" disabled>
+            Reset <i className="bi bi-arrow-repeat ms-1" />
           </button>
         </div>
       </div>
 
-      {/* Employee Appraisal Cards */}
+      <div className="summary-row border rounded-2 px-5 py-3 mt-3 align-items-end justify-content-between d-flex gap-3 shadow-sm">
+        <h2 className="text-muted fw-bold mb-0 ms-3">Average Score for Quarter</h2>
+        <div className="summary-card-content">
+          <span className="summary-card-content-value fw-bold">Score:</span>
+          <span className="summary-card-content-value text-primary ms-3">{averageScore || 0}</span>
+        </div>
+        <div className="summary-card-content">
+          <span className="summary-card-content-value fw-bold">Max Score:</span>
+          <span className="summary-card-content-value text-primary ms-3">{maxScore || 0}</span>
+        </div>
+      </div>
+
       <div className="employee-appraisal-cards">
-        {results.length === 0 ? (
+        {reportees.length === 0 ? (
           <div className="text-center mt-5">
-            <p className="text-muted fw-semibold">No appraisal data available for this period</p>
-            <p className="text-muted">Please check back later or contact HR if you believe this is an error.</p>
+            <p className="text-muted fw-semibold">No reportees pending for this quarter.</p>
           </div>
         ) : (
-          results.map((employee, index) => (
-            <EmployeeAppraisalCard
-              key={employee.EMP_ID || employee.empNo || index}
-              employee={
-                new EmployeeModel({
-                  empNo: employee.EMP_ID || employee.empNo || '',
-                  employeeName: employee.EMP_NAME || employee.employeeName || '',
-                  employeeScale: employee.SCALE || employee.employeeScale || '',
-                  roles: employee.ADDITIONAL_ROLE_1 || employee.ADDITIONAL_ROLE_2
-                    ? [employee.ADDITIONAL_ROLE_1, employee.ADDITIONAL_ROLE_2].filter(Boolean)
-                    : employee.roles || [],
-                  appraiser: employee.REPORTING_AUTHORITY_NAME || employee.appraiser || '',
-                })
-              }
-              dateRange={getDateRange(employee.START_DATE, employee.END_DATE)}
-              primaryRole={employee.MAIN_ROLE || employee.primaryRole || ''}
-              appraisalStatus={getDisplayStatus(employee.APPRAISAL_STATUS)}
-              exceptionStatus={employee.EXCEPTION_STATUS || 'NOT CREATED'}
-              organization={employee.ORGANIZATION || employee.organization || ''}
-              quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
-              appraisalPeriod={appraisalPeriod}
-              scoreData={scoreData}
-              onAddCheckIn={() => {
-                navigate('/appraisal/check-in-form', {
-                  state: {
-                    financialYear,
-                    appraisalPeriod,
-                    quarter,
-                    dateRange: getDateRange(employee.START_DATE, employee.END_DATE),
-                    employee: {
-                      empNo: employee.EMP_ID || employee.empNo || '',
-                      employeeName: employee.EMP_NAME || employee.employeeName || '',
-                      employeeScale: employee.SCALE || employee.employeeScale || '',
-                      roles: employee.ADDITIONAL_ROLE_1 || employee.ADDITIONAL_ROLE_2
-                        ? [employee.ADDITIONAL_ROLE_1, employee.ADDITIONAL_ROLE_2].filter(Boolean)
-                        : employee.roles || [],
-                      primaryRole: employee.MAIN_ROLE || employee.primaryRole || '',
-                      appraiser: employee.REPORTING_AUTHORITY_NAME || employee.appraiser || '',
+          reportees.map((record, index) => {
+            const employeeModel = new EmployeeModel({
+              empNo: record?.EMP_ID || record?.empNo || `reportee-${index}`,
+              employeeName: record?.EMP_NAME || record?.employeeName || 'Employee',
+              employeeScale: record?.SCALE || record?.employeeScale || '',
+              additionalRoles: buildAdditionalRoles(record),
+              appraiser: record?.APPRAISER_NAME || record?.REPORTING_AUTHORITY_NAME || '',
+              primaryRole: record?.PRIMARY_ROLE || record?.MAIN_ROLE || '',
+            });
+
+            const dateRange = buildDateRange(record?.START_DATE, record?.END_DATE);
+            const appraisalStatus = getDisplayStatus(record?.APPRAISAL_STATUS || record?.STATUS);
+
+            return (
+              <EmployeeAppraisalCard
+                key={employeeModel.empNo || index}
+                employee={employeeModel}
+                dateRange={dateRange}
+                quarter={quarter}
+                appraisalPeriod={appraisalPeriod}
+                primaryRole={employeeModel.primaryRole}
+                additionalRoles={buildAdditionalRoles(record)}
+                organization={record?.ORGANIZATION || ''}
+                appraisalStatus={appraisalStatus}
+                exceptionStatus={record?.EXCEPTION_STATUS || 'NOT CREATED'}
+                scoreData={record?.scoreData || scoreTable}
+                onAddCheckIn={() => {
+                  navigate('/appraisal/check-in-form', {
+                    state: {
+                      financialYear,
+                      appraisalPeriod,
+                      quarter,
+                      dateRange,
+                      employee: {
+                        empNo: employeeModel.empNo,
+                        employeeName: employeeModel.employeeName,
+                        employeeScale: employeeModel.employeeScale,
+                        roles: employeeModel.additionalRoles,
+                        primaryRole: employeeModel.primaryRole,
+                        appraiser: employeeModel.appraiser,
+                        organization: record?.ORGANIZATION || '',
+                      },
+                      organizationName: record?.ORGANIZATION || '',
+                      urlId: record?.URL_ID || 'quarterly-appraiser-dashboard',
+                      roleType: 'appraiser',
+                      pageType: 'review',
+                      intent: 'Review',
+                      appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS || '',
                     },
-                  },
-                });
-              }}
-              onViewSummary={() => {}}
-              onAddException={() => {}}
-            />
-          ))
+                  });
+                }}
+                onViewSummary={() => {}}
+                onAddException={() => {}}
+              />
+            );
+          })
         )}
       </div>
     </div>

@@ -1,22 +1,14 @@
-import { BackButton } from '../../../components/common';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { BackButton } from '../../../components/common';
 import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
 import EmployeeModel from '../../../models/EmployeeModel';
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
 import { toast } from 'react-toastify';
 
-/**
- *
- * @param {Object} props - The component props.
- * @param {string} props.financialYear - The financial year.
- * @param {string} props.appraisalPeriod - The appraisal period.
- * @param {string} props.quarter - The quarter.
- * @returns
- */
 export default function QuarterlyAppraisee() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -65,7 +57,9 @@ export default function QuarterlyAppraisee() {
   if (!financialYear || !appraisalPeriod || !quarter) {
     return (
       <div className="pageWrapper">
-        <div>No financial year, appraisal period, or quarter found</div>
+        <div className="text-center mt-5">
+          <p className="text-danger fw-semibold">Missing financial year, appraisal period, or quarter</p>
+        </div>
       </div>
     );
   }
@@ -139,17 +133,12 @@ export default function QuarterlyAppraisee() {
           </h1>
         </div>
         <h2 className="text-muted fw-bold mb-0 ms-3">
-          {`${
-            appraisalPeriod === 'Quarterly' ? `${quarter}, ` : '' // Show Quarter only for Quarterly appraisal periods, else directly show the FY
-          } ${financialYear} ${appraisalPeriod} Check-In`}
+          {`${quarter}, ${financialYear} Quarterly Check-In`}
         </h2>
       </div>
 
-      {/* Appraisee Check-In Summary Row */}
       <div className="summary-row border rounded-2 px-5 py-3 mt-3 align-items-end justify-content-between d-flex gap-3 shadow-sm">
-        <h2 className="text-muted fw-bold mb-0 ms-3 text-muted">{`Average Score for ${
-          appraisalPeriod === 'Quarterly' ? 'Quarter' : 'Year'
-        }`}</h2>
+        <h2 className="text-muted fw-bold mb-0 ms-3">Average Score for Quarter</h2>
         <div className="summary-card-content">
           <span className="summary-card-content-value fw-bold">Score:</span>
           <span className="summary-card-content-value text-primary ms-3">{averageScore}</span>
@@ -160,7 +149,6 @@ export default function QuarterlyAppraisee() {
         </div>
       </div>
 
-      {/* Employee Appraisal Cards */}
       <div className="employee-appraisal-cards">
         {!hasCardData ? (
           <div className="text-center mt-5">

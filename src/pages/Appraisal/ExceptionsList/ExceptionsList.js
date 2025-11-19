@@ -1,9 +1,8 @@
 import { BackButton } from '../../../components/common';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import './ExceptionsList.css';
 import { ExceptionListTable } from '../../../components/Appraisal';
-import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -12,6 +11,7 @@ import { toast } from 'react-toastify';
 
 export default function ExceptionsList() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const financialYear = searchParams.get('financialYear');
   const quarter = searchParams.get('quarter');
   const appraisalPeriod = searchParams.get('appraisalPeriod');
@@ -22,6 +22,9 @@ export default function ExceptionsList() {
 
   // Extract year from financial year format (e.g., "FY 2025-26" -> "2025")
   const extractYear = (fy) => {
+    if (!fy) {
+      return new Date().getFullYear().toString();
+    }
     const match = fy.match(/FY (\d{4})/);
     return match ? match[1] : new Date().getFullYear().toString();
   };
@@ -51,13 +54,67 @@ export default function ExceptionsList() {
     data?.result != null
       ? data?.result?.map((item) => ({
           exceptionId: item.exception_id,
-          employee: { empNo: item.employee_no, name: item.employee_name },
+          custTicketId: item.cust_ticket_id || item.ticket_id || item.exception_id,
+          urlId: item.url_id || item.employee_no,
+          employee: {
+            empNo: item.employee_no,
+            name: item.employee_name,
+            branch: item.branch_name || item.branch,
+            primaryRole: item.primary_role || item.role_name,
+            appraiser: item.appraiser_name || item.appraiser,
+            zone: item.zone_name || item.zone,
+          },
           exceptionDescription: item.exception_description,
           preExceptionScore: item.pre_exception_score,
           postExceptionScore: item.post_exception_score,
           exceptionStatus: item.exception_status,
         }))
       : [];
+
+  const buildQuarterDateRange = (fyLabel, quarterLabel) => {
+    if (!fyLabel || !quarterLabel) return '';
+    const yearString = extractYear(fyLabel);
+    const baseYear = yearString ? parseInt(yearString, 10) : NaN;
+    if (!baseYear) return '';
+
+    switch (quarterLabel) {
+      case 'Q1':
+        return `01 Apr ${baseYear} - 30 Jun ${baseYear}`;
+      case 'Q2':
+        return `01 Jul ${baseYear} - 30 Sep ${baseYear}`;
+      case 'Q3':
+        return `01 Oct ${baseYear} - 31 Dec ${baseYear}`;
+      case 'Q4':
+        return `01 Jan ${baseYear + 1} - 31 Mar ${baseYear + 1}`;
+      default:
+        return '';
+    }
+  };
+
+  const handleReviewException = (exception) => {
+    navigate('/appraisal/review-quarterly-exception', {
+      state: {
+        financialYear,
+        quarter,
+        appraisalPeriod,
+        dateRange: buildQuarterDateRange(financialYear, quarter),
+        employee: {
+          empNo: exception.employee.empNo,
+          employeeName: exception.employee.name,
+          branch: exception.employee.branch,
+          primaryRole: exception.employee.primaryRole,
+          appraiser: exception.employee.appraiser,
+          zone: exception.employee.zone,
+        },
+        role: 'APPRAISER',
+        roleName: 'APPRAISER',
+        roleId: 'APPRAISER',
+        custTicketId: exception.custTicketId,
+        exceptionId: exception.exceptionId,
+        urlId: exception.urlId,
+      },
+    });
+  };
 
   const [filters, setFilters] = useState({
     employee: '',
@@ -186,7 +243,10 @@ export default function ExceptionsList() {
         </div>
       </div>
 
-      <ExceptionListTable exceptionListData={exceptionListData} />
+      <ExceptionListTable
+        exceptionListData={exceptionListData}
+        onReviewException={handleReviewException}
+      />
     </div>
   );
 }

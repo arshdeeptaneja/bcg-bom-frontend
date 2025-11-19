@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BackButton } from '../../../components/common';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import './QuarterlyException.css';
 import {
   CheckInDescriptionSection,
@@ -8,23 +10,31 @@ import {
 import MeasurableKRA from './NonDiscretionaryKRA/MeasurableKRA/MeasurableKRA';
 import NonMeasurableKRA from './NonDiscretionaryKRA/NonMeasurableKRA/NonMeasurableKRA';
 import DeclarationSection from './Declaration';
-import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
-import { toast } from 'react-toastify';
+import { saveAppraisalData, loadAppraisalData } from './localStorageHelpers';
 
 function QuarterlyException() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Get data from location state
   const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {
-    financialYear: "2024-2025",
-    appraisalPeriod: "Mid-Year",
-    quarter: "Q2",
-    dateRange: "01 Jul 2024 - 30 Sep 2024",
-    employee: { name: "John Doe", id: "EMP123" },
-    role: "APPRAISEE",
+    financialYear: '2025',
+    appraisalPeriod: 'Quarterly',
+    quarter: 'Q1',
+    dateRange: '01 Apr 2025 - 30 Jun 2025',
+    employee: {
+      empNo: user?.empNo || 'arogya',
+      employeeName: user?.EMP_NAME || 'Employee Name',
+      branch: user?.BRANCH_UNIT_TYPE || 'Branch',
+      primaryRole: 'Primary Role',
+      appraiser: 'Appraiser Name',
+      roles: user?.roles || [],
+    },
+    role: 'APPRAISEE',
   };
 
   // Get employee details from auth context using getUserProperty
@@ -49,24 +59,32 @@ function QuarterlyException() {
 
   // Role State (Appraisee / Appraiser / Reviewer)
   const [currentRole, setCurrentRole] = useState(role || 'APPRAISEE');
+  const [declarationFile, setDeclarationFile] = useState(null);
+  const [declarationChecked, setDeclarationChecked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ------------------------------------------------------------------------
-  // Temporary Role Switcher (for testing)
-  // ------------------------------------------------------------------------
-  const handleRoleChange = (e) => {
-    setCurrentRole(e.target.value);
-  };
-  // ------------------------------------------------------------------------
-
-  const [kraData, setKraData] = useState([]);
-  const [comments, setComments] = useState({
-    appraisee: '',
-    appraiser: '',
-    reviewer: '',
+  // Submit mutation
+  const submitMutation = useMutation({
+    mutationFn: ({ payload, attachment }) =>
+      appraisalAPI.submitQuarterlyExceptionReport(payload, attachment),
+    onSuccess: (data) => {
+      toast.success('Exception submitted successfully!');
+      // Clear localStorage after successful submission
+      localStorage.removeItem('appraisalFormData');
+      localStorage.removeItem('appraisalDeclaration');
+      setIsSubmitting(false);
+      // Navigate back or show success
+      navigate(-1);
+    },
+    onError: (error) => {
+      console.error('Submit error:', error);
+      toast.error(error.response?.data?.message || 'Failed to submit exception');
+      setIsSubmitting(false);
+    },
   });
-  const [measurableKraListData, setMeasurableKraListData] = useState([]);
+
+  const [measurableKraListData, setMeasurableKraListData] = useState({});
   const [nonMeasurableKraListData, setNonMeasurableKraListData] = useState({});
-  const [developmentInputsData, setDevelopmentInputsData] = useState([]);
   const [monthlyScores, setMonthlyScores] = useState({});
 
   // React Query to fetch quarterly exception report data
@@ -105,54 +123,101 @@ function QuarterlyException() {
       }
 
       // Set measurable KRA data
+      let mKraData = {};
       if (responseData?.measurableKraList) {
+        mKraData = responseData.measurableKraList;
         setMeasurableKraListData(responseData.measurableKraList);
       } else if (responseData?.measurableKraListData) {
+        mKraData = responseData.measurableKraListData;
         setMeasurableKraListData(responseData.measurableKraListData);
+      } else if (responseData?.measurableKRA) {
+        mKraData = responseData.measurableKRA;
+        setMeasurableKraListData(responseData.measurableKRA);
       }
 
       // Set non-measurable KRA data
+      let nmKraData = {};
       if (responseData?.nonMeasurableKraList) {
+        nmKraData = responseData.nonMeasurableKraList;
         setNonMeasurableKraListData(responseData.nonMeasurableKraList);
       } else if (responseData?.nonMeasurableKraListData) {
+        nmKraData = responseData.nonMeasurableKraListData;
         setNonMeasurableKraListData(responseData.nonMeasurableKraListData);
+      } else if (responseData?.nonMeasurableKRA) {
+        nmKraData = responseData.nonMeasurableKRA;
+        setNonMeasurableKraListData(responseData.nonMeasurableKRA);
       }
 
-      // Set development inputs
-      if (responseData?.developmentInputs) {
-        setDevelopmentInputsData(responseData.developmentInputs);
-      } else if (responseData?.developmentInputsData) {
-        setDevelopmentInputsData(responseData.developmentInputsData);
-      }
-
-      // Set KRA data
-      if (responseData?.kraData) {
-        setKraData(responseData.kraData);
+      // Save to local storage
+      if (Object.keys(mKraData).length > 0 || Object.keys(nmKraData).length > 0) {
+        saveAppraisalData({
+          measurableKRA: mKraData,
+          nonMeasurableKRA: nmKraData,
+        });
       }
     }
   }, [data]);
 
-  const isEditableBy = (fieldOwner) => {
-    switch (currentRole) {
-      case 'APPRAISEE':
-        return fieldOwner === 'appraisee';
-      case 'APPRAISER':
-        return fieldOwner === 'appraiser';
-      case 'REVIEWER':
-        return fieldOwner === 'reviewer';
-      default:
-        return false;
-    }
-  };
+  const handleDeclarationChange = useCallback((file, checked) => {
+    setDeclarationFile(file);
+    setDeclarationChecked(checked);
+  }, []);
 
   const handleSave = () => {
-    console.log('Saving draft as', currentRole);
-    alert(`Saved as ${currentRole}`);
+    const currentData = loadAppraisalData();
+    saveAppraisalData(currentData);
+    toast.success('Draft saved successfully!');
   };
 
   const handleSubmit = () => {
-    console.log('Submitting as', currentRole);
-    alert(`Submitted by ${currentRole}`);
+    // Validation
+    if (!declarationChecked) {
+      toast.error('Please agree to the declaration before submitting.');
+      return;
+    }
+
+    if (!declarationFile) {
+      toast.error('Please upload a file before submitting.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Collect all KRA data from localStorage
+    const formData = loadAppraisalData();
+
+    // Build the payload according to the API spec
+    const payload = {
+      kraData: formData.measurableKRA
+        ? Object.entries(formData.measurableKRA).flatMap(([month, items]) =>
+            items.map((item) => ({
+              month: month,
+              kra: item.kra,
+              unit: item.unit,
+              actual: item.actual,
+              target: item.target,
+              maxScore: item.maxScore,
+              score: item.score,
+              category: item.category,
+              comment: item.comment || '',
+            }))
+          )
+        : [],
+      financialYear: parseInt(financialYear.replace('FY ', '').split('-')[0]) || 2025,
+      empNo: employee.empNo,
+      endDate: dateRange ? dateRange.split(' - ')[1] : '',
+      quarter: quarter,
+      declarationOption: declarationChecked ? 'AGREED' : 'NOT_AGREED',
+      startDate: dateRange ? dateRange.split(' - ')[0] : '',
+      reportingAuthorityNo: employee.appraiser?.empNo || employee.appraiser || '',
+      id: (data?.data?.id || data?.id) || '',
+    };
+
+    // Submit with file
+    submitMutation.mutate({
+      payload: payload,
+      attachment: declarationFile,
+    });
   };
 
   // Calculate monthly scores data for the table (Q1: April, May, June)
@@ -225,9 +290,6 @@ function QuarterlyException() {
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Quarterly Exception</h1>
         </div>
-
-      
-
       </div>
 
       {/* Rest of your UI unchanged below */}
@@ -245,9 +307,9 @@ function QuarterlyException() {
           <table className="table-accent">
             <thead>
               <tr>
-                <th style={{width:"55%"}}>Month</th>
-                <th style={{width:"25%"}}>Actual</th>
-                <th style={{width:"25%"}}>Max</th>
+                <th style={{ width: '55%' }}>Month</th>
+                <th style={{ width: '25%' }}>Actual</th>
+                <th style={{ width: '25%' }}>Max</th>
               </tr>
             </thead>
             <tbody>
@@ -267,49 +329,40 @@ function QuarterlyException() {
           </table>
         </div>
 
-
-     
-
         <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
-          {/* <h5 className="text-primary fw-bold mb-3">Non-Discretionary KRA</h5> */}
-          {/* <MeasurableKra
-            totalActualScore={5.0}
-            totalMaxScore={10.0}
-            kraListData={measurableKraListData}
-            role={currentRole}
-            isEditableBy={isEditableBy}
-          /> */}
-          <MeasurableKRA/>
-          <NonMeasurableKRA/>
-          {/* <NonMeasurableKra
-            totalActualScore={5.0}
-            totalMaxScore={10.0}
-            kraListData={nonMeasurableKraListData}
-            role={currentRole}
-            isEditableBy={isEditableBy}
-          /> */}
+          <MeasurableKRA initialData={measurableKraListData} />
+          <NonMeasurableKRA initialData={nonMeasurableKraListData} />
         </div>
 
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Declaration</h5>
-          <DeclarationSection />
-
+          <DeclarationSection
+            onDeclarationChange={handleDeclarationChange}
+            employeeName={employee.employeeName || employee.name || 'Employee'}
+            isSubmitDisabled={isSubmitting}
+          />
         </div>
       </div>
 
-      {/* <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
-        <button className="btn btn-outline-primary" onClick={handleSave}>
-          Save
+      <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
+        <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSubmitting}>
+          Save Draft
         </button>
-        <button className="btns btn-primarys" onClick={handleSubmit}>
-          Submit
+        <button
+          className="btn"
+          style={{
+            backgroundColor: 'var(--accent-color)',
+            color: '#fff',
+            fontWeight: 500,
+          }}
+          onClick={handleSubmit}
+          disabled={isSubmitting || !declarationChecked || !declarationFile}
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Exception'}
         </button>
-      </div> */}
+      </div>
     </div>
   );
 }
 
 export default QuarterlyException;
-
-
-

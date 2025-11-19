@@ -1,121 +1,288 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BackButton } from '../../../components/common';
-import { useLocation } from 'react-router-dom';
-import {CheckInDescriptionSection} from '../../../components/Appraisal';
-import KraTable from '../../../pages/Appraisal/ExceptionReview/KraTable';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { CheckInDescriptionSection } from '../../../components/Appraisal';
 import ValidatorTable from './ValidatorTable';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { appraisalAPI } from '../../../services/api';
+import LoadingSpinner from '../../../components/Spinner';
+import { toast } from 'react-toastify';
+
+const parseFinancialYear = (fy) => {
+    if (!fy) return '';
+    const match = `${fy}`.match(/(\d{4})/);
+    return match ? match[1] : `${fy}`;
+};
+
+const buildQuarterDateRange = (fyLabel, quarterLabel) => {
+    if (!fyLabel || !quarterLabel) return '';
+    const base = parseInt(parseFinancialYear(fyLabel), 10);
+    if (!base) return '';
+
+    switch (quarterLabel) {
+        case 'Q1':
+            return `01 Apr ${base} - 30 Jun ${base}`;
+        case 'Q2':
+            return `01 Jul ${base} - 30 Sep ${base}`;
+        case 'Q3':
+            return `01 Oct ${base} - 31 Dec ${base}`;
+        case 'Q4':
+            return `01 Jan ${base + 1} - 31 Mar ${base + 1}`;
+        default:
+            return '';
+    }
+};
+
+const normalizeValidatorRows = (payload = []) => {
+    if (!Array.isArray(payload)) return [];
+    return payload.map((item, index) => ({
+        id: item.kraId || item.id || item.urlId || index + 1,
+        kraId: item.kraId || item.id || item.urlId || index + 1,
+        kra: item.kra || item.kraName || item.metric || 'KRA',
+        unit: item.unit || item.unitOfMeasure || '-',
+        actual: item.actual ?? item.appraiseeActual ?? '',
+        appraisee: item.appraisee ?? item.appraiseeActual ?? '',
+        appraiserActual: item.appraiserActual ?? item.appraiser_value ?? '',
+        validatorActual: item.validatorActual ?? '',
+        target: item.target ?? item.appraiseeTarget ?? '',
+        appraiserTarget: item.appraiserTarget ?? item.target ?? '',
+        validatorTarget: item.validatorTarget ?? '',
+        maxScore: item.maxScore ?? item.max_score ?? '',
+        score: item.score ?? '',
+        appraiserScore: item.appraiserScore ?? item.score ?? '',
+        validatorScore: item.validatorScore ?? '',
+        month: item.month || item.period || '',
+        category: item.category || item.kraCategory || '',
+        selfComment: item.selfComment ?? item.appraiseeComment ?? '',
+        appraiserComment: item.appraiserComment ?? '',
+        validatorComment: item.validatorComment ?? '',
+        commentOpen: true,
+        checked: false,
+        action: 'accept',
+    }));
+};
+
+const deriveDeclarationOption = (rows = []) => {
+    if (rows.some((row) => row.action === 'reject')) {
+        return 'REJECT';
+    }
+    if (rows.some((row) => row.action === 'edit')) {
+        return 'ACCEPT_AND_EDIT';
+    }
+    return 'ACCEPT_AS_IS';
+};
 
 function EmployeeQuarterlyException() {
     const location = useLocation();
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { getEmployeeDetails, getUserProperty } = useAuth();
 
-    // ✅ FIXED: role added in destructuring
-    // const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {};
-    const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {
-        financialYear: "2024-2025",
-        appraisalPeriod: "Mid-Year",
-        quarter: "Q2",
-        dateRange: "01 Jul 2024 - 30 Sep 2024",
-        employee: { name: "John Doe", id: "EMP123" },
-        role: "APPRAISEE",
+    const employeeDetails = getEmployeeDetails();
+    const loggedInEmpNo = getUserProperty('empNo', employeeDetails?.currentUser?.EMP_ID || '');
+
+    const fallbackEmployee = useMemo(
+        () => ({
+            empNo: loggedInEmpNo,
+            employeeName: employeeDetails?.currentUser?.EMP_NAME || 'Employee Name',
+            branch: employeeDetails?.currentUser?.BRANCH_NAME || 'Branch',
+            primaryRole: employeeDetails?.currentUser?.PRIMARY_ROLE || 'Primary Role',
+            appraiser: employeeDetails?.currentUser?.APPRAISER_NAME || 'Appraiser Name',
+            roles: employeeDetails?.currentUser?.roles || [],
+        }),
+        [employeeDetails, loggedInEmpNo]
+    );
+
+    const {
+        financialYear = 'FY 2024-25',
+        appraisalPeriod = 'Quarterly',
+        quarter = 'Q1',
+        dateRange,
+        employee = fallbackEmployee,
+        role = 'VALIDATOR',
+        roleName,
+        roleId,
+        zone,
+        custTicketId,
+        exceptionId,
+        urlId,
+    } = location.state || {};
+
+    const validatorEmployee = employee || fallbackEmployee;
+    const ticketId = custTicketId || exceptionId || validatorEmployee?.custTicketId || '';
+    const reviewEmpNo = validatorEmployee?.empNo || loggedInEmpNo;
+    const validatorRoleName = roleName || role || 'VALIDATOR';
+    const validatorRoleId = roleId || role || 'VALIDATOR';
+    const validatorZone = zone || validatorEmployee?.zone || employeeDetails?.currentUser?.ZONE_NAME || '';
+    const parsedFinancialYear = parseFinancialYear(financialYear);
+    const derivedDateRange = dateRange || buildQuarterDateRange(financialYear, quarter);
+
+    const [kraRows, setKraRows] = useState([]);
+
+    const {
+        data: reviewData,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: [
+            'exceptionQuarterlyValidatorReview',
+            reviewEmpNo,
+            quarter,
+            parsedFinancialYear,
+            validatorRoleName,
+            ticketId,
+        ],
+        enabled: Boolean(reviewEmpNo && quarter && parsedFinancialYear),
+        queryFn: () =>
+            appraisalAPI.getExceptionQuarterlyValidatorReview({
+                fy: parsedFinancialYear,
+                quarter,
+                empNo: reviewEmpNo,
+                roleName: validatorRoleName,
+                roleId: validatorRoleId,
+                zone: validatorZone,
+                custTicketId: ticketId,
+            }),
+        staleTime: 5 * 60 * 1000,
+    });
+
+    useEffect(() => {
+        if (isError && error) {
+            toast.error(error?.response?.data?.message || 'Failed to load validator view');
+        }
+    }, [isError, error]);
+
+    useEffect(() => {
+        if (!reviewData) return;
+        const sourceRows =
+            reviewData?.kraData || reviewData?.result?.kraData || reviewData?.result || [];
+        setKraRows(normalizeValidatorRows(sourceRows));
+    }, [reviewData]);
+
+    const handleDownload = () => {
+        const attachmentUrl = reviewData?.attachmentUrl || reviewData?.result?.attachmentUrl;
+        if (!attachmentUrl) {
+            toast.info('No attachment available for download');
+            return;
+        }
+        window.open(attachmentUrl, '_blank');
     };
 
-    const [currentRole, setCurrentRole] = useState(role || 'APPRAISEE');
+    const handleRowChange = useCallback((id, patch) => {
+        setKraRows((prev) => prev.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+    }, []);
 
+    const selectedRows = useMemo(() => kraRows.filter((row) => row.checked), [kraRows]);
 
+    const submitMutation = useMutation({
+        mutationFn: (payload) => appraisalAPI.submitExceptionQuarterlyValidatorReview(payload),
+        onSuccess: () => {
+            toast.success('Exception validated successfully');
+            queryClient.invalidateQueries({ queryKey: ['exceptionQuarterlyValidatorReview'] });
+            queryClient.invalidateQueries({ queryKey: ['exceptionValidatorDashboard'] });
+            navigate(-1);
+        },
+        onError: (submitError) => {
+            toast.error(submitError?.response?.data?.message || 'Failed to submit validator review');
+        },
+    });
 
-    const [kraData, setKraData] = useState([]);
+    const handleSubmit = () => {
+        if (!selectedRows.length) {
+            toast.error('Select at least one KRA before submitting');
+            return;
+        }
 
- 
+        const rowsMissingComment = selectedRows.filter(
+            (row) => row.action !== 'accept' && !row.validatorComment?.trim()
+        );
 
-    // useEffect(() => {
-    //     setKraData([
-    //         { KraName: 'KRA 1', KraWeight: 10 },
-    //         { KraName: 'KRA 2', KraWeight: 20 },
-    //         { KraName: 'KRA 3', KraWeight: 30 },
-    //     ]);
+        if (rowsMissingComment.length) {
+            toast.error('Please add comments for every edited or rejected KRA');
+            return;
+        }
 
-    //     setMeasurableKraListData([
-    //         {
-    //             KraName: 'KRA 1',
-    //             KraActualScore: 10,
-    //             KraTarget: 100,
-    //             KraWeight: 10,
-    //             KraFinalScore: 10,
-    //             comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //         },
-    //         {
-    //             KraName: 'KRA 2',
-    //             KraActualScore: 20,
-    //             KraTarget: 200,
-    //             KraWeight: 20,
-    //             KraFinalScore: 20,
-    //             comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //         },
-    //     ]);
+        const payload = {
+            urlId: reviewData?.urlId || urlId || validatorEmployee?.urlId || reviewEmpNo,
+            quarter,
+            financialYear: Number(parsedFinancialYear) || new Date().getFullYear(),
+            empNo: reviewEmpNo,
+            custTicketId: ticketId,
+            kraData: selectedRows.map((row) => ({
+                id: row.kraId,
+                action: row.action?.toUpperCase(),
+                month: row.month,
+                unit: row.unit,
+                category: row.category,
+                validatorActual: row.validatorActual,
+                validatorTarget: row.validatorTarget,
+                validatorScore: row.validatorScore,
+                validatorComment: row.validatorComment,
+            })),
+            declarationOption: deriveDeclarationOption(selectedRows),
+        };
 
-    //     setNonMeasurableKraListData({
-    //         'Section 1': [
-    //             {
-    //                 KraName: 'KRA 1',
-    //                 KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-    //                 comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //             },
-    //         ],
-    //         'Section 2': [
-    //             {
-    //                 KraName: 'KRA 2',
-    //                 KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-    //                 comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //             },
-    //         ],
-    //         'Section 3': [
-    //             {
-    //                 KraName: 'KRA 3',
-    //                 KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-    //                 comments: { appraisee: '', appraiser: '', reviewer: '' },
-    //             },
-    //         ],
-    //     });
-    // }, []);
-
-
+        submitMutation.mutate(payload);
+    };
 
     if (!financialYear || !appraisalPeriod || !quarter) {
         return <div>No financial year, appraisal period, or quarter found</div>;
     }
 
+    if (isLoading) {
+        return (
+            <div className="pageWrapper">
+                <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
+                    <div className="headline d-flex flex-row justify-content-between align-items-center">
+                        <BackButton />
+                        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                            Review Quarterly Exception
+                        </h1>
+                    </div>
+                </div>
+                <div className="pageWrapper-content d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+                    <LoadingSpinner />
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="pageWrapper">
-            {/* Header Section */}
             <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
                 <div className="headline d-flex flex-row justify-content-between align-items-center">
                     <BackButton />
-                    <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Review Quarterly Exception</h1>
+                    <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                        Review Quarterly Exception
+                    </h1>
                 </div>
-
-
-
             </div>
 
-            {/* Rest of your UI unchanged below */}
             <div className="pageWrapper-content d-flex flex-column m-1 p-3">
                 <CheckInDescriptionSection
-                    employee={employee}
-                    dateRange={dateRange}
-                    showDownloadButton={true}
-                    onDownload={() => console.log("Download file...")}
+                    employee={validatorEmployee}
+                    dateRange={derivedDateRange}
+                    showDownloadButton
+                    onDownload={handleDownload}
                 />
 
                 <div className="note mt-5 mb-5">
                     <span className="text-muted">Note: </span>
                     <span className="text-muted">
-                        Please raise an exception if actual or target values are incorrect.
+                        Please review the corrected actuals, targets, and comments before submitting the
+                        validation.
                     </span>
                 </div>
 
-                <ValidatorTable />
+                <ValidatorTable
+                    rows={kraRows}
+                    onRowChange={handleRowChange}
+                    onSubmit={handleSubmit}
+                    isSubmitting={submitMutation.isLoading}
+                />
             </div>
-
         </div>
     );
 }

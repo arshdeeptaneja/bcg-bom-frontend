@@ -10,9 +10,10 @@ import './ExceptionListTable.css';
  * @param {string} props.exceptionListData.preExceptionScore - The pre-exception score.
  * @param {string} props.exceptionListData.postExceptionScore - The post-exception score.
  * @param {string} props.exceptionListData.exceptionStatus - The exception status.
+ * @param {Function} props.onReviewException - Callback when review button is clicked
  * @returns
  */
-export default function ExceptionListTable({ exceptionListData }) {
+export default function ExceptionListTable({ exceptionListData, onReviewException }) {
   return (
     <div className="table-responsive ">
       <table className="table">
@@ -50,8 +51,16 @@ export default function ExceptionListTable({ exceptionListData }) {
                 <td className="text-center">{exception.exceptionStatus}</td>
                 <td className="text-center">
                   <div className="action-buttons d-flex flex-column gap-2">
-                    <div className="btn btn-primary">View Appraisal</div>
-                    <div className="btn btn-outline-primary">Review Exception</div>
+                    <button type="button" className="btn btn-primary">
+                      View Appraisal
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary"
+                      onClick={() => onReviewException?.(exception)}
+                    >
+                      Review Exception
+                    </button>
                   </div>
                 </td>
               </tr>
