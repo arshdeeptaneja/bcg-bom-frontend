@@ -13,6 +13,11 @@ import {
 import DevelopmentInput from './DevelopmentInput/DevelopementInput';
 import RemarkSection from './Remark/Remark';
 import RemarkTable from './Remark/Remark';
+import { useQuery } from '@tanstack/react-query';
+import { appraisalAPI } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+import LoadingSpinner from '../../../components/Spinner';
+import { toast } from 'react-toastify';
 
 
 const demoRows = [
@@ -39,6 +44,42 @@ function AppraiserAddAppraisal() {
     role: "APPRAISEE",
   };
 
+  // Get employee details from auth context using getUserProperty
+  const { getEmployeeDetails, getUserProperty } = useAuth();
+  const employeeDetails = getEmployeeDetails();
+  const empNo = getUserProperty('empNo', 
+    employee?.empNo || 
+    employee?.id || 
+    employee?.EMP_ID || 
+    employeeDetails?.currentUser?.[0]?.EMP_ID || 
+    ''
+  );
+
+  // Extract year from financial year format (e.g., "FY 2025-26" -> "2025")
+  const extractYear = (fy) => {
+    const match = fy?.match(/FY (\d{4})/);
+    return match ? match[1] : new Date().getFullYear().toString();
+  };
+
+  // React Query to fetch reportee appraisal dashboard data
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['reporteeAppraisalDashboard', financialYear, quarter, empNo],
+    queryFn: () =>
+      appraisalAPI.getReporteeAppraisalDashboard({
+        empNo: empNo,
+        financialYear: parseInt(extractYear(financialYear)),
+        quarter: quarter || '',
+      }),
+    enabled: !!empNo && !!financialYear && !!quarter, // Only run query if required params are available
+  });
+
+  // Show error toast when API fails
+  useEffect(() => {
+    if (isError) {
+      toast.error(`Failed to fetch reportee appraisal dashboard data: ${error?.message || 'Unknown error'}`);
+    }
+  }, [isError, error]);
+
   // Role State (Appraisee / Appraiser / Reviewer)
   const [currentRole, setCurrentRole] = useState(role || 'APPRAISEE');
   const [selected, setSelected] = useState("Integrity of the officer is doubtful");
@@ -61,56 +102,40 @@ function AppraiserAddAppraisal() {
   const [nonMeasurableKraListData, setNonMeasurableKraListData] = useState({});
   const [developmentInputsData, setDevelopmentInputsData] = useState([]);
 
+  // Extract and set data from API response when it loads
   useEffect(() => {
-    setKraData([
-      { KraName: 'KRA 1', KraWeight: 10 },
-      { KraName: 'KRA 2', KraWeight: 20 },
-      { KraName: 'KRA 3', KraWeight: 30 },
-    ]);
+    if (data) {
+      const responseData = data?.data || data;
+      
+      // Set KRA data
+      if (responseData?.kraData) {
+        setKraData(responseData.kraData);
+      } else if (responseData?.result) {
+        setKraData(responseData.result);
+      }
 
-    setMeasurableKraListData([
-      {
-        KraName: 'KRA 1',
-        KraActualScore: 10,
-        KraTarget: 100,
-        KraWeight: 10,
-        KraFinalScore: 10,
-        comments: { appraisee: '', appraiser: '', reviewer: '' },
-      },
-      {
-        KraName: 'KRA 2',
-        KraActualScore: 20,
-        KraTarget: 200,
-        KraWeight: 20,
-        KraFinalScore: 20,
-        comments: { appraisee: '', appraiser: '', reviewer: '' },
-      },
-    ]);
+      // Set measurable KRA list data
+      if (responseData?.measurableKraList) {
+        setMeasurableKraListData(responseData.measurableKraList);
+      } else if (responseData?.measurableKraListData) {
+        setMeasurableKraListData(responseData.measurableKraListData);
+      }
 
-    setNonMeasurableKraListData({
-      'Section 1': [
-        {
-          KraName: 'KRA 1',
-          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-          comments: { appraisee: '', appraiser: '', reviewer: '' },
-        },
-      ],
-      'Section 2': [
-        {
-          KraName: 'KRA 2',
-          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-          comments: { appraisee: '', appraiser: '', reviewer: '' },
-        },
-      ],
-      'Section 3': [
-        {
-          KraName: 'KRA 3',
-          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-          comments: { appraisee: '', appraiser: '', reviewer: '' },
-        },
-      ],
-    });
-  }, []);
+      // Set non-measurable KRA list data
+      if (responseData?.nonMeasurableKraList) {
+        setNonMeasurableKraListData(responseData.nonMeasurableKraList);
+      } else if (responseData?.nonMeasurableKraListData) {
+        setNonMeasurableKraListData(responseData.nonMeasurableKraListData);
+      }
+
+      // Set development inputs data
+      if (responseData?.developmentInputs) {
+        setDevelopmentInputsData(responseData.developmentInputs);
+      } else if (responseData?.developmentInputsData) {
+        setDevelopmentInputsData(responseData.developmentInputsData);
+      }
+    }
+  }, [data]);
 
   const isEditableBy = (fieldOwner) => {
     switch (currentRole) {
@@ -144,6 +169,39 @@ function AppraiserAddAppraisal() {
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return <div>No financial year, appraisal period, or quarter found</div>;
+  }
+
+  // Show loading spinner while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="pageWrapper">
+        <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
+          <div className="headline d-flex flex-row justify-content-between align-items-center">
+            <BackButton />
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser :Add Appraisal</h1>
+          </div>
+        </div>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Show error state if API call fails
+  if (isError) {
+    return (
+      <div className="pageWrapper">
+        <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
+          <div className="headline d-flex flex-row justify-content-between align-items-center">
+            <BackButton />
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser :Add Appraisal</h1>
+          </div>
+        </div>
+        <div className="text-center mt-5">
+          <p className="text-danger fw-semibold">Failed to load appraisal data</p>
+          <p className="text-muted">{error?.message || 'Please try again later'}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
