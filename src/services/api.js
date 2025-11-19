@@ -366,9 +366,32 @@ export const appraisalAPI = {
     }
   },
 
+  // GET: Get quarterly exception review data
+  getExceptionQuarterlyReview: async ({ fy, quarter, empNo, roleName, roleId, zone }) => {
+    try {
+      const params = new URLSearchParams({
+        fy: fy,
+        quarter: quarter || 'Q1',
+        empNo: empNo,
+        roleName: roleName,
+        roleId: roleId,
+        zone: zone,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/exception_quarterly_verify/review?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
   // GET: Get appraisal home dashboard data
   getAppraisalHomeDashboard: async ({ empNo, role, appraisalPeriod, financialYear, quarter }) => {
     try {
+
+      console.log("role in api is: ", role)
       const params = new URLSearchParams({
         empNo: empNo,
         role: role,
@@ -405,13 +428,104 @@ export const appraisalAPI = {
     }
   },
 
+  // GET: Get quarterly check-in report data
+  getQuarterlyCheckInReport: async ({ 
+    empNo, 
+    url, 
+    roleType, 
+    financialYear, 
+    quarter, 
+    pageType, 
+    appraisalStatus, 
+    intent = 'Fill' 
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo,
+        url: url,
+        roleType: roleType,
+        financialYear: financialYear,
+        quarter: quarter,
+        pageType: pageType,
+        appraisalStatus: appraisalStatus,
+        intent: intent,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/quarterly_check_in_report?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
+  // GET: Get quarterly exception report data
+  getQuarterlyExceptionReport: async ({ 
+    empNo, 
+    url, 
+    roleType, 
+    financialYear, 
+    quarter, 
+    pageType, 
+    appraisalStatus, 
+    intent = 'Fill' 
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo,
+        url: url,
+        roleType: roleType,
+        financialYear: financialYear,
+        quarter: quarter,
+        pageType: pageType,
+        appraisalStatus: appraisalStatus,
+        intent: intent,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/quarterly_exception_report?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
+  // GET: Get appraisee dashboard data
+  getAppraiseeDashboard: async ({ fy, quarter, appraisalPeriod, empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        fy: fy,
+        quarter: quarter || '',
+        appraisalPeriod: appraisalPeriod,
+        empNo: empNo,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/appraisee/dashboard?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
   // GET: Get appraisee check-in dashboard data (my appraisal dashboard)
-  getAppraiseeCheckInDashboard: async ({ empNo, financialYear, appraisalPeriod, quarter }) => {
+  getAppraiseeCheckInDashboard: async ({
+    empNo,
+    financialYear,
+    role,
+    appraisalPeriod,
+    quarter,
+  }) => {
     try {
       const params = new URLSearchParams({
         fy: financialYear,
         empNo: empNo,
+        role: role,
         appraisalPeriod: appraisalPeriod,
+        quarter: quarter || '',
       });
       if (quarter) {
         params.append('quarter', quarter);
@@ -460,32 +574,19 @@ export const appraisalAPI = {
     }
   },
 
-  // GET: Get quarterly check-in report (appraisee/appraiser views)
-  getQuarterlyCheckInReport: async ({
-    empNo,
-    url,
-    roleType,
-    financialYear,
-    quarter,
-    pageType,
-    appraisalStatus,
-    intent,
-    roleId,
-  }) => {
+  // GET: Get exception quarterly validator review data
+  getExceptionQuarterlyValidatorReview: async ({ fy, quarter, empNo, roleName, roleId, zone }) => {
     try {
       const params = new URLSearchParams({
+        fy: fy,
+        quarter: quarter || 'Q1',
         empNo: empNo,
-        url: url,
-        roleType: roleType,
-        financialYear: financialYear,
-        quarter: quarter,
-        pageType: pageType,
-        appraisalStatus: appraisalStatus,
-        intent: intent,
+        roleName: roleName,
         roleId: roleId,
+        zone: zone,
       });
       const response = await apiClient.get(
-        `/appraisal/quarterly_check_in_report?${params.toString()}`
+        `${appraisalBaseUrl}/exception_quarterly_validator/review?${params.toString()}`
       );
       return response.data;
     } catch (error) {
@@ -540,20 +641,20 @@ export const appraisalAPI = {
     }
   },
 
-  // GET: Get quarterly exception report data
-  getQuarterlyExceptionReport: async ({ urlId, financialYear, quarter }) => {
+  // GET: Get reportee appraisal dashboard data
+  getReporteeAppraisalDashboard: async ({ empNo, financialYear, quarter }) => {
     try {
       const params = new URLSearchParams({
-        urlId: urlId,
+        empNo: empNo,
         financialYear: financialYear,
-        quarter: quarter,
+        quarter: quarter || '',
       });
       const response = await apiClient.get(
-        `/appraisal/quarterly_exception_report?${params.toString()}`
+        `${appraisalBaseUrl}/reportee_appraisal/dashboard?${params.toString()}`
       );
       return response.data;
     } catch (error) {
-      console.error('getQuarterlyExceptionReport error', error);
+      console.log('error', error);
       throw error;
     }
   },
@@ -578,9 +679,43 @@ export const appraisalAPI = {
       return response.data;
     } catch (error) {
       console.error('submitQuarterlyExceptionReport error', error);
+    }
+  },
+
+
+  // GET: Get appeal report data
+  getAppealReport: async ({ roleId, roleType }) => {
+    try {
+      const params = new URLSearchParams({
+        roleId: roleId,
+        roleType: roleType,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/appeal_report?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
       throw error;
     }
   },
+
+  // GET: Get appeal committee data
+  getAppealCommittee: async ({ empNo, financialYear }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo: empNo,
+        financialYear: financialYear,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/appeal_committee?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  }
 };
 
 // Generic API methods

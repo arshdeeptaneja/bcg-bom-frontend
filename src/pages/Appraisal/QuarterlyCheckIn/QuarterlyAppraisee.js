@@ -4,134 +4,63 @@ import { useQuery } from '@tanstack/react-query';
 import { BackButton } from '../../../components/common';
 import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
 import EmployeeModel from '../../../models/EmployeeModel';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
-
-const STATUS_MAPPING = {
-  complete_reva: 'Pending at Acceptor',
-  complete_self: 'Pending at Appraiser',
-  complete_repa: 'Pending at Reviewer',
-  pending: 'Pending at Appraisee',
-  submitted_appraisal: 'Completed',
-  completed: 'Completed',
-  complete_ac: 'Completed',
-};
-
-const getDisplayStatus = (backendStatus) => {
-  if (!backendStatus) return 'Pending';
-  const normalized = String(backendStatus).toLowerCase();
-  return STATUS_MAPPING[normalized] || backendStatus;
-};
-
-const pickNumericValue = (source, keys = []) => {
-  if (!source) return NaN;
-  for (const key of keys) {
-    const raw = source[key];
-    if (raw === undefined || raw === null || raw === '') {
-      continue;
-    }
-    const parsed = Number(raw);
-    if (!Number.isNaN(parsed)) {
-      return parsed;
-    }
-  }
-  return NaN;
-};
-
-const computeAverageFromScoreTable = (scoreEntries) => {
-  if (!Array.isArray(scoreEntries) || scoreEntries.length === 0) {
-    return 0;
-  }
-  const total = scoreEntries.reduce((sum, entry) => {
-    const percentage =
-      Number(entry?.PERCENTAGE_SCORE) ?? Number(entry?.percentageScore) ?? Number(entry?.SCORE);
-    return sum + (Number.isNaN(percentage) ? 0 : percentage);
-  }, 0);
-  return Number((total / scoreEntries.length).toFixed(2));
-};
-
-const buildDateRange = (start, end) => {
-  if (!start || !end) {
-    return '';
-  }
-  return `${start} to ${end}`;
-};
-
-const buildAdditionalRoles = (record) => {
-  const roles = [record?.ADDITIONAL_ROLE_1, record?.ADDITIONAL_ROLE_2, record?.ADDITIONAL_ROLE_3]
-    .filter(Boolean)
-    .map((role) => String(role));
-  return roles;
-};
-
-const extractYear = (fyLabel) => {
-  if (!fyLabel) {
-    return new Date().getFullYear().toString();
-  }
-  const match = fyLabel.match(/FY\s+(\d{4})/i);
-  return match ? match[1] : fyLabel;
-};
+import { toast } from 'react-toastify';
 
 export default function QuarterlyAppraisee() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const financialYear = searchParams.get('financialYear');
+  const { getEmployeeDetails, getUserProperty, user } = useAuth();
   const appraisalPeriod = searchParams.get('appraisalPeriod');
   const quarter = searchParams.get('quarter');
-  const { getEmployeeDetails, getUserProperty } = useAuth();
+  const role = user?.roles?.[0] || 'admin'; 
+
+  // Get employee details from auth context using getUserProperty
   const employeeDetails = getEmployeeDetails();
-  const authEmpNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
+  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
 
-  const isQuarterlyFlow = appraisalPeriod?.toLowerCase() === 'quarterly';
+  // Extract year from financial year format (e.g., "FY 2025-26" -> "2025")
+  const extractYear = (fy) => {
+    if (!fy) return new Date().getFullYear().toString();
+    const fyMatch = fy.match(/FY (\d{4})/);
+    if (fyMatch) return fyMatch[1];
+    const rangeMatch = fy.match(/(\d{4})-\d{4}/);
+    if (rangeMatch) return rangeMatch[1];
+    const yearMatch = fy.match(/\d{4}/);
+    return yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+  };
 
+  // React Query to fetch my appraisal dashboard data
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['quarterlyAppraiseeDashboard', financialYear, quarter, authEmpNo],
+    queryKey: ['myAppraisalDashboard', financialYear, appraisalPeriod, quarter, empNo],
     queryFn: () =>
       appraisalAPI.getAppraiseeCheckInDashboard({
-        empNo: authEmpNo,
-        financialYear: extractYear(financialYear),
-        appraisalPeriod: 'quarterly',
-        quarter: quarter,
+        empNo: empNo,
+        role: role,
+        financialYear: parseInt(extractYear(financialYear)),
+        appraisalPeriod: appraisalPeriod?.toLowerCase() || 'annual',
+        quarter: quarter || '',
       }),
-    enabled: Boolean(authEmpNo && financialYear && quarter && isQuarterlyFlow),
+    enabled: !!empNo && !!financialYear && !!appraisalPeriod && !!quarter,
   });
 
-  const results = data?.result || [];
-  const scoreTable = data?.appraisal_score_dash || [];
-  const scoreSummary = data?.score_summary || data?.scoreSummary || {};
-
-  const averageScore = useMemo(() => {
-    const summaryAverage = pickNumericValue(scoreSummary, ['averageScore', 'avgScore', 'AVERAGE_SCORE']);
-    return Number.isNaN(summaryAverage) ? computeAverageFromScoreTable(scoreTable) : summaryAverage;
-  }, [scoreSummary, scoreTable]);
-
-  const maxScore = useMemo(() => {
-    const summaryMax = pickNumericValue(scoreSummary, ['maxScore', 'MAX_SCORE']);
-    if (!Number.isNaN(summaryMax)) {
-      return summaryMax;
+  // Show error toast when API fails
+  useEffect(() => {
+    if (isError) {
+      toast.error(`Failed to fetch appraisal data: ${error?.message || 'Unknown error'}`);
     }
-    return scoreTable.reduce((maxValue, entry) => {
-      const candidate = Number(entry?.MAX_SCORE ?? entry?.WEIGHTAGE ?? 0);
-      return Number.isNaN(candidate) ? maxValue : Math.max(maxValue, candidate);
-    }, 0);
-  }, [scoreSummary, scoreTable]);
+  }, [isError, error]);
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return (
       <div className="pageWrapper">
         <div className="text-center mt-5">
           <p className="text-danger fw-semibold">Missing financial year, appraisal period, or quarter</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isQuarterlyFlow) {
-    return (
-      <div className="pageWrapper">
-        <div className="text-center mt-5">
-          <p className="text-danger fw-semibold">This route is only available for quarterly appraisals.</p>
         </div>
       </div>
     );
@@ -165,13 +94,37 @@ export default function QuarterlyAppraisee() {
           </div>
         </div>
         <div className="text-center mt-5">
-          <p className="text-danger fw-semibold">Failed to load quarterly appraisal data</p>
-          <p className="text-muted">{error?.message || 'Please try again later.'}</p>
+          <p className="text-danger fw-semibold">Failed to load appraisal data</p>
+          <p className="text-muted">{error?.message || 'Please try again later'}</p>
         </div>
       </div>
     );
   }
 
+  const responseData = data?.data || data;
+  const appraisalScoreDash = responseData?.appraisal_score_dash || [];
+  const averageScore = responseData?.average_score ?? 0;
+  const maxScore = responseData?.max_score ?? 100;
+  const cardData = responseData?.result?.[0];
+  const hasCardData = !!cardData;
+
+  const cardDateRange =
+    cardData?.START_DATE && cardData?.END_DATE
+      ? `${cardData.START_DATE} to ${cardData.END_DATE}`
+      : '2024-01-01 to 2024-12-31';
+
+  const employeeModel = hasCardData
+    ? new EmployeeModel({
+        empNo: cardData?.EMP_ID || cardData?.empNo || '123456',
+        employeeName: cardData?.EMP_NAME || cardData?.employeeName || 'John Doe',
+        employeeScale: cardData?.SCALE || cardData?.employeeScale || '10',
+        roles:
+          cardData?.ADDITIONAL_ROLE_1 || cardData?.ADDITIONAL_ROLE_2
+            ? [cardData?.ADDITIONAL_ROLE_1, cardData?.ADDITIONAL_ROLE_2].filter(Boolean)
+            : cardData?.roles || ['Role 1', 'Role 2'],
+        appraiser: cardData?.REPORTING_AUTHORITY_NAME || cardData?.appraiser || 'Jane Doe',
+      })
+    : null;
   return (
     <div className="pageWrapper">
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
@@ -190,76 +143,52 @@ export default function QuarterlyAppraisee() {
         <h2 className="text-muted fw-bold mb-0 ms-3">Average Score for Quarter</h2>
         <div className="summary-card-content">
           <span className="summary-card-content-value fw-bold">Score:</span>
-          <span className="summary-card-content-value text-primary ms-3">{averageScore || 0}</span>
+          <span className="summary-card-content-value text-primary ms-3">{averageScore}</span>
         </div>
         <div className="summary-card-content">
           <span className="summary-card-content-value fw-bold">Max Score:</span>
-          <span className="summary-card-content-value text-primary ms-3">{maxScore || 0}</span>
+          <span className="summary-card-content-value text-primary ms-3">{maxScore}</span>
         </div>
       </div>
 
       <div className="employee-appraisal-cards">
-        {results.length === 0 ? (
+        {!hasCardData ? (
           <div className="text-center mt-5">
-            <p className="text-muted fw-semibold">No quarterly check-ins available for this period.</p>
+            <p className="text-muted fw-semibold">No appraisal data available for this period</p>
+            <p className="text-muted">Please check back later or contact HR if you believe this is an error.</p>
           </div>
         ) : (
-          results.map((record, index) => {
-            const employeeModel = new EmployeeModel({
-              empNo: record?.EMP_ID || record?.empNo || `employee-${index}`,
-              employeeName: record?.EMP_NAME || record?.employeeName || 'Employee',
-              employeeScale: record?.SCALE || record?.employeeScale || '',
-              additionalRoles: buildAdditionalRoles(record),
-              appraiser: record?.REPORTING_AUTHORITY_NAME || record?.appraiser || '',
-              primaryRole: record?.MAIN_ROLE || record?.primaryRole || '',
-            });
-
-            const dateRange = buildDateRange(record?.START_DATE, record?.END_DATE);
-            const appraisalStatus = getDisplayStatus(record?.APPRAISAL_STATUS);
-
-            return (
-              <EmployeeAppraisalCard
-                key={employeeModel.empNo || index}
-                employee={employeeModel}
-                dateRange={dateRange}
-                quarter={quarter}
-                appraisalPeriod={appraisalPeriod}
-                primaryRole={record?.MAIN_ROLE || ''}
-                additionalRoles={buildAdditionalRoles(record)}
-                organization={record?.ORGANIZATION || ''}
-                appraisalStatus={appraisalStatus}
-                exceptionStatus={record?.EXCEPTION_STATUS || 'NOT CREATED'}
-                scoreData={scoreTable}
-                onAddCheckIn={() => {
-                  navigate('/appraisal/check-in-form', {
-                    state: {
-                      financialYear,
-                      appraisalPeriod,
-                      quarter,
-                      dateRange,
-                      employee: {
-                        empNo: employeeModel.empNo,
-                        employeeName: employeeModel.employeeName,
-                        employeeScale: employeeModel.employeeScale,
-                        roles: employeeModel.additionalRoles,
-                        primaryRole: employeeModel.primaryRole,
-                        appraiser: employeeModel.appraiser,
-                        organization: record?.ORGANIZATION || '',
-                      },
-                      organizationName: record?.ORGANIZATION || '',
-                      urlId: record?.URL_ID || 'quarterly-appraisee-dashboard',
-                      roleType: 'emp',
-                      pageType: 'elo',
-                      intent: 'Fill',
-                      appraisalStatus: record?.APPRAISAL_STATUS || '',
-                    },
-                  });
-                }}
-                onViewSummary={() => {}}
-                onAddException={() => {}}
-              />
-            );
-          })
+          <EmployeeAppraisalCard
+            employee={employeeModel}
+            dateRange={cardDateRange}
+            primaryRole={cardData?.MAIN_ROLE || cardData?.primaryRole || 'Role 1'}
+            appraisalStatus={cardData?.APPRAISAL_STATUS || 'PENDING AT APPRAISEE'}
+            exceptionStatus="COMPLETED"
+            organization={cardData?.ORGANIZATION || cardData?.organization || 'Dhanetha'}
+            quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
+            appraisalPeriod={appraisalPeriod}
+            scoreData={appraisalScoreDash}
+            onAddCheckIn={() => {
+              navigate('/quarterly/quaterly-appraisee-check-in', {
+                state: {
+                  financialYear,
+                  appraisalPeriod,
+                  quarter,
+                  dateRange: cardDateRange,
+                  employee: {
+                    empNo: employeeModel.empNo,
+                    employeeName: employeeModel.employeeName,
+                    employeeScale: employeeModel.employeeScale,
+                    roles: employeeModel.roles,
+                    primaryRole: cardData?.MAIN_ROLE || cardData?.primaryRole || 'Role 1',
+                    appraiser: employeeModel.appraiser,
+                  },
+                },
+              });
+            }}
+            onViewSummary={() => {}}
+            onAddException={() => {}}
+          />
         )}
       </div>
     </div>
