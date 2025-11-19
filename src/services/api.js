@@ -3,6 +3,19 @@ import axios from 'axios';
 // Base API configuration
 const API_BASE_URL = 'http://localhost:8084';
 
+const appendQueryParam = (searchParams, key, value) => {
+  if (value === undefined || value === null) {
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((entry) => appendQueryParam(searchParams, key, entry));
+    return;
+  }
+
+  searchParams.append(key, String(value));
+};
+
 const unauthClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -516,6 +529,9 @@ export const appraisalAPI = {
         appraisalPeriod: appraisalPeriod,
         quarter: quarter || '',
       });
+      if (quarter) {
+        params.append('quarter', quarter);
+      }
       const response = await apiClient.get(
         `/appraisal/my_appraisal_dashboard?${params.toString()}`
       );
@@ -594,7 +610,7 @@ export const appraisalAPI = {
         statusUpdates
       };
 
-      const response = await apiClient.get(
+      const response = await apiClient.post(
         `/admin/hr_status_update_utility/update_status/search`,
         body
       );
@@ -602,6 +618,71 @@ export const appraisalAPI = {
       return response.data;
     } catch (error) {
       console.error("Error searching appraisal status:", error);
+      throw error;
+    }
+  },
+
+  submitSelfAppraisal: async (payload) => {
+    try {
+      const params = new URLSearchParams();
+
+      Object.entries(payload || {}).forEach(([key, value]) => {
+        appendQueryParam(params, key, value);
+      });
+
+      const response = await apiClient.post(
+        `/appraisal/submit-self-appraisal?${params.toString()}`,
+        null
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('submitSelfAppraisal error', error);
+      throw error;
+    }
+  },
+
+  saveQuarterlyCheckInReport: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/quarterly_check_in_report/save',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('saveQuarterlyCheckInReport error', error);
+      throw error;
+    }
+  },
+
+  submitQuarterlyCheckInReport: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/quarterly_check_in_report/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitQuarterlyCheckInReport error', error);
+      throw error;
+    }
+  },
+
+  // GET: Get reportee appraisal dashboard data
+  getReporteeAppraisalDashboard: async ({ empNo, financialYear, quarter }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo,
+        financialYear,
+        quarter
+      });
+      // TODO: Verify this endpoint. It was lost in a merge conflict.
+      const response = await apiClient.get(
+        `/appraisal/reportee/dashboard?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching reportee appraisal dashboard:", error);
       throw error;
     }
   },
@@ -620,6 +701,48 @@ export const appraisalAPI = {
       return response.data;
     } catch (error) {
       console.error("Error fetching reporting authority bulk list:", error);
+      throw error;
+    }
+  },
+
+  // POST: Submit quarterly exception report with file attachment
+  submitQuarterlyExceptionReport: async (payload, attachment) => {
+    try {
+      const formData = new FormData();
+      formData.append('payload', JSON.stringify(payload));
+      if (attachment) {
+        formData.append('attachment', attachment);
+      }
+      const response = await apiClient.post(
+        '/appraisal/quarterly_exception_report/submit_exception',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitQuarterlyExceptionReport error', error);
+    }
+  },
+
+
+  // GET: Get appeal report data
+  getAppealReport: async ({ roleId, roleType }) => {
+    try {
+      const params = new URLSearchParams({
+        roleId,
+        roleType
+      });
+      // TODO: Verify this endpoint. It was lost in a merge conflict.
+      const response = await apiClient.get(
+        `/appraisal/appeal/report?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching appeal report:", error);
       throw error;
     }
   },
@@ -1023,6 +1146,7 @@ export const appraisalAPI = {
 
 
 
+  }
 };
 
 // Generic API methods

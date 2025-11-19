@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./NonMeasurableKRA.css";
 import { saveAppraisalData, loadAppraisalData } from "../../localStorageHelpers";
 
-const NonMeasurableKRA = () => {
+const NonMeasurableKRA = ({ initialData }) => {
   const [data, setData] = useState([]);
 
   // Load saved data on mount
@@ -10,6 +10,9 @@ const NonMeasurableKRA = () => {
     const stored = loadAppraisalData();
     if (stored.nonMeasurableKRA && stored.nonMeasurableKRA.length > 0) {
       setData(stored.nonMeasurableKRA);
+    } else if (initialData && Array.isArray(initialData) && initialData.length > 0) {
+      setData(initialData);
+      saveAppraisalData({ nonMeasurableKRA: initialData });
     } else {
       // fallback default data (optional)
       setData([
@@ -23,7 +26,7 @@ const NonMeasurableKRA = () => {
         // },
       ]);
     }
-  }, []);
+  }, [initialData]);
 
   // Save whenever data changes
   useEffect(() => {
