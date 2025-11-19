@@ -15,6 +15,7 @@ import {
 } from '../../../components/Appraisal';
 import DevelopmentInput from './DevelopmentInput/DevelopementInput';
 import RemarkTable from './Remark/Remark';
+import { toast } from 'react-toastify';
 
 
 const demoRows = [
@@ -164,6 +165,13 @@ function AppraiserAddAppraisal() {
         : [];
   const reporteeCards = reporteeRows.map((row) => buildCardPayload(row, effectiveQuarter));
 
+  // Show error toast when API fails
+  useEffect(() => {
+    if (isDashboardError) {
+      toast.error(`Failed to fetch reportee appraisal dashboard data: ${dashboardError?.message || 'Unknown error'}`);
+    }
+  }, [isDashboardError, dashboardError]);
+
   // Role State (Appraisee / Appraiser / Reviewer)
   const [currentRole, setCurrentRole] = useState(locationState.role || 'APPRAISEE');
   const [selectedIntegrity, setSelectedIntegrity] = useState(
@@ -181,56 +189,40 @@ function AppraiserAddAppraisal() {
   const [nonMeasurableKraListData, setNonMeasurableKraListData] = useState({});
   const [developmentInputsData, setDevelopmentInputsData] = useState([]);
 
+  // Extract and set data from API response when it loads
   useEffect(() => {
-    setKraData([
-      { KraName: 'KRA 1', KraWeight: 10 },
-      { KraName: 'KRA 2', KraWeight: 20 },
-      { KraName: 'KRA 3', KraWeight: 30 },
-    ]);
+    if (reporteeDashboard) {
+      const responseData = reporteeDashboard?.data || reporteeDashboard;
 
-    setMeasurableKraListData([
-      {
-        KraName: 'KRA 1',
-        KraActualScore: 10,
-        KraTarget: 100,
-        KraWeight: 10,
-        KraFinalScore: 10,
-        comments: { appraisee: '', appraiser: '', reviewer: '' },
-      },
-      {
-        KraName: 'KRA 2',
-        KraActualScore: 20,
-        KraTarget: 200,
-        KraWeight: 20,
-        KraFinalScore: 20,
-        comments: { appraisee: '', appraiser: '', reviewer: '' },
-      },
-    ]);
+      // Set KRA data
+      if (responseData?.kraData) {
+        setKraData(responseData.kraData);
+      } else if (responseData?.result) {
+        setKraData(responseData.result);
+      }
 
-    setNonMeasurableKraListData({
-      'Section 1': [
-        {
-          KraName: 'KRA 1',
-          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-          comments: { appraisee: '', appraiser: '', reviewer: '' },
-        },
-      ],
-      'Section 2': [
-        {
-          KraName: 'KRA 2',
-          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-          comments: { appraisee: '', appraiser: '', reviewer: '' },
-        },
-      ],
-      'Section 3': [
-        {
-          KraName: 'KRA 3',
-          KraDescription: 'lorem ipsum dolor sit amet consectetur adipisicing elit.',
-          comments: { appraisee: '', appraiser: '', reviewer: '' },
-        },
-      ],
-    });
-  }, []);
+      // Set measurable KRA list data
+      if (responseData?.measurableKraList) {
+        setMeasurableKraListData(responseData.measurableKraList);
+      } else if (responseData?.measurableKraListData) {
+        setMeasurableKraListData(responseData.measurableKraListData);
+      }
+
+      // Set non-measurable KRA list data
+      if (responseData?.nonMeasurableKraList) {
+        setNonMeasurableKraListData(responseData.nonMeasurableKraList);
+      } else if (responseData?.nonMeasurableKraListData) {
+        setNonMeasurableKraListData(responseData.nonMeasurableKraListData);
+      }
+
+      // Set development inputs data
+      if (responseData?.developmentInputs) {
+        setDevelopmentInputsData(responseData.developmentInputs);
+      } else if (responseData?.developmentInputsData) {
+        setDevelopmentInputsData(responseData.developmentInputsData);
+      }
+    }
+  }, [reporteeDashboard]);
 
   const isEditableBy = (fieldOwner) => {
     switch (currentRole) {
@@ -255,74 +247,69 @@ function AppraiserAddAppraisal() {
     alert(`Submitted by ${currentRole}`);
   };
 
+  const renderReporteeList = () => {
+    if (reporteeCards.length === 0) {
+      return (
+        <div className="alert alert-info">
+          No reportees found for the selected period.
+        </div>
+      );
+    }
+
+    return reporteeCards.map((cardPayload, index) => (
+      <AnnualAppraiserCard
+        key={index}
+        employeeModel={cardPayload.employeeModel}
+        dateRange={cardPayload.dateRange}
+        primaryRole={cardPayload.primaryRole}
+        organization={cardPayload.organization}
+        appraisalStatus={cardPayload.appraisalStatus}
+        exceptionStatus={cardPayload.exceptionStatus}
+        quarter={cardPayload.quarter}
+        onClick={() => {
+          const selection = mapCardToSelection(cardPayload);
+          setSelectedAssignment(selection);
+        }}
+      />
+    ));
+  };
+
   if (!financialYearParam || !appraisalPeriodParam || (isQuarterly && !quarterParam)) {
     return <div>No financial year, appraisal period, or quarter found</div>;
   }
 
-  const handleSelectReportee = (cardPayload) => {
-    const mappedSelection = mapCardToSelection(cardPayload);
-    setSelectedAssignment(mappedSelection);
-    setCurrentRole('APPRAISER');
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-  };
-
-  const renderReporteeList = () => {
-    if (!shouldLoadDashboard) {
-      return (
-        <div className="alert alert-warning mt-3">
-          Unable to load reportees without employee or financial year context.
+  // Show loading spinner while data is being fetched
+  if (isDashboardLoading) {
+    return (
+      <div className="pageWrapper">
+        <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
+          <div className="headline d-flex flex-row justify-content-between align-items-center">
+            <BackButton />
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser :Add Appraisal</h1>
+          </div>
         </div>
-      );
-    }
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
-    if (isDashboardLoading) {
-      return <LoadingSpinner />;
-    }
-
-    if (isDashboardError) {
-      return (
-        <div className="alert alert-danger mt-3">
-          Failed to load reportees. {dashboardError?.message || 'Please try again later.'}
+  // Show error state if API call fails
+  if (isDashboardError) {
+    return (
+      <div className="pageWrapper">
+        <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
+          <div className="headline d-flex flex-row justify-content-between align-items-center">
+            <BackButton />
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser :Add Appraisal</h1>
+          </div>
         </div>
-      );
-    }
-
-    if (reporteeCards.length === 0) {
-      return (
-        <div className="alert alert-info mt-3">
-          No reportees found for the selected criteria.
-        </div>
-      );
-    }
-
-    return reporteeCards.map((card) => (
-      <div key={`${card.employeeModel.empNo}-${card.quarter || 'annual'}`} className="mb-4">
-        <AnnualAppraiserCard
-          employee={card.employeeModel}
-          dateRange={card.dateRange}
-          primaryRole={card.primaryRole}
-          organization={card.organization}
-          appraisalStatus={card.appraisalStatus}
-          exceptionStatus={card.exceptionStatus}
-          quarter={card.quarter}
-          appraisalPeriod={appraisalPeriodParam}
-        />
-        <div className="d-flex justify-content-end mt-3">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => handleSelectReportee(card)}
-          >
-            {selectedAssignment?.employee?.empNo === card.employeeModel.empNo
-              ? 'Selected'
-              : 'Add Appraisal'}
-          </button>
+        <div className="text-center mt-5">
+          <p className="text-danger fw-semibold">Failed to load appraisal data</p>
+          <p className="text-muted">{dashboardError?.message || 'Please try again later'}</p>
         </div>
       </div>
-    ));
-  };
+    );
+  }
 
   return (
     <div className="pageWrapper">
@@ -433,7 +420,7 @@ function AppraiserAddAppraisal() {
             <button className="btn btn-outline-primary" onClick={handleSave}>
               Save
             </button>
-            <button className="btns btn-primarys" onClick={handleSubmit}>
+            <button className="btn btn-primary" onClick={handleSubmit}>
               Submit
             </button>
           </div>
