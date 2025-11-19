@@ -1,11 +1,9 @@
-import { useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BackButton } from '../../../components/common';
 import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
 import EmployeeModel from '../../../models/EmployeeModel';
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';

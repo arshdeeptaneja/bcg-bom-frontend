@@ -10,11 +10,10 @@ import {
 import MeasurableKRA from './NonDiscretionaryKRA/MeasurableKRA/MeasurableKRA';
 import NonMeasurableKRA from './NonDiscretionaryKRA/NonMeasurableKRA/NonMeasurableKRA';
 import DeclarationSection from './Declaration';
-import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
-import { toast } from 'react-toastify';
+import { saveAppraisalData, loadAppraisalData } from './localStorageHelpers';
 
 function QuarterlyException() {
   const location = useLocation();
@@ -63,38 +62,6 @@ function QuarterlyException() {
   const [declarationFile, setDeclarationFile] = useState(null);
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiData, setApiData] = useState(null);
-
-  // Fetch exception report data
-  const {
-    data: exceptionData,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ['quarterlyExceptionReport', employee.empNo, financialYear, quarter],
-    queryFn: () =>
-      appraisalAPI.getQuarterlyExceptionReport({
-        urlId: employee.empNo,
-        financialYear: financialYear.replace('FY ', '').split('-')[0] || financialYear,
-        quarter: quarter,
-      }),
-    enabled: !!employee.empNo && !!financialYear && !!quarter,
-    onSuccess: (data) => {
-      setApiData(data);
-      // Initialize localStorage with API data if needed
-      if (data && data.kraData) {
-        saveAppraisalData({
-          measurableKRA: data.measurableKRA || {},
-          nonMeasurableKRA: data.nonMeasurableKRA || {},
-        });
-      }
-    },
-    onError: (err) => {
-      console.error('Failed to fetch exception report:', err);
-      toast.error('Failed to load exception report data');
-    },
-  });
 
   // Submit mutation
   const submitMutation = useMutation({
@@ -116,20 +83,8 @@ function QuarterlyException() {
     },
   });
 
-  const handleRoleChange = (e) => {
-    setCurrentRole(e.target.value);
-  };
-  // ------------------------------------------------------------------------
-
-  const [kraData, setKraData] = useState([]);
-  const [comments, setComments] = useState({
-    appraisee: '',
-    appraiser: '',
-    reviewer: '',
-  });
-  const [measurableKraListData, setMeasurableKraListData] = useState([]);
+  const [measurableKraListData, setMeasurableKraListData] = useState({});
   const [nonMeasurableKraListData, setNonMeasurableKraListData] = useState({});
-  const [developmentInputsData, setDevelopmentInputsData] = useState([]);
   const [monthlyScores, setMonthlyScores] = useState({});
 
   // React Query to fetch quarterly exception report data
@@ -168,45 +123,40 @@ function QuarterlyException() {
       }
 
       // Set measurable KRA data
+      let mKraData = {};
       if (responseData?.measurableKraList) {
+        mKraData = responseData.measurableKraList;
         setMeasurableKraListData(responseData.measurableKraList);
       } else if (responseData?.measurableKraListData) {
+        mKraData = responseData.measurableKraListData;
         setMeasurableKraListData(responseData.measurableKraListData);
+      } else if (responseData?.measurableKRA) {
+        mKraData = responseData.measurableKRA;
+        setMeasurableKraListData(responseData.measurableKRA);
       }
 
       // Set non-measurable KRA data
+      let nmKraData = {};
       if (responseData?.nonMeasurableKraList) {
+        nmKraData = responseData.nonMeasurableKraList;
         setNonMeasurableKraListData(responseData.nonMeasurableKraList);
       } else if (responseData?.nonMeasurableKraListData) {
+        nmKraData = responseData.nonMeasurableKraListData;
         setNonMeasurableKraListData(responseData.nonMeasurableKraListData);
+      } else if (responseData?.nonMeasurableKRA) {
+        nmKraData = responseData.nonMeasurableKRA;
+        setNonMeasurableKraListData(responseData.nonMeasurableKRA);
       }
 
-      // Set development inputs
-      if (responseData?.developmentInputs) {
-        setDevelopmentInputsData(responseData.developmentInputs);
-      } else if (responseData?.developmentInputsData) {
-        setDevelopmentInputsData(responseData.developmentInputsData);
-      }
-
-      // Set KRA data
-      if (responseData?.kraData) {
-        setKraData(responseData.kraData);
+      // Save to local storage
+      if (Object.keys(mKraData).length > 0 || Object.keys(nmKraData).length > 0) {
+        saveAppraisalData({
+          measurableKRA: mKraData,
+          nonMeasurableKRA: nmKraData,
+        });
       }
     }
   }, [data]);
-
-  const isEditableBy = (fieldOwner) => {
-    switch (currentRole) {
-      case 'APPRAISEE':
-        return fieldOwner === 'appraisee';
-      case 'APPRAISER':
-        return fieldOwner === 'appraiser';
-      case 'REVIEWER':
-        return fieldOwner === 'reviewer';
-      default:
-        return false;
-    }
-  };
 
   const handleDeclarationChange = useCallback((file, checked) => {
     setDeclarationFile(file);
@@ -260,7 +210,7 @@ function QuarterlyException() {
       declarationOption: declarationChecked ? 'AGREED' : 'NOT_AGREED',
       startDate: dateRange ? dateRange.split(' - ')[0] : '',
       reportingAuthorityNo: employee.appraiser?.empNo || employee.appraiser || '',
-      id: exceptionData?.id || '',
+      id: (data?.data?.id || data?.id) || '',
     };
 
     // Submit with file
@@ -380,8 +330,8 @@ function QuarterlyException() {
         </div>
 
         <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
-          <MeasurableKRA initialData={exceptionData?.measurableKRA} />
-          <NonMeasurableKRA initialData={exceptionData?.nonMeasurableKRA} />
+          <MeasurableKRA initialData={measurableKraListData} />
+          <NonMeasurableKRA initialData={nonMeasurableKraListData} />
         </div>
 
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
