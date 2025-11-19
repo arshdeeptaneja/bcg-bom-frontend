@@ -1,41 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BackButton } from "../../../../components/common";
 import { FaInfoCircle } from "react-icons/fa";
 import AppealTable from "../../../../components/AppealTable/AppealTable";
+import { useQuery } from '@tanstack/react-query';
+import { appraisalAPI } from '../../../../services/api';
+import { useAuth } from '../../../../contexts/AuthContext';
+import LoadingSpinner from '../../../../components/Spinner';
+import { toast } from 'react-toastify';
 
-const Data = [
-  {
-    ticketId: 1,
-    empNumber: "R25494",
-    empName: "RAMA M.S.",
-    primaryRole: "ZO Retail/MSME Loans Officer",
-    branch: "CHENNAI ZO",
-    preAppeal: "1.6/30 A",
-    postAppeal: "1.4/30",
-    appealStatus: "Accepted",
-  },
-  {
-    ticketId: 22,
-    empNumber: "R12992",
-    empName: "RAJIV KUMAR BANSAL",
-    primaryRole: "Zonal Head",
-    branch: "CHENNAI ZO",
-    preAppeal: "2.8/5.0",
-    postAppeal: "3.4/5.0",
-    appealStatus: "Pending",
-  },
-  {
-    ticketId: 81,
-    empNumber: "N12875",
-    empName: "NISHA",
-    primaryRole: "Deposit Officer",
-    branch: "VERPAL",
-    preAppeal: "3.2/5.0",
-    postAppeal: "4.4/5.0",
-    appealStatus: "Pending",
-  },
-];
 const EmployeeAppealList = () => {
     const [filters, setFilters] = useState({
         moduleName: "",
@@ -44,7 +17,82 @@ const EmployeeAppealList = () => {
         scale: "",
     });
 
- 
+    // Get employee details from auth context using getUserProperty
+    const { getEmployeeDetails, getUserProperty } = useAuth();
+    const employeeDetails = getEmployeeDetails();
+    const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
+
+    // Extract year from financial year format (e.g., "FY 2025-26" -> "2025" or "2025" -> "2025")
+    const extractYear = (fy) => {
+        if (!fy) return new Date().getFullYear().toString();
+        // Try FY format first
+        const fyMatch = fy.match(/FY (\d{4})/);
+        if (fyMatch) return fyMatch[1];
+        // Try range format (e.g., "2024-2025")
+        const rangeMatch = fy.match(/(\d{4})-\d{4}/);
+        if (rangeMatch) return rangeMatch[1];
+        // Try single year
+        const yearMatch = fy.match(/\d{4}/);
+        return yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+    };
+
+    // Get financial year from filter or use default
+    const financialYearForAPI = filters.financialYear || new Date().getFullYear().toString();
+
+    // React Query to fetch appeal committee data
+    const { data, isLoading, isError, error } = useQuery({
+        queryKey: ['appealCommittee', empNo, financialYearForAPI],
+        queryFn: () =>
+            appraisalAPI.getAppealCommittee({
+                empNo: empNo,
+                financialYear: parseInt(extractYear(financialYearForAPI)),
+            }),
+        enabled: !!empNo && !!financialYearForAPI, // Only run query if required params are available
+    });
+
+    // Show error toast when API fails
+    useEffect(() => {
+        if (isError) {
+            toast.error(`Failed to fetch appeal committee data: ${error?.message || 'Unknown error'}`);
+        }
+    }, [isError, error]);
+
+    // Extract and map data from API response
+    const [Data, setData] = useState([]);
+
+    useEffect(() => {
+        if (data) {
+            const responseData = data?.data || data;
+            
+            // Map API response to table data structure
+            if (responseData?.result && Array.isArray(responseData.result)) {
+                const mappedData = responseData.result.map((item) => ({
+                    ticketId: item.ticket_id || item.TICKET_ID || item.ticketId || '',
+                    empNumber: item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
+                    empName: item.emp_name || item.EMP_NAME || item.employeeName || item.employee_name || '',
+                    primaryRole: item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
+                    branch: item.branch || item.BRANCH || item.branch_name || item.BRANCH_NAME || '',
+                    preAppeal: item.pre_appeal || item.PRE_APPEAL || item.preAppeal || '',
+                    postAppeal: item.post_appeal || item.POST_APPEAL || item.postAppeal || '',
+                    appealStatus: item.appeal_status || item.APPEAL_STATUS || item.appealStatus || 'Pending',
+                }));
+                setData(mappedData);
+            } else if (Array.isArray(responseData)) {
+                // Handle case where response is directly an array
+                const mappedData = responseData.map((item) => ({
+                    ticketId: item.ticket_id || item.TICKET_ID || item.ticketId || '',
+                    empNumber: item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
+                    empName: item.emp_name || item.EMP_NAME || item.employeeName || item.employee_name || '',
+                    primaryRole: item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
+                    branch: item.branch || item.BRANCH || item.branch_name || item.BRANCH_NAME || '',
+                    preAppeal: item.pre_appeal || item.PRE_APPEAL || item.preAppeal || '',
+                    postAppeal: item.post_appeal || item.POST_APPEAL || item.postAppeal || '',
+                    appealStatus: item.appeal_status || item.APPEAL_STATUS || item.appealStatus || 'Pending',
+                }));
+                setData(mappedData);
+            }
+        }
+    }, [data]);
 
   // pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,6 +115,39 @@ const EmployeeAppealList = () => {
     const handleReset = () => {
         setFilters({ moduleName: "", financialYear: "", quarter: "", scale: "" });
     };
+
+    // Show loading spinner while data is being fetched
+    if (isLoading) {
+        return (
+            <div className="AppraiserContaniner">
+                <div className="d-flex justify-content-between align-items-center px-2">
+                    <div className="pageWrapper-header">
+                        <BackButton />
+                        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3"> Employee Appeal List </h1>
+                    </div>
+                </div>
+                <LoadingSpinner />
+            </div>
+        );
+    }
+
+    // Show error state if API call fails
+    if (isError) {
+        return (
+            <div className="AppraiserContaniner">
+                <div className="d-flex justify-content-between align-items-center px-2">
+                    <div className="pageWrapper-header">
+                        <BackButton />
+                        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3"> Employee Appeal List </h1>
+                    </div>
+                </div>
+                <div className="text-center mt-5">
+                    <p className="text-danger fw-semibold">Failed to load appeal list data</p>
+                    <p className="text-muted">{error?.message || 'Please try again later'}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="AppraiserContaniner ">
