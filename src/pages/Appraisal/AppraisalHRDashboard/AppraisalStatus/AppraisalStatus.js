@@ -1,6 +1,7 @@
 // AppraiserPage.jsx
 import { BackButton } from '../../../../components/common';
 import { FaInfoCircle } from "react-icons/fa";
+import { appraisalAPI } from '../../../../services/api';
 
 import "./AppraisalStatus.css";
 import { useState } from 'react';
@@ -8,7 +9,77 @@ import { useState } from 'react';
 const AppraiserStatus = () => {
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
-  const [showReasonComment, setShowReasonComment] = useState(false);
+  const [ecNumber, setEcNumber] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [tableData, setTableData] = useState([]);
+  const [noData, setNoData] = useState(false);
+
+
+  const handleSearch = async () => {
+    if (!ecNumber.trim()) {
+      alert("Please enter EC Number");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setNoData(false);
+
+      const res = await appraisalAPI.searchHRStatusUpdate({ empNo: ecNumber });
+
+      if (res && res.length > 0) {
+        setTableData(res);
+      } else {
+        setTableData([]);
+        setNoData(true);
+      }
+
+    } catch (error) {
+      console.error(error);
+      setNoData(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handleReset = () => {
+    setEcNumber("");
+    setTableData([]);
+    setNoData(false);
+  };
+
+
+  const handleStatusChange = async (assignmentId, newStatus) => {
+  if (!newStatus) return;
+
+  try {
+    const confirmUpdate = window.confirm(
+      `Are you sure you want to update status to "${newStatus}"?`
+    );
+
+    if (!confirmUpdate) return;
+
+    const res = await appraisalAPI.updateHRStatus({
+      assignmentId,
+      newStatus,
+    });
+
+    alert("Status updated successfully!");
+
+    // update UI instantly
+    setTableData((prev) =>
+      prev.map((row) =>
+        row.assignmentId === assignmentId
+          ? { ...row, action: newStatus }
+          : row
+      )
+    );
+  } catch (error) {
+    alert("Failed to update status!");
+    console.error(error);
+  }
+};
 
 
 
@@ -52,16 +123,22 @@ const AppraiserStatus = () => {
                   type="text"
                   className="form-control ec-input"
                   placeholder="Enter EC Number"
-                  aria-label="Enter EC Number"
+                  value={ecNumber}
+                  onChange={(e) => setEcNumber(e.target.value)}
                 />
+
               </div>
 
               <div className="me-2 mb-2">
-                <button className="btn-search">Search</button>
+                <button className="btn-search" onClick={handleSearch}>
+                  {loading ? "Searching..." : "Search"}
+                </button>
               </div>
 
               <div className="mb-2">
-                <button className=" btn-reset">Reset</button>
+                <button className="btn-reset" onClick={handleReset}>
+                  Reset
+                </button>
               </div>
             </div>
           </div>
@@ -90,35 +167,35 @@ const AppraiserStatus = () => {
               {appraisalPeriod === 'Quarterly' &&
                 <div className="period-section">
                   <label className="period-title">Quarterly Period</label>
-                  <div className="period-btns mt-2" role="group">
-                    <div
-                      className={`period-btn ${selectedQuarter === 'Q1' ? 'active' : ''
+                  <div className="btn-group mt-2" role="group">
+                    <button type="button"
+                      className={`btns px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
                         }`}
                       onClick={() => setSelectedQuarter('Q1')}
                     >
                       Q1
-                    </div>
-                    <div
-                      className={`period-btn ${selectedQuarter === 'Q2' ? 'active' : ''
+                    </button>
+                    <button type="button"
+                      className={`btns px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
                         }`}
                       onClick={() => setSelectedQuarter('Q2')}
                     >
                       Q2
-                    </div>
-                    <div
-                      className={`period-btn ${selectedQuarter === 'Q3' ? 'active' : ''
+                    </button>
+                    <button type="button"
+                      className={`btns px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
                         }`}
                       onClick={() => setSelectedQuarter('Q3')}
                     >
                       Q3
-                    </div>
-                    <div
-                      className={`period-btn ${selectedQuarter === 'Q4' ? 'active' : ''
+                    </button>
+                    <button type="button"
+                      className={`btns px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
                         }`}
                       onClick={() => setSelectedQuarter('Q4')}
                     >
                       Q4
-                    </div>
+                    </button>
                   </div>
                 </div>
               }
@@ -137,11 +214,10 @@ const AppraiserStatus = () => {
             <table className="table appraisal-table align-middle mb-0">
               <thead className='table-header'>
                 <tr>
-                  <th></th>
+                  <th>Select</th>
                   <th>URL ID</th>
                   <th>EMP Number</th>
                   <th>EMP Name</th>
-                  <th>Main Role</th>
                   <th>SOL ID</th>
                   <th>Zone</th>
                   <th>Appraisal Status</th>
@@ -149,60 +225,51 @@ const AppraiserStatus = () => {
                   <th>Start Date</th>
                   <th>End Date</th>
                   <th>Select Status</th>
-                  <th>Reason Comment</th>
+                  <th>Reason</th>
                 </tr>
               </thead>
-
               <tbody>
-                <tr>
-                  <td className="text-center">
-                    <input type="checkbox" />
-                  </td>
+                {tableData.length > 0 ? (
+                  tableData.map((item, index) => (
+                    <tr key={index}>
+                      <td className="text-center">
+                        <input type="checkbox" />
+                      </td>
 
-                  <td>U-16695</td>
-                  <td>R19305</td>
-                  <td>RAJESHWAR PRASAD</td>
-                  <td>Branch Manager</td>
-                  <td>220</td>
-                  <td>Central Zone</td>
+                      <td>{item.urlId}</td>
+                      <td>{item.ecNumber}</td>
+                      <td>{item.employeeName}</td>
+                      <td>{item.solId}</td>
+                      <td>{item.zone}</td>
+                      <td>{item.appraisalstatus}</td>
+                      <td>{item.score}</td>
+                      <td>{item.startDate}</td>
+                      <td>{item.endDate}</td>
+                      <td>
+                        <select
+                          className="form-select custom-select"
+                          value={item.action}
+                          onChange={(e) => handleStatusChange(item.assignmentId, e.target.value)}
+                        >
+                          <option value="">-Select-</option>
+                          <option value="Approved">Approved</option>
+                          <option value="Rejected">Rejected</option>
+                          <option value="Pending">Pending</option>
+                        </select>
+                      </td>
 
-                  <td>Completed</td>
-                  <td>66.7</td>
-                  <td>28-APR-25</td>
-                  <td>30-JUN-25</td>
-
-                  {/* Select Status Dropdown */}
-                  <td>
-                    <select className="form-select status-select" style={{width:"200px"}}>
-                      <option>-Select-</option>
-                      <option>Approved</option>
-                      <option>Rejected</option>
-                    </select>
-                  </td>
-
-                  <td style={{ textAlign: "center" }}>
-                    <i
-                      className="bi bi-chat-left-text-fill text-primary align-middle"
-                      style={{ fontSize: "20px", cursor: "pointer" }}
-                      onClick={() => setShowReasonComment(!showReasonComment)}
-                    ></i>
-                  </td>
-                </tr>
-                <tr >
-                  <td colSpan="13">
-                    {showReasonComment && (
-                      <div className="mt-4 d-flex flex-column align-items-start">
-                        <label className="form-label fw-semibold">Reason Comment:</label>
-                        <textarea
-                          className="form-control reason-comment-box"
-                          rows="4"
-                          placeholder="Enter your comment"
-                        ></textarea>
-                      </div>
-                    )}
-                  </td>
-                </tr>
+                      <td>{item.reason}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="12" className="text-center text-muted">
+                      {noData ? "No data found!" : "Enter EC & click Search"}
+                    </td>
+                  </tr>
+                )}
               </tbody>
+
             </table>
           </div>
         </div>
