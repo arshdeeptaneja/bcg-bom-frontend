@@ -41,7 +41,7 @@ export default function QuarterlyAppraisee() {
         empNo: empNo,
         role: role,
         financialYear: parseInt(extractYear(financialYear)),
-        appraisalPeriod: appraisalPeriod?.toLowerCase() || 'annual',
+        appraisalPeriod: appraisalPeriod.toLowerCase() === "quarterly" ? "quarter" : "",
         quarter: quarter || '',
       }),
     enabled: !!empNo && !!financialYear && !!appraisalPeriod && !!quarter,
