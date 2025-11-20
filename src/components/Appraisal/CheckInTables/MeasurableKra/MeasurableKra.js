@@ -12,17 +12,19 @@ import { useState } from 'react';
  * @param {String} props.kraListData.KraComments - KRA Comments
  * @returns
  */
-export default function MeasurableKra({ totalActualScore, totalMaxScore, kraListData }) {
+export default function MeasurableKra({ totalActualScore, totalMaxScore, kraListData, onKraChange, isEditable }) {
   const [openKra, setOpenKra] = useState(null);
-  const [commentsByKra, setCommentsByKra] = useState({});
 
   const handleComments = (kraName) => {
     setOpenKra((prev) => (prev === kraName ? null : kraName));
   };
 
-  const handleChange = (kraName, value) => {
-    setCommentsByKra((prev) => ({ ...prev, [kraName]: value }));
+  const handleChange = (kraId, field, value) => {
+    if (onKraChange) {
+      onKraChange(kraId, field, value);
+    }
   };
+
   return (
     <div className="d-flex flex-column gap-3">
       <div className="table-headline d-flex flex-row justify-content-between">
@@ -35,12 +37,12 @@ export default function MeasurableKra({ totalActualScore, totalMaxScore, kraList
         </div>
       </div>
       <div className="table-responsive">
-        <table className="table text-center">
+        <table className="table text-center align-middle">
           <thead className="table-primary">
             <tr>
               <th className="text-center">Measurable KRA Name</th>
-              <th className="text-center">Actual Score</th>
-              <th className="text-center">Target</th>
+              <th className="text-center" style={{ width: '120px' }}>Actual Score</th>
+              <th className="text-center" style={{ width: '120px' }}>Target</th>
               <th className="text-center">Weightage</th>
               <th className="text-center">Final Score</th>
               <th className="text-center">Comments</th>
@@ -50,9 +52,31 @@ export default function MeasurableKra({ totalActualScore, totalMaxScore, kraList
             {kraListData.map((kra) => (
               <>
                 <tr key={`${kra.KraName}-row`}>
-                  <td className='table-Tds'>{kra.KraName}</td>
-                  <td className='table-Tds'>{kra.KraActualScore}</td>
-                  <td className='table-Tds'>{kra.KraTarget}</td>
+                  <td className='table-Tds text-start'>{kra.KraName}</td>
+                  <td className='table-Tds'>
+                    {isEditable ? (
+                      <input
+                        type="number"
+                        className="form-control form-control-sm text-center"
+                        value={kra.KraActualScore || ''}
+                        onChange={(e) => handleChange(kra.KraId, 'KraActualScore', e.target.value)}
+                      />
+                    ) : (
+                      kra.KraActualScore
+                    )}
+                  </td>
+                  <td className='table-Tds'>
+                    {isEditable ? (
+                      <input
+                        type="number"
+                        className="form-control form-control-sm text-center"
+                        value={kra.KraTarget || ''}
+                        onChange={(e) => handleChange(kra.KraId, 'KraTarget', e.target.value)}
+                      />
+                    ) : (
+                      kra.KraTarget
+                    )}
+                  </td>
                   <td className='table-Tds'>{kra.KraWeight}</td>
                   <td className='table-Tds'>{kra.KraFinalScore}</td>
                   <td>
@@ -62,7 +86,7 @@ export default function MeasurableKra({ totalActualScore, totalMaxScore, kraList
                       onClick={() => handleComments(kra.KraName)}
                       aria-label="Add comment"
                     >
-                      <i className="bi bi-chat-left-text-fill text-primary"></i>
+                      <i className={`bi bi-chat-left-text-fill ${kra.KraComments ? 'text-success' : 'text-primary'}`}></i>
                     </button>
                   </td>
                 </tr>
@@ -71,14 +95,15 @@ export default function MeasurableKra({ totalActualScore, totalMaxScore, kraList
                 {openKra === kra.KraName && (
                   <tr key={`${kra.KraName}-comment`}>
                     <td colSpan={6}>
-                      <div className="text-start">
+                      <div className="text-start p-2 bg-light">
                         <label className="form-label fw-semibold">Appraisee Comment:</label>
                         <textarea
                           className="form-control"
                           rows={3}
                           placeholder="Enter Your Comment"
-                          value={commentsByKra[kra.KraName] || ''}
-                          onChange={(e) => handleChange(kra.KraName, e.target.value)}
+                          value={kra.KraComments || ''}
+                          onChange={(e) => handleChange(kra.KraId, 'KraComments', e.target.value)}
+                          disabled={!isEditable}
                         />
                       </div>
                     </td>
