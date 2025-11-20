@@ -211,7 +211,8 @@ export default function AppraisalHome() {
             );
           }}
         />
-
+        
+        {appraisalPeriod === 'Annually' && (
         <KpiTab
           heading="Reviewer Mode"
           kpiData={[
@@ -238,6 +239,7 @@ export default function AppraisalHome() {
             );
           }}
         />
+        )}
       </div>
       {/* Accordion for My Final Score */}
       <div className="myFinalScore-accordion mt-3">
