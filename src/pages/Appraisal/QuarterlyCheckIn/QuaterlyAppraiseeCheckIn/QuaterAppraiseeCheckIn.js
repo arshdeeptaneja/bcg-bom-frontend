@@ -75,6 +75,8 @@ function QuaterlyAppraiseeCheckIn() {
   const [developmentInputsData, setDevelopmentInputsData] = useState([]);
   const [monthlyScores, setMonthlyScores] = useState({});
 
+  let page_type = "self"
+
   // React Query to fetch quarterly check-in report data
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['quarterlyCheckInReport', financialYear, appraisalPeriod, quarter, empNo, currentRole],
@@ -85,7 +87,7 @@ function QuaterlyAppraiseeCheckIn() {
         roleType: currentRole || role || 'APPRAISEE',
         financialYear: parseInt(extractYear(financialYear)),
         quarter: quarter || '',
-        pageType:'self',
+        pageType: page_type,
         appraisalStatus: employee?.appraisalStatus || employee?.APPRAISAL_STATUS || 'PENDING',
         intent: 'Fill',
       }),
