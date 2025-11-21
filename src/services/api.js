@@ -39,7 +39,7 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-   // const token = localStorage.getItem('accessToken');
+   //const token = localStorage.getItem('accessToken');
     const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -775,6 +775,28 @@ if (filterStatus) params.append("STATUS", filterStatus);
     }
   },
 
+
+
+   // GET: Get quarterly exception report data
+ getQuarterlyExceptionReport: async ({ urlId, financialYear, quarter }) => {
+  try {
+    const params = new URLSearchParams({
+      urlId,
+      financialYear,
+      quarter,
+    });
+
+    const response = await apiClient.get(
+      `/appraisal/quarterly_exception_report?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("getQuarterlyExceptionReport error", error);
+    throw error;
+  }
+},
+
+
   // POST: Submit quarterly exception report with file attachment
   submitQuarterlyExceptionReport: async (payload, attachment) => {
     try {
@@ -852,7 +874,7 @@ if (filterStatus) params.append("STATUS", filterStatus);
     roleName,
     roleId,
     zone,
-    custTicketId,
+    //custTicketId,
   }) => {
     try {
       const params = new URLSearchParams();
@@ -862,7 +884,7 @@ if (filterStatus) params.append("STATUS", filterStatus);
       appendQueryParam(params, 'roleName', roleName);
       appendQueryParam(params, 'roleId', roleId);
       appendQueryParam(params, 'zone', zone);
-      appendQueryParam(params, 'custTicketId', custTicketId);
+    //  appendQueryParam(params, 'custTicketId', custTicketId);
 
       const response = await apiClient.get(
         `/appraisal/exception_quarterly_verify/review?${params.toString()}`

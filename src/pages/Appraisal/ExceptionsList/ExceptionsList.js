@@ -50,26 +50,41 @@ export default function ExceptionsList() {
 
   console.log(data);
 
-  const exceptionListData =
-    data?.result != null
-      ? data?.result?.map((item) => ({
-          exceptionId: item.exception_id,
-          custTicketId: item.cust_ticket_id || item.ticket_id || item.exception_id,
-          urlId: item.url_id || item.employee_no,
+const exceptionListData =
+  data?.result != null
+    ? data?.result
+        .map((item) => ({
+          exceptionId: item.CUST_TICKET_ID,
+          custTicketId: item.CUST_TICKET_ID,
+          urlId: item.P_URL_ID,
+
           employee: {
-            empNo: item.employee_no,
-            name: item.employee_name,
-            branch: item.branch_name || item.branch,
-            primaryRole: item.primary_role || item.role_name,
-            appraiser: item.appraiser_name || item.appraiser,
-            zone: item.zone_name || item.zone,
+            empNo: item.EC_NUMBER,
+            name: item.EMP_NAME,
+            branch: item.BRNAME,
+            primaryRole: item.PRIMARY_ROLE,
+            appraiser: item.REP_NAME,
+            zone: item.ZNNAME,
           },
-          exceptionDescription: item.exception_description,
-          preExceptionScore: item.pre_exception_score,
-          postExceptionScore: item.post_exception_score,
-          exceptionStatus: item.exception_status,
+
+          exceptionDescription: item.FINAL_APPEAL_STATUS,
+          preExceptionScore: item.TOTAL_SCORE,
+          postExceptionScore: item.TOTAL_FINAL_SCORE,
+          exceptionStatus: item.STATUS,
         }))
-      : [];
+        // Apply filters here
+        .filter((item) => {
+          const f = filters;
+
+          return (
+            (f.employee === '' || item.employee.name === f.employee) &&
+            (f.primaryRole === '' || item.employee.primaryRole === f.primaryRole) &&
+            (f.branch === '' || item.employee.branch === f.branch) &&
+            (f.exceptionStatus === '' || item.exceptionStatus === f.exceptionStatus)
+          );
+        })
+    : [];
+
 
   const buildQuarterDateRange = (fyLabel, quarterLabel) => {
     if (!fyLabel || !quarterLabel) return '';
@@ -136,13 +151,14 @@ export default function ExceptionsList() {
   };
 
   const handleClearFilter = () => {
-    setFilters({
-      employee: '',
-      primaryRole: '',
-      branch: '',
-      exceptionStatus: '',
-    });
-  };
+  setFilters({
+    employee: '',
+    primaryRole: '',
+    branch: '',
+    exceptionStatus: '',
+  });
+};
+
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return <div>No financial year, appraisal period, or quarter found</div>;
@@ -167,81 +183,89 @@ export default function ExceptionsList() {
       </div>
 
       {/* Filter Panel */}
-      <div className="filter-panel mt-4 d-flex align-items-end gap-3">
-        {/* Employee Filter */}
-        <div className="filter-group">
-          <label className="filter-label text-primary fw-semibold">Employee</label>
-          <select
-            className="form-select filter-select"
-            value={filters.employee}
-            onChange={(e) => handleFilterChange('employee', e.target.value)}
-          >
-            <option value="">-Select-</option>
-            {data?.EMP_NAME?.map((item) => (
-              <option value={item.branch}>{item.branch}</option>
-            ))}
-          </select>
-        </div>
+     {/* Filter Panel */}
+<div className="filter-panel mt-4 d-flex align-items-end gap-3">
 
-        {/* Primary Role Filter */}
-        <div className="filter-group">
-          <label className="filter-label text-primary fw-semibold">Primary Role</label>
-          <select
-            className="form-select filter-select"
-            value={filters.primaryRole}
-            onChange={(e) => handleFilterChange('primaryRole', e.target.value)}
-          >
-            <option value="">-Select-</option>
-            {data?.PRIMARY_ROLE?.map((item) => (
-              <option value={item.branch}>{item.branch}</option>
-            ))}
-          </select>
-        </div>
+  {/* Employee Filter */}
+  <div className="filter-group">
+    <label className="filter-label text-primary fw-semibold">Employee</label>
+    <select
+      className="form-select filter-select"
+      value={filters.employee}
+      onChange={(e) => handleFilterChange('employee', e.target.value)}
+    >
+      <option value="">-Select-</option>
+      {data?.EMP_NAME?.map((name) => (
+        <option key={name} value={name}>{name}</option>
+      ))}
+    </select>
+  </div>
 
-        {/* Branch Filter */}
-        <div className="filter-group">
-          <label className="filter-label text-primary fw-semibold">Branch</label>
-          <select
-            className="form-select filter-select"
-            value={filters.branch}
-            onChange={(e) => handleFilterChange('branch', e.target.value)}
-          >
-            <option value="">-Select-</option>
-            {data?.BRANCH_NAME?.map((item) => (
-              <option value={item.branch}>{item.branch}</option>
-            ))}
-          </select>
-        </div>
+  {/* Primary Role Filter */}
+  <div className="filter-group">
+    <label className="filter-label text-primary fw-semibold">Primary Role</label>
+    <select
+      className="form-select filter-select"
+      value={filters.primaryRole}
+      onChange={(e) => handleFilterChange('primaryRole', e.target.value)}
+    >
+      <option value="">-Select-</option>
+      {data?.PRIMARY_ROLE?.map((role) => (
+        <option key={role} value={role}>{role}</option>
+      ))}
+    </select>
+  </div>
 
-        {/* Exception Status Filter */}
-        <div className="filter-group">
-          <label className="filter-label text-primary fw-semibold">Exception Status</label>
-          <select
-            className="form-select filter-select"
-            value={filters.exceptionStatus}
-            onChange={(e) => handleFilterChange('exceptionStatus', e.target.value)}
-          >
-            <option value="">-Select-</option>
-            {data?.TICKET_STATUS?.map((item) => (
-              <option value={item.branch}>{item.branch}</option>
-            ))}
-          </select>
-        </div>
+  {/* Branch Filter */}
+  <div className="filter-group">
+    <label className="filter-label text-primary fw-semibold">Branch</label>
+    <select
+      className="form-select filter-select"
+      value={filters.branch}
+      onChange={(e) => handleFilterChange('branch', e.target.value)}
+    >
+      <option value="">-Select-</option>
+      {data?.BRANCH_NAME?.map((branch) => (
+        <option key={branch} value={branch}>{branch}</option>
+      ))}
+    </select>
+  </div>
 
-        {/* Action Buttons */}
-        <div className="filter-actions d-flex gap-2">
-          <button type="button" className="btn btn-primary search-btn" onClick={handleSearch}>
-            Search
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline-primary clear-filter-btn"
-            onClick={handleClearFilter}
-          >
-            Clear Filter
-          </button>
-        </div>
-      </div>
+  {/* Exception Status Filter */}
+  <div className="filter-group">
+    <label className="filter-label text-primary fw-semibold">Exception Status</label>
+    <select
+      className="form-select filter-select"
+      value={filters.exceptionStatus}
+      onChange={(e) => handleFilterChange('exceptionStatus', e.target.value)}
+    >
+      <option value="">-Select-</option>
+      {data?.TICKET_STATUS?.map((status) => (
+        <option key={status} value={status}>{status}</option>
+      ))}
+    </select>
+  </div>
+
+  {/* Buttons */}
+  <div className="filter-actions d-flex gap-2">
+    <button
+      type="button"
+      className="btn btn-primary search-btn"
+      onClick={handleSearch}
+    >
+      Search
+    </button>
+
+    <button
+      type="button"
+      className="btn btn-outline-primary clear-filter-btn"
+      onClick={handleClearFilter}
+    >
+      Clear Filter
+    </button>
+  </div>
+</div>
+
 
       <ExceptionListTable
         exceptionListData={exceptionListData}

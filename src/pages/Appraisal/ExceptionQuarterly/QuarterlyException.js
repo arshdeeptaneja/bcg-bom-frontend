@@ -24,13 +24,14 @@ function QuarterlyException() {
   const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {
     financialYear: '2025',
     appraisalPeriod: 'Quarterly',
-    quarter: 'Q1',
-    dateRange: '01 Apr 2025 - 30 Jun 2025',
+    quarter: 'Q2',
+    dateRange: '10 Apr 2025 - 30 Jun 2025',
     employee: {
       empNo: user?.empNo || 'arogya',
       employeeName: user?.EMP_NAME || 'Employee Name',
       branch: user?.BRANCH_UNIT_TYPE || 'Branch',
       primaryRole: 'Primary Role',
+      url: "U-34545",
       appraiser: 'Appraiser Name',
       roles: user?.roles || [],
     },
@@ -92,14 +93,14 @@ function QuarterlyException() {
     queryKey: ['quarterlyExceptionReport', financialYear, appraisalPeriod, quarter, empNo, currentRole],
     queryFn: () =>
       appraisalAPI.getQuarterlyExceptionReport({
-        empNo: empNo,
-        url: employee?.url || employee?.URL_ID || '', // @TODO: Confirm with Arsh - URL field name
-        roleType: currentRole || role || 'APPRAISEE',
+        //empNo: empNo,
+        urlId: employee?.url || employee?.URL_ID || '', // @TODO: Confirm with Arsh - URL field name
+        //roleType: currentRole || role || 'APPRAISEE',
         financialYear: parseInt(extractYear(financialYear)),
         quarter: quarter || '',
-        pageType: 'quarterly-exception', // @TODO: Confirm with Arsh - pageType value
-        appraisalStatus: employee?.appraisalStatus || employee?.APPRAISAL_STATUS || 'PENDING', // @TODO: Confirm with Arsh - appraisalStatus field name
-        intent: 'Fill',
+        //pageType: 'quarterly-exception', // @TODO: Confirm with Arsh - pageType value
+        //appraisalStatus: employee?.appraisalStatus || employee?.APPRAISAL_STATUS || 'PENDING', // @TODO: Confirm with Arsh - appraisalStatus field name
+        //intent: 'Fill',
       }),
     enabled: !!empNo && !!financialYear && !!quarter, // Only run query if required params are available
   });
@@ -190,20 +191,33 @@ function QuarterlyException() {
     const payload = {
       kraData: formData.measurableKRA
         ? Object.entries(formData.measurableKRA).flatMap(([month, items]) =>
-            items.map((item) => ({
-              month: month,
-              kra: item.kra,
-              unit: item.unit,
-              actual: item.actual,
-              target: item.target,
-              maxScore: item.maxScore,
-              score: item.score,
-              category: item.category,
-              comment: item.comment || '',
-            }))
+            items.map((item) => (
+              {
+                target: {
+                  kra_type : "measurable",
+                  KRA_CODE : 100008,
+                  PARENT_KRA : null,
+                  //kra: item.kra,
+                  //unit: item.unit,
+                  old_actual: "95.0",
+                  old_target: "100.0",
+                  new_actual: item.actual,
+                  new_target: item.target,
+                  old_mpb: "5.0",
+                  new_mpb: "6.0",
+                  chk_status: "on",
+                  max_score: item.maxScore,
+                  old_score: item.score,
+                  MONTH: month,
+                  //category: item.category,
+                  firstcomment: item.comment || '',
+                  repa_score: "90.0"
+                }
+              }
+          ))
           )
         : [],
-      financialYear: parseInt(financialYear.replace('FY ', '').split('-')[0]) || 2025,
+      financialYear: parseInt(financialYear) || 2025,
       empNo: employee.empNo,
       endDate: dateRange ? dateRange.split(' - ')[1] : '',
       quarter: quarter,

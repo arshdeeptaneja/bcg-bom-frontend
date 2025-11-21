@@ -119,7 +119,7 @@ function ReviewQuarterlyException() {
                 roleName: reviewerRoleName,
                 roleId: reviewerRoleId,
                 zone: reviewerZone,
-                custTicketId: ticketId,
+                // custTicketId: ticketId,
             }),
         staleTime: 5 * 60 * 1000,
     });
@@ -130,12 +130,24 @@ function ReviewQuarterlyException() {
         }
     }, [isError, error]);
 
-    useEffect(() => {
-        if (!reviewData) return;
-        const sourceRows =
-            reviewData?.kraData || reviewData?.result?.kraData || reviewData?.result || [];
-        setKraRows(normalizeKraRows(sourceRows));
-    }, [reviewData]);
+   useEffect(() => {
+    if (!reviewData) return;
+
+    let sourceRows = [];
+
+    if (reviewData?.kraData) {
+        sourceRows = reviewData.kraData;
+    }
+    else if (reviewData?.result?.kraData) {
+        sourceRows = reviewData.result.kraData;
+    }
+    else if (reviewData?.results_KRA_LIST_Measurable) {
+        sourceRows = [reviewData.results_KRA_LIST_Measurable];
+    }
+
+    setKraRows(normalizeKraRows(sourceRows));
+}, [reviewData]);
+
 
     const handleDownload = () => {
         const attachmentUrl = reviewData?.attachmentUrl || reviewData?.result?.attachmentUrl;
@@ -240,12 +252,26 @@ function ReviewQuarterlyException() {
 
             {/* Content */}
             <div className="pageWrapper-content d-flex flex-column m-1 p-3">
-                <CheckInDescriptionSection
-                    employee={reviewEmployee}
-                    dateRange={dateRange}
-                    showDownloadButton
-                    onDownload={handleDownload}
-                />
+              <CheckInDescriptionSection
+    employee={{
+        ...reviewEmployee,
+
+        empName: reviewData?.emp_name,
+        organisation: reviewData?.organisation,
+        appraiseeContact: reviewData?.appraisee_contactno,
+        appraiseeEmail: reviewData?.appraisee_email,
+        status: reviewData?.status,
+        appealStatus: reviewData?.appeal_status,
+        validatorName: reviewData?.validator_name,
+        validatorNumber: reviewData?.validator_emp_number,
+    }}
+
+    dateRange={`${reviewData?.startdate} - ${reviewData?.enddate}`}
+    showDownloadButton
+    onDownload={handleDownload}
+/>
+
+
 
                 <div className="note mt-5 mb-5">
                     <span className="text-muted">Note: </span>
