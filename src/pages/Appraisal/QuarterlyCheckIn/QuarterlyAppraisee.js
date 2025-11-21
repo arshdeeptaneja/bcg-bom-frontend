@@ -16,7 +16,7 @@ export default function QuarterlyAppraisee() {
   const { getEmployeeDetails, getUserProperty, user } = useAuth();
   const appraisalPeriod = searchParams.get('appraisalPeriod');
   const quarter = searchParams.get('quarter');
-  const role = user?.roles?.[0] || 'admin'; 
+  const role = user?.roles?.[0] || 'admin';
 
   // Get employee details from auth context using getUserProperty
   const employeeDetails = getEmployeeDetails();
@@ -41,7 +41,7 @@ export default function QuarterlyAppraisee() {
         empNo: empNo,
         role: role,
         financialYear: parseInt(extractYear(financialYear)),
-        appraisalPeriod: appraisalPeriod?.toLowerCase() || 'annual',
+        appraisalPeriod: appraisalPeriod.toLowerCase() === "quarterly" ? "quarter" : "",
         quarter: quarter || '',
       }),
     enabled: !!empNo && !!financialYear && !!appraisalPeriod && !!quarter,
@@ -100,29 +100,31 @@ export default function QuarterlyAppraisee() {
   }
 
   const responseData = data?.data || data;
+  const redResult = responseData?.redresult || [];
+
   const appraisalScoreDash = responseData?.appraisal_score_dash || [];
   const averageScore = responseData?.average_score ?? 0;
   const maxScore = responseData?.max_score ?? 100;
-  const cardData = responseData?.result?.[0];
+  const cardData = responseData?.result?.[0] || responseData?.redresult?.[0] || null;
+
+
   const hasCardData = !!cardData;
 
-  const cardDateRange =
-    cardData?.START_DATE && cardData?.END_DATE
-      ? `${cardData.START_DATE} to ${cardData.END_DATE}`
-      : '2024-01-01 to 2024-12-31';
+  const cardDateRange = cardData?.date || 'N/A';
 
   const employeeModel = hasCardData
     ? new EmployeeModel({
-        empNo: cardData?.EMP_ID || cardData?.empNo || '123456',
-        employeeName: cardData?.EMP_NAME || cardData?.employeeName || 'John Doe',
-        employeeScale: cardData?.SCALE || cardData?.employeeScale || '10',
-        roles:
-          cardData?.ADDITIONAL_ROLE_1 || cardData?.ADDITIONAL_ROLE_2
-            ? [cardData?.ADDITIONAL_ROLE_1, cardData?.ADDITIONAL_ROLE_2].filter(Boolean)
-            : cardData?.roles || ['Role 1', 'Role 2'],
-        appraiser: cardData?.REPORTING_AUTHORITY_NAME || cardData?.appraiser || 'Jane Doe',
-      })
+      empNo: cardData?.pf_number || 'N/A',
+      employeeName: cardData?.emp_name || 'N/A',
+      employeeScale: cardData?.scale || 'N/A',
+      roles: [],
+      appraiser: cardData?.reporting_authority_name || 'N/A',
+    })
     : null;
+    console.log("RED RESULT:", redResult);
+console.log("CARD DATA:", cardData);
+console.log("EMPLOYEE MODEL:", employeeModel);
+
   return (
     <div className="pageWrapper">
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
@@ -159,6 +161,7 @@ export default function QuarterlyAppraisee() {
           <EmployeeAppraisalCard
             employee={employeeModel}
             dateRange={cardDateRange}
+            redResult={redResult}
             primaryRole={cardData?.MAIN_ROLE || cardData?.primaryRole || 'Role 1'}
             appraisalStatus={cardData?.APPRAISAL_STATUS || 'PENDING AT APPRAISEE'}
             exceptionStatus="COMPLETED"
@@ -184,8 +187,8 @@ export default function QuarterlyAppraisee() {
                 },
               });
             }}
-            onViewSummary={() => {}}
-            onAddException={() => {}}
+            onViewSummary={() => { }}
+            onAddException={() => { }}
           />
         )}
       </div>

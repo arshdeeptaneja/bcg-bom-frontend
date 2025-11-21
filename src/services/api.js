@@ -39,7 +39,7 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    //const token = localStorage.getItem('accessToken');
+   // const token = localStorage.getItem('accessToken');
     const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -390,23 +390,44 @@ export const appraisalAPI = {
   },
 
   // GET: Get appraiser check-in dashboard data
-  getAppraiserCheckInDashboard: async ({ empNo, financialYear, quarter, appraisalPeriod }) => {
-    try {
-      const params = new URLSearchParams({
-        empNo: empNo,
-        financialYear: financialYear,
-        quarter: quarter,
-        appraisalPeriod: appraisalPeriod,
-      });
-      const response = await apiClient.get(
-        `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
-      );
-      return response.data;
-    } catch (error) {
-      console.log('error', error);
-      throw error;
-    }
-  },
+getAppraiserCheckInDashboard: async ({
+  empNo,
+  financialYear,
+  quarter,
+  appraisalPeriod,
+
+  filterEmpId,
+  filterName,
+  filterRole,
+  filterAppraiser,
+  filterStatus,
+}) => {
+  try {
+    const params = new URLSearchParams({
+      empNo,
+      financialYear,
+      quarter,
+      appraisalPeriod,
+    });
+
+    // Apply filters if selected
+    if (filterEmpId) params.append("ecNumber", filterEmpId);
+    if (filterName) params.append("employeeName", filterName);
+    if (filterRole) params.append("primaryRole", filterRole);
+    if (filterAppraiser) params.append("appraiser", filterAppraiser);
+    if (filterStatus) params.append("status", filterStatus);
+
+    const response = await apiClient.get(
+      `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+},
+
 
   // GET: Get quarterly check-in report data
   getQuarterlyCheckInReport: async ({ 
@@ -441,36 +462,43 @@ export const appraisalAPI = {
   },
 
     // GET: Get quarterly exception report data
-  getQuarterlyExceptionReport: async ({ 
-    empNo, 
-    url, 
-    roleType, 
-    financialYear, 
-    quarter, 
-    pageType, 
-    appraisalStatus, 
-    intent = 'Fill' 
-  }) => {
-    try {
-      const params = new URLSearchParams({
-        empNo: empNo,
-        url: url,
-        roleType: roleType,
-        financialYear: financialYear,
-        quarter: quarter,
-        pageType: pageType,
-        appraisalStatus: appraisalStatus,
-        intent: intent,
-      });
-      const response = await apiClient.get(
-        `${appraisalBaseUrl}/quarterly_exception_report?${params.toString()}`
-      );
-      return response.data;
-    } catch (error) {
-      console.log('error', error);
-      throw error;
-    }
-  },
+getAppraiserCheckInDashboard: async ({
+  empNo,
+  financialYear,
+  quarter,
+  appraisalPeriod,
+  filterEmpId,
+  filterName,
+  filterRole,
+  filterAppraiser,
+  filterStatus,
+}) => {
+  try {
+    const params = new URLSearchParams({
+      empNo,
+      financialYear,
+      quarter,
+      appraisalPeriod,
+    });
+
+    // Add filters to API params
+   if (filterEmpId) params.append("EC_NUMBER", filterEmpId);
+if (filterName) params.append("EMP_NAME", filterName);
+if (filterRole) params.append("MAIN_ROLE", filterRole);
+if (filterAppraiser) params.append("REPORTING_AUTHORITY_NAME", filterAppraiser);
+if (filterStatus) params.append("STATUS", filterStatus);
+
+
+    const response = await apiClient.get(
+      `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+},
 
   // POST: Submit quarterly exception report with file attachment
 
@@ -505,13 +533,13 @@ export const appraisalAPI = {
       const params = new URLSearchParams({
         fy: financialYear,
         empNo: empNo,
-        role: role,
+        // role: role,
         appraisalPeriod: appraisalPeriod,
         quarter: quarter || '',
       });
-      if (quarter) {
-        params.append('quarter', quarter);
-      }
+      // if (quarter) {
+      //   params.append('quarter', quarter);
+      // }
       const response = await apiClient.get(
         `/appraisal/my_appraisal_dashboard?${params.toString()}`
       );
@@ -526,25 +554,27 @@ export const appraisalAPI = {
   getEmployeeSelfAppraisal: async ({
     empNo,
     url,
-    zoneName,
-    roleId,
+   // zoneName,
+   // roleId,
     roleType,
     financialYear,
     quarter,
     pageType,
     appraisalStatus,
+    intent,
   }) => {
     try {
       const params = new URLSearchParams({
         empNo: empNo,
         url: url,
-        zoneName: zoneName,
-        roleId: roleId,
+       // zoneName: zoneName,
+       // roleId: roleId,
         roleType: roleType,
         financialYear: financialYear,
         quarter: quarter || '',
         pageType: pageType,
         appraisalStatus: appraisalStatus,
+        intent: intent,
       });
       const response = await apiClient.get(
         `/appraisal/employee_self_appraisal?${params.toString()}`

@@ -24,12 +24,13 @@ function QuaterlyAppraiseeCheckIn() {
 
   // Get data from location state
   const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {
-    financialYear: "2024-2025",
+    financialYear: "2025",
     appraisalPeriod: "Mid-Year",
+
     quarter: "Q2",
-    dateRange: "01 Jul 2024 - 30 Sep 2024",
-    employee: { name: "John Doe", id: "EMP123" },
-    role: "APPRAISEE",
+    dateRange: "2025",
+    employee: { name: "John Doe", empNo: "36665",appraisalStatus: "pending",    url: 'U-34545' },
+    role: "Administrative Officers",
   };
 
   // Get employee number from auth context as fallback
@@ -84,7 +85,7 @@ function QuaterlyAppraiseeCheckIn() {
         roleType: currentRole || role || 'APPRAISEE',
         financialYear: parseInt(extractYear(financialYear)),
         quarter: quarter || '',
-        pageType: 'quarterly-check-in',
+        pageType:'self',
         appraisalStatus: employee?.appraisalStatus || employee?.APPRAISAL_STATUS || 'PENDING',
         intent: 'Fill',
       }),

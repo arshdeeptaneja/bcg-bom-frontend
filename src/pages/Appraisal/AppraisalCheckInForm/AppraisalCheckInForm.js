@@ -246,15 +246,16 @@ function AppraisalCheckInForm() {
           pageType: pageType || 'elo',
           appraisalStatus: initialAppraisalStatus || '',
           intent: intent || 'Fill',
-          roleId: employee?.primaryRole || 'default',
+         // roleId: employee?.primaryRole || 'default', // not present in requests keys
         });
       } else {
         // Annual flow - call employee self appraisal API
         return appraisalAPI.getEmployeeSelfAppraisal({
           empNo: employee?.empNo || '',
           url: 'check-in-form',
-          zoneName: employee?.zone || 'default',
-          roleId: employee?.primaryRole || 'default',
+          intent: intent || 'Fill',
+          zoneName: employee?.zone || 'default',// not present in requests keys
+           roleId: employee?.primaryRole || 'default',
           roleType: '12',
           financialYear: extractYear(financialYear),
           quarter: '',

@@ -20,6 +20,7 @@ export default function EmployeeAppraisalCard({
   appraisalStatus = 'PENDING AT APPRAISEE',
   exceptionStatus = 'NOT CREATED',
   scoreData = [],
+    redResult = [],  
   onAddCheckIn,
   onViewSummary,
   onAddException,
@@ -219,9 +220,13 @@ export default function EmployeeAppraisalCard({
       <div
         className={`actions-collapse row mt-5 ${isExpanded ? 'open' : ''}`}
         aria-hidden={!isExpanded}
+
       >
+        {/* Red Result Section (if available) */}
+
+
         {/* Score Breakdown Section */}
-        {scoreData && scoreData.length > 0 && (
+        {/* {scoreData && scoreData.length > 0 && (
           <div className="score-breakdown-section col-12 mb-4">
             <h5 className="text-primary fw-bold mb-3">Score Breakdown</h5>
             <div className="table-responsive">
@@ -247,7 +252,7 @@ export default function EmployeeAppraisalCard({
               </table>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Role Description Section */}
         <div className="role-description col-md-6 col-12">
@@ -331,4 +336,6 @@ EmployeeAppraisalCard.propTypes = {
   onAddCheckIn: PropTypes.func,
   onViewSummary: PropTypes.func,
   onAddException: PropTypes.func,
+  redResult: PropTypes.array,
+
 };
