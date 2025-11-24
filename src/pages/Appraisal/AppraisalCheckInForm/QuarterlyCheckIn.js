@@ -1,14 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BackButton } from '../../../components/common';
 import LoadingSpinner from '../../../components/Spinner';
-import {
-  CheckInSummaryTable,
-  FinalScoreSummaryTable,
-  CheckInDescriptionSection,
-  MeasurableKra,
-  NonMeasurableKra,
-  DevelopmentInputs,
-} from '../../../components/Appraisal';
+import QuarterlyHeader from './components/QuarterlyHeader';
+import MonthlySummaryTable from './components/MonthlySummaryTable';
+import QuarterlyMeasurableTable from './components/QuarterlyMeasurableTable';
+import QuarterlyNonMeasurableTable from './components/QuarterlyNonMeasurableTable';
+
+const MONTH_LABEL_LOOKUP = {
+  1: 'January',
+  2: 'February',
+  3: 'March',
+  4: 'April',
+  5: 'May',
+  6: 'June',
+  7: 'July',
+  8: 'August',
+  9: 'September',
+  10: 'October',
+  11: 'November',
+  12: 'December',
+};
+
+const QUARTER_MONTH_MAP = {
+  Q1: [4, 5, 6],
+  Q2: [7, 8, 9],
+  Q3: [10, 11, 12],
+  Q4: [1, 2, 3],
+};
+
+const getQuarterMonths = (quarter = 'Q1') => {
+  const months = QUARTER_MONTH_MAP[quarter?.toUpperCase()] || QUARTER_MONTH_MAP.Q1;
+  return months.map((value) => ({ value, label: MONTH_LABEL_LOOKUP[value] }));
+};
 
 const QuarterlyCheckIn = ({
   data,
@@ -19,31 +42,46 @@ const QuarterlyCheckIn = ({
   actions,
 }) => {
   const { employee, dateRange } = context;
-  const { currentRole, isEditableBy, handleRoleChange } = roleState;
+  const { isEditableBy } = roleState;
   const { handleSave, handleSubmit, handleKraChange, handleSectionCommentChange, isSaving, isSubmitting } = actions;
 
-  const [showMeasurableComment, setShowMeasurableComment] = useState(false);
-  const [showNonMeasurableComment, setShowNonMeasurableComment] = useState(false);
-
   // Use API data or fallback to empty/mock data
-  const kraData = data?.finalScoreSummary || [];
-  const measurableKraListData = data?.measurableKras || [];
+  const allMeasurableKras = data?.measurableKras || [];
   const nonMeasurableKraListData = data?.nonMeasurableKras || {};
+  const quarterMonths = useMemo(() => getQuarterMonths(context.quarter), [context.quarter]);
+  const defaultActiveMonth = useMemo(() => {
+    const currentMonthNumber = new Date().getMonth() + 1;
+    const currentMonthOption = quarterMonths.find((month) => month.value === currentMonthNumber);
+    if (currentMonthOption) return currentMonthOption.value;
+    return quarterMonths[0]?.value || currentMonthNumber;
+  }, [quarterMonths]);
+
+  const [activeMonth, setActiveMonth] = useState(defaultActiveMonth);
+
+  useEffect(() => {
+    setActiveMonth(defaultActiveMonth);
+  }, [defaultActiveMonth]);
+
+  const activeMonthBucket = data?.krasByMonth?.[activeMonth] || { measurable: [], nonMeasurable: [] };
+  const measurableOverrides = formState.formData.measurableKraScores || {};
+  const measurableForMonth = activeMonthBucket.measurable?.map((kra) => (
+    measurableOverrides[kra.KraId] ? { ...kra, ...measurableOverrides[kra.KraId] } : kra
+  )) || [];
+  const nonMeasurableForMonth = activeMonthBucket.nonMeasurable || [];
+  const nonMeasurableSectionsForMonth = nonMeasurableForMonth.reduce((acc, kra) => {
+    const sectionKey = kra.SectionName || 'Non-Measurable';
+    if (!acc[sectionKey]) acc[sectionKey] = [];
+    acc[sectionKey].push(kra);
+    return acc;
+  }, {});
   
-  // Use form data for measurable KRAs if available
-  const formMeasurableKras = Object.values(formState.formData.measurableKraScores || {});
-  const displayMeasurableKras = formMeasurableKras.length > 0 ? formMeasurableKras : measurableKraListData;
+  const hasQuarterData = allMeasurableKras.length > 0 || Object.keys(nonMeasurableKraListData).length > 0;
 
   const actualScoreData = data?.monthlyScoreSummary?.actualScoreData || {};
   const maxScoreData = data?.monthlyScoreSummary?.maxScoreData || {};
-  const totalMeasurableActual = data?.totalMeasurableActual || 0;
-  const totalMeasurableMax = data?.totalMeasurableMax || 0;
   const totalNonMeasurableActual = data?.totalNonMeasurableActual || 0;
   const totalNonMeasurableMax = data?.totalNonMeasurableMax || 0;
   const validationMessage = data?.validationMessage || '';
-
-  // Development inputs questions
-  const developmentInputsQuestions = data?.developmentInputs || [];
 
   if (isLoading) {
     return (
@@ -64,199 +102,115 @@ const QuarterlyCheckIn = ({
   return (
     <div className="pageWrapper">
       {/* Header Section */}
-      <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
-        <div className="headline d-flex flex-row justify-content-between align-items-center">
+      <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center mb-4">
+        <div className="headline d-flex flex-row align-items-center">
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-            Quarterly Check-In
+            Add Appraisee Check-in
           </h1>
         </div>
-        <div className="d-flex flex-row align-items-center">
-          <label htmlFor="roleSelect" className="me-2 text-muted fw-bold">
-            Role:
-          </label>
-          <select
-            id="roleSelect"
-            value={currentRole}
-            onChange={handleRoleChange}
-            className="form-select form-select-sm"
-            style={{ width: '180px' }}
-          >
-            <option value="APPRAISEE">Appraisee (Self)</option>
-            <option value="APPRAISER">Appraiser (Level 1)</option>
-            <option value="REVIEWER">Reviewer (Final)</option>
-          </select>
+        <div className="d-flex align-items-center gap-3">
+            <span className="fw-bold text-dark">{context.quarter}, {context.financialYear} Quarterly Check-In</span>
+            <button className="btn btn-primary btn-sm text-white rounded">
+                Info <i className="bi bi-info-circle ms-1"></i>
+            </button>
         </div>
       </div>
+
       <div className="pageWrapper-content d-flex flex-column m-1 p-3">
-        <CheckInDescriptionSection employee={employee} dateRange={dateRange} />
+        <QuarterlyHeader 
+            employee={employee} 
+            dateRange={dateRange} 
+            primaryRole={employee?.primaryRole || roleState.currentRole}
+            additionalRoles={employee?.additionalRoles || []}
+        />
         {validationMessage && (
           <div className="alert alert-info mt-3" role="alert">
             <i className="bi bi-info-circle me-2"></i>
             {validationMessage}
           </div>
         )}
-        <div className="note mt-5 mb-5">
-          <span className="text-muted">Note: </span>
+        <div className="note mb-3">
+          <span className="fw-bold">Note: </span>
           <span className="text-muted">
             Please raise an exception if actual or target values are incorrect.
           </span>
         </div>
-        <div className="final-score-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
-          <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
-          <FinalScoreSummaryTable kraListData={kraData} />
-        </div>
+
         {Object.keys(actualScoreData).length > 0 && (
-          <div className="check-in-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
-            <h5 className="text-primary fw-bold mb-3">Monthly Score Summary</h5>
-            <CheckInSummaryTable
+            <MonthlySummaryTable
               actualScoreData={actualScoreData}
               maxScoreData={maxScoreData}
-              className="mt-5"
+              quarterMonths={quarterMonths}
+            />
+        )}
+        {hasQuarterData && (
+          <div className="discretionary-kra-section d-flex flex-column gap-3 m-1 p-3">
+            {quarterMonths.length > 0 && (
+              <div className="d-flex justify-content-end mb-3">
+                <div className="nav gap-4">
+                  {quarterMonths.map((month) => (
+                    <button
+                      key={month.value}
+                      type="button"
+                      className={`btn btn-link text-decoration-none p-0 fw-bold ${activeMonth === month.value ? 'text-primary border-bottom border-primary border-2' : 'text-muted'}`}
+                      onClick={() => setActiveMonth(month.value)}
+                    >
+                      {month.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <QuarterlyMeasurableTable
+                kraListData={measurableForMonth}
+                onKraChange={handleKraChange}
+                isEditable={isEditableBy.APPRAISEE}
+            />
+
+            <QuarterlyNonMeasurableTable
+                kraListData={nonMeasurableSectionsForMonth}
+                totalActualScore={totalNonMeasurableActual}
+                totalMaxScore={totalNonMeasurableMax}
             />
           </div>
         )}
-        {(measurableKraListData.length > 0 ||
-          Object.keys(nonMeasurableKraListData).length > 0) && (
-          <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
-            <h5 className="text-primary fw-bold mb-3">Discretionary KRA</h5>
-            {measurableKraListData.length > 0 && (
-              <div className="discretionary-kra-list">
-                <MeasurableKra
-                  totalActualScore={totalMeasurableActual}
-                  totalMaxScore={totalMeasurableMax}
-                  kraListData={displayMeasurableKras}
-                  onKraChange={handleKraChange}
-                  isEditable={isEditableBy.APPRAISEE} // Allow editing based on role
-                />
-                <div className="mt-3 p-2">
-                  <div className="d-flex align-items-center gap-2 mb-2">
-                    <label className="form-label fw-bold text-muted mb-0">Performance Measurable Comments</label>
-                    <button 
-                      className="btn btn-link p-0 text-decoration-none" 
-                      onClick={() => setShowMeasurableComment(!showMeasurableComment)}
-                    >
-                      <i className={`bi bi-chat-left-text-fill ${formState.formData.sectionComments?.measurable?.[0] ? 'text-success' : 'text-primary'}`}></i>
-                    </button>
-                  </div>
-                  {showMeasurableComment && (
-                    <textarea
-                      className="form-control"
-                      rows={3}
-                      placeholder="Enter comments for measurable performance..."
-                      value={formState.formData.sectionComments?.measurable?.[0] || ''}
-                      onChange={(e) => handleSectionCommentChange('measurable', [e.target.value])}
-                      disabled={!isEditableBy.APPRAISEE}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-            {Object.keys(nonMeasurableKraListData).length > 0 && (
-              <div className="non-measurable-section">
-                <NonMeasurableKra
-                  totalActualScore={totalNonMeasurableActual}
-                  totalMaxScore={totalNonMeasurableMax}
-                  kraListData={nonMeasurableKraListData}
-                />
-                <div className="mt-3 p-2">
-                  <div className="d-flex align-items-center gap-2 mb-2">
-                    <label className="form-label fw-bold text-muted mb-0">Non-Measurable Comments</label>
-                    <button 
-                      className="btn btn-link p-0 text-decoration-none" 
-                      onClick={() => setShowNonMeasurableComment(!showNonMeasurableComment)}
-                    >
-                      <i className={`bi bi-chat-left-text-fill ${formState.formData.sectionComments?.nonMeasurable ? 'text-success' : 'text-primary'}`}></i>
-                    </button>
-                  </div>
-                  {showNonMeasurableComment && (
-                    <textarea
-                      className="form-control"
-                      rows={3}
-                      placeholder="Enter comments for non-measurable performance..."
-                      value={formState.formData.sectionComments?.nonMeasurable || ''}
-                      onChange={(e) => handleSectionCommentChange('nonMeasurable', e.target.value)}
-                      disabled={!isEditableBy.APPRAISEE}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
         
-        {/* Additional Section Comments */}
-        <div className="additional-comments-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
-            <h5 className="text-primary fw-bold mb-3">Additional Comments</h5>
-            
-            <div className="mb-3">
-                <label className="form-label fw-bold text-muted">Performance Non-Measurable Comments</label>
-                <textarea
-                    className="form-control"
-                    rows={2}
-                    value={formState.formData.sectionComments?.performanceNonMeasurable || ''}
-                    onChange={(e) => handleSectionCommentChange('performanceNonMeasurable', e.target.value)}
-                    disabled={!isEditableBy.APPRAISEE}
-                />
-            </div>
-
-            <div className="mb-3">
-                <label className="form-label fw-bold text-muted">Performance Semi-Measurable Comments</label>
-                <textarea
-                    className="form-control"
-                    rows={2}
-                    value={formState.formData.sectionComments?.semiMeasurable || ''}
-                    onChange={(e) => handleSectionCommentChange('semiMeasurable', e.target.value)}
-                    disabled={!isEditableBy.APPRAISEE}
-                />
-            </div>
-
-            <div className="mb-3">
-                <label className="form-label fw-bold text-muted">Performance Period Comments</label>
-                <textarea
-                    className="form-control"
-                    rows={2}
-                    value={formState.formData.sectionComments?.period || ''}
-                    onChange={(e) => handleSectionCommentChange('period', e.target.value)}
-                    disabled={!isEditableBy.APPRAISEE}
-                />
-            </div>
-
-            <div className="mb-3">
-                <label className="form-label fw-bold text-muted">Areas of Performance Comments</label>
-                <textarea
-                    className="form-control"
-                    rows={2}
-                    value={formState.formData.sectionComments?.areas || ''}
-                    onChange={(e) => handleSectionCommentChange('areas', e.target.value)}
-                    disabled={!isEditableBy.APPRAISEE}
-                />
-            </div>
-        </div>
-
-        <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
+        <div className="development-inputs-section d-flex flex-column gap-3 m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Development Inputs</h5>
-          <DevelopmentInputs
-            questions={developmentInputsQuestions}
-            role={currentRole}
-            isEditableBy={isEditableBy}
-          />
+          
+          {data?.developmentInputs?.map((input, index) => (
+            <div className="mb-3" key={input.id}>
+              <label className="form-label fw-bold text-dark">
+                {index + 1}. {input.question} <span className="text-danger">*</span>
+              </label>
+              <textarea
+                className="form-control"
+                rows={3}
+                placeholder="Enter Your Response"
+                value={formState.formData.sectionComments?.[input.key] || ''}
+                onChange={(e) => handleSectionCommentChange(input.key, e.target.value)}
+                disabled={!isEditableBy.APPRAISEE}
+              />
+            </div>
+          ))}
         </div>
       </div>
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button
-          className="btn btn-outline-primary"
+          className="btn btn-outline-primary px-4"
           onClick={handleSave}
           disabled={isSaving || isSubmitting}
         >
           {isSaving ? 'Saving...' : 'Save'}
         </button>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary px-4 text-white"
           onClick={handleSubmit}
           disabled={isSaving || isSubmitting}
         >
-          {isSubmitting ? 'Submitting...' : 'Submit'}
+          {isSubmitting ? 'Submitting...' : 'Submit →'}
         </button>
       </div>
     </div>

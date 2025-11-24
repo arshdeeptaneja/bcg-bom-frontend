@@ -904,9 +904,10 @@ if (filterStatus) params.append("STATUS", filterStatus);
       appendQueryParam(params, 'quarter', quarter);
       appendQueryParam(params, 'empNo', empNo);
       appendQueryParam(params, 'roleName', roleName);
-      appendQueryParam(params, 'roleId', roleId);
+      // Note: roleId parameter in API expects the URL ID (e.g., U-34545), not the role identifier
+      // Use custTicketId if roleId is not provided (they serve the same purpose in the API)
+      appendQueryParam(params, 'roleId', roleId || custTicketId);
       appendQueryParam(params, 'zone', zone);
-      appendQueryParam(params, 'custTicketId', custTicketId);
 
       const response = await apiClient.get(
         `/appraisal/exception_quarterly_validator/review?${params.toString()}`

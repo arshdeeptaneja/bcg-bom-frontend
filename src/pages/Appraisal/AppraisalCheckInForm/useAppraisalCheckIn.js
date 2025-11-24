@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
-import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import {
   transformAnnualAppraisalData,
@@ -13,7 +12,6 @@ import {
 export const useAppraisalCheckIn = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   // Parse query parameters
   const searchParams = new URLSearchParams(location.search);
@@ -37,6 +35,8 @@ export const useAppraisalCheckIn = () => {
 
   // Construct employee object if missing but empNo exists
   const employee = stateOrQuery.employee || (empNo ? { empNo, primaryRole: 'default' } : null);
+  const employeeNumber = employee?.empNo || '';
+  const normalizedFinancialYear = useMemo(() => extractYear(financialYear), [financialYear]);
 
   // Determine if this is a quarterly flow
   const isQuarterlyFlow = useMemo(() => {
@@ -86,18 +86,32 @@ export const useAppraisalCheckIn = () => {
   const [isDirty, setIsDirty] = useState(false);
 
   // Fetch appraisal data
+  const queryKey = isQuarterlyFlow
+    ? [
+        'quarterlyCheckInReport',
+        employeeNumber,
+        normalizedFinancialYear,
+        quarter || '',
+        roleType || 'emp',
+        intent || 'Fill',
+        urlId || 'default-url',
+      ]
+    : [
+        'employeeSelfAppraisal',
+        employeeNumber,
+        normalizedFinancialYear,
+        appraisalPeriod || 'Quarterly',
+      ];
+
   const { data: apiResponse, isLoading, isError } = useQuery({
-    queryKey: urlId || 'quarterly-check-in',
-          roleType: user?.ROLE_NAME ||isQuarterlyFlow
-      ? ['quarterlyCheckInReport', employee?.empNo, financialYear, quarter, roleType, intent]
-      : ['employeeSelfAppraisal', employee?.empNo, financialYear, quarter, appraisalPeriod],
+    queryKey,
     queryFn: () => {
       if (isQuarterlyFlow) {
         return appraisalAPI.getQuarterlyCheckInReport({
-          empNo: employee?.empNo || '',
-          roleType:  roleType || 'emp',
-          url:'U-34545',
-          financialYear: extractYear(financialYear),
+          empNo: employeeNumber,
+          roleType: roleType || 'emp',
+          url: urlId || 'quarterly-check-in',
+          financialYear: normalizedFinancialYear,
           quarter: quarter || '',
           pageType: pageType || 'self',
           appraisalStatus: initialAppraisalStatus || 'pending',
@@ -106,19 +120,19 @@ export const useAppraisalCheckIn = () => {
         });
       } else {
         return appraisalAPI.getEmployeeSelfAppraisal({
-          empNo: employee?.empNo || '',
+          empNo: employeeNumber,
           url: 'check-in-form',
           zoneName: employee?.zone || 'default',
           roleId: employee?.primaryRole || 'default',
           roleType: '12',
-          financialYear: extractYear(financialYear),
+          financialYear: normalizedFinancialYear,
           quarter: '',
           pageType: '1',
           appraisalStatus: 'in-progress',
         });
       }
     },
-    enabled: !!employee?.empNo && !!financialYear && !!appraisalPeriod,
+    enabled: !!employeeNumber && !!financialYear && !!appraisalPeriod,
   });
 
   const transformedData = useMemo(() => {
@@ -130,9 +144,13 @@ export const useAppraisalCheckIn = () => {
 
   // Initialize form data from transformed data
   useEffect(() => {
-    if (transformedData?.measurableKras) {
+    if (!transformedData?.measurableKras?.length) {
+      return;
+    }
+
+    setFormData((prev) => {
       const initialScores = {};
-      transformedData.measurableKras.forEach(kra => {
+      transformedData.measurableKras.forEach((kra) => {
         initialScores[kra.KraId] = { ...kra };
       });
       
@@ -144,15 +162,17 @@ export const useAppraisalCheckIn = () => {
         performanceNonMeasurable: rawData.performanceNonMeasurableComment || '',
         semiMeasurable: rawData.performanceSemiMeasurableComment || '',
         period: rawData.performancePeriodComment || '',
-        areas: rawData.areasPerformanceComment || ''
+        areas: rawData.areasPerformanceComment || '',
+        highlights: rawData.performancePeriodComment || rawData.HIGHLIGHTS_COMMENTS || '',
+        areasOfImprovement: rawData.areasPerformanceComment || rawData.BELOW_EXPECTATIONS_COMMENTS || '',
       };
 
-      setFormData(prev => ({ 
-        ...prev, 
+      return {
+        ...prev,
         measurableKraScores: initialScores,
-        sectionComments: initialSectionComments
-      }));
-    }
+        sectionComments: initialSectionComments,
+      };
+    });
   }, [transformedData]);
 
   useEffect(() => {
@@ -189,6 +209,10 @@ export const useAppraisalCheckIn = () => {
   const buildQuarterlyPayload = () => {
     const rawData = transformedData?.rawData || {};
     const originalKras = rawData.results_KRA_LIST?.measurable || [];
+
+    if (!originalKras.length) {
+      console.warn('Quarterly payload generated with no measurable KRAs to submit.');
+    }
     
     const kraData = originalKras.map(kra => {
       const updates = formData.measurableKraScores[kra.KRA_CODE] || {};
@@ -200,29 +224,29 @@ export const useAppraisalCheckIn = () => {
         actual: updates.KraActualScore !== undefined ? updates.KraActualScore : kra.actual,
         target: updates.KraTarget !== undefined ? updates.KraTarget : kra.target,
         KRA_COMMENT: updates.KraComments !== undefined ? updates.KraComments : kra.KRA_COMMENT,
-        // Ensure numeric values are handled if needed, though API seems to accept strings for some
+        old_actual: kra.old_actual || kra.actual_og || '',
       };
     });
 
     return {
-      financialYear: extractYear(financialYear),
-      quarter: quarter || "Q1",
-      empNumber: employee?.empNo || "",
-      urlId: urlId || "U-34545", // Use provided urlId or fallback
+      financialYear: parseInt(normalizedFinancialYear, 10),
+      quarter: quarter || 'Q1',
+      empNumber: employeeNumber,
+      urlId: urlId || 'quarterly-check-in',
       kraData: kraData,
-      submittype: "self", // TODO: Make dynamic based on role/intent if needed
-      startDate: rawData.startDate || "2024-07-01 00:00:00.0",
-      endDate: rawData.endDate || "2024-09-30 00:00:00.0",
-      reportingAuthority: rawData.reportingAuthority || "string",
-      organizationName: rawData.organizationName || "string",
+      submittype: 'self', // TODO: Make dynamic based on role/intent if needed
+      startDate: rawData.startDate || '2024-07-01 00:00:00.0',
+      endDate: rawData.endDate || '2024-09-30 00:00:00.0',
+      reportingAuthority: rawData.reportingAuthority || 'string',
+      organizationName: rawData.organizationName || 'string',
       performanceMeasurableComment: Array.isArray(formData.sectionComments?.measurable) 
         ? formData.sectionComments.measurable 
-        : [formData.sectionComments?.measurable || ""], // Ensure array
-      nonMeasurableComment: formData.sectionComments?.nonMeasurable || "",
-      performanceNonMeasurableComment: formData.sectionComments?.performanceNonMeasurable || "",
-      performanceSemiMeasurableComment: formData.sectionComments?.semiMeasurable || "",
-      performancePeriodComment: formData.sectionComments?.period || "",
-      areasPerformanceComment: formData.sectionComments?.areas || ""
+        : [formData.sectionComments?.measurable || ''], // Ensure array
+      nonMeasurableComment: formData.sectionComments?.nonMeasurable || '',
+      performanceNonMeasurableComment: formData.sectionComments?.performanceNonMeasurable || '',
+      performanceSemiMeasurableComment: formData.sectionComments?.semiMeasurable || '',
+      performancePeriodComment: formData.sectionComments?.highlights || '',
+      areasPerformanceComment: formData.sectionComments?.areasOfImprovement || '',
     };
   };
 
