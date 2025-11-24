@@ -1,59 +1,15 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { BackButton } from '../../../components/common';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CheckInDescriptionSection } from '../../../components/Appraisal';
 import KraTable from './KraTable';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { appraisalAPI } from '../../../services/api';
 import LoadingSpinner from '../../../components/Spinner';
-import { toast } from 'react-toastify';
-
-const parseFinancialYear = (fy) => {
-    if (!fy) return '';
-    const match = `${fy}`.match(/(\d{4})/);
-    return match ? match[1] : `${fy}`;
-};
-
-const normalizeKraRows = (payload = []) => {
-    if (!Array.isArray(payload)) return [];
-    return payload.map((item, index) => ({
-        id: item.kraId || item.id || item.urlId || index + 1,
-        kraId: item.kraId || item.id || item.urlId || index + 1,
-        kra: item.kra || item.kraName || item.metric || 'KRA',
-        unit: item.unit || item.unitOfMeasure || '-',
-        actual: item.actual ?? item.appraiseeActual ?? '',
-        appraisee: item.appraisee ?? item.appraiseeActual ?? '',
-        appraiserActual: item.appraiserActual ?? item.appraiser_value ?? '',
-        target: item.target ?? item.appraiseeTarget ?? '',
-        appraiserTarget: item.appraiserTarget ?? item.target ?? '',
-        maxScore: item.maxScore ?? item.max_score ?? '',
-        score: item.score ?? '',
-        appraiserScore: item.appraiserScore ?? item.score ?? '',
-        month: item.month || item.period || '',
-        category: item.category || item.kraCategory || '',
-        selfComment: item.selfComment ?? item.appraiseeComment ?? '',
-        appraiserComment: item.appraiserComment ?? '',
-        commentOpen: true,
-        checked: false,
-        action: 'accept',
-    }));
-};
-
-const deriveDeclarationOption = (rows = []) => {
-    if (rows.some((row) => row.action === 'reject')) {
-        return 'REJECT';
-    }
-    if (rows.some((row) => row.action === 'edit')) {
-        return 'ACCEPT_AND_EDIT';
-    }
-    return 'ACCEPT_AS_IS';
-};
+import { useExceptionReview } from '../shared/hooks/useExceptionReview';
 
 function ReviewQuarterlyException() {
     const location = useLocation();
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
     const { getEmployeeDetails, getUserProperty } = useAuth();
 
     const employeeDetails = getEmployeeDetails();
@@ -87,122 +43,30 @@ function ReviewQuarterlyException() {
     } = location.state || {};
 
     const reviewEmployee = employee || fallbackEmployee;
-    const ticketId = custTicketId || exceptionId || reviewEmployee?.custTicketId || '';
     const reviewEmpNo = reviewEmployee?.empNo || loggedInEmpNo;
     const reviewerRoleName = roleName || role || 'APPRAISER';
     const reviewerRoleId = roleId || role || 'APPRAISER';
     const reviewerZone = zone || reviewEmployee?.zone || employeeDetails?.currentUser?.ZONE_NAME || '';
-    const parsedFinancialYear = parseFinancialYear(financialYear);
 
-    const [kraRows, setKraRows] = useState([]);
-
+    // Use custom hook for all business logic
     const {
-        data: reviewData,
+        kraRows,
         isLoading,
-        isError,
-        error,
-    } = useQuery({
-        queryKey: [
-            'exceptionQuarterlyReview',
-            reviewEmpNo,
-            quarter,
-            parsedFinancialYear,
-            reviewerRoleName,
-            ticketId,
-        ],
-        enabled: Boolean(reviewEmpNo && quarter && parsedFinancialYear),
-        queryFn: () =>
-            appraisalAPI.getExceptionQuarterlyReview({
-                fy: parsedFinancialYear,
-                quarter,
-                empNo: reviewEmpNo,
-                roleName: reviewerRoleName,
-                roleId: reviewerRoleId,
-                zone: reviewerZone,
-                custTicketId: ticketId,
-            }),
-        staleTime: 5 * 60 * 1000,
+        isSubmitting,
+        handleRowChange,
+        handleSubmit,
+        handleDownload,
+    } = useExceptionReview({
+        empNo: reviewEmpNo,
+        quarter,
+        financialYear,
+        roleName: reviewerRoleName,
+        roleId: reviewerRoleId,
+        zone: reviewerZone,
+        custTicketId: custTicketId || exceptionId,
+        urlId,
+        onSuccess: () => navigate(-1),
     });
-
-    useEffect(() => {
-        if (isError && error) {
-            toast.error(error?.response?.data?.message || 'Failed to load exception review');
-        }
-    }, [isError, error]);
-
-    useEffect(() => {
-        if (!reviewData) return;
-        const sourceRows =
-            reviewData?.kraData || reviewData?.result?.kraData || reviewData?.result || [];
-        setKraRows(normalizeKraRows(sourceRows));
-    }, [reviewData]);
-
-    const handleDownload = () => {
-        const attachmentUrl = reviewData?.attachmentUrl || reviewData?.result?.attachmentUrl;
-        if (!attachmentUrl) {
-            toast.info('No attachment available for download');
-            return;
-        }
-        window.open(attachmentUrl, '_blank');
-    };
-
-    const handleRowChange = useCallback((id, patch) => {
-        setKraRows((prev) => prev.map((row) => (row.id === id ? { ...row, ...patch } : row)));
-    }, []);
-
-    const selectedRows = useMemo(() => kraRows.filter((row) => row.checked), [kraRows]);
-
-    const submitMutation = useMutation({
-        mutationFn: (payload) => appraisalAPI.submitExceptionQuarterlyReview(payload),
-        onSuccess: () => {
-            toast.success('Exception review submitted successfully');
-            queryClient.invalidateQueries({ queryKey: ['exceptionQuarterlyVerify'] });
-            navigate(-1);
-        },
-        onError: (submitError) => {
-            toast.error(
-                submitError?.response?.data?.message || 'Failed to submit exception review'
-            );
-        },
-    });
-
-    const handleSubmit = () => {
-        if (!selectedRows.length) {
-            toast.error('Select at least one KRA before submitting');
-            return;
-        }
-
-        const rowsMissingComment = selectedRows.filter(
-            (row) => row.action !== 'accept' && !row.appraiserComment?.trim()
-        );
-
-        if (rowsMissingComment.length) {
-            toast.error('Please add comments for every edited or rejected KRA');
-            return;
-        }
-
-        const payload = {
-            urlId: reviewData?.urlId || urlId || reviewEmployee?.urlId || reviewEmpNo,
-            quarter,
-            financialYear: Number(parsedFinancialYear) || new Date().getFullYear(),
-            empNo: reviewEmpNo,
-            custTicketId: ticketId,
-            kraData: selectedRows.map((row) => ({
-                id: row.kraId,
-                action: row.action?.toUpperCase(),
-                month: row.month,
-                unit: row.unit,
-                category: row.category,
-                appraiserActual: row.appraiserActual,
-                appraiserTarget: row.appraiserTarget,
-                appraiserScore: row.appraiserScore,
-                appraiserComment: row.appraiserComment,
-            })),
-            declarationOption: deriveDeclarationOption(selectedRows),
-        };
-
-        submitMutation.mutate(payload);
-    };
 
     if (!financialYear || !appraisalPeriod || !quarter) {
         return <div>No financial year, appraisal period, or quarter found</div>;
@@ -258,7 +122,7 @@ function ReviewQuarterlyException() {
                     rows={kraRows}
                     onRowChange={handleRowChange}
                     onSubmit={handleSubmit}
-                    isSubmitting={submitMutation.isLoading}
+                    isSubmitting={isSubmitting}
                 />
             </div>
         </div>

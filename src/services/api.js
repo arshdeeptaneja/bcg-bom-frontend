@@ -350,7 +350,7 @@ export const appraisalAPI = {
     }
   },
 
-  // GET: Get exception validator dashboard data
+  // GET: Get exception quarterly verify data
   getExceptionQuarterlyVerify: async ({ fy, quarter, empNo }) => {
     try {
       const params = new URLSearchParams({
