@@ -117,26 +117,17 @@ export default function AppraiserCheckInDashboard() {
     queryKey: [
       "appraiserCheckInDashboard",
       financialYear,
-  quarter,
-  authEmpNo,
-  filterEmpId,
-  filterName,
-  filterRole,
-  filterAppraiser,
-  filterStatus,
+      quarter,
+      authEmpNo,
     ],
 
     queryFn: () =>
       appraisalAPI.getAppraiserCheckInDashboard({
-        empNo: authEmpNo,
+        //empNo: authEmpNo,
+        empNo: "38096",
         financialYear: extractYear(financialYear),
         quarter,
         appraisalPeriod: "quarterly",
-        ecNumber: filterEmpId,               // correct
-        employeeName: filterName,            // correct
-        mainRole: filterRole,                // correct
-        reportingAuthority: filterAppraiser, // correct
-        status: filterStatus,
       }),
 
     enabled: Boolean(authEmpNo && financialYear && quarter),
@@ -147,6 +138,55 @@ export default function AppraiserCheckInDashboard() {
   const scoreTable = data?.appraisal_score_dash || [];
   const scoreSummary = data?.score_summary || {};
   const filterData = data?.filter_data || {};
+
+  // -------------------- CLIENT-SIDE FILTERING -------------------------
+  const filteredReportees = useMemo(() => {
+    return reportees.filter((record) => {
+      // Filter by Employee Number
+      if (
+        filterEmpId &&
+        !String(record?.EMP_ID).includes(filterEmpId)
+      ) {
+        return false;
+      }
+
+      // Filter by Employee Name
+      if (
+        filterName &&
+        !String(record?.EMP_NAME).toLowerCase().includes(filterName.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Filter by Primary Role
+      if (
+        filterRole &&
+        String(record?.MAIN_ROLE).toLowerCase() !==
+          filterRole.toLowerCase()
+      ) {
+        return false;
+      }
+
+      // Filter by Appraiser (Reporting Authority)
+      if (
+        filterAppraiser &&
+        String(record?.REPORTING_AUTHORITY_NAME).toLowerCase() !==
+          filterAppraiser.toLowerCase()
+      ) {
+        return false;
+      }
+
+      // Filter by Status
+      if (
+        filterStatus &&
+        getDisplayStatus(record?.APPRAISAL_STATUS) !== filterStatus
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [reportees, filterEmpId, filterName, filterRole, filterAppraiser, filterStatus]);
 
   // -------------------- FILTER HANDLERS -------------------------
   const handleFilterChange = (e) => {
@@ -356,13 +396,13 @@ export default function AppraiserCheckInDashboard() {
       {/* ---------------- EMPLOYEE CARDS ---------------- */}
       <div className="employee-appraisal-cards mt-4">
 
-        {reportees.length === 0 && (
+        {filteredReportees.length === 0 && (
           <p className="text-center text-muted fw-bold mt-5">
             No reportees found.
           </p>
         )}
 
-        {reportees.map((record, index) => {
+        {filteredReportees.map((record, index) => {
           const employeeModel = new EmployeeModel({
             empNo: record?.EMP_ID,
             employeeName: record?.EMP_NAME,
@@ -391,7 +431,7 @@ export default function AppraiserCheckInDashboard() {
               exceptionStatus={record?.EXCEPTION_STATUS || "NOT CREATED"}
               scoreData={scoreTable}
               onAddCheckIn={() =>
-                navigate("/appraisal/check-in-form", {
+                navigate("/quarterly/quaterly-appraiser-check-in", {
                   state: {
                     financialYear,
                     appraisalPeriod,

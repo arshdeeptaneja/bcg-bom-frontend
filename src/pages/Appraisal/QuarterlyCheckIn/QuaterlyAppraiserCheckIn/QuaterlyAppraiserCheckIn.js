@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BackButton } from '../../../../components/common';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   CheckInDescriptionSection,
   NonMeasurableKra,
@@ -8,30 +8,25 @@ import {
 } from '../../../../components/Appraisal';
 import QuaterlyMeasurableKraTable from '../../../../components/QuaterTables/QuaterMeasurableKra';
 import QuaterNonMeasurable from '../../../../components/QuaterTables/QuaterNonMeasurable';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../../services/api';
 import { useAuth } from '../../../../contexts/AuthContext';
 import LoadingSpinner from '../../../../components/Spinner';
 import { toast } from 'react-toastify';
+import QuaterAppraiserMeasurableKra from '../../../../components/QuaterTables/QuaterAppraiserMeasurableKra';
+import QuaterAppraiserNonMeasureableKra from '../../../../components/QuaterTables/QuaterAppraiserNonMeasureableKra';
 
-function QuaterlyAppraiseeCheckIn() {
+function QuaterlyAppraiserCheckIn() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Month conversion utility
- 
-  const getMonthNumber = (num) => {
-  const arr = [
-   '', 'January', 'February', 'March',
-    'April', 'May', 'June',
-    'July', 'August', 'September',
-    'October', 'November', 'December'
-  ];
-  return arr[num] || '';
+  const getMonthName = (monthNumber) => {
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return monthNames[monthNumber - 1] || "January";
   };
-
-
-
 
   const [activeMonth, setActiveMonth] = useState("April");
   const [months, setMonths] = useState(["April", "May", "June"]);
@@ -51,6 +46,7 @@ function QuaterlyAppraiseeCheckIn() {
   const employeeDetails = getEmployeeDetails();
   const empNoFromAuth = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
   const empNo = employee?.empNo || employee?.id || employee?.EMP_ID || empNoFromAuth;
+const [fullResponseData, setFullResponseData] = useState(null);
 
   // Extract year from financial year format
   const extractYear = (fy) => {
@@ -81,68 +77,18 @@ function QuaterlyAppraiseeCheckIn() {
   const [developmentInputsData, setDevelopmentInputsData] = useState([]);
   const [monthlyScores, setMonthlyScores] = useState({});
   const [monthlyMeasurableData, setMonthlyMeasurableData] = useState({});
-  
-  // Form inputs for comments
-  const [formInputs, setFormInputs] = useState({
-    performanceMeasurableComment: ['', '', ''],
-    nonMeasurableComment: '',
-    performanceNonMeasurableComment: '',
-    performanceSemiMeasurableComment: '',
-    performancePeriodComment: '',
-    areasPerformanceComment: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   let page_type = "self"
-
-  // Submit mutation for quarterly appraisee check-in
-  const submitMutation = useMutation({
-    mutationFn: (payload) =>
-      appraisalAPI.submitQuarterlyAppraiseeCheckInReport(payload),
-    onSuccess: (data) => {
-      toast.success('Check-in submitted successfully!');
-      setIsSubmitting(false);
-      // Navigate back or show success
-      navigate(-1);
-    },
-    onError: (error) => {
-      console.error('Submit error:', error);
-      toast.error(error.response?.data?.message || 'Failed to submit check-in');
-      setIsSubmitting(false);
-    },
-  });
-
-  const buildKraDataPayload = () => {
-  return months.flatMap(monthName => {
-    const rows = monthlyMeasurableData[monthName] || [];
-    return rows.map(row => ({
-      ...row,                              // REQUIRED full object !!
-      MONTH: getMonthNumber(monthName)     // convert month name → number
-    }));
-  });
-};
-
-
-const buildPerformanceMeasurableComments = () => {
-  return months.map((m) => {
-    const index = getMonthNumber(m) - 1;
-    return formInputs.performanceMeasurableComment[index] || "";
-  });
-};
-
-
-
 
   // React Query to fetch quarterly check-in report data
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['quarterlyCheckInReport', financialYear, appraisalPeriod, quarter, empNo, currentRole],
     queryFn: () =>
-      appraisalAPI.getQuarterlyCheckInReport({
-        empNo: "38096",
-        // url: employee?.url || employee?.URL_ID || '',
-        url: "U-34545",
+      appraisalAPI.getQuarterlyAppraiserCheckInReport({
+        empNo: empNo,
+        url:"U-34545",
         //roleType: currentRole || role || 'APPRAISEE',
-        roleType: "Administrative Officers",
+        roleType:"Administrative Officers",
         financialYear: parseInt(extractYear(financialYear)),
         quarter: quarter || '',
         pageType: page_type,
@@ -163,19 +109,24 @@ const buildPerformanceMeasurableComments = () => {
     if (data) {
       const responseData = data?.data || data;
 
-      // Process measurable KRA data from results_KRA_LIST
-      const measurableList = responseData?.results_KRA_LIST?.measurable || [];
+       // Store full response globally so handleSave can use it
+    setFullResponseData(responseData);
 
+      // Process measurable KRA data from results_KRA_LIST
+  const measurableList = responseData?.results_KRA_LIST?.measurable || [];
+
+  
+      
       if (measurableList.length > 0) {
         // Get unique months from the data
         const monthNumbers = [...new Set(measurableList.map(item => item.MONTH))].sort((a, b) => a - b);
-
+        
         if (monthNumbers.length > 0) {
           // Convert month numbers to month names
-          const monthNames = monthNumbers.map(num => getMonthNumber(num));
+          const monthNames = monthNumbers.map(num => getMonthName(num));
           setMonths(monthNames);
           setActiveMonth(monthNames[0]);
-
+          
           // Group KRA data by month
           const kraByMonth = {};
           monthNumbers.forEach((monthNum, idx) => {
@@ -184,15 +135,17 @@ const buildPerformanceMeasurableComments = () => {
           });
           setMonthlyMeasurableData(kraByMonth);
 
+          
+          
           // Calculate monthly scores for the summary table
           const scores = {};
           monthNumbers.forEach((monthNum, idx) => {
             const monthName = monthNames[idx];
             const monthData = measurableList.filter(item => item.MONTH === monthNum);
-
+            
             const totalActual = monthData.reduce((sum, item) => sum + (parseFloat(item.actual_score) || 0), 0);
             const totalMax = monthData.reduce((sum, item) => sum + (parseFloat(item.maxscore) || 0), 0);
-
+            
             scores[monthName] = {
               actual: totalActual,
               max: totalMax
@@ -200,9 +153,29 @@ const buildPerformanceMeasurableComments = () => {
           });
           setMonthlyScores(scores);
         }
-
+        
         setMeasurableKraListData(measurableList);
       }
+
+        
+  // 3. MEASURABLE MONTH COMMENTS
+  // API FIELD => ALL_MEASURABLE_COMMENT
+  const commentsObj = responseData?.ALL_MEASURABLE_COMMENT || {};
+
+  
+
+  const mappedComments = {};
+  Object.keys(commentsObj).forEach(monthNum => {
+    const mNum = parseInt(monthNum);
+    const mName = getMonthName(mNum);
+
+    mappedComments[mName] = commentsObj[monthNum]?.MEASURABLE_COMMENT || "";
+  });
+
+  setComments(prev => ({
+    ...prev,
+    measurableMonthComments: mappedComments
+  }));
 
       // Set non-measurable KRA data
       if (responseData?.results_KRA_LIST?.non_measurable) {
@@ -211,24 +184,8 @@ const buildPerformanceMeasurableComments = () => {
         setNonMeasurableKraListData(responseData.nonMeasurableKraList);
       }
 
-      // Set development inputs from API response questions
-      const questionsArray = [];
-      if (responseData?.question1) {
-        questionsArray.push({
-          question: responseData.question1,
-          required: true,
-        });
-      }
-      if (responseData?.question2) {
-        questionsArray.push({
-          question: responseData.question2,
-          required: true,
-        });
-      }
-      
-      if (questionsArray.length > 0) {
-        setDevelopmentInputsData(questionsArray);
-      } else if (responseData?.developmentInputs) {
+      // Set development inputs
+      if (responseData?.developmentInputs) {
         setDevelopmentInputsData(responseData.developmentInputs);
       } else if (responseData?.developmentInputsData) {
         setDevelopmentInputsData(responseData.developmentInputsData);
@@ -254,12 +211,79 @@ const buildPerformanceMeasurableComments = () => {
     }
   };
 
- const handleSave = async () => {
-  try {
-    setIsSubmitting(true);
 
+  // Convert month names back to month numbers
+const getMonthNumber = (name) => {
+  const months = {
+    January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
+    July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
+  };
+  return months[name] || 0;
+};
+
+// Build final measurable array
+const buildMeasurablePayload = () => {
+  return months.flatMap((monthName) => {
+    const rows = monthlyMeasurableData[monthName] || [];
+    const mNum = getMonthNumber(monthName);
+
+    return rows.map((item) => ({
+      KRA_CODE: item.KRA_CODE,
+      MONTH: mNum,
+      actual: item.actual,
+      target: item.target,
+      actual_score: item.actual_score,
+      maxscore: item.maxscore,
+      COMMENT_REPA: item.COMMENT_REPA || null
+    }));
+  });
+};
+
+// Build full kraData array for ALL months
+const buildKraDataPayload = () => {
+  return months.flatMap(monthName => {
+    const rows = monthlyMeasurableData[monthName] || [];
+    return rows.map(row => ({ ...row }));  // backend wants FULL KRA object
+  });
+};
+
+// Convert your month-wise comment object → array like [“c1”, “c2”, “c3”]
+const buildPerformanceMeasurableComments = () => {
+  const monthList = Object.keys(comments.measurableMonthComments || {});
+  const sortedMonths = monthList.sort(
+    (a, b) => getMonthNumber(a) - getMonthNumber(b)
+  );
+  return sortedMonths.map(month => comments.measurableMonthComments[month]);
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+
+  // Format: 01 Jul 2024
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+};
+
+const cleanDateRange = () => {
+  if (!dateRange || !dateRange.includes("→")) return "";
+
+  const [start, end] = dateRange.split("→").map(d => d.trim());
+
+  return `${formatDate(start)} → ${formatDate(end)}`;
+};
+
+
+
+
+const handleSave = async () => {
+  try {
     const kraDataPayload = buildKraDataPayload();
-    const measurableCommentsPayload = buildPerformanceMeasurableComments();
+    const measurableCommentsArr = buildPerformanceMeasurableComments();
 
     const payload = {
       financialYear: parseInt(extractYear(financialYear)),
@@ -267,66 +291,72 @@ const buildPerformanceMeasurableComments = () => {
       empNumber: empNo,
       urlId: employee?.url || "U-34545",
 
-      kraData: kraDataPayload,
+      kraData: kraDataPayload,   // full measurable KRA list
 
-      submittype: "self",
+      submittype: "repa", // because you are APPRAISER
 
-      startDate: "2024-07-01 00:00:00.0",
+      startDate: "2024-07-01 00:00:00.0",   // you can update dynamically
       endDate: "2024-09-30 00:00:00.0",
 
-      reportingAuthority: employee?.appraiser || "",
-      organizationName: employee?.organization || "",
+reportingAuthority: fullResponseData?.REPORTING_AUTHORITY_NAME || "",
+organizationName: fullResponseData?.organisation || "",
 
-      performanceMeasurableComment: measurableCommentsPayload,
-      nonMeasurableComment: formInputs.nonMeasurableComment,
-      performanceNonMeasurableComment: formInputs.performanceNonMeasurableComment,
-      performanceSemiMeasurableComment: formInputs.performanceSemiMeasurableComment,
-      performancePeriodComment: formInputs.performancePeriodComment,
-      areasPerformanceComment: formInputs.areasPerformanceComment
+nonMeasurableComment: fullResponseData?.NON_MEASURABLE_COMMENT || "",
+performanceNonMeasurableComment: fullResponseData?.performance_non_measurable_score_total || "",
+performanceSemiMeasurableComment: fullResponseData?.SEMI_MEASURABLE_COMMENT || "",
+performancePeriodComment: fullResponseData?.HIGHLIGHTS_COMMENTS || "",
+areasPerformanceComment: fullResponseData?.BELOW_EXPECTATIONS_COMMENTS || ""
+
     };
 
     console.log("SAVE PAYLOAD =>", payload);
 
-    await appraisalAPI.appraiseeSaveQuarterlyCheckIn(payload);
+    await appraisalAPI.appraiserSaveQuarterlyCheckIn(payload);
 
-    toast.success("Draft Saved Successfully!");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to save!");
-  } finally {
-    setIsSubmitting(false);
+    toast.success("Draft saved successfully!");
+
+  } catch (error) {
+    toast.error("Failed to save draft");
+    console.error("Save error =>", error);
   }
 };
 
 
-  const handleSubmit = () => {
-    setIsSubmitting(true);
+const handleSubmit = async () => {
+  try {
+    const measurablePayload = buildMeasurablePayload();
+    const monthCommentsPayload = buildPerformanceMeasurableComments();
 
-    // Build the payload matching backend expectations
     const payload = {
+      empNo: empNo,
+      url: employee?.url || "U-34545",
+      roleType: "Administrative Officers",
       financialYear: parseInt(extractYear(financialYear)),
-      quarter: quarter || '',
-      empNumber: empNo || employee?.empNo || '',
-      urlId: employee?.URL_ID || employee?.url || 'U-34545',
-      kraData: measurableKraListData,
-      submittype: 'self',
-      startDate: location.state?.dateRange?.split(' - ')[0]?.trim() || '2024-07-01 00:00:00.0',
-      endDate: location.state?.dateRange?.split(' - ')[1]?.trim() || '2024-09-30 00:00:00.0',
-      reportingAuthority: employee?.appraiser || '',
-      organizationName: employee?.organization || '',
-      performanceMeasurableComment: formInputs.performanceMeasurableComment,
-      nonMeasurableComment: formInputs.nonMeasurableComment,
-      performanceNonMeasurableComment: formInputs.performanceNonMeasurableComment,
-      performanceSemiMeasurableComment: formInputs.performanceSemiMeasurableComment,
-      performancePeriodComment: formInputs.performancePeriodComment,
-      areasPerformanceComment: formInputs.areasPerformanceComment,
+      quarter: quarter,
+      pageType: "self",
+      intent: "Submit",
+
+      measurable: measurablePayload,
+      non_measurable: nonMeasurableKraListData || [],
+
+      comments: {
+        appraiser: comments.appraiser || "",
+      },
+
+      month_comments: monthCommentsPayload,
     };
 
-    console.log('Submitting payload:', JSON.stringify(payload, null, 2));
+    console.log("Submitting payload:", payload);
 
-    // Submit mutation
-    submitMutation.mutate(payload);
-  };
+    const response = await appraisalAPI.submitQuarterlyAppraiserCheckInReport(payload);
+
+    toast.success("Check-In Submitted Successfully!");
+  } catch (error) {
+    toast.error("Failed to submit check-in");
+    console.error(error);
+  }
+};
+
 
   // Calculate monthly scores data for the table
   const monthsData = months.map(month => {
@@ -337,27 +367,27 @@ const buildPerformanceMeasurableComments = () => {
       max: monthData.max || 0,
     };
   });
-  const averageActual = monthsData.length > 0
-    ? monthsData.reduce((sum, m) => sum + m.actual, 0) / monthsData.length
+  const averageActual = monthsData.length > 0 
+    ? monthsData.reduce((sum, m) => sum + m.actual, 0) / monthsData.length 
     : 0;
-  const averageMax = monthsData.length > 0
-    ? monthsData.reduce((sum, m) => sum + m.max, 0) / monthsData.length
+  const averageMax = monthsData.length > 0 
+    ? monthsData.reduce((sum, m) => sum + m.max, 0) / monthsData.length 
     : 0;
 
-  // Development inputs questions - now mapped from API response
-  const developmentInputsQuestions = developmentInputsData.length > 0
-    ? developmentInputsData
+  // Development inputs questions
+  const developmentInputsQuestions = developmentInputsData.length > 0 
+    ? developmentInputsData 
     : [
-      { question: 'Please mention the highlights of your performance on this KRA', required: true },
-      { question: 'Please mention the areas for improvement on this KRA', required: true },
-    ];
+        { question: 'Please mention the highlights of your performance on this KRA', required: true },
+        { question: 'Please mention the areas for improvement on this KRA', required: true},
+      ];
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return (
       <div className="pageWrapper">
         <div className="pageWrapper-header">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraiser Check-In</h1>
         </div>
         <div className="text-center mt-5">
           <p className="text-danger fw-semibold">Missing required parameters: Financial Year, Appraisal Period, or Quarter</p>
@@ -372,7 +402,7 @@ const buildPerformanceMeasurableComments = () => {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraiser Check-In</h1>
           </div>
         </div>
         <LoadingSpinner />
@@ -386,7 +416,7 @@ const buildPerformanceMeasurableComments = () => {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraiser Check-In</h1>
           </div>
         </div>
         <div className="text-center mt-5">
@@ -402,12 +432,16 @@ const buildPerformanceMeasurableComments = () => {
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraiser Check-In</h1>
         </div>
       </div>
 
       <div className="pageWrapper-content d-flex flex-column m-1 p-3">
-        <CheckInDescriptionSection employee={employee} dateRange={dateRange} />
+     <CheckInDescriptionSection
+  employee={employee}
+  dateRange={cleanDateRange()}
+/>
+
 
         <div className="note mt-5 mb-5">
           <span className="text-muted">Note: </span>
@@ -420,9 +454,9 @@ const buildPerformanceMeasurableComments = () => {
           <table className="table-accent">
             <thead>
               <tr>
-                <th style={{ width: "55%" }}>Month</th>
-                <th style={{ width: "25%" }}>Actual</th>
-                <th style={{ width: "25%" }}>Max</th>
+                <th style={{width:"55%"}}>Month</th>
+                <th style={{width:"25%"}}>Actual</th>
+                <th style={{width:"25%"}}>Max</th>
               </tr>
             </thead>
             <tbody>
@@ -442,66 +476,41 @@ const buildPerformanceMeasurableComments = () => {
           </table>
         </div>
 
-        <ul className="nav nav-tabs month-tabs mb-3">
-          {months.map((m) => (
-            <li className="nav-items" key={m}>
-              <button
-                className={`nav-link ${activeMonth === m ? "active" : ""}`}
-                onClick={() => setActiveMonth(m)}
-              >
-                {m}
-              </button>
-            </li>
-          ))}
-        </ul>
+      
 
         <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
-          <QuaterlyMeasurableKraTable
-            data={monthlyMeasurableData[activeMonth] || []}
-            activeMonth={activeMonth}
-          />
-          <QuaterNonMeasurable 
-            kraListData={nonMeasurableKraListData && nonMeasurableKraListData.length > 0 ? { "General": nonMeasurableKraListData } : {}}
-            totalActualScore={0}
-            totalMaxScore={0}
-            role={currentRole}
-            isEditableBy={isEditableBy}
-          />
+    <QuaterAppraiserMeasurableKra
+  data={monthlyMeasurableData[activeMonth] || []}
+  activeMonth={activeMonth}
+  months={months}
+  setActiveMonth={setActiveMonth}
+/>
+
+
+         
+          <QuaterAppraiserNonMeasureableKra/>
         </div>
 
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Development Inputs</h5>
-
-
-          <div className="d-flex flex-column gap-3">
-            {developmentInputsQuestions.map((question, index) => (
-              <div key={question.question} className="d-flex flex-column gap-1">
-                {/* Question number and question text */}
-                <div className="d-flex flex-row gap-1">
-                  <span className="fw-bold">{index + 1}.</span>
-                  <span className="fw-bold">{question.question}</span>
-                  {question.required && <span className="text-danger">*</span>}
-                </div>
-
-
-                {/* Textarea for free text response */}
-                <textarea className="form-control" placeholder="Enter your Response" rows={3} />
-              </div>
-            ))}
-          </div>
+          <DevelopmentInputs
+            questions={developmentInputsQuestions}
+            role={currentRole}
+            isEditableBy={isEditableBy}
+          />
         </div>
       </div>
 
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
-        <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSubmitting}>
+        <button className="btn btn-outline-primary" onClick={handleSave}>
           Save
         </button>
-        <button className="btns btn-primarys" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? 'Submitting...' : 'Submit'}
+        <button className="btns btn-primarys" onClick={handleSubmit}>
+          Submit
         </button>
       </div>
     </div>
   );
 }
 
-export default QuaterlyAppraiseeCheckIn;
+export default QuaterlyAppraiserCheckIn;

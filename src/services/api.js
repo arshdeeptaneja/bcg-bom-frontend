@@ -39,8 +39,8 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-   // const token = localStorage.getItem('accessToken');
-    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
+  // const token = localStorage.getItem('accessToken');
+   const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -332,6 +332,8 @@ export const appraisalAPI = {
     }
   },
 
+
+
   // GET: Get exception validator dashboard data
   getExceptionValidatorDashboard: async ({ fy, quarter, exceptionPeriod, empNo }) => {
     try {
@@ -460,6 +462,49 @@ getAppraiserCheckInDashboard: async ({
       throw error;
     }
   },
+
+  //GET: get quarterly check-in report data Apppraiser
+
+ getQuarterlyAppraiserCheckInReport: async ({
+  empNo,
+  url,
+  roleType,
+  financialYear,
+  quarter,
+  pageType,
+  appraisalStatus,
+  intent = "Fill",
+}) => {
+  try {
+    const params = new URLSearchParams();
+
+    // Only append if value exists
+    if (empNo) params.append("empNo", empNo);
+    if (url) params.append("url", url);
+    if (roleType) params.append("roleType", roleType);
+    if (financialYear) params.append("financialYear", financialYear);
+    if (quarter) params.append("quarter", quarter);
+    if (pageType) params.append("pageType", pageType);
+    if (appraisalStatus) params.append("appraisalStatus", appraisalStatus);
+
+    // Always required
+    params.append("intent", intent);
+
+    const response = await apiClient.get(
+      `${appraisalBaseUrl}/quarterly_check_in_report?${params.toString()}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error in getQuarterlyAppraiserCheckInReport:", error);
+    throw error;
+  }
+},
+
+
+
+
+
 
     // GET: Get quarterly exception report data
 getAppraiserCheckInDashboard: async ({
@@ -725,7 +770,8 @@ if (filterStatus) params.append("STATUS", filterStatus);
     }
   },
 
-  submitQuarterlyCheckInReport: async (payload = {}) => {
+ //post : Appraiser check in submit
+  submitQuarterlyAppraiserCheckInReport: async (payload = {}) => {
     try {
       const response = await apiClient.post(
         '/appraisal/quarterly_check_in_report/submit',
@@ -737,6 +783,50 @@ if (filterStatus) params.append("STATUS", filterStatus);
       throw error;
     }
   },
+
+  //post :Appraiser check-in save
+  appraiserSaveQuarterlyCheckIn: async (payload = {}) => {
+    try{ const response= await apiClient.post(
+        '/appraisal/quarterly_check_in_report/save',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('appraiserSaveQuarterlyCheckIn error', error);
+      throw error;
+    }
+  },
+
+
+//post : Appraisee check in submit
+    submitQuarterlyAppraiseeCheckInReport: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/quarterly_check_in_report/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitQuarterlyAppraiseeCheckInReport error', error);
+      throw error;
+    }
+  },
+
+  //post Appraisee Check in save 
+  appraiseeSaveQuarterlyCheckIn: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        'appraisal/quarterly_check_in_report/save',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('appraiseeSaveQuarterlyCheckIn error', error);
+      throw error;
+    }
+  },
+
+
 
   // GET: Get reportee appraisal dashboard data
   getReporteeAppraisalDashboard: async ({ empNo, financialYear, quarter }) => {
@@ -780,9 +870,7 @@ if (filterStatus) params.append("STATUS", filterStatus);
     try {
       const formData = new FormData();
       formData.append('payload', JSON.stringify(payload));
-      if (attachment) {
-        formData.append('attachment', attachment);
-      }
+      formData.append('attachment', attachment);
       const response = await apiClient.post(
         '/appraisal/quarterly_exception_report/submit_exception',
         formData,
@@ -792,11 +880,37 @@ if (filterStatus) params.append("STATUS", filterStatus);
           },
         }
       );
+      console.log('submitQuarterlyExceptionReport success:', response.data);
       return response.data;
     } catch (error) {
-      console.error('submitQuarterlyExceptionReport error', error);
+      console.error('submitQuarterlyExceptionReport error:', error.response?.data || error.message);
+      throw error;
     }
   },
+
+  
+  // GET: Get quarterly exception report data
+  getQuarterlyExceptionReport: async ({ urlId, financialYear, quarter }) => {
+    try {
+      const params = new URLSearchParams({
+        urlId: urlId,
+        financialYear: financialYear,
+        quarter: quarter,
+      });
+      const response = await apiClient.get(
+        `/appraisal/quarterly_exception_report?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getQuarterlyExceptionReport error', error);
+      throw error;
+    }
+  },
+
+
+
+
+
 
 
   // GET: Get appeal report data

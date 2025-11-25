@@ -69,3 +69,7 @@ ease;
 .measurable-table tbody tr:hover {
   background-color: #f8f9fa;
 }
+
+.Q-trs{
+padding: 1.9rem 1.4rem;
+}

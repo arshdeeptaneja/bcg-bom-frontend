@@ -28,6 +28,40 @@ export default function EmployeeAppraisalCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
 
+  // Helper function to format ISO date to readable format
+  const formatDate = (isoDateString) => {
+    if (!isoDateString) return 'N/A';
+    try {
+      const date = new Date(isoDateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+      });
+    } catch {
+      return isoDateString;
+    }
+  };
+
+  // Format the date range properly
+  const getFormattedDateRange = () => {
+    if (!dateRange) return 'N/A';
+    
+    // Check if it contains ISO dates (with T and Z)
+    if (dateRange.includes('T')) {
+      // Split by → separator
+      const parts = dateRange.split(' → ').map(d => d.trim());
+      if (parts.length === 2) {
+        const startDate = formatDate(parts[0]);
+        const endDate = formatDate(parts[1]);
+        return `${startDate} → ${endDate}`;
+      }
+    }
+    
+    // If already formatted, return as is
+    return dateRange;
+  };
+
   // Helper method to toggle the expansion state
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -125,7 +159,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Number</div>
-              <div className="fw-semibold">{employee.empNo}</div>
+              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{employee.empNo}</div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -137,7 +171,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Date</div>
-              <div className="fw-semibold">{dateRange}</div>
+              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{getFormattedDateRange()}</div>
             </div>
           </div>
         </div>
@@ -152,7 +186,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Name</div>
-              <div className="fw-semibold">{employee.employeeName}</div>
+              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{employee.employeeName}</div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -164,7 +198,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Primary Role</div>
-              <div className="fw-semibold">{primaryRole}</div>
+              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{primaryRole}</div>
             </div>
           </div>
         </div>
@@ -179,7 +213,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Scale</div>
-              <div className="fw-semibold">{employee.employeeScale}</div>
+              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{employee.employeeScale}</div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -191,7 +225,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Appraiser</div>
-              <div className="fw-semibold">
+              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>
                 {employee.appraiser?.name || employee.appraiser || 'N/A'}
               </div>
             </div>
@@ -260,7 +294,7 @@ export default function EmployeeAppraisalCard({
           <div className="primary-role-badge mb-3">
             <span className="badge bg-light text-dark px-3 py-2 d-inline-flex align-items-center gap-2">
               <i className="bi bi-star-fill text-success" />
-              <span className="fw-semibold">{primaryRole || 'N/A'}</span>
+              <span className="fw-semibold" style={{fontSize:"1rem"}}>{primaryRole || 'N/A'}</span>
             </span>
           </div>
 

@@ -37,6 +37,7 @@ import {
   AppealDelection,
   ReviewerDashboard,
   ReviewerMode,
+  QuaterlyAppraiserCheckIn,
 } from './pages';
 import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
 import { TopBar, LeftNavigation } from './components/common';
@@ -543,6 +544,16 @@ function AppContent() {
               }
             />
 
+<Route
+  path="/quarterly/quaterly-appraiser-check-in"
+  element={
+    isAuthenticated ? (
+      <QuaterlyAppraiserCheckInLayout onLogout={handleLogout} />
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+ />
 
               <Route
               path="/utility/quarterly-appraiser-bulk"
@@ -990,6 +1001,7 @@ const AdminSettingLayout = ({ onLogout }) => (
   </>
 );
 
+
 const AppealDeletionLayout = ({ onLogout }) => (
   <>
     <TopBar onLogout={onLogout} />
@@ -1004,6 +1016,15 @@ const AppealCommitteeReviewLayout = ({ onLogout }) => (
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <AppealCommitteeReview />
+  </>
+);
+
+//QuaterlyAppraiserCheckIn
+const QuaterlyAppraiserCheckInLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <QuaterlyAppraiserCheckIn />
   </>
 );
 

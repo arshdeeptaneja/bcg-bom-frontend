@@ -86,6 +86,10 @@ function QuarterlyException() {
   const [measurableKraListData, setMeasurableKraListData] = useState({});
   const [nonMeasurableKraListData, setNonMeasurableKraListData] = useState({});
   const [monthlyScores, setMonthlyScores] = useState({});
+  
+  // State to track edited KRA data (user changes)
+  const [editedMeasurableKra, setEditedMeasurableKra] = useState({});
+  const [editedNonMeasurableKra, setEditedNonMeasurableKra] = useState({});
 
   // React Query to fetch quarterly exception report data
   const { data, isLoading, isError, error } = useQuery({
@@ -93,17 +97,18 @@ function QuarterlyException() {
     queryFn: () =>
       appraisalAPI.getQuarterlyExceptionReport({
         empNo: empNo,
-        url: employee?.url || employee?.URL_ID || '', // @TODO: Confirm with Arsh - URL field name
+        url: employee?.url || employee?.URL_ID || '',
         roleType: currentRole || role || 'APPRAISEE',
         financialYear: parseInt(extractYear(financialYear)),
         quarter: quarter || '',
-        pageType: 'quarterly-exception', // @TODO: Confirm with Arsh - pageType value
-        appraisalStatus: employee?.appraisalStatus || employee?.APPRAISAL_STATUS || 'PENDING', // @TODO: Confirm with Arsh - appraisalStatus field name
+        pageType: 'quarterly-exception',
+        appraisalStatus: employee?.appraisalStatus || employee?.APPRAISAL_STATUS || 'PENDING',
         intent: 'Fill',
       }),
-    enabled: !!empNo && !!financialYear && !!quarter, // Only run query if required params are available
+    enabled: !!empNo && !!financialYear && !!quarter,
   });
-  console.log("data", data);
+
+  console.log("API Response:", data);
 
   // Show error toast when API fails
   useEffect(() => {
@@ -112,50 +117,85 @@ function QuarterlyException() {
     }
   }, [isError, error]);
 
+  // Helper function to convert month number to month name
+  const getMonthName = (monthNumber) => {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return monthNames[monthNumber - 1] || 'Unknown';
+  };
+
   // Extract and set data from API response when it loads
   useEffect(() => {
-    if (data) {
-      const responseData = data?.data || data;
+    if (!data) return;
 
-      // Set monthly scores (for the table)
-      if (responseData?.monthlyScores) {
-        setMonthlyScores(responseData.monthlyScores);
+    const response = data?.data || data;
+
+    /** -----------------------
+     *  MAP MEASURABLE KRA LIST
+     * -----------------------*/
+    const measurableList = response?.["results-KRA_LIST-measurable"] || [];
+
+    const mKRA = {};
+    const scores = {};
+
+    measurableList.forEach(item => {
+      const monthNumber = item.MONTH; // 7, 8, 9, etc.
+      const monthName = getMonthName(monthNumber); // "July", "August", "September"
+
+      if (!mKRA[monthName]) {
+        mKRA[monthName] = [];
+        scores[monthName] = { actual: 0, max: 0 };
       }
 
-      // Set measurable KRA data
-      let mKraData = {};
-      if (responseData?.measurableKraList) {
-        mKraData = responseData.measurableKraList;
-        setMeasurableKraListData(responseData.measurableKraList);
-      } else if (responseData?.measurableKraListData) {
-        mKraData = responseData.measurableKraListData;
-        setMeasurableKraListData(responseData.measurableKraListData);
-      } else if (responseData?.measurableKRA) {
-        mKraData = responseData.measurableKRA;
-        setMeasurableKraListData(responseData.measurableKRA);
-      }
+      mKRA[monthName].push({
+        kra: item.kra_desc || '',
+        target: item.target || item.target_og || '',
+        actual: item.actual || item.actual_og || '',
+        unit: item.unit || '',
+        maxScore: item.maxscore || 0,
+        score: item.score || 0,
+        comment: item.COMMENT_SELF_1 || '',
+        category: 'measurable',
+        kraCode: item.KRA_CODE || '',
+        showActual: item.show_actual || item.actual || '',
+        showTarget: item.show_target || item.target || '',
+      });
 
-      // Set non-measurable KRA data
-      let nmKraData = {};
-      if (responseData?.nonMeasurableKraList) {
-        nmKraData = responseData.nonMeasurableKraList;
-        setNonMeasurableKraListData(responseData.nonMeasurableKraList);
-      } else if (responseData?.nonMeasurableKraListData) {
-        nmKraData = responseData.nonMeasurableKraListData;
-        setNonMeasurableKraListData(responseData.nonMeasurableKraListData);
-      } else if (responseData?.nonMeasurableKRA) {
-        nmKraData = responseData.nonMeasurableKRA;
-        setNonMeasurableKraListData(responseData.nonMeasurableKRA);
-      }
+      // Accumulate scores for the monthly scores table
+      scores[monthName].actual += parseFloat(item.score || 0);
+      scores[monthName].max += parseFloat(item.maxscore || 0);
+    });
 
-      // Save to local storage
-      if (Object.keys(mKraData).length > 0 || Object.keys(nmKraData).length > 0) {
-        saveAppraisalData({
-          measurableKRA: mKraData,
-          nonMeasurableKRA: nmKraData,
-        });
-      }
-    }
+    console.log("Mapped Measurable KRA:", mKRA);
+    console.log("Monthly Scores:", scores);
+
+    setMeasurableKraListData(mKRA);
+    setMonthlyScores(scores);
+
+    /** ---------------------------
+     *  MAP NON-MEASURABLE KRA LIST
+     * ---------------------------*/
+    const nonMeasurableList = response["results-KRA_LIST-non measurable"] || [];
+
+    const nmKRA = {};
+
+    nonMeasurableList.forEach(item => {
+      const month = "General"; // non measurable doesn't have month
+      if (!nmKRA[month]) nmKRA[month] = [];
+
+      nmKRA[month].push({
+        kra: item.kra_desc || '',
+        comment: item.COMMENT_SELF_1 || '',
+        category: 'non-measurable',
+        kraCode: item.KRA_CODE || '',
+      });
+    });
+
+    console.log("Mapped Non-Measurable KRA:", nmKRA);
+    setNonMeasurableKraListData(nmKRA);
+
   }, [data]);
 
   const handleDeclarationChange = useCallback((file, checked) => {
@@ -183,35 +223,116 @@ function QuarterlyException() {
 
     setIsSubmitting(true);
 
-    // Collect all KRA data from localStorage
-    const formData = loadAppraisalData();
+    // Parse date range and convert to backend format (YYYY-MM-DD HH:MM:SS.0)
+    let startDate = '';
+    let endDate = '';
+    
+    if (dateRange) {
+      // Try splitting by " → " first
+      let parts = dateRange.split(' → ');
+      
+      // If that doesn't work, try " - "
+      if (parts.length !== 2) {
+        parts = dateRange.split(' - ');
+      }
+      
+      const startStr = parts[0]?.trim() || '';
+      const endStr = parts[1]?.trim() || '';
+      
+      // Convert from "01 Apr 2025" format to "2024-07-01 00:00:00.0" format
+      const convertToBackendDate = (dateStr) => {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr; // Return as-is if parsing fails
+        
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day} 00:00:00.0`;
+      };
+      
+      startDate = convertToBackendDate(startStr);
+      endDate = convertToBackendDate(endStr);
+    }
 
-    // Build the payload according to the API spec
-    const payload = {
-      kraData: formData.measurableKRA
-        ? Object.entries(formData.measurableKRA).flatMap(([month, items]) =>
-            items.map((item) => ({
-              month: month,
-              kra: item.kra,
-              unit: item.unit,
-              actual: item.actual,
-              target: item.target,
-              maxScore: item.maxScore,
-              score: item.score,
-              category: item.category,
-              comment: item.comment || '',
-            }))
+    // Extract financial year
+    const financialYearValue = parseInt(extractYear(financialYear)) || new Date().getFullYear();
+
+    // Build the KRA data array with target object structure
+    const kraDataArray = [
+      // Flatten measurable KRA data with any edits
+      ...(measurableKraListData && Object.entries(measurableKraListData).length > 0
+        ? Object.entries(measurableKraListData).flatMap(([month, items]) =>
+            items.map((item, index) => {
+              const editedData = editedMeasurableKra[`${month}_${index}`] || {};
+              const monthIndex = Object.keys(measurableKraListData).indexOf(month) + 1;
+              return {
+                target: {
+                  kra_type: 'measurable',
+                  KRA_CODE: parseInt(item.kraCode) || 0,
+                  PARENT_KRA: null,
+                  firstcomment: editedData.comment || item.comment || '',
+                  old_target: String(item.target || ''),
+                  new_target: String(editedData.target || item.target || ''),
+                  old_actual: String(item.actual || ''),
+                  new_actual: String(editedData.actual || item.actual || ''),
+                  old_mpb: String(item.maxScore || ''),
+                  new_mpb: String(editedData.maxScore || item.maxScore || ''),
+                  chk_status: 'on',
+                  old_score: String(item.score || ''),
+                  max_score: String(item.maxScore || ''),
+                  MONTH: String(monthIndex),
+                  repa_score: String(editedData.score || item.score || ''),
+                }
+              };
+            })
           )
-        : [],
-      financialYear: parseInt(financialYear.replace('FY ', '').split('-')[0]) || 2025,
-      empNo: employee.empNo,
-      endDate: dateRange ? dateRange.split(' - ')[1] : '',
-      quarter: quarter,
+        : []),
+      
+      // Flatten non-measurable KRA data with any edits
+      ...(nonMeasurableKraListData && Object.entries(nonMeasurableKraListData).length > 0
+        ? Object.entries(nonMeasurableKraListData).flatMap(([month, items]) =>
+            items.map((item, index) => {
+              const editedData = editedNonMeasurableKra[`${month}_${index}`] || {};
+              return {
+                target: {
+                  kra_type: 'discretionary_non_measurable',
+                  KRA_CODE: parseInt(item.kraCode) || 0,
+                  PARENT_KRA: null,
+                  firstcomment: editedData.comment || item.comment || '',
+                  old_target: String(item.kra || ''),
+                  new_target: String(editedData.kra || item.kra || ''),
+                  old_actual: '',
+                  new_actual: '',
+                  old_mpb: '',
+                  new_mpb: '',
+                  chk_status: 'on',
+                  old_score: '',
+                  max_score: '',
+                  MONTH: '',
+                  repa_score: '',
+                }
+              };
+            })
+          )
+        : []),
+    ];
+
+    // Build the complete payload matching backend expectations
+    const payload = {
+      kraData: kraDataArray,
+      financialYear: financialYearValue,
+      empNo: empNo || employee?.empNo || '',
+      endDate: endDate,
+      quarter: quarter || '',
       declarationOption: declarationChecked ? 'AGREED' : 'NOT_AGREED',
-      startDate: dateRange ? dateRange.split(' - ')[0] : '',
-      reportingAuthorityNo: employee.appraiser?.empNo || employee.appraiser || '',
-      id: (data?.data?.id || data?.id) || '',
+      startDate: startDate,
+      reportingAuthorityNo: employee?.appraiser_emp_id || employee?.REPORTING_AUTHORITY_ID || '',
+      id: data?.urlId || employee?.URL_ID || employee?.url || '',
     };
+
+    console.log('Submitting payload:', JSON.stringify(payload, null, 2));
+    console.log('File:', declarationFile);
 
     // Submit with file
     submitMutation.mutate({
@@ -220,20 +341,43 @@ function QuarterlyException() {
     });
   };
 
-  // Calculate monthly scores data for the table (Q1: April, May, June)
-  const months = ["April", "May", "June"];
-  const monthsData = months.map(month => {
-    const monthData = monthlyScores[month] || {};
-    return {
-      month,
-      actual: monthData.actual || monthData.ACTUAL || 0,
-      max: monthData.max || monthData.MAX || 0,
-    };
-  });
+  // Handler to update measurable KRA edits
+  const handleMeasurableKraChange = useCallback((monthIndex, kraIndex, field, value) => {
+    const key = `${monthIndex}_${kraIndex}`;
+    setEditedMeasurableKra(prev => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || {}),
+        [field]: value,
+      }
+    }));
+  }, []);
+
+  // Handler to update non-measurable KRA edits
+  const handleNonMeasurableKraChange = useCallback((monthIndex, kraIndex, field, value) => {
+    const key = `${monthIndex}_${kraIndex}`;
+    setEditedNonMeasurableKra(prev => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || {}),
+        [field]: value,
+      }
+    }));
+  }, []);
+
+  // Calculate monthly scores data for the table - now dynamic based on API data
+  const monthsData = Object.keys(monthlyScores).map(month => ({
+    month,
+    actual: monthlyScores[month]?.actual || 0,
+    max: monthlyScores[month]?.max || 0,
+  }));
+
   const averageActual = monthsData.length > 0 
     ? monthsData.reduce((sum, m) => sum + m.actual, 0) / monthsData.length 
     : 0;
-  const averageMax = monthsData.length > 0 ? monthsData[0].max : 0;
+  const averageMax = monthsData.length > 0 
+    ? monthsData.reduce((sum, m) => sum + m.max, 0) / monthsData.length 
+    : 0;
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return (
@@ -292,7 +436,7 @@ function QuarterlyException() {
         </div>
       </div>
 
-      {/* Rest of your UI unchanged below */}
+      {/* Rest of your UI */}
       <div className="pageWrapper-content d-flex flex-column m-1 p-3">
         <CheckInDescriptionSection employee={employee} dateRange={dateRange} />
 
@@ -320,18 +464,26 @@ function QuarterlyException() {
                   <td>{max.toFixed(1)}</td>
                 </tr>
               ))}
-              <tr>
-                <td><b>Average</b></td>
-                <td>{averageActual.toFixed(1)}</td>
-                <td>{averageMax.toFixed(1)}</td>
-              </tr>
+              {monthsData.length > 0 && (
+                <tr>
+                  <td><b>Average</b></td>
+                  <td>{averageActual.toFixed(1)}</td>
+                  <td>{averageMax.toFixed(1)}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
         <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
-          <MeasurableKRA initialData={measurableKraListData} />
-          <NonMeasurableKRA initialData={nonMeasurableKraListData} />
+          <MeasurableKRA 
+            initialData={measurableKraListData} 
+            onKraChange={handleMeasurableKraChange}
+          />
+          <NonMeasurableKRA 
+            initialData={nonMeasurableKraListData}
+            onKraChange={handleNonMeasurableKraChange}
+          />
         </div>
 
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
