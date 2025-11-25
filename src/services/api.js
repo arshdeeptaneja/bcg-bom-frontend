@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL = 'http://localhost:8084';
+const AUTH_BASE_URL = 'http://localhost:8090';  // Auth & Identity APIs
+const APPRAISAL_BASE_URL = 'http://localhost:8084';  // Appraisal APIs
 
 const appendQueryParam = (searchParams, key, value) => {
   if (value === undefined || value === null) {
@@ -17,7 +18,7 @@ const appendQueryParam = (searchParams, key, value) => {
 };
 
 const unauthClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: AUTH_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -25,10 +26,9 @@ const unauthClient = axios.create({
   },
 });
 
-// Create axios instance with default config
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  // timeout: 10000, // 10 seconds
+// Auth client for identity/auth endpoints
+const authClient = axios.create({
+  baseURL: AUTH_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -36,59 +36,82 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add auth token
-apiClient.interceptors.request.use(
-  (config) => {
-   // const token = localStorage.getItem('accessToken');
-    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+// Appraisal client for appraisal endpoints
+const appraisalClient = axios.create({
+  baseURL: APPRAISAL_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    'Cache-Control': 'no-cache',
   },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+});
 
-// Response interceptor to handle token refresh
-apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
+// Legacy alias (points to appraisal by default for backward compatibility)
+const apiClient = appraisalClient;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken: refreshToken,
-          });
-
-          const { accessToken } = response.data;
-          localStorage.setItem('accessToken', accessToken);
-
-          // Retry the original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return apiClient(originalRequest);
-        }
-      } catch (refreshError) {
-        // Refresh failed, redirect to login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userDetailedInfo');
-        window.location.href = '/login';
+// Request interceptor to add auth token (shared by both clients)
+const addAuthTokenInterceptor = (client) => {
+  client.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('accessToken');
+      // const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
     }
+  );
+};
 
-    return Promise.reject(error);
-  }
-);
+addAuthTokenInterceptor(authClient);
+addAuthTokenInterceptor(appraisalClient);
+
+// Response interceptor to handle token refresh (shared by both clients)
+const addRefreshTokenInterceptor = (client) => {
+  client.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    async (error) => {
+      const originalRequest = error.config;
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const response = await axios.post(`${AUTH_BASE_URL}/auth/refresh`, {
+              refreshToken: refreshToken,
+            });
+
+            const { accessToken } = response.data;
+            localStorage.setItem('accessToken', accessToken);
+
+            // Retry the original request with new token
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            return client(originalRequest);
+          }
+        } catch (refreshError) {
+          // Refresh failed, redirect to login
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          localStorage.removeItem('userDetailedInfo');
+          window.location.href = '/login';
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
+};
+
+addRefreshTokenInterceptor(authClient);
+addRefreshTokenInterceptor(appraisalClient);
 
 // API service methods
 export const authAPI = {
@@ -96,7 +119,7 @@ export const authAPI = {
   login: async (credentials) => {
     try {
       console.log('Sending login request:', {
-        url: `${API_BASE_URL}/identity/auth/login`,
+        url: `${AUTH_BASE_URL}/identity/auth/login`,
 
         method: 'POST',
         credentials: {
@@ -105,7 +128,7 @@ export const authAPI = {
         },
       });
 
-      const response = await apiClient.post('/identity/auth/login', credentials);
+      const response = await authClient.post('/identity/auth/login', credentials);
       console.log('Login response received:', {
         status: response.status,
         statusText: response.statusText,
@@ -129,7 +152,7 @@ export const authAPI = {
   // POST: Refresh token
   refreshToken: async (refreshToken) => {
     try {
-      const response = await apiClient.post('/identity/auth/refresh', { refreshToken });
+      const response = await authClient.post('/identity/auth/refresh', { refreshToken });
       return response.data;
     } catch (error) {
       throw error;
@@ -139,7 +162,7 @@ export const authAPI = {
   // POST: Logout user
   logout: async () => {
     try {
-      const response = await apiClient.post('/identity/auth/logout');
+      const response = await authClient.post('/identity/auth/logout');
       return response.data;
     } catch (error) {
       throw error;
@@ -194,7 +217,7 @@ export const userAPI = {
 export const generateCaptchaAPI = {
   getCaptchaImage: async () => {
     try {
-      const response = await apiClient.get('/identity/captcha/generate');
+      const response = await authClient.get('/identity/captcha/generate');
       return {
         id: response.data.captchaId,
         image: response.data.captchaImg,
@@ -207,7 +230,7 @@ export const generateCaptchaAPI = {
 
   validateCaptcha: async (captchaId, userInput) => {
     try {
-      const response = await apiClient.post('/identity/captcha/validate', null, {
+      const response = await authClient.post('/identity/captcha/validate', null, {
         params: {
           captchaId: captchaId,
           userInput: userInput,
@@ -227,7 +250,7 @@ export const generateCaptchaAPI = {
 
   getCaptchaImageByRefresh: async (captchaIdToRefresh) => {
     try {
-      const response = await apiClient.get(`/identity/captcha/refresh/${captchaIdToRefresh}`);
+      const response = await authClient.get(`/identity/captcha/refresh/${captchaIdToRefresh}`);
       return {
         id: response.data.captchaId,
         image: response.data.captchaImg,
@@ -360,6 +383,23 @@ export const appraisalAPI = {
       });
       const response = await apiClient.get(
         `${appraisalBaseUrl}/exception_quarterly_verify?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // GET: Get exception quarterly validator data
+  getExceptionQuarterlyValidator: async ({ fy, quarter, empNo }) => {
+    try {
+      const params = new URLSearchParams({
+        fy: fy,
+        quarter: quarter,
+        empNo: empNo,
+      });
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/exception_quarterly_validator?${params.toString()}`
       );
       return response.data;
     } catch (error) {
@@ -554,8 +594,7 @@ if (filterStatus) params.append("STATUS", filterStatus);
   getEmployeeSelfAppraisal: async ({
     empNo,
     url,
-   // zoneName,
-   // roleId,
+    zoneName,
     roleType,
     financialYear,
     quarter,
@@ -564,18 +603,17 @@ if (filterStatus) params.append("STATUS", filterStatus);
     intent,
   }) => {
     try {
-      const params = new URLSearchParams({
-        empNo: empNo,
-        url: url,
-       // zoneName: zoneName,
-       // roleId: roleId,
-        roleType: roleType,
-        financialYear: financialYear,
-        quarter: quarter || '',
-        pageType: pageType,
-        appraisalStatus: appraisalStatus,
-        intent: intent,
-      });
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'url', url);
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'pageType', pageType);
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
+      appendQueryParam(params, 'intent', intent);
+
       const response = await apiClient.get(
         `/appraisal/employee_self_appraisal?${params.toString()}`
       );
@@ -620,8 +658,8 @@ if (filterStatus) params.append("STATUS", filterStatus);
   // GET: Fetch acceptor (reviewer) appraisal payload
   getAcceptorAppraisal: async ({
     empNo,
-    urlId,
-    roleName,
+    url,
+    roleType,
     roleId,
     zoneName,
     financialYear,
@@ -632,8 +670,8 @@ if (filterStatus) params.append("STATUS", filterStatus);
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'empNo', empNo);
-      appendQueryParam(params, 'urlId', urlId);
-      appendQueryParam(params, 'roleName', roleName);
+      appendQueryParam(params, 'url', url);
+      appendQueryParam(params, 'roleType', roleType);
       appendQueryParam(params, 'roleId', roleId);
       appendQueryParam(params, 'zoneName', zoneName);
       appendQueryParam(params, 'financialYear', financialYear);
@@ -738,6 +776,20 @@ if (filterStatus) params.append("STATUS", filterStatus);
     }
   },
 
+  // POST: Submit annual self appraisal with JSON body
+  submitAnnualSelfAppraisal: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        '/appraisal/employee_self_appraisal/submit',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitAnnualSelfAppraisal error', error);
+      throw error;
+    }
+  },
+
   // GET: Get reportee appraisal dashboard data
   getReporteeAppraisalDashboard: async ({ empNo, financialYear, quarter }) => {
     try {
@@ -753,6 +805,41 @@ if (filterStatus) params.append("STATUS", filterStatus);
       return response.data;
     } catch (error) {
       console.error("Error fetching reportee appraisal dashboard:", error);
+      throw error;
+    }
+  },
+
+  // GET: Get reportee appraisal data for appraiser/reviewer review
+  getReporteeAppraisal: async ({ empNo, financialYear, quarter, url, zoneName, roleType }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'url', url);
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'roleType', roleType);
+
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/reportee_appraisal?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getReporteeAppraisal error:', error);
+      throw error;
+    }
+  },
+
+  // POST: Submit reportee appraisal (appraiser/reviewer submission)
+  submitReporteeAppraisal: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        `${appraisalBaseUrl}/reportee_appraisal/submit`,
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitReporteeAppraisal error:', error);
       throw error;
     }
   },
@@ -1414,7 +1501,7 @@ export const api = {
 export const accessService = {
   async getAccessModuleWise(empId, unitType, role) {
     try {
-      const response = await apiClient.get('/identity/auth/accessModuleWise', {
+      const response = await authClient.get('/identity/auth/accessModuleWise', {
         params: {
           empId: empId,
           unitType: unitType,

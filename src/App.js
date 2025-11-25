@@ -38,6 +38,8 @@ import {
   AppealDelection,
   ReviewerDashboard,
   ReviewerMode,
+  AnnualAppraisalReview,
+  AnnualReview,
 } from './pages';
 import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
 import { TopBar, LeftNavigation } from './components/common';
@@ -598,6 +600,28 @@ function AppContent() {
               }
             />
 
+            <Route
+              path="/appraisal/annual/appraiser-review"
+              element={
+                isAuthenticated ? (
+                  <AnnualAppraisalReviewLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraisal/annual/reviewer"
+              element={
+                isAuthenticated ? (
+                  <AnnualReviewLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
 
           </Routes>
         </div>
@@ -1025,6 +1049,24 @@ const AppealCommitteeReviewLayout = ({ onLogout }) => (
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <AppealCommitteeReview />
+  </>
+);
+
+// Annual Appraisal Review (Appraiser/Reviewer)
+const AnnualAppraisalReviewLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AnnualAppraisalReview />
+  </>
+);
+
+// Annual Review (Reviewer/Acceptor)
+const AnnualReviewLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AnnualReview />
   </>
 );
 

@@ -1,60 +1,46 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { appraisalAPI } from '../../../services/api';
+import { appraisalAPI } from '../../../../services/api';
 import { toast } from 'react-toastify';
-import {
-  transformAnnualAppraisalData,
-  transformQuarterlyAppraisalData,
-  extractYear,
-} from './appraisalTransformers';
+import { transformQuarterlyAppraisalData } from '../appraisalTransformers';
+import { useAppraisalContext } from '../useAppraisalContext';
 
-export const useAppraisalCheckIn = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+/**
+ * Quarterly Appraisal Hook
+ * 
+ * Handles all quarterly-specific logic including:
+ * - Data fetching via getQuarterlyCheckInReport
+ * - Month-based KRA grouping (O(1) lookup for tab switching)
+ * - Save draft functionality
+ * - Submit functionality
+ * - Role-based editability
+ */
+export const useQuarterlyAppraisal = () => {
+  const context = useAppraisalContext();
+  const {
+    navigate,
+    employee,
+    employeeNumber,
+    financialYear,
+    normalizedFinancialYear,
+    quarter,
+    appraisalPeriod,
+    dateRange,
+    urlId,
+    roleType,
+    pageType,
+    intent,
+    initialAppraisalStatus,
+    isContextValid,
+    deriveRole,
+  } = context;
 
-  // Parse query parameters
-  const searchParams = new URLSearchParams(location.search);
-  const queryParams = Object.fromEntries(searchParams.entries());
-
-  // Extract data from location state or fallback to query params
-  const stateOrQuery = location.state || {};
-
-  console.log('State or Query Params:', stateOrQuery, queryParams);
-  
-  const empNo = stateOrQuery.employee?.empNo || queryParams.empNo;
-  const financialYear = stateOrQuery.financialYear || queryParams.financialYear;
-  const quarter = stateOrQuery.quarter || queryParams.quarter;
-  const appraisalPeriod = stateOrQuery.appraisalPeriod || queryParams.appraisalPeriod;
-  const dateRange = stateOrQuery.dateRange || queryParams.dateRange;
-  const urlId = stateOrQuery.urlId || queryParams.urlId;
-  const roleType = stateOrQuery.roleType || queryParams.roleType;
-  const pageType = stateOrQuery.pageType || queryParams.pageType;
-  const intent = stateOrQuery.intent || queryParams.intent;
-  const initialAppraisalStatus = stateOrQuery.appraisalStatus || queryParams.appraisalStatus;
-
-  // Construct employee object if missing but empNo exists
-  const employee = stateOrQuery.employee || (empNo ? { empNo, primaryRole: 'default' } : null);
-  const employeeNumber = employee?.empNo || '';
-  const normalizedFinancialYear = useMemo(() => extractYear(financialYear), [financialYear]);
-
-  // Determine if this is a quarterly flow
-  const isQuarterlyFlow = useMemo(() => {
-    return appraisalPeriod?.toLowerCase() === 'quarterly';
-  }, [appraisalPeriod]);
-
-  // Derive actual role
-  const actualRole = useMemo(() => {
-    if (!isQuarterlyFlow) return 'APPRAISEE';
-    if (intent === 'Review' || roleType === 'appraiser') return 'APPRAISER';
-    return 'APPRAISEE';
-  }, [isQuarterlyFlow, intent, roleType]);
-
-  const [currentRole, setCurrentRole] = useState(actualRole);
+  // Role state management
+  const [currentRole, setCurrentRole] = useState(deriveRole);
 
   useEffect(() => {
-    setCurrentRole(actualRole);
-  }, [actualRole]);
+    setCurrentRole(deriveRole);
+  }, [deriveRole]);
 
   const handleRoleChange = (e) => {
     setCurrentRole(e.target.value);
@@ -66,81 +52,56 @@ export const useAppraisalCheckIn = () => {
     REVIEWER: currentRole === 'REVIEWER',
   };
 
+  // Form state for quarterly flow
   const [formData, setFormData] = useState({
     measurableKraScores: {},
     nonMeasurableKraComments: {},
-    developmentInputAnswers: {},
     sectionComments: {
       measurable: [],
       nonMeasurable: '',
       performanceNonMeasurable: '',
       semiMeasurable: '',
-      period: '',
-      areas: ''
+      highlights: '',
+      areasOfImprovement: '',
     },
-    appraiseeComments: '',
-    appraiserComments: '',
-    reviewerComments: '',
   });
 
   const [isDirty, setIsDirty] = useState(false);
 
-  // Fetch appraisal data
-  const queryKey = isQuarterlyFlow
-    ? [
-        'quarterlyCheckInReport',
-        employeeNumber,
-        normalizedFinancialYear,
-        quarter || '',
-        roleType || 'emp',
-        intent || 'Fill',
-        urlId || 'default-url',
-      ]
-    : [
-        'employeeSelfAppraisal',
-        employeeNumber,
-        normalizedFinancialYear,
-        appraisalPeriod || 'Quarterly',
-      ];
+  // Query key for quarterly data
+  const queryKey = [
+    'quarterlyCheckInReport',
+    employeeNumber,
+    normalizedFinancialYear,
+    quarter || '',
+    roleType || 'emp',
+    intent || 'Fill',
+    urlId || 'default-url',
+  ];
 
+  // Fetch quarterly appraisal data
   const { data: apiResponse, isLoading, isError } = useQuery({
     queryKey,
-    queryFn: () => {
-      if (isQuarterlyFlow) {
-        return appraisalAPI.getQuarterlyCheckInReport({
-          empNo: employeeNumber,
-          roleType: roleType || 'emp',
-          url: urlId || 'quarterly-check-in',
-          financialYear: normalizedFinancialYear,
-          quarter: quarter || '',
-          pageType: pageType || 'self',
-          appraisalStatus: initialAppraisalStatus || 'pending',
-          intent: intent || 'Fill',
-          roleId: employee?.primaryRole || 'default',
-        });
-      } else {
-        return appraisalAPI.getEmployeeSelfAppraisal({
-          empNo: employeeNumber,
-          url: 'check-in-form',
-          zoneName: employee?.zone || 'default',
-          roleId: employee?.primaryRole || 'default',
-          roleType: '12',
-          financialYear: normalizedFinancialYear,
-          quarter: '',
-          pageType: '1',
-          appraisalStatus: 'in-progress',
-        });
-      }
-    },
-    enabled: !!employeeNumber && !!financialYear && !!appraisalPeriod,
+    queryFn: () =>
+      appraisalAPI.getQuarterlyCheckInReport({
+        empNo: employeeNumber,
+        roleType: roleType || 'emp',
+        url: urlId || 'quarterly-check-in',
+        financialYear: normalizedFinancialYear,
+        quarter: quarter || '',
+        pageType: pageType || 'self',
+        appraisalStatus: initialAppraisalStatus || 'pending',
+        intent: intent || 'Fill',
+        roleId: employee?.primaryRole || 'default',
+      }),
+    enabled: isContextValid && appraisalPeriod?.toLowerCase() === 'quarterly',
   });
 
+  // Transform API response to component-compatible format
   const transformedData = useMemo(() => {
     if (!apiResponse) return null;
-    return isQuarterlyFlow
-      ? transformQuarterlyAppraisalData(apiResponse)
-      : transformAnnualAppraisalData(apiResponse);
-  }, [apiResponse, isQuarterlyFlow]);
+    return transformQuarterlyAppraisalData(apiResponse);
+  }, [apiResponse]);
 
   // Initialize form data from transformed data
   useEffect(() => {
@@ -153,16 +114,14 @@ export const useAppraisalCheckIn = () => {
       transformedData.measurableKras.forEach((kra) => {
         initialScores[kra.KraId] = { ...kra };
       });
-      
-      // Initialize section comments if available in rawData
+
+      // Initialize section comments from rawData
       const rawData = transformedData.rawData || {};
       const initialSectionComments = {
         measurable: rawData.performanceMeasurableComment || [],
         nonMeasurable: rawData.nonMeasurableComment || '',
         performanceNonMeasurable: rawData.performanceNonMeasurableComment || '',
         semiMeasurable: rawData.performanceSemiMeasurableComment || '',
-        period: rawData.performancePeriodComment || '',
-        areas: rawData.areasPerformanceComment || '',
         highlights: rawData.performancePeriodComment || rawData.HIGHLIGHTS_COMMENTS || '',
         areasOfImprovement: rawData.areasPerformanceComment || rawData.BELOW_EXPECTATIONS_COMMENTS || '',
       };
@@ -175,37 +134,40 @@ export const useAppraisalCheckIn = () => {
     });
   }, [transformedData]);
 
+  // Show error toast on fetch error
   useEffect(() => {
     if (isError) {
-      toast.error('Failed to load appraisal data. Please try again.');
+      toast.error('Failed to load quarterly appraisal data. Please try again.');
     }
   }, [isError]);
 
+  // Form change handlers
   const handleKraChange = (kraId, field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       measurableKraScores: {
         ...prev.measurableKraScores,
         [kraId]: {
           ...prev.measurableKraScores[kraId],
-          [field]: value
-        }
-      }
+          [field]: value,
+        },
+      },
     }));
     setIsDirty(true);
   };
 
   const handleSectionCommentChange = (section, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       sectionComments: {
         ...prev.sectionComments,
-        [section]: value
-      }
+        [section]: value,
+      },
     }));
     setIsDirty(true);
   };
 
+  // Build quarterly payload for save/submit
   const buildQuarterlyPayload = () => {
     const rawData = transformedData?.rawData || {};
     const originalKras = rawData.results_KRA_LIST?.measurable || [];
@@ -213,12 +175,12 @@ export const useAppraisalCheckIn = () => {
     if (!originalKras.length) {
       console.warn('Quarterly payload generated with no measurable KRAs to submit.');
     }
-    
-    const kraData = originalKras.map(kra => {
+
+    const kraData = originalKras.map((kra) => {
       const updates = formData.measurableKraScores[kra.KRA_CODE] || {};
-      
+
       // Map UI fields back to API fields
-      // Note: We preserve all original fields and only update what changed
+      // Preserve all original fields and only update what changed
       return {
         ...kra,
         actual: updates.KraActualScore !== undefined ? updates.KraActualScore : kra.actual,
@@ -239,9 +201,9 @@ export const useAppraisalCheckIn = () => {
       endDate: rawData.endDate || '2024-09-30 00:00:00.0',
       reportingAuthority: rawData.reportingAuthority || 'string',
       organizationName: rawData.organizationName || 'string',
-      performanceMeasurableComment: Array.isArray(formData.sectionComments?.measurable) 
-        ? formData.sectionComments.measurable 
-        : [formData.sectionComments?.measurable || ''], // Ensure array
+      performanceMeasurableComment: Array.isArray(formData.sectionComments?.measurable)
+        ? formData.sectionComments.measurable
+        : [formData.sectionComments?.measurable || ''],
       nonMeasurableComment: formData.sectionComments?.nonMeasurable || '',
       performanceNonMeasurableComment: formData.sectionComments?.performanceNonMeasurable || '',
       performanceSemiMeasurableComment: formData.sectionComments?.semiMeasurable || '',
@@ -250,6 +212,7 @@ export const useAppraisalCheckIn = () => {
     };
   };
 
+  // Save mutation
   const saveMutation = useMutation({
     mutationFn: (payload) => appraisalAPI.saveQuarterlyCheckInReport(payload),
     onSuccess: () => {
@@ -262,6 +225,7 @@ export const useAppraisalCheckIn = () => {
     },
   });
 
+  // Submit mutation
   const submitMutation = useMutation({
     mutationFn: (payload) => appraisalAPI.submitQuarterlyCheckInReport(payload),
     onSuccess: () => {
@@ -276,30 +240,22 @@ export const useAppraisalCheckIn = () => {
   });
 
   const handleSave = () => {
-    if (isQuarterlyFlow) {
-      const payload = buildQuarterlyPayload();
-      saveMutation.mutate(payload);
-    } else {
-      console.log('Annual save not yet implemented');
-      toast.info('Save functionality for annual appraisal is not yet available');
-    }
+    const payload = buildQuarterlyPayload();
+    saveMutation.mutate(payload);
   };
 
   const handleSubmit = () => {
-    if (isQuarterlyFlow) {
-      const payload = buildQuarterlyPayload();
-      submitMutation.mutate(payload);
-    } else {
-      console.log('Annual submit not yet implemented');
-      toast.info('Submit functionality for annual appraisal is not yet available');
-    }
+    const payload = buildQuarterlyPayload();
+    submitMutation.mutate(payload);
   };
 
   return {
+    // Data
     data: transformedData,
     isLoading,
     isError,
-    isQuarterlyFlow,
+
+    // Context (quarterly-specific shape)
     context: {
       employee,
       financialYear,
@@ -307,17 +263,23 @@ export const useAppraisalCheckIn = () => {
       appraisalPeriod,
       dateRange,
     },
+
+    // Role state
     roleState: {
       currentRole,
       isEditableBy,
       handleRoleChange,
     },
+
+    // Form state
     formState: {
       formData,
       setFormData,
       isDirty,
       setIsDirty,
     },
+
+    // Actions
     actions: {
       handleSave,
       handleSubmit,

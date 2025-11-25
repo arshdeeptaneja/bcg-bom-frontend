@@ -99,7 +99,7 @@ function ReviewerDashboard() {
           appraiser: assignment.appraiser,
           reviewer: loggedInEmpNo,
         },
-        urlId: assignment.urlId,
+        url: assignment.urlId,
         appraisalStatus: assignment.appraisalStatus,
       },
     });
