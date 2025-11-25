@@ -123,8 +123,8 @@ export default function AppraiserCheckInDashboard() {
 
     queryFn: () =>
       appraisalAPI.getAppraiserCheckInDashboard({
-        //empNo: authEmpNo,
-        empNo: "38096",
+        empNo: authEmpNo,
+        //empNo: "38096",
         financialYear: extractYear(financialYear),
         quarter,
         appraisalPeriod: "quarterly",
