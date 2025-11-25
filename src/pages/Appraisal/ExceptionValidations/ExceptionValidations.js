@@ -1,10 +1,10 @@
 import { BackButton } from '../../../components/common';
-import './ExceptionsList.css';
+import '../ExceptionsList/ExceptionsList.css';
 import { ExceptionListTable } from '../../../components/Appraisal';
 import LoadingSpinner from '../../../components/Spinner';
-import { useExceptionsList } from '../shared/hooks/useExceptionsList';
+import { useExceptionValidations } from '../shared/hooks/useExceptionValidations';
 
-export default function ExceptionsList() {
+export default function ExceptionValidations() {
   const {
     exceptionListData,
     filterOptions,
@@ -17,7 +17,7 @@ export default function ExceptionsList() {
     handleSearch,
     handleClearFilter,
     handleReviewException,
-  } = useExceptionsList();
+  } = useExceptionValidations();
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return <div>No financial year, appraisal period, or quarter found</div>;
@@ -28,7 +28,9 @@ export default function ExceptionsList() {
       <div className="pageWrapper">
         <div className="pageWrapper-header">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Resolution</h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+            Employee Quarterly Exception List
+          </h1>
         </div>
         <LoadingSpinner />
       </div>
@@ -39,7 +41,9 @@ export default function ExceptionsList() {
     <div className="pageWrapper">
       <div className="pageWrapper-header">
         <BackButton />
-        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exceptions List</h1>
+        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+          Employee Quarterly Exception List
+        </h1>
       </div>
 
       {/* Filter Panel */}

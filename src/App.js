@@ -21,6 +21,7 @@ import {
   ExceptionHome,
   ExceptionVerify,
   ExceptionsList,
+  ExceptionValidations,
   QuarterlyException,
   EmployeeExceptionList,
   ReviewQuarterlyException,
@@ -237,6 +238,16 @@ function AppContent() {
               element={
                 isAuthenticated ? (
                   <ExceptionsListLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
+              path="/appraisal/exception-validations"
+              element={
+                isAuthenticated ? (
+                  <ExceptionValidationsLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )
@@ -846,6 +857,16 @@ const ExceptionsListLayout = ({ onLogout }) => {
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
       <ExceptionsList />
+    </>
+  );
+};
+
+const ExceptionValidationsLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <ExceptionValidations />
     </>
   );
 };
