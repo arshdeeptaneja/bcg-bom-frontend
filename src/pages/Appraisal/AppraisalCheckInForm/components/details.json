@@ -1,0 +1,60 @@
+[
+    //user details info
+  {
+    "LOCATION": 201600,
+    "BRANCHTYPE": "ro",
+    "GRIEVANCE_USER_TYPE": "Employee",
+    "SHOWROLEACCEPTANCE": "yes",
+    "SHOWMYGEMSSCORE": "no",
+    "SHOWOVSROLEACCEPTANCE": "no",
+    "OUT_PD_ROLE": null,
+    "USER_ID": "38965",
+    "ALPHA": null,
+    "OLD_PFID": null,
+    "GRIEVANCE_ADMIN_TYPE_ROLE": null,
+    "SHOWUBR": "no",
+    "ROLE_CODE": 1049891,
+    "RH_EMP_NUMBER": "38965",
+    "EMP_NAME": "SANTOSH KUMAR MISHRA",
+    "SHOWQUIZ": "yes",
+    "SHOWRECOVERYGEMS": "no",
+    "LOG_ACCESS": "no",
+    "CONTACTNO": null,
+    "GRIEVANCE_ADMIN_TYPE_MODULE": null,
+    "SHOWCLERKROLEACCEPTANCE": "no",
+    "BRNAME": "REGIONAL OFFICE-PATNA",
+    "BRANCH_UNIT_TYPE": "RO",
+    "DATE_OF_BIRTH": "1981-10-14T18:30:00.000+00:00",
+    "MAIN_ROLE": "RO Overall Credit Officer",
+    "ADDITIONAL_ROLE": "none",
+    "DATE_OF_JOINING": null,
+    "ROLE_NAME": "Administrative Officers",
+    "FULL_GRADE": "4",
+    "IS_PLANNING": "no",
+    "IS_GM": "no",
+    "SHOWRCPAGE": "yes",
+    "SHOWINSIDEDASHBOARDFORCFS": "no",
+    "MOBILE_NO": 9766361519,
+    "EMP_ID": "38965",
+    "OUT_PD_BR_NAME": null,
+    "PASSWORD": "Welcome",
+    "ROLES": null,
+    "USER_TYPE": 7,
+    "OUT_PD_LOCATION_ID": null,
+    "URL_ID": "S-80872",
+    "GRADE": 4,
+    "POSITION_DESIGNATION": "Administrative Officers",
+    "EMAIL_ID": "38965@psb.in",
+    "ZNNAME": "Central Zone",
+    "DVU_ACCESS_TYPE": null,
+    "BANK_NAME": null
+  }
+]
+
+
+
+{"MOBILE_NO":9766361519,"PWDVERIFY":1,"PASSWORD":"Welcome","SECONDARY_ROLE":"RO Retail Credit Officer","USEREXIST":1,"FIRSTTIMELOGIN":"1","EMAIL_ID":"38965@psb.in","ROLE_NAME":"Administrative Officers","CHECKLDAP":1,"PSDMATCH":0,"LOCATION":201600,"BRANCHTYPE":"ro","GRIEVANCE_USER_TYPE":"Employee","SHOWROLEACCEPTANCE":"yes","SHOWMYGEMSSCORE":"no","SHOWOVSROLEACCEPTANCE":"no","OUT_PD_ROLE":null,"USER_ID":"38965","ALPHA":null,"OLD_PFID":null,"GRIEVANCE_ADMIN_TYPE_ROLE":null,"SHOWUBR":"no","ROLE_CODE":1049891,"RH_EMP_NUMBER":"38965","EMP_NAME":"SANTOSH KUMAR MISHRA","SHOWQUIZ":"yes","SHOWRECOVERYGEMS":"no","LOG_ACCESS":"no","CONTACTNO":null,"GRIEVANCE_ADMIN_TYPE_MODULE":null,"SHOWCLERKROLEACCEPTANCE":"no","BRNAME":"REGIONAL OFFICE-PATNA","BRANCH_UNIT_TYPE":"RO","DATE_OF_BIRTH":"1981-10-14T18:30:00.000+00:00","MAIN_ROLE":"RO Overall Credit Officer","ADDITIONAL_ROLE":"none","DATE_OF_JOINING":null,"FULL_GRADE":"4","IS_PLANNING":"no","IS_GM":"no","SHOWRCPAGE":"yes","SHOWINSIDEDASHBOARDFORCFS":"no","EMP_ID":"38965","OUT_PD_BR_NAME":null,"ROLES":null,"USER_TYPE":7,"OUT_PD_LOCATION_ID":null,"URL_ID":"S-80872","GRADE":4,"POSITION_DESIGNATION":"Administrative Officers","ZNNAME":"Central Zone","DVU_ACCESS_TYPE":null,"BANK_NAME":null,"empNo":"38965","name":"SANTOSH KUMAR MISHRA","unitType":"RO","designation":"Administrative Officers"}
+
+
+
+eyJhbGciOiJIUzM4NCJ9.eyJlbXBJZCI6IjM4OTY1Iiwicm9sZXMiOiJBZG1pbmlzdHJhdGl2ZSBPZmZpY2VycyIsInN1YiI6IjM4OTY1IiwiaWF0IjoxNzYzNjUxODA1LCJleHAiOjE3NjM3MzgyMDV9.JttbGBDfpw2uX_Ih-7up3vzXKjPa8Na6RfTq7WOwB7PVaR9vjFlMw8wzLErhmcML

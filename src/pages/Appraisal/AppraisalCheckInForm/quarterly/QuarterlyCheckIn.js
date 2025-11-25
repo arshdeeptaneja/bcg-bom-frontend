@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { BackButton } from '../../../components/common';
-import LoadingSpinner from '../../../components/Spinner';
-import QuarterlyHeader from './components/QuarterlyHeader';
-import MonthlySummaryTable from './components/MonthlySummaryTable';
-import QuarterlyMeasurableTable from './components/QuarterlyMeasurableTable';
-import QuarterlyNonMeasurableTable from './components/QuarterlyNonMeasurableTable';
+import { BackButton } from '../../../../components/common';
+import LoadingSpinner from '../../../../components/Spinner';
+import QuarterlyHeader from '../components/QuarterlyHeader';
+import MonthlySummaryTable from '../components/MonthlySummaryTable';
+import QuarterlyMeasurableTable from '../components/QuarterlyMeasurableTable';
+import QuarterlyNonMeasurableTable from '../components/QuarterlyNonMeasurableTable';
 import { useQuarterlyAppraisal } from './useQuarterlyAppraisal';
 
 const MONTH_LABEL_LOOKUP = {

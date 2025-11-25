@@ -1,0 +1,329 @@
+/**
+ * Annual Appraisal Review - Appraiser/Reviewer Styles
+ * 
+ * Separate stylesheet with appraiser-specific styles:
+ * - Read-only field styling for appraisee data
+ * - Appraiser input highlighting
+ * - Score selector buttons
+ * - Comment section layout
+ */
+
+/* ===== Container Styles ===== */
+.annual-appraisal-review .pageWrapper-content {
+  background-color: #fafafa;
+  border-radius: 8px;
+}
+
+/* ===== Header Bar for KRA Table ===== */
+.review-kra-header-bar {
+  font-size: 0.9rem;
+}
+
+.review-kra-header-bar .appraiser-highlight-header {
+  background-color: rgba(255, 193, 7, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+/* ===== Read-Only Section Styling ===== */
+.read-only-section {
+  position: relative;
+}
+
+.read-only-section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #6c757d;
+  border-radius: 4px 0 0 4px;
+}
+
+.read-only-field {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  color: #495057;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.read-only-field em {
+  font-style: italic;
+  color: #adb5bd;
+}
+
+/* ===== Appraiser Input Section Highlighting ===== */
+.appraiser-input-section {
+  position: relative;
+  background-color: #fff9e6;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.appraiser-input-section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #ffc107;
+  border-radius: 4px 0 0 4px;
+}
+
+.appraiser-input-cell {
+  background-color: rgba(255, 193, 7, 0.1);
+  border-radius: 8px;
+}
+
+.appraiser-input-field {
+  border: 2px solid #ffc107;
+  background-color: #fffef5;
+}
+
+.appraiser-input-field:focus {
+  border-color: #ffb300;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+  background-color: #fff;
+}
+
+.appraiser-comment-input {
+  border: 2px solid #ffc107;
+  background-color: #fffef5;
+}
+
+.appraiser-comment-input:focus {
+  border-color: #ffb300;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+  background-color: #fff;
+}
+
+/* ===== Score Selector Buttons ===== */
+.review-score-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.review-score-btn-outline {
+  background-color: #fff;
+  border: 2px solid #ffc107;
+  color: #856404;
+}
+
+.review-score-btn-outline:hover {
+  background-color: #fff3cd;
+  transform: scale(1.1);
+}
+
+.review-score-btn-selected {
+  background-color: #ffc107;
+  border: 2px solid #ffc107;
+  color: #212529;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+  transform: scale(1.15);
+}
+
+.review-score-btn-selected:hover {
+  background-color: #ffb300;
+  border-color: #ffb300;
+}
+
+.review-score-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.appraiser-score-selector {
+  padding: 8px;
+  background-color: rgba(255, 193, 7, 0.15);
+  border-radius: 24px;
+}
+
+/* ===== Appraisee Score Display ===== */
+.appraisee-score-display {
+  padding: 4px;
+}
+
+.appraisee-score-display .badge {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* ===== Final Score Box ===== */
+.annual-appraisal-review .final-score-box {
+  font-weight: 600;
+  font-size: 1.1rem;
+  background-color: #e7f1ff;
+  min-width: 50px;
+  display: inline-block;
+}
+
+/* ===== Comment Section Container ===== */
+.comment-section-container {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.comment-row {
+  background-color: transparent;
+}
+
+.comment-row td {
+  padding: 0 !important;
+}
+
+/* ===== KRA Row Styling ===== */
+.annual-appraisal-review .kra-row {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.annual-appraisal-review .kra-row:hover {
+  background-color: #f8f9fa;
+}
+
+.annual-appraisal-review .kra-row td {
+  padding: 16px 8px;
+  vertical-align: middle;
+}
+
+/* ===== KRA Group Header ===== */
+.annual-appraisal-review .kra-group-header {
+  background-color: rgba(25, 135, 84, 0.1);
+}
+
+/* ===== Submit Button Section ===== */
+.submit-button-section {
+  border-top: 1px solid #dee2e6;
+  margin-top: 24px;
+}
+
+.submit-button-section .btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  padding: 12px 32px;
+  font-weight: 600;
+}
+
+.submit-button-section .btn-primary:hover:not(:disabled) {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.submit-button-section .btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-button-section .btn-secondary {
+  padding: 12px 24px;
+}
+
+/* ===== Alert Styling ===== */
+.annual-appraisal-review .alert-info {
+  background-color: #cff4fc;
+  border-color: #b6effb;
+  color: #055160;
+}
+
+/* ===== Section Headers ===== */
+.annual-appraisal-review h5 .badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+/* ===== Development Inputs Section ===== */
+.development-inputs-section {
+  margin-top: 16px;
+}
+
+.development-inputs-section .form-label {
+  font-size: 0.95rem;
+}
+
+.development-inputs-section.appraiser-input-section {
+  border: 2px solid #ffc107;
+}
+
+/* ===== Option Based Inputs ===== */
+.option-based-inputs-section .form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.option-based-inputs-section .appraiser-input-section .form-check-input:checked {
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 992px) {
+  .review-kra-header-bar {
+    font-size: 0.8rem;
+  }
+
+  .review-score-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  .annual-appraisal-review .kra-row td {
+    padding: 12px 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .review-kra-header-bar {
+    display: none;
+  }
+
+  .annual-appraisal-review .kra-row {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .annual-appraisal-review .kra-row td {
+    width: 100% !important;
+    padding: 8px 0;
+  }
+
+  .appraiser-score-selector {
+    justify-content: flex-start !important;
+  }
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  .submit-button-section {
+    display: none;
+  }
+
+  .appraiser-input-section {
+    background-color: #fff;
+    border: 1px solid #000;
+  }
+
+  .review-score-btn {
+    border: 1px solid #000;
+  }
+
+  .review-score-btn-selected {
+    background-color: #ccc;
+  }
+}

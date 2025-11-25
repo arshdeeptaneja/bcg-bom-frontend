@@ -1,4 +1,5 @@
 import React from 'react';
+import './ValidatorTable.css';
 
 export default function ValidatorTable({ rows = [], onRowChange, onSubmit, isSubmitting }) {
   const anyChecked = rows.some((row) => row.checked);
@@ -39,8 +40,8 @@ export default function ValidatorTable({ rows = [], onRowChange, onSubmit, isSub
         <div className="kra-header-row table-header">
           <div className="col select-col">Select KRA</div>
           <div className="col kra-col">KRA</div>
-          <div className="col kra-col">Roles</div>
-          <div className="col kra-col">Unit</div>
+          <div className="col roles-col">Roles</div>
+          <div className="col unit-col">Unit</div>
           <div className="col actual-col">Actual</div>
           <div className="col target-col">Target</div>
           <div className="col max-col">Max Score</div>
@@ -53,7 +54,8 @@ export default function ValidatorTable({ rows = [], onRowChange, onSubmit, isSub
 
         {rows.map((row) => {
           const valueEditable = row.checked && row.action === 'edit';
-          const commentEditable = row.checked && row.action !== 'accept';
+          // Validator comment is always editable if row is checked/expanded
+          const commentEditable = true;
 
           return (
             <div key={row.id} className="d-flex flex-column">
@@ -73,11 +75,8 @@ export default function ValidatorTable({ rows = [], onRowChange, onSubmit, isSub
 
                 <div className="col roles-col">
                   <div className="role">Actual</div>
-                  <div className="divider" />
                   <div className="role">Appraisee</div>
-                  <div className="divider" />
                   <div className="role">Appraiser</div>
-                  <div className="divider" />
                   <div className="role">Validator</div>
                 </div>
 
@@ -124,7 +123,9 @@ export default function ValidatorTable({ rows = [], onRowChange, onSubmit, isSub
                   <input className="readonly single" value={row.month} readOnly />
                 </div>
 
-                <div className="col cat-col" />
+                <div className="col cat-col">
+                    {/* KRA Category content if any */}
+                </div>
 
                 <div className="col comment-col">
                   <button
@@ -173,20 +174,28 @@ export default function ValidatorTable({ rows = [], onRowChange, onSubmit, isSub
               {row.commentOpen && (
                 <div className="comment-block">
                   <div className="comment-inner">
-                    <div className="comment-left">
-                      <label className="lbl">Self Comment:</label>
-                      <div className="self-box">{row.selfComment || ''}</div>
+                    {/* Self Comment */}
+                    <div className="comment-section">
+                      <label className="comment-label">Self Comment:</label>
+                      <div className="comment-box">{row.selfComment || 'No comment'}</div>
                     </div>
-                    <div className="comment-right">
-                      <label className="lbl">
+
+                    {/* Appraiser Comment - Read Only */}
+                    <div className="comment-section">
+                      <label className="comment-label">Appraiser Comment:</label>
+                      <div className="comment-box">{row.appraiserComment || 'No comment'}</div>
+                    </div>
+
+                    {/* Validator Comment - Editable */}
+                    <div className="comment-section">
+                      <label className="comment-label">
                         Validator Comment<span className="required">*</span>
                       </label>
                       <textarea
-                        className="text-area"
+                        className="comment-textarea"
                         value={row.validatorComment || ''}
                         onChange={(e) => handleInput(row.id, 'validatorComment', e.target.value)}
                         placeholder="write here"
-                        readOnly={!commentEditable}
                         maxLength={300}
                       />
                       <div className="comment-foot">
@@ -204,7 +213,7 @@ export default function ValidatorTable({ rows = [], onRowChange, onSubmit, isSub
 
       <div className="submit-wrap">
         <button
-          className={`submit-btn ${anyChecked ? 'active' : 'inactive'}`}
+          className="submit-btn"
           onClick={handleSubmit}
           disabled={!anyChecked || isSubmitting}
         >

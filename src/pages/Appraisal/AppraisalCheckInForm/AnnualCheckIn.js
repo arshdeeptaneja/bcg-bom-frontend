@@ -9,18 +9,24 @@ import {
   NonMeasurableKra,
   DevelopmentInputs,
 } from '../../../components/Appraisal';
+import { useAnnualAppraisal } from './useAnnualAppraisal';
 
-const AnnualCheckIn = ({
-  data,
-  isLoading,
-  context,
-  roleState,
-  formState,
-  actions,
-}) => {
+const AnnualCheckIn = () => {
+  // Use the annual-specific hook directly
+  const {
+    data,
+    developmentInputs,
+    isLoading,
+    isError,
+    context,
+    roleState,
+    formState,
+    actions,
+  } = useAnnualAppraisal();
+
   const { employee, dateRange } = context;
   const { currentRole, isEditableBy, handleRoleChange } = roleState;
-  const { handleSave, handleSubmit, isSaving, isSubmitting } = actions;
+  const { handleSubmit, handleDevelopmentInputChange, isSubmitting } = actions;
 
   // Use API data or fallback to empty/mock data
   const kraData = data?.finalScoreSummary || [];
@@ -34,8 +40,25 @@ const AnnualCheckIn = ({
   const totalNonMeasurableMax = data?.totalNonMeasurableMax || 0;
   const validationMessage = data?.validationMessage || '';
 
-  // Development inputs questions (TODO: fetch from API when available)
-  const developmentInputsQuestions = [];
+  // Handle missing context
+  if (!context.financialYear || !context.appraisalPeriod) {
+    return (
+      <div className="pageWrapper">
+        <div>No financial year or appraisal period found</div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (isError) {
+    return (
+      <div className="pageWrapper">
+        <div className="alert alert-danger">
+          Failed to load annual appraisal data. Please try again later.
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -132,25 +155,36 @@ const AnnualCheckIn = ({
         )}
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Development Inputs</h5>
-          <DevelopmentInputs
-            questions={developmentInputsQuestions}
-            role={currentRole}
-            isEditableBy={isEditableBy}
-          />
+          {developmentInputs.length > 0 ? (
+            developmentInputs.map((input, index) => (
+              <div className="mb-3" key={input.id}>
+                <label className="form-label fw-bold text-dark">
+                  {index + 1}. {input.question} <span className="text-danger">*</span>
+                </label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  placeholder="Enter Your Response"
+                  value={formState.formData.sectionComments?.[input.key] || ''}
+                  onChange={(e) => handleDevelopmentInputChange(input.key, e.target.value)}
+                  disabled={!isEditableBy.APPRAISEE}
+                />
+              </div>
+            ))
+          ) : (
+            <DevelopmentInputs
+              questions={[]}
+              role={currentRole}
+              isEditableBy={isEditableBy}
+            />
+          )}
         </div>
       </div>
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button
-          className="btn btn-outline-primary"
-          onClick={handleSave}
-          disabled={isSaving || isSubmitting}
-        >
-          {isSaving ? 'Saving...' : 'Save'}
-        </button>
-        <button
           className="btn btn-primary"
           onClick={handleSubmit}
-          disabled={isSaving || isSubmitting}
+          disabled={isSubmitting}
         >
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>

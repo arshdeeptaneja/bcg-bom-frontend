@@ -1,0 +1,103 @@
+/* Annual Check-In Styles */
+
+/* Score Button Styles (1-5 selector) */
+.annual-score-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.annual-score-btn-outline {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  color: #495057;
+}
+
+.annual-score-btn-outline:hover:not(:disabled) {
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.annual-score-btn-selected {
+  background-color: #198754;
+  border: 1px solid #198754;
+  color: #fff;
+}
+
+.annual-score-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* KRA Group Header */
+.kra-group-header {
+  margin-bottom: 0;
+}
+
+/* Final Score Box */
+.final-score-box {
+  min-width: 40px;
+  font-weight: 600;
+}
+
+/* KRA Row styling */
+.kra-row {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.kra-row:hover {
+  background-color: #f8f9fa;
+}
+
+/* Comment Row */
+.comment-row td {
+  padding-top: 0 !important;
+  padding-bottom: 1rem !important;
+}
+
+/* Header Bar */
+.annual-kra-header-bar {
+  font-size: 0.9rem;
+}
+
+/* Section styling */
+.development-inputs-section,
+.option-based-inputs-section {
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+/* Form check styling for option-based inputs */
+.option-based-inputs-section .form-check {
+  padding: 0.5rem 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.option-based-inputs-section .form-check-input:checked {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+/* Non-measurable section */
+.non-measurable-kra-section {
+  margin-top: 1.5rem;
+}
+
+/* Table adjustments */
+.non-measurable-kra-section .table {
+  margin-bottom: 0;
+}
+
+.non-measurable-kra-section .table td {
+  vertical-align: middle;
+  padding: 1rem 0.75rem;
+}
+
+/* Description text styling */
+.kra-row .text-primary.small {
+  line-height: 1.4;
+}

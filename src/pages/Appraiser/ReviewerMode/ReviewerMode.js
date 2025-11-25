@@ -57,7 +57,7 @@ function ReviewerMode() {
     roleName = 'REVIEWER',
     roleId = 'REVIEWER',
     appraisalStatus = '',
-    urlId = employeeDetails?.currentUser?.url || employeeDetails?.currentUser?.URL_ID || '',
+    url = employeeDetails?.currentUser?.url || employeeDetails?.currentUser?.URL_ID || '',
   } = location.state || {};
 
   const reviewEmpNo = employee?.empNo || loggedInEmpNo;
@@ -83,13 +83,13 @@ function ReviewerMode() {
     isError,
     error,
   } = useQuery({
-    queryKey: ['acceptorAppraisal', reviewEmpNo, urlId, parsedFinancialYear, quarter, roleName],
-    enabled: Boolean(reviewEmpNo && urlId && parsedFinancialYear),
+    queryKey: ['acceptorAppraisal', reviewEmpNo, url, parsedFinancialYear, quarter, roleName],
+    enabled: Boolean(reviewEmpNo && url && parsedFinancialYear),
     queryFn: () =>
       appraisalAPI.getAcceptorAppraisal({
         empNo: reviewEmpNo,
-        urlId,
-        roleName,
+        url,
+        roleType: roleName,
         roleId,
         zoneName,
         financialYear: parsedFinancialYear,
@@ -123,7 +123,7 @@ function ReviewerMode() {
     onSuccess: () => {
       toast.success('Reviewer remarks submitted successfully');
       queryClient.invalidateQueries({
-        queryKey: ['acceptorAppraisal', reviewEmpNo, urlId, parsedFinancialYear, quarter, roleName],
+        queryKey: ['acceptorAppraisal', reviewEmpNo, url, parsedFinancialYear, quarter, roleName],
       });
       navigate(-1);
     },
@@ -139,7 +139,7 @@ function ReviewerMode() {
     }
 
     const payload = {
-      urlId,
+      id: url,
       empNo: reviewEmpNo,
       financialYear: parsedFinancialYear,
       appraisalPeriod,

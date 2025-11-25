@@ -82,64 +82,200 @@ const resolveFallbackMonth = (resultsData, rawData) => {
 /**
  * Data transformer for annual appraisal API response
  * Converts API response to component-compatible format
+ * 
+ * Handles:
+ * - result_kra_list_discretionary_non_measurable_child (grouped by GROUP_NAME)
+ * - result_kra_list_measurable_child (if present)
+ * - annual_score_summary for final score display
+ * - result_questions.development_inputs for question sections
  */
 export const transformAnnualAppraisalData = (apiResponse) => {
   if (!apiResponse) return null;
 
-  // Extract annual_score_data if it exists
+  // Extract annual_score_data for Final Score Summary
   const scoreData = apiResponse.annual_score_summary?.annual_score_data || [];
   
-  // Extract Business Dimension data for Final Score Summary
-  const businessDimensionData = scoreData.filter(
-    (item) => item.CATEGORY === 'Business Dimension' && item.MAX_SCORE != null
-  );
-  const finalScoreSummary = businessDimensionData.map((item) => ({
-    KraName: item.CATEGORY,
-    KraWeight: item.MAX_SCORE || 0,
-  }));
+  // Transform Final Score Summary from annual_score_data
+  const finalScoreSummary = scoreData
+    .filter((item) => item.CATEGORY && item.MAX_SCORE != null)
+    .map((item) => ({
+      Category: item.CATEGORY,
+      MaxScore: item.MAX_SCORE || 0,
+      SelfScore: item.SELF_SCORE || 0,
+      ReportingAuthorityScore: item.BY_REPORTING_AUTHORITY || 0,
+      ReviewingAuthorityScore: item.BY_REVIEVING_AUTHORITY || 0,
+      AcceptingAuthorityScore: item.BY_ACCEPTING_AUTHORITY || 0,
+      PostAppealScore: item.POST_APPEAL_SCORE || 0,
+      MdScore: item.MD_SCORE || 0,
+      Id: item.ID,
+    }));
 
-  // Extract Discretionary Measurable KRAs
-  const measurableData = scoreData.find(
+  // Parse discretionary non-measurable KRAs and group by GROUP_NAME
+  const nonMeasurableChildList = apiResponse.result_kra_list_discretionary_non_measurable_child || [];
+  const nonMeasurableKras = {};
+  
+  nonMeasurableChildList.forEach((kra) => {
+    const groupName = kra.GROUP_NAME || 'Other';
+    
+    if (!nonMeasurableKras[groupName]) {
+      nonMeasurableKras[groupName] = [];
+    }
+    
+    nonMeasurableKras[groupName].push({
+      KraId: kra.AP_KRA_ID,
+      KraCode: kra.KRA_CODE,
+      ParentKraCode: kra.PARENT_KRA_CODE,
+      KraName: kra.KRA_DESC,
+      KraDescription: kra.KRA_METRIC,
+      KraType: kra.KRA_TYPE || 'discretionary_non_measurable',
+      MaxScore: kra.MAX_SCORE || 0,
+      Target: kra.TARGET ? parseFloat(kra.TARGET) : null,
+      Actual: kra.ACTUAL ? parseFloat(kra.ACTUAL) : null,
+      Score: kra.SCORE ? parseFloat(kra.SCORE) : null,
+      // Role-specific actuals (keep separate for per-role API integration)
+      AppraiseeActual: kra.APPRAISEE_ACTUAL ? parseFloat(kra.APPRAISEE_ACTUAL) : null,
+      AppraiserActual: kra.APPRAISER_ACTUAL ? parseFloat(kra.APPRAISER_ACTUAL) : null,
+      ReviewerActual: kra.REVIEWER_ACTUAL ? parseFloat(kra.REVIEWER_ACTUAL) : null,
+      AcceptorActual: kra.ACCEPTOR_ACTUAL ? parseFloat(kra.ACCEPTOR_ACTUAL) : null,
+      // Reporting/Reviewing/Accepting authority scores
+      RepaActuals: kra.REPA_ACTUALS ? parseFloat(kra.REPA_ACTUALS) : null,
+      RepaTarget: kra.REPA_TARGET ? parseFloat(kra.REPA_TARGET) : null,
+      RepaScore: kra.REPA_SCORE ? parseFloat(kra.REPA_SCORE) : null,
+      RevaActuals: kra.REVA_ACTUALS ? parseFloat(kra.REVA_ACTUALS) : null,
+      RevaTarget: kra.REVA_TARGET ? parseFloat(kra.REVA_TARGET) : null,
+      RevaScore: kra.REVA_SCORE ? parseFloat(kra.REVA_SCORE) : null,
+      AcActuals: kra.AC_ACTUALS ? parseFloat(kra.AC_ACTUALS) : null,
+      AcTarget: kra.AC_TARGET ? parseFloat(kra.AC_TARGET) : null,
+      AcScore: kra.AC_SCORE ? parseFloat(kra.AC_SCORE) : null,
+      PostAppealActual: kra.POST_APPEAL_ACTUAL ? parseFloat(kra.POST_APPEAL_ACTUAL) : null,
+      PostAppealScore: kra.POST_APPEAL_SCORE ? parseFloat(kra.POST_APPEAL_SCORE) : null,
+      // Comments per role
+      CommentSelf1: kra.COMMENT_SELF_1 || '',
+      CommentSelf2: kra.COMMENT_SELF_2 || '',
+      CommentRepa: kra.COMMENT_REPA || '',
+      CommentReva: kra.COMMENT_REVA || '',
+      CommentAc: kra.COMMENT_AC || '',
+      // Flags
+      IsEditable: kra.ACTUAL_EDIT_FLAG === 0,
+      IsActive: kra.KRA_ACTIVE_FLAG === 1,
+      ExceptionId: kra.EXCEPTION_ID,
+      // Tooltips
+      Tooltip: kra.TOOLTIP,
+      ScoreTooltip: kra.SCORE_TOOLTIP,
+      IaTooltip: kra.IA_TOOLTIP,
+      ItTooltip: kra.IT_TOOLTIP,
+      // Misc
+      Bonus: kra.BONUS,
+      Mpb: kra.MPB,
+      IncrementalTarget: kra.INCREMENTAL_TARGET,
+      IncrementalActual: kra.INCREMENTAL_ACTUAL,
+    });
+  });
+
+  // Parse measurable KRAs (handle both object and array formats)
+  const measurableChildData = apiResponse.result_kra_list_measurable_child || {};
+  const measurableKras = [];
+  
+  // Handle if it's an object with month keys or an array
+  if (Array.isArray(measurableChildData)) {
+    measurableChildData.forEach((kra) => {
+      measurableKras.push({
+        KraId: kra.AP_KRA_ID || kra.KRA_CODE,
+        KraCode: kra.KRA_CODE,
+        KraName: kra.KRA_DESC || kra.kra_desc,
+        KraDescription: kra.KRA_METRIC || '',
+        KraType: kra.KRA_TYPE || 'measurable',
+        MaxScore: parseFloat(kra.MAX_SCORE || kra.maxscore) || 0,
+        Target: kra.TARGET ? parseFloat(kra.TARGET) : null,
+        Actual: kra.ACTUAL ? parseFloat(kra.ACTUAL) : null,
+        Score: kra.SCORE ? parseFloat(kra.SCORE) : null,
+        KraActualScore: parseFloat(kra.ACTUAL || kra.actual) || 0,
+        KraTarget: parseFloat(kra.TARGET || kra.target) || 0,
+        KraWeight: parseFloat(kra.MAX_SCORE || kra.maxscore) || 0,
+        KraFinalScore: parseFloat(kra.SCORE || kra.score) || 0,
+        KraComments: kra.COMMENT_SELF_1 || kra.comment_self || '',
+        IsEditable: kra.ACTUAL_EDIT_FLAG === 0,
+      });
+    });
+  } else if (typeof measurableChildData === 'object' && Object.keys(measurableChildData).length > 0) {
+    // If it's an object, iterate over values
+    Object.values(measurableChildData).forEach((kraOrList) => {
+      const kraList = Array.isArray(kraOrList) ? kraOrList : [kraOrList];
+      kraList.forEach((kra) => {
+        if (kra && kra.KRA_CODE) {
+          measurableKras.push({
+            KraId: kra.AP_KRA_ID || kra.KRA_CODE,
+            KraCode: kra.KRA_CODE,
+            KraName: kra.KRA_DESC || kra.kra_desc,
+            KraDescription: kra.KRA_METRIC || '',
+            MaxScore: parseFloat(kra.MAX_SCORE || kra.maxscore) || 0,
+            KraActualScore: parseFloat(kra.ACTUAL || kra.actual) || 0,
+            KraTarget: parseFloat(kra.TARGET || kra.target) || 0,
+            KraWeight: parseFloat(kra.MAX_SCORE || kra.maxscore) || 0,
+            KraFinalScore: parseFloat(kra.SCORE || kra.score) || 0,
+            KraComments: kra.COMMENT_SELF_1 || kra.comment_self || '',
+            IsEditable: kra.ACTUAL_EDIT_FLAG === 0,
+          });
+        }
+      });
+    });
+  }
+
+  // Calculate totals from annual_score_summary categories
+  const discretionaryMeasurableRow = scoreData.find(
     (item) => item.CATEGORY === 'Discretionary Measurable KRAs'
   );
-  const measurableKras = measurableData
-    ? [
-        {
-          KraName: measurableData.CATEGORY,
-          KraActualScore: measurableData.SELF_SCORE || 0,
-          KraTarget: measurableData.MAX_SCORE || 0,
-          KraWeight: measurableData.MAX_SCORE || 0,
-          KraFinalScore: measurableData.SELF_SCORE || 0,
-        },
-      ]
-    : [];
-
-  // Extract Discretionary Non-Measurable KRAs
-  const nonMeasurableData = scoreData.find(
+  const discretionaryNonMeasurableRow = scoreData.find(
     (item) => item.CATEGORY === 'Discretionary Non-Measurable KRAs'
   );
-  const nonMeasurableKras = nonMeasurableData
-    ? {
-        'Discretionary Non-Measurable': [
-          {
-            KraName: nonMeasurableData.CATEGORY,
-            KraDescription: 'Please provide your inputs for non-measurable KRAs',
-          },
-        ],
-      }
-    : {};
 
-  // Monthly score summary (placeholder - will be populated when monthly data is available)
+  const totalMeasurableActual = discretionaryMeasurableRow?.SELF_SCORE || 0;
+  const totalMeasurableMax = discretionaryMeasurableRow?.MAX_SCORE || 0;
+  const totalNonMeasurableActual = discretionaryNonMeasurableRow?.SELF_SCORE || 0;
+  const totalNonMeasurableMax = discretionaryNonMeasurableRow?.MAX_SCORE || 
+    apiResponse.discretionary_non_measurable_maxscore_total || 0;
+
+  // Monthly score summary (not typically used for annual, but keep for compatibility)
   const monthlyScoreSummary = {
     actualScoreData: {},
     maxScoreData: {},
   };
 
-  // Calculate totals for discretionary KRAs
-  const totalMeasurableActual = measurableData?.SELF_SCORE || 0;
-  const totalMeasurableMax = measurableData?.MAX_SCORE || 0;
-  const totalNonMeasurableActual = nonMeasurableData?.SELF_SCORE || 0;
-  const totalNonMeasurableMax = nonMeasurableData?.MAX_SCORE || 0;
+  // Extract metadata
+  const metadata = {
+    empName: apiResponse.emp_name || '',
+    empNumber: apiResponse.empnumber || '',
+    organisation: apiResponse.organisation || '',
+    status: apiResponse.status || '',
+    date: apiResponse.date || '',
+    startDate: apiResponse.startdate || '',
+    endDate: apiResponse.enddate || '',
+    scale: apiResponse.scale || '',
+    jobFamily: apiResponse.job_family || '',
+    cohort: apiResponse.cohort || '',
+    unitConverter: apiResponse.unit_converter || '',
+    // Role assignments
+    primary: apiResponse.primary || '',
+    secondary: apiResponse.secondary || '',
+    tertiary: apiResponse.tertiary || '',
+    // Authority info
+    reportingAuthorityNo: apiResponse.REPORTING_AUTHORITY_NO || '',
+    reportingAuthorityName: apiResponse.REPORTING_AUTHORITY_NAME || '',
+    reviewingAuthorityNo: apiResponse.REVIEWING_AUTHORITY_NO || '',
+    reviewingAuthorityName: apiResponse.REVIEWING_AUTHORITY_NAME || '',
+    acceptingAuthorityNo: apiResponse.ACCEPTING_AUTHORITY_NO || '',
+    acceptingAuthorityName: apiResponse.ACCEPTING_AUTHORITY_NAME || '',
+    // Warnings
+    repaWarningComment: apiResponse.REPA_WARNING_COMMENT || '',
+    revaWarningComment: apiResponse.REVA_WARNING_COMMENT || '',
+    warningFlagRepa: apiResponse.warningflag_repa || '',
+    warningFlagReva: apiResponse.warningflag_reva || '',
+  };
+
+  // Determine read-only state based on status
+  const isReadOnly = apiResponse.status === 'complete_self' || 
+    apiResponse.status === 'complete_repa' || 
+    apiResponse.status === 'complete_reva';
 
   return {
     finalScoreSummary,
@@ -150,8 +286,11 @@ export const transformAnnualAppraisalData = (apiResponse) => {
     totalMeasurableMax,
     totalNonMeasurableActual,
     totalNonMeasurableMax,
+    metadata,
+    isReadOnly,
     unitConverter: apiResponse.unit_converter || '',
     validationMessage: apiResponse.text || '',
+    rawData: apiResponse,
   };
 };
 

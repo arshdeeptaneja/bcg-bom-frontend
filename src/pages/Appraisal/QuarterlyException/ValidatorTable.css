@@ -1,0 +1,224 @@
+:root {
+    --primary-color: #0389d0;
+    --text-color: #333;
+    --border-color: #dee2e6;
+    --bg-light: #f8f9fa;
+}
+
+.kra-root {
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-color);
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.kra-title-top {
+    margin: 0 0 20px 0;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.kra-table-wrap {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.kra-header-row {
+    display: flex;
+    align-items: center;
+    padding: 18px 24px;
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    gap: 16px;
+}
+
+.kra-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 30px 24px;
+    border-bottom: 1px solid var(--border-color);
+    gap: 16px;
+    background: #fff;
+}
+
+.kra-row:last-child {
+    border-bottom: none;
+}
+
+/* Columns */
+.col {
+    flex-shrink: 0;
+}
+
+.select-col { width: 40px; display: flex; justify-content: center; padding-top: 12px; }
+.kra-col { flex: 1.5; min-width: 150px; font-size: 0.9rem; line-height: 1.4; padding-top: 12px; }
+.roles-col { width: 100px; display: flex; flex-direction: column; gap: 20px; font-size: 0.85rem; font-weight: 600; color: #555; padding-top: 0; }
+.roles-col .role { height: 38px; display: flex; align-items: center; }
+.unit-col { width: 60px; text-align: center; padding-top: 12px; }
+.actual-col, .target-col { width: 100px; display: flex; flex-direction: column; gap: 20px; }
+.max-col, .score-col, .month-col { width: 80px; text-align: center; padding-top: 12px; }
+.cat-col { width: 100px; padding-top: 12px; }
+.comment-col { width: 60px; display: flex; justify-content: center; padding-top: 12px; }
+.action-col { width: 140px; display: flex; flex-direction: column; gap: 16px; padding-top: 12px; }
+
+/* Inputs */
+input.readonly, input.editable {
+    width: 100%;
+    padding: 8px 10px;
+    height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    text-align: center;
+    background: #fff;
+}
+
+input.readonly {
+    background: var(--bg-light);
+    color: #666;
+    border-color: var(--border-color);
+}
+
+input.editable {
+    border-color: var(--primary-color);
+}
+
+input.single {
+    width: 100%;
+}
+
+/* Comment Icon */
+.comment-icon {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 4px;
+    transition: transform 0.2s;
+}
+
+.comment-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Radio Buttons */
+.radio-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.radio-row input[type="radio"] {
+    accent-color: var(--primary-color);
+}
+
+/* Comment Block */
+.comment-block {
+    padding: 20px;
+    background: var(--bg-light);
+    border-top: 1px solid var(--border-color);
+    margin-top: -1px;
+}
+
+.comment-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.comment-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.comment-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.comment-box {
+    padding: 10px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    min-height: 40px;
+    color: #555;
+}
+
+.comment-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    resize: vertical;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.comment-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(3, 137, 208, 0.1);
+}
+
+.comment-foot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+.required {
+    color: #dc3545;
+    margin-left: 4px;
+}
+
+/* Submit Button */
+.submit-wrap {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.submit-btn {
+    padding: 10px 24px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submit-btn:hover {
+    background: #026aa1;
+}
+
+.submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.empty-kra {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+    font-size: 1.1rem;
+}
