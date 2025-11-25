@@ -182,7 +182,7 @@ export default function ExceptionVerify() {
           ]}
           onClick={() => {
             navigate(
-              `/appraisal/exceptions-list?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+              `/appraisal/review-exception-list?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
             );
           }}
         />

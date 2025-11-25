@@ -78,15 +78,15 @@ const EmployeeExceptionList = () => {
   const { data: apiData, isLoading, isError, error } = useQuery({
     queryKey: ['exceptionQuarterlyValidatorReview', financialYear, quarter, empNo, roleName, roleId, zone],
     queryFn: () =>
-      appraisalAPI.getExceptionQuarterlyValidatorReview({
+      appraisalAPI.getExceptionQuarterlyValidator({
         fy: parseInt(extractYear(financialYear)),
         quarter: quarter || 'Q1',
         empNo: empNo,
-        roleName: roleName,
-        roleId: roleId,
-        zone: zone,
+        // roleName: roleName,
+        // roleId: roleId,
+        // zone: zone,
       }),
-    enabled: !!empNo && !!financialYear && !!roleName && !!roleId && !!zone, // Only run query if required params are available
+    enabled: !!empNo && !!financialYear //&& !!roleName && !!roleId && !!zone, // Only run query if required params are available
   });
 
   // Show error toast when API fails
