@@ -888,6 +888,29 @@ if (filterStatus) params.append("STATUS", filterStatus);
     }
   },
 
+    // GET: Fetch validator view of exception for review
+    getExceptionQuarterlyValidator: async ({
+      fy,
+      quarter,
+      empNo,
+    }) => {
+      try {
+        const params = new URLSearchParams();
+        appendQueryParam(params, 'fy', fy);
+        appendQueryParam(params, 'quarter', quarter);
+        appendQueryParam(params, 'empNo', empNo);
+  
+        const response = await apiClient.get(
+          `/appraisal/exception_quarterly_validator?${params.toString()}`
+        );
+        return response.data;
+      } catch (error) {
+        console.error('getExceptionQuarterlyValidator error', error);
+        throw error;
+      }
+    },
+
+
   // GET: Fetch validator view of exception for review
   getExceptionQuarterlyValidatorReview: async ({
     fy,
