@@ -37,26 +37,26 @@ const buildQuarterDateRange = (fyLabel, quarterLabel) => {
 const normalizeValidatorRows = (payload = []) => {
     if (!Array.isArray(payload)) return [];
     return payload.map((item, index) => ({
-        id: item.kraId || item.id || item.urlId || index + 1,
-        kraId: item.kraId || item.id || item.urlId || index + 1,
-        kra: item.kra || item.kraName || item.metric || 'KRA',
+        id: item.KRA_CODE || item.kraId || item.id || item.urlId || index + 1,
+        kraId: item.KRA_CODE || item.kraId || item.id || item.urlId || index + 1,
+        kra: item.kra_desc || item.kra || item.kraName || item.metric || 'KRA',
         unit: item.unit || item.unitOfMeasure || '-',
-        actual: item.actual ?? item.appraiseeActual ?? '',
-        appraisee: item.appraisee ?? item.appraiseeActual ?? '',
-        appraiserActual: item.appraiserActual ?? item.appraiser_value ?? '',
-        validatorActual: item.validatorActual ?? '',
-        target: item.target ?? item.appraiseeTarget ?? '',
-        appraiserTarget: item.appraiserTarget ?? item.target ?? '',
-        validatorTarget: item.validatorTarget ?? '',
-        maxScore: item.maxScore ?? item.max_score ?? '',
-        score: item.score ?? '',
-        appraiserScore: item.appraiserScore ?? item.score ?? '',
-        validatorScore: item.validatorScore ?? '',
-        month: item.month || item.period || '',
+        actual: item.final_actual ?? item.actual ?? item.appraiseeActual ?? '',
+        appraisee: item.appraisee ?? item.final_actual ?? item.appraiseeActual ?? '',
+        appraiserActual: item.APPRAISER_ACTUAL ?? item.appraiserActual ?? item.appraiser_value ?? '',
+        validatorActual: item.VALIDATOR_ACTUAL ?? item.validatorActual ?? '',
+        target: item.final_target ?? item.target ?? item.appraiseeTarget ?? '',
+        appraiserTarget: item.APPRAISER_TARGET ?? item.appraiserTarget ?? item.target ?? '',
+        validatorTarget: item.VALIDATOR_TARGET ?? item.validatorTarget ?? '',
+        maxScore: item.maxscore ?? item.maxScore ?? item.max_score ?? '',
+        score: item.self_score ?? item.score ?? '',
+        appraiserScore: item.APPRAISER_SCORE ?? item.appraiserScore ?? item.score ?? '',
+        validatorScore: item.VALIDATOR_SCORE ?? item.validatorScore ?? '',
+        month: item.MONTH || item.month || item.period || '',
         category: item.category || item.kraCategory || '',
-        selfComment: item.selfComment ?? item.appraiseeComment ?? '',
-        appraiserComment: item.appraiserComment ?? '',
-        validatorComment: item.validatorComment ?? '',
+        selfComment: item.COMMENT_SELF ?? item.selfComment ?? item.appraiseeComment ?? '',
+        appraiserComment: item.APPRAISER_COMMENT ?? item.appraiserComment ?? '',
+        validatorComment: item.VALIDATOR_COMMENT ?? item.validatorComment ?? '',
         commentOpen: true,
         checked: false,
         action: 'accept',
@@ -89,6 +89,7 @@ function EmployeeQuarterlyException() {
             branch: employeeDetails?.currentUser?.BRANCH_NAME || 'Branch',
             primaryRole: employeeDetails?.currentUser?.PRIMARY_ROLE || 'Primary Role',
             appraiser: employeeDetails?.currentUser?.APPRAISER_NAME || 'Appraiser Name',
+            validator: employeeDetails?.currentUser?.VALIDATOR_NAME || '',
             roles: employeeDetails?.currentUser?.roles || [],
         }),
         [employeeDetails, loggedInEmpNo]
@@ -113,7 +114,9 @@ function EmployeeQuarterlyException() {
     const ticketId = custTicketId || exceptionId || validatorEmployee?.custTicketId || '';
     const reviewEmpNo = validatorEmployee?.empNo || loggedInEmpNo;
     const validatorRoleName = roleName || role || 'VALIDATOR';
-    const validatorRoleId = roleId || role || 'VALIDATOR';
+    // Note: In the API, roleId parameter expects the URL ID (e.g., U-34545)
+    // Use urlId or ticketId as the roleId for the API call
+    const validatorRoleId = urlId || ticketId || roleId;
     const validatorZone = zone || validatorEmployee?.zone || employeeDetails?.currentUser?.ZONE_NAME || '';
     const parsedFinancialYear = parseFinancialYear(financialYear);
     const derivedDateRange = dateRange || buildQuarterDateRange(financialYear, quarter);
@@ -156,18 +159,43 @@ function EmployeeQuarterlyException() {
 
     useEffect(() => {
         if (!reviewData) return;
-        const sourceRows =
-            reviewData?.kraData || reviewData?.result?.kraData || reviewData?.result || [];
+        
+        // Handle different response structures
+        let sourceRows = [];
+        
+        // Check for kraData array
+        if (reviewData?.kraData && Array.isArray(reviewData.kraData)) {
+            sourceRows = reviewData.kraData;
+        } else if (reviewData?.result?.kraData && Array.isArray(reviewData.result.kraData)) {
+            sourceRows = reviewData.result.kraData;
+        } else if (reviewData?.results_KRA_LIST_Measurable) {
+            // Handle single KRA object
+            sourceRows = [reviewData.results_KRA_LIST_Measurable];
+        } else if (Array.isArray(reviewData?.result)) {
+            sourceRows = reviewData.result;
+        } else if (Array.isArray(reviewData)) {
+            sourceRows = reviewData;
+        }
+        
         setKraRows(normalizeValidatorRows(sourceRows));
     }, [reviewData]);
 
     const handleDownload = () => {
-        const attachmentUrl = reviewData?.attachmentUrl || reviewData?.result?.attachmentUrl;
+        const attachmentUrl = reviewData?.file_url || reviewData?.attachmentUrl || reviewData?.result?.attachmentUrl;
         if (!attachmentUrl) {
             toast.info('No attachment available for download');
             return;
         }
-        window.open(attachmentUrl, '_blank');
+        // Handle file path or URL
+        if (attachmentUrl.startsWith('http')) {
+            window.open(attachmentUrl, '_blank');
+        } else {
+            // If it's a file path, construct the download URL
+            // Assuming backend serves files from /uploads endpoint
+            const fileName = attachmentUrl.split('/').pop();
+            const downloadUrl = `${window.location.origin}/uploads/${fileName}`;
+            window.open(downloadUrl, '_blank');
+        }
     };
 
     const handleRowChange = useCallback((id, patch) => {
@@ -262,8 +290,16 @@ function EmployeeQuarterlyException() {
 
             <div className="pageWrapper-content d-flex flex-column m-1 p-3">
                 <CheckInDescriptionSection
-                    employee={validatorEmployee}
-                    dateRange={derivedDateRange}
+                    employee={{
+                        ...validatorEmployee,
+                        empNo: reviewData?.empnumber || reviewData?.ecnumber || validatorEmployee?.empNo,
+                        employeeName: reviewData?.emp_name || validatorEmployee?.employeeName,
+                        branch: reviewData?.organisation || validatorEmployee?.branch,
+                        primaryRole: reviewData?.primary || validatorEmployee?.primaryRole,
+                        appraiser: reviewData?.REPORTING_AUTHORITY_NAME || validatorEmployee?.appraiser,
+                        validator: reviewData?.validator_name || validatorEmployee?.validator,
+                    }}
+                    dateRange={reviewData?.date || derivedDateRange}
                     showDownloadButton
                     onDownload={handleDownload}
                 />
@@ -275,6 +311,21 @@ function EmployeeQuarterlyException() {
                         validation.
                     </span>
                 </div>
+
+                {/* Score Summary Section */}
+                {(reviewData?.measurable_score_total || reviewData?.new_measurable_score_total) && (
+                    <div className="d-flex justify-content-start align-items-center gap-4 mb-4">
+                        <h5 className="text-primary fw-bold mb-0">Non-discretionary Score</h5>
+                        <div className="d-flex gap-3">
+                            <span className="text-muted">
+                                Old Score: <span className="fw-bold text-dark">{reviewData?.measurable_score_total || 0}/7.0</span>
+                            </span>
+                            <span className="text-success">
+                                New Score: <span className="fw-bold">{reviewData?.new_measurable_score_total || 0}/7.0</span>
+                            </span>
+                        </div>
+                    </div>
+                )}
 
                 <ValidatorTable
                     rows={kraRows}

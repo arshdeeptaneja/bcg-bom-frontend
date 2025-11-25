@@ -114,26 +114,26 @@ const EmployeeExceptionList = () => {
       // Adjust field names based on actual API response structure
       if (responseData?.result && Array.isArray(responseData.result)) {
         const mappedData = responseData.result.map((item) => ({
-          ticketId: item.ticket_id || item.TICKET_ID || item.ticketId || '',
-          empNumber: item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
+          ticketId: item.cust_ticket_id || item.ticket_id || item.TICKET_ID || item.ticketId || '',
+          empNumber: item.empnumber || item.ecnumber || item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
           empName: item.emp_name || item.EMP_NAME || item.employeeName || item.employee_name || '',
-          primaryRole: item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
-          branch: item.branch || item.BRANCH || item.branch_name || item.BRANCH_NAME || '',
-          preScore: item.pre_score || item.PRE_SCORE || item.preExceptionScore || '',
-          postScore: item.post_score || item.POST_SCORE || item.postExceptionScore || '',
+          primaryRole: item.primary || item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
+          branch: item.organisation || item.branch || item.BRANCH || item.branch_name || item.BRANCH_NAME || '',
+          preScore: item.measurable_score_total || item.pre_score || item.PRE_SCORE || item.preExceptionScore || '',
+          postScore: item.new_measurable_score_total || item.post_score || item.POST_SCORE || item.postExceptionScore || '',
           status: item.status || item.STATUS || item.exception_status || item.EXCEPTION_STATUS || '',
         }));
         setData(mappedData);
       } else if (Array.isArray(responseData)) {
         // Handle case where response is directly an array
         const mappedData = responseData.map((item) => ({
-          ticketId: item.ticket_id || item.TICKET_ID || item.ticketId || '',
-          empNumber: item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
+          ticketId: item.cust_ticket_id || item.ticket_id || item.TICKET_ID || item.ticketId || '',
+          empNumber: item.empnumber || item.ecnumber || item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
           empName: item.emp_name || item.EMP_NAME || item.employeeName || item.employee_name || '',
-          primaryRole: item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
-          branch: item.branch || item.BRANCH || item.branch_name || item.BRANCH_NAME || '',
-          preScore: item.pre_score || item.PRE_SCORE || item.preExceptionScore || '',
-          postScore: item.post_score || item.POST_SCORE || item.postExceptionScore || '',
+          primaryRole: item.primary || item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
+          branch: item.organisation || item.branch || item.BRANCH || item.branch_name || item.BRANCH_NAME || '',
+          preScore: item.measurable_score_total || item.pre_score || item.PRE_SCORE || item.preExceptionScore || '',
+          postScore: item.new_measurable_score_total || item.post_score || item.POST_SCORE || item.postExceptionScore || '',
           status: item.status || item.STATUS || item.exception_status || item.EXCEPTION_STATUS || '',
         }));
         setData(mappedData);

@@ -1,3 +1,84 @@
+const MONTH_LABELS = [
+  null,
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+const MONTH_NAME_TO_NUMBER = MONTH_LABELS.reduce((acc, label, index) => {
+  if (!label) return acc;
+  const lower = label.toLowerCase();
+  acc[lower] = index;
+  acc[lower.slice(0, 3)] = index;
+  return acc;
+}, {});
+
+const getMonthLabel = (monthNumber) => MONTH_LABELS[monthNumber] || `Month ${monthNumber}`;
+
+const parseMonthValue = (value, fallbackMonth = 4) => {
+  if (typeof value === 'number' && value >= 1 && value <= 12) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return fallbackMonth;
+
+    const numeric = parseInt(trimmed, 10);
+    if (!Number.isNaN(numeric) && numeric >= 1 && numeric <= 12) {
+      return numeric;
+    }
+
+    const lookup = MONTH_NAME_TO_NUMBER[trimmed.toLowerCase()];
+    if (lookup) {
+      return lookup;
+    }
+  }
+
+  return fallbackMonth;
+};
+
+const ensureMonthBucket = (bucket, monthNumber) => {
+  const safeMonth = monthNumber >= 1 && monthNumber <= 12 ? monthNumber : 4;
+  if (!bucket[safeMonth]) {
+    bucket[safeMonth] = {
+      label: getMonthLabel(safeMonth),
+      measurable: [],
+      nonMeasurable: [],
+    };
+  }
+  return bucket[safeMonth];
+};
+
+const resolveFallbackMonth = (resultsData, rawData) => {
+  const candidateDate =
+    resultsData.startDate ||
+    resultsData.START_DATE ||
+    rawData.startDate ||
+    rawData.START_DATE ||
+    '';
+
+  if (candidateDate) {
+    const parsedDate = new Date(candidateDate);
+    const monthValue = parsedDate.getMonth?.() + 1;
+    if (!Number.isNaN(monthValue)) {
+      return monthValue;
+    }
+  }
+
+  // Default fiscal year start (April)
+  return 4;
+};
+
 /**
  * Data transformer for annual appraisal API response
  * Converts API response to component-compatible format
@@ -76,117 +157,206 @@ export const transformAnnualAppraisalData = (apiResponse) => {
 
 /**
  * Data transformer for quarterly appraisal API response
- * Converts API response to component-compatible format
+ * Converts API response to component-compatible format with month-based grouping
+ * 
+ * Key Features:
+ * - Groups KRAs by month for efficient tab switching (O(1) lookup)
+ * - Handles parent-child KRA relationships
+ * - Calculates monthly score summaries
+ * - Manages editability based on ACTUAL_EDIT_STATUS
+ * - Supports read-only mode based on APPRAISAL_STATUS
  */
 export const transformQuarterlyAppraisalData = (apiResponse) => {
   if (!apiResponse) return null;
 
-  // The API response structure is flat
+  // Handle nested results structure (results.KRA_LIST or results_KRA_LIST)
   const data = apiResponse;
-
-  // Extract KRAs
-  const measurableList = data.results_KRA_LIST?.measurable || [];
-  const nonMeasurableList = data.results_KRA_LIST?.non_measurable || [];
+  const resultsData = data.results || data;
+  const kraListData = resultsData.KRA_LIST || resultsData.results_KRA_LIST || data.results_KRA_LIST || {};
+  const fallbackMonthNumber = resolveFallbackMonth(resultsData, data);
   
-  // Map Measurable KRAs
-  const measurableKras = measurableList.map(kra => ({
-    KraId: kra.KRA_CODE,
-    KraName: kra.kra_desc,
-    KraTarget: kra.target,
-    KraUnit: kra.unit,
-    KraWeight: kra.maxscore,
-    KraActualScore: kra.actual,
-    KraFinalScore: kra.score,
-    KraAppraiserScore: kra.repa_score,
-    KraReviewerScore: kra.reva_score,
-    KraComments: kra.KRA_COMMENT,
-    Month: kra.MONTH
-  }));
-
-  // Map Non-Measurable KRAs
-  const nonMeasurableKras = {};
-  if (nonMeasurableList.length > 0) {
-    nonMeasurableKras['Non-Measurable'] = nonMeasurableList.map(kra => ({
+  // Extract KRA lists with multiple fallback paths
+  const measurableList = kraListData.measurable || [];
+  const nonMeasurableList = kraListData.non_measurable || [];
+  
+  // 1. Map & Normalize Measurable KRAs with full metadata
+  const measurableKras = measurableList.map(kra => {
+    const monthNumber = parseMonthValue(kra.MONTH ?? kra.month ?? kra.month_no, fallbackMonthNumber);
+    return {
       KraId: kra.KRA_CODE,
       KraName: kra.kra_desc,
-      KraDescription: kra.kra_desc
-    }));
+      KraType: kra.kratype || 'measurable',
+      KraTarget: parseFloat(kra.target) || 0,
+      KraUnit: kra.unit,
+      KraWeight: parseFloat(kra.maxscore) || 0,
+      KraActualScore: parseFloat(kra.actual) || 0,
+      KraFinalScore: parseFloat(kra.score) || 0,
+      KraAppraiserScore: parseFloat(kra.repa_score) || 0,
+      KraReviewerScore: parseFloat(kra.reva_score) || 0,
+      KraComments: kra.comment_self || kra.KRA_COMMENT || '',
+      AppraiserComment: kra.comment_repa || '',
+      ReviewerComment: kra.comment_reva || '',
+      Month: monthNumber,
+      MonthLabel: getMonthLabel(monthNumber),
+      IsEditable: kra.ACTUAL_EDIT_STATUS === 0 || kra.ACTUAL_EDIT_STATUS === '0', // Editable if status is 0
+      ParentKra: kra.parent_kra || kra.PARENT_KRA || null, // For hierarchical display
+      IsParent: kra.IS_PARENT === true || kra.IS_PARENT === 1,
+      MaxScore: parseFloat(kra.max_score || kra.maxscore) || 0,
+    };
+  });
+
+  // 2. Group by Month (The "Bucket" Strategy for O(1) lookup during tab switching)
+  const krasByMonth = {};
+  measurableKras.forEach((kra) => {
+    const bucket = ensureMonthBucket(krasByMonth, kra.Month);
+    bucket.measurable.push(kra);
+  });
+
+  // 3. Map Non-Measurable KRAs (Usually not month-bound)
+  const nonMeasurableKras = {};
+  if (nonMeasurableList.length > 0) {
+    const normalizedNonMeasurable = nonMeasurableList.map((kra) => {
+      const monthNumber = parseMonthValue(kra.MONTH ?? kra.month ?? kra.month_no, fallbackMonthNumber);
+      const sectionName = kra.section_name || kra.SECTION_NAME || 'Non-Measurable';
+      const base = {
+        KraId: kra.KRA_CODE,
+        KraName: kra.kra_desc,
+        KraDescription: kra.kra_desc,
+        KraType: kra.kratype || 'non-measurable',
+        IsEditable: kra.ACTUAL_EDIT_STATUS === 0 || kra.ACTUAL_EDIT_STATUS === '0',
+        comments: {
+          appraisee: kra.comment_self || kra.KRA_COMMENT || '',
+          appraiser: kra.comment_repa || '',
+          reviewer: kra.comment_reva || '',
+        },
+        Month: monthNumber,
+        MonthLabel: getMonthLabel(monthNumber),
+        SectionName: sectionName,
+      };
+      return base;
+    });
+
+    normalizedNonMeasurable.forEach((kra) => {
+      const sectionKey = kra.SectionName || 'Non-Measurable';
+      if (!nonMeasurableKras[sectionKey]) {
+        nonMeasurableKras[sectionKey] = [];
+      }
+      nonMeasurableKras[sectionKey].push(kra);
+    });
+
+    normalizedNonMeasurable.forEach((kra) => {
+      const bucket = ensureMonthBucket(krasByMonth, kra.Month);
+      bucket.nonMeasurable.push(kra);
+    });
   }
 
-  // Final Score Summary (List of KRAs and Weights)
-  // Group by KRA Name to avoid duplicates if multiple months exist for same KRA
+  // 4. Calculate Monthly Score Summaries
+  const monthlyScoreSummary = {
+    actualScoreData: {},
+    maxScoreData: {}
+  };
+  
+  measurableKras.forEach(kra => {
+    const month = kra.Month;
+    if (month) {
+      monthlyScoreSummary.actualScoreData[month] = 
+        (monthlyScoreSummary.actualScoreData[month] || 0) + kra.KraFinalScore;
+      monthlyScoreSummary.maxScoreData[month] = 
+        (monthlyScoreSummary.maxScoreData[month] || 0) + kra.KraWeight;
+    }
+  });
+
+  // 5. Final Score Summary (Unique KRAs with weights)
   const uniqueKras = new Map();
   measurableList.forEach(kra => {
     if (!uniqueKras.has(kra.kra_desc)) {
       uniqueKras.set(kra.kra_desc, {
         KraName: kra.kra_desc,
-        KraWeight: kra.maxscore // Assuming maxscore is weight
+        KraWeight: parseFloat(kra.maxscore) || 0
       });
     }
   });
   const finalScoreSummary = Array.from(uniqueKras.values());
 
-  // Monthly Score Summary
-  const actualScoreData = {};
-  const maxScoreData = {};
-
-  measurableList.forEach(kra => {
-    const month = kra.MONTH;
-    if (month) {
-      // Summing up scores for the month
-      actualScoreData[month] = (actualScoreData[month] || 0) + (parseFloat(kra.score) || 0);
-      maxScoreData[month] = (maxScoreData[month] || 0) + (parseFloat(kra.maxscore) || 0);
-    }
-  });
-
-  const monthlyScoreSummary = {
-    actualScoreData,
-    maxScoreData
-  };
-
-  // Development Inputs
+  // 6. Extract Development Inputs (Questions & Comments)
   const developmentInputs = [];
-  if (data.question1) {
+  if (data.question1 || resultsData.question1) {
     developmentInputs.push({
-      question: data.question1,
-      answer: data.HIGHLIGHTS_COMMENTS,
-      id: 'question1'
+      id: 'question1',
+      key: 'highlights',
+      question: data.question1 || resultsData.question1,
+      answer: data.performancePeriodComment || resultsData.performancePeriodComment || data.HIGHLIGHTS_COMMENTS || resultsData.HIGHLIGHTS_COMMENTS || ''
     });
   }
-  if (data.question2) {
+  if (data.question2 || resultsData.question2) {
     developmentInputs.push({
-      question: data.question2,
-      answer: data.BELOW_EXPECTATIONS_COMMENTS,
-      id: 'question2'
+      id: 'question2',
+      key: 'areasOfImprovement',
+      question: data.question2 || resultsData.question2,
+      answer: data.areasPerformanceComment || resultsData.areasPerformanceComment || data.BELOW_EXPECTATIONS_COMMENTS || resultsData.BELOW_EXPECTATIONS_COMMENTS || ''
     });
   }
 
-  // Comments
-  const comments = {
-    appraisee: '',
-    appraiser: '',
-    reviewer: ''
+  // 7. Determine Appraisal Status for Read-Only Mode
+  const appraisalStatus = data.APPRAISAL_STATUS || resultsData.APPRAISAL_STATUS || 'Pending';
+  const isReadOnly = appraisalStatus !== 'Pending' && appraisalStatus !== 'PENDING';
+
+  // 8. Extract Submission Details
+  const submissionDetails = {
+    appraiseeSubmittedDate: data.appraisee_submitted_date || resultsData.appraisee_submitted_date,
+    appraiserSubmittedDate: data.appraiser_submitted_date || resultsData.appraiser_submitted_date,
+    reviewerSubmittedDate: data.reviewer_submitted_date || resultsData.reviewer_submitted_date,
   };
 
-  // Totals
-  const totalMeasurableActual = data.performance_measurable_score_total || 0;
-  const totalMeasurableMax = data.performance_measurable_maxscore_total || 0;
-  const totalNonMeasurableActual = data.performance_non_measurable_score_total || 0;
-  const totalNonMeasurableMax = data.performance_non_measurable_maxscore_total || 0;
+  // 9. Calculate Totals
+  const totalMeasurableActual = parseFloat(
+    data.performance_measurable_score_total || 
+    resultsData.performance_measurable_score_total || 
+    0
+  );
+  const totalMeasurableMax = parseFloat(
+    data.performance_measurable_maxscore_total || 
+    resultsData.performance_measurable_maxscore_total || 
+    0
+  );
+  const totalNonMeasurableActual = parseFloat(
+    data.performance_non_measurable_score_total || 
+    resultsData.performance_non_measurable_score_total || 
+    0
+  );
+  const totalNonMeasurableMax = parseFloat(
+    data.performance_non_measurable_maxscore_total || 
+    resultsData.performance_non_measurable_maxscore_total || 
+    0
+  );
 
   return {
+    // Core data structures
+    krasByMonth,          // <--- Key for efficient tab rendering (O(1) lookup)
+    measurableKras,       // Flat list for global operations
+    nonMeasurableKras,
+    
+    // Summaries
     finalScoreSummary,
     monthlyScoreSummary,
-    measurableKras,
-    nonMeasurableKras,
+    
+    // Totals
     totalMeasurableActual,
     totalMeasurableMax,
     totalNonMeasurableActual,
     totalNonMeasurableMax,
+    
+    // Additional data
     developmentInputs,
-    comments,
-    unitConverter: '',
-    validationMessage: '',
+    submissionDetails,
+    
+    // UI state
+    appraisalStatus,
+    isReadOnly,
+    
+    // Metadata
+    unitConverter: data.unit_converter || resultsData.unit_converter || '',
+    validationMessage: data.text || resultsData.text || '',
     rawData: data,
   };
 };
