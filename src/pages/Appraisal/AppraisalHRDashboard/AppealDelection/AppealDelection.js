@@ -1,3 +1,11 @@
+/**
+ * The `AppealDeletion` component in React handles searching and deleting exceptions related to
+ * employee appraisals.
+ * @returns The `AppealDeletion` component is being returned. It contains JSX elements for a page that
+ * includes a breadcrumb header, search section, and table section for managing appeal deletion
+ * utility. The component includes state variables for `empNumber`, `loading`, `tableData`, and
+ * `noData`, as well as functions for handling search and deletion of exceptions.
+ */
 import React, { useState } from "react";
 import { appraisalAPI } from "../../../../services/api";
 import { BackButton } from "../../../../components/common";

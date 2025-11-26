@@ -1,3 +1,11 @@
+/**
+ * The ExceptionScore component renders a page with breadcrumb navigation, info section, back button,
+ * and a table section displaying file upload information.
+ * @returns The `ExceptionScore` component is being returned, which contains JSX elements for
+ * displaying a page layout with breadcrumb navigation, info section, back button, page title, and a
+ * table section. The table currently displays a message "No records found" as there are no records to
+ * display.
+ */
 
 import { BackButton } from "../../../../components/common";
 import { FaInfoCircle } from "react-icons/fa";

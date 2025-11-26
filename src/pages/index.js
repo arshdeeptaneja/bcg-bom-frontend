@@ -41,3 +41,4 @@ export { default as ReviewerDashboard } from './Appraiser/ReviewerDashboard/Revi
 export { default as ReviewerMode } from './Appraiser/ReviewerMode/ReviewerMode';
 export { default as AppealCommitteeReview } from './Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
 export { AnnualAppraisalReview, AnnualReview } from './Appraisal/AppraisalCheckInForm/annual';
+export {default as QuaterlyAppraiserCheckIn} from './Appraisal/QuarterlyCheckIn/QuaterlyAppraiserCheckIn/QuaterlyAppraiserCheckIn';

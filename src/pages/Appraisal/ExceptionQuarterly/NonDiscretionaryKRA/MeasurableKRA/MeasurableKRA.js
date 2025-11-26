@@ -3,106 +3,69 @@ import { loadAppraisalData, saveAppraisalData } from "../../localStorageHelpers"
 import "./MeasurableKRA.css";
 
 const MeasurableKRA = ({ initialData }) => {
-  const [selectedMonth, setSelectedMonth] = useState("April");
+  const [selectedMonth, setSelectedMonth] = useState(null);
   const [openCommentIndex, setOpenCommentIndex] = useState(null);
   const [kraData, setKraData] = useState({});
   const [editedData, setEditedData] = useState({});
   const [message, setMessage] = useState("");
 
-  // ✅ Load from localStorage or API data safely
+  // ✅ Load from localStorage or API data with proper priority
   useEffect(() => {
+    // PRIORITY 1: Check localStorage first
     const stored = loadAppraisalData();
 
-    // Priority: 1. localStorage, 2. API initialData, 3. default
-    if (
-      stored.measurableKRA &&
-      typeof stored.measurableKRA === "object" &&
-      Object.keys(stored.measurableKRA).length > 0
-    ) {
+    if (stored?.measurableKRA && Object.keys(stored.measurableKRA).length > 0) {
+      console.log("Loading from localStorage:", stored.measurableKRA);
       setKraData(stored.measurableKRA);
-      setEditedData(JSON.parse(JSON.stringify(stored.measurableKRA))); // copy for editing
-    } else if (initialData && typeof initialData === "object" && Object.keys(initialData).length > 0) {
+      setEditedData(JSON.parse(JSON.stringify(stored.measurableKRA)));
+      
+      // Set first month as selected if not set
+      if (!selectedMonth) {
+        setSelectedMonth(Object.keys(stored.measurableKRA)[0]);
+      }
+      return;
+    }
+
+    // PRIORITY 2: Load from API initialData
+    if (initialData && Object.keys(initialData).length > 0) {
+      console.log("Loading from API initialData:", initialData);
       setKraData(initialData);
       setEditedData(JSON.parse(JSON.stringify(initialData)));
+      
+      // Set first month as selected if not set
+      if (!selectedMonth) {
+        setSelectedMonth(Object.keys(initialData)[0]);
+      }
+      
+      // Save to localStorage for future use
       saveAppraisalData({ measurableKRA: initialData });
-    } else {
-      const defaultData = {
-        April: [
-          {
-            kra: "% Growth in Terminal Total o/s advances",
-            unit: "%",
-            actual: "-8.1",
-            target: "0.9",
-            maxScore: "4.0",
-            score: "0.0",
-            category: "Advances",
-            comment: "",
-          },
-          {
-            kra: "% Growth in Terminal Agri o/s advances",
-            unit: "%",
-            actual: "-0.9",
-            target: "1.2",
-            maxScore: "3.0",
-            score: "0.0",
-            category: "Agri",
-            comment: "",
-          },
-        ],
-        May: [
-          {
-            kra: "% Growth in Terminal Total o/s advances",
-            unit: "%",
-            actual: "-5.5",
-            target: "2.0",
-            maxScore: "4.0",
-            score: "1.0",
-            category: "Advances",
-            comment: "",
-          },
-          {
-            kra: "% Growth in Terminal Agri o/s advances",
-            unit: "%",
-            actual: "1.0",
-            target: "1.2",
-            maxScore: "3.0",
-            score: "2.5",
-            category: "Agri",
-            comment: "",
-          },
-        ],
-        June: [
-          {
-            kra: "% Growth in Terminal Total o/s advances",
-            unit: "%",
-            actual: "2.5",
-            target: "3.0",
-            maxScore: "4.0",
-            score: "3.0",
-            category: "Advances",
-            comment: "",
-          },
-          {
-            kra: "% Growth in Terminal Agri o/s advances",
-            unit: "%",
-            actual: "3.2",
-            target: "4.1",
-            maxScore: "3.0",
-            score: "2.9",
-            category: "Agri",
-            comment: "",
-          },
-        ],
-      };
-      setKraData(defaultData);
-      setEditedData(JSON.parse(JSON.stringify(defaultData)));
-      saveAppraisalData({ measurableKRA: defaultData });
+      return;
     }
-  }, []);
+
+    // PRIORITY 3: Empty state - no data available
+    console.log("No data available - showing empty state");
+    setKraData({});
+    setEditedData({});
+  }, [initialData]);
+
+  // Set selected month when data loads
+  useEffect(() => {
+    if (!selectedMonth && Object.keys(kraData).length > 0) {
+      setSelectedMonth(Object.keys(kraData)[0]);
+    }
+  }, [kraData, selectedMonth]);
 
   // ✅ Handle user input (edit only locally until submit)
   const handleInputChange = (month, index, field, value) => {
     const updated = { ...editedData };
+    if (!updated[month]) {
+      console.error(`Month ${month} not found in editedData`);
+      return;
+    }
+    if (!updated[month][index]) {
+      console.error(`Index ${index} not found in month ${month}`);
+      return;
+    }
     updated[month][index][field] = value;
     setEditedData(updated);
   };
@@ -115,6 +78,10 @@ const MeasurableKRA = ({ initialData }) => {
   // ✅ Handle comment typing
   const handleCommentChange = (month, index, value) => {
     const updated = { ...editedData };
+    if (!updated[month] || !updated[month][index]) {
+      console.error(`Cannot update comment: month ${month} or index ${index} not found`);
+      return;
+    }
     updated[month][index].comment = value;
     setEditedData(updated);
   };
@@ -127,6 +94,29 @@ const MeasurableKRA = ({ initialData }) => {
     setTimeout(() => setMessage(""), 2500);
   };
 
+  // Get available months dynamically
+  const availableMonths = Object.keys(editedData);
+
+  // If no data, show empty state
+  if (availableMonths.length === 0) {
+    return (
+      <div className="kra-section page container-fluid py-4">
+        <h5 className="fw-semibold mb-3" style={{ color: "var(--main-color)" }}>
+          Non-discretionary KRA
+        </h5>
+        <h6 className="fw-semibold" style={{ color: "var(--accent-color)" }}>
+          Measurable
+        </h6>
+        <div className="text-center py-5">
+          <p className="text-muted">No measurable KRA data available</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Get current month data
+  const currentMonthData = editedData[selectedMonth] || [];
+
   return (
     <div className="kra-section page container-fluid py-4">
       <h5 className="fw-semibold mb-3" style={{ color: "var(--main-color)" }}>
@@ -138,7 +128,7 @@ const MeasurableKRA = ({ initialData }) => {
           Measurable
         </h6>
         <div className="kra-month-tabs d-flex gap-3">
-          {["April", "May", "June"].map((month) => (
+          {availableMonths.map((month) => (
             <button
               key={month}
               className={`kra-month-btn ${selectedMonth === month ? "active" : ""}`}
@@ -168,87 +158,99 @@ const MeasurableKRA = ({ initialData }) => {
             </tr>
           </thead>
           <tbody>
-            {editedData[selectedMonth]?.map((row, index) => (
-              <React.Fragment key={index}>
-                <tr>
-                  <td>
-                    <input type="checkbox" className="form-check-input" />
-                  </td>
-                  <td>{row.kra}</td>
-                  <td>{row.unit}</td>
+            {currentMonthData.length === 0 ? (
+              <tr>
+                <td colSpan="9" className="text-center text-muted">
+                  No data available for {selectedMonth}
+                </td>
+              </tr>
+            ) : (
+              currentMonthData.map((row, index) => (
+                <React.Fragment key={`${selectedMonth}-${index}-${row.kraCode || index}`}>
+                  <tr>
+                    <td>
+                      <input type="checkbox" className="form-check-input" />
+                    </td>
 
-                  {/* Actual */}
-                  <td>
-                    <div className="kra-value-box text-center">
-                      <div className="kra-display-value">{kraData[selectedMonth][index].actual}</div>
-                      <input
-                        type="number"
-                        className="form-control text-center input-cell"
-                        value={row.actual}
-                        onChange={(e) =>
-                          handleInputChange(selectedMonth, index, "actual", e.target.value)
-                        }
-                      />
-                    </div>
-                  </td>
+                    <td>{row.kra || 'N/A'}</td>
+                    <td>{row.unit || 'N/A'}</td>
 
-                  {/* Target */}
-                  <td>
-                    <div className="kra-value-box text-center">
-                      <div className="kra-display-value">{kraData[selectedMonth][index].target}</div>
-                      <input
-                        type="number"
-                        className="form-control text-center input-cell"
-                        value={row.target}
-                        onChange={(e) =>
-                          handleInputChange(selectedMonth, index, "target", e.target.value)
-                        }
-                      />
-                    </div>
-                  </td>
+                    {/* ACTUAL */}
+                    <td>
+                      <div className="kra-value-box text-center">
+                        <div className="kra-display-value">
+                          {kraData[selectedMonth]?.[index]?.actual || row.actual || '0'}
+                        </div>
 
-                  <td>{row.maxScore}</td>
-                  <td>{row.score}</td>
-                  <td>{row.category}</td>
-
-                  <td className="text-center">
-                    {/* <i
-                      className="bi bi-chat-dots comment-icon"
-                      onClick={() => handleCommentToggle(index)}
-                    ></i> */}
-
-                    <i class="bi bi-chat-left-text-fill text-primary"
-                      onClick={() => handleCommentToggle(index)}
-
-                    ></i>
-                  </td>
-                </tr>
-
-                {openCommentIndex === index && (
-                  <tr className="comment-row">
-                    <td colSpan="9">
-                      <div className="px-3 py-2">
-                        <label className="fw-semibold mb-2 d-flex">Appraisee Comment:</label>
-                        <textarea
-                          className="form-control"
-                          rows="3"
-                          placeholder="Enter Your Comment"
-                          value={row.comment}
+                        <input
+                          type="number"
+                          className="form-control text-center input-cell"
+                          value={row.actual || ''}
                           onChange={(e) =>
-                            handleCommentChange(selectedMonth, index, e.target.value)
+                            handleInputChange(selectedMonth, index, "actual", e.target.value)
                           }
-                        ></textarea>
+                        />
                       </div>
                     </td>
+
+                    {/* TARGET */}
+                    <td>
+                      <div className="kra-value-box text-center">
+                        <div className="kra-display-value">
+                          {kraData[selectedMonth]?.[index]?.target || row.target || '0'}
+                        </div>
+
+                        <input
+                          type="number"
+                          className="form-control text-center input-cell"
+                          value={row.target || ''}
+                          onChange={(e) =>
+                            handleInputChange(selectedMonth, index, "target", e.target.value)
+                          }
+                        />
+                      </div>
+                    </td>
+
+                    <td>{row.maxScore || '0'}</td>
+                    <td>{row.score || '0'}</td>
+                    <td>{row.category || 'measurable'}</td>
+
+                    <td className="text-center">
+                      <i
+                        className="bi bi-chat-left-text-fill text-primary"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleCommentToggle(index)}
+                      ></i>
+                    </td>
                   </tr>
-                )}
-              </React.Fragment>
-            ))}
+
+                  {openCommentIndex === index && (
+                    <tr className="comment-row">
+                      <td colSpan="9">
+                        <div className="px-3 py-2">
+                          <label className="fw-semibold mb-2 d-flex">Appraisee Comment:</label>
+
+                          <textarea
+                            className="form-control"
+                            rows="3"
+                            placeholder="Enter Your Comment"
+                            value={row.comment || ''}
+                            onChange={(e) =>
+                              handleCommentChange(selectedMonth, index, e.target.value)
+                            }
+                          ></textarea>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Submit button */}
+      {/* Optional: Uncomment if you want a submit button in this component */}
       {/* <div className="text-end mt-3">
         <button
           className="btn px-4"
@@ -259,7 +261,7 @@ const MeasurableKRA = ({ initialData }) => {
           }}
           onClick={handleSubmit}
         >
-          Submit
+          Save Changes
         </button>
       </div> */}
     </div>

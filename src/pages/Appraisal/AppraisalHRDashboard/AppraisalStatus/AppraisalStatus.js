@@ -1,3 +1,12 @@
+/**
+ * The `AppraiserStatus` component in JavaScript handles HR status updates and status changes for
+ * appraisals with search and reset functionalities.
+ * @returns The `AppraiserStatus` component is being returned. It contains JSX elements for a page
+ * related to appraisal status change utility. The component includes a header section with breadcrumb
+ * links and info section, input controls for searching and resetting data, options for selecting
+ * appraisal period and quarterly period, a table displaying appraisal data with options to update
+ * status, and buttons for actions like search and reset.
+ */
 // AppraiserPage.jsx
 import { BackButton } from '../../../../components/common';
 import { FaInfoCircle } from "react-icons/fa";

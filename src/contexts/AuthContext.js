@@ -1,3 +1,5 @@
+/* The above code is a React context setup for handling authentication in a React application. Here's a
+breakdown of what the code does: */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Create the AuthContext

@@ -1,3 +1,11 @@
+/**
+ * The `KraTable` component in React renders a table for displaying and editing Key Result Areas (KRAs)
+ * with checkboxes, input fields, and action options.
+ * @returns The `KraTable` component is being returned. It is a functional component that renders a
+ * table with rows of data based on the `rows` prop passed to it. The component handles various user
+ * interactions such as checkbox selection, input changes, action selection, and comment toggling. It
+ * also provides a submit button to trigger the `onSubmit` function when any row is checked.
+ */
 import React from "react";
 import "./KraTable.css";
 

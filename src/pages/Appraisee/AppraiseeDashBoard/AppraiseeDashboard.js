@@ -1,3 +1,12 @@
+/**
+ * The `AppraiseeDashboard` function fetches and displays appraisee dashboard data based on financial
+ * year, appraisal period, and quarter parameters.
+ * @returns The `AppraiseeDashboard` component is being returned. This component fetches data related
+ * to the appraisee's dashboard using React Query and displays it in the UI. It includes various
+ * sections such as fetching data, handling loading and error states, extracting data from the API
+ * response, calculating date ranges, determining appraisal status, and displaying employee appraisal
+ * cards.
+ */
 import { BackButton } from '../../../components/common';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import EmployeeModel from '../../../models/EmployeeModel';

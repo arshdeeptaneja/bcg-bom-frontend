@@ -1,3 +1,11 @@
+/**
+ * The `ReportingReviewBulk` component in React handles bulk upload and download functionalities for
+ * reporting authority data with error log display.
+ * @returns The `ReportingReviewBulk` component is being returned. It contains JSX elements for a page
+ * that allows users to upload, download, and view error logs for reporting authority updates in bulk.
+ * The page includes file upload functionality, buttons to download sample and data table files, a
+ * table displaying error logs, and some informational sections.
+ */
 import React, { useState, useEffect } from "react";
 import { FaDownload } from "react-icons/fa";
 // import "./ReportingReviewBulk.css";

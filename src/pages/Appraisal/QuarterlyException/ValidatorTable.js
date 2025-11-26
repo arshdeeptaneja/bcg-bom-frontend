@@ -1,3 +1,12 @@
+/**
+ * The ValidatorTable component in React handles the display and interaction of rows with checkboxes,
+ * input fields, and action buttons for validation purposes.
+ * @returns The `ValidatorTable` component is being returned. It is a functional component that renders
+ * a table for validator review with various interactive elements such as checkboxes, input fields,
+ * radio buttons, buttons, and text areas for comments. The component also handles user interactions
+ * like checking/unchecking rows, updating values, toggling comments, selecting actions, and submitting
+ * the form.
+ */
 import React from 'react';
 import './ValidatorTable.css';
 

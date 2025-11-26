@@ -19,7 +19,7 @@ export default function DevelopmentInputs({ questions }) {
           </div>
 
           {/* Radio buttons for multiple choice questions */}
-          {question.options && (
+          {/* {question.options && (
             <div className="d-flex flex-row gap-3">
               {question.options.map((option) => (
                 <div className="form-check" key={option}>
@@ -39,7 +39,7 @@ export default function DevelopmentInputs({ questions }) {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
           {/* Textarea for free text response */}
           <textarea className="form-control" placeholder="Enter your Response" rows={3} />
         </div>

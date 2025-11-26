@@ -1,3 +1,12 @@
+/**
+ * The `TeamMembers` component in React displays team member information, status indicators, and role
+ * allocations based on user roles and data provided.
+ * @returns The `TeamMembers` component is being returned. It displays information about team members,
+ * role allocations, status counts, and allows for interaction with team members based on user roles.
+ * The component includes various sections such as role allocator card, total members count, status
+ * list, team members list with their details and status indicators, and roles allocated section for
+ * specific user roles.
+ */
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./TeamMembers.css";

@@ -1,3 +1,11 @@
+/**
+ * The LogsAndAutoAnnuals component in React renders a section for displaying logs and another section
+ * for auto annual appraisals with buttons for various actions.
+ * @returns The `LogsAndAutoAnnuals` component is being returned. It consists of two sections: Logs
+ * Section and Auto Annual Appraisal Section. The Logs Section displays a list of log items with
+ * download buttons, while the Auto Annual Appraisal Section displays a table with appraisal period and
+ * action buttons for auto submitting appraisee scales.
+ */
 import React from "react";
 import "./LogsAndAutoAnnuals.css";
 

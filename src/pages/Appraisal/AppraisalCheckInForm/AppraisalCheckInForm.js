@@ -1,3 +1,10 @@
+/**
+ * The `AppraisalCheckInForm` function is a React component that dynamically renders either the
+ * QuarterlyCheckIn or AnnualCheckIn component based on the appraisal period.
+ * @returns The `AppraisalCheckInForm` component is being returned. It dynamically renders either the
+ * `QuarterlyCheckIn` or `AnnualCheckIn` component based on the `isQuarterlyFlow` state from the
+ * `useAppraisalCheckIn` hook.
+ */
 import React from 'react';
 import './AppraisalCheckInForm.css';
 import { useAppraisalContext } from './useAppraisalContext';

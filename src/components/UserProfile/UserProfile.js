@@ -1,3 +1,11 @@
+/**
+ * The UserProfile component in React fetches and displays various user data including profile
+ * information, roles, KRA metrics, team members, and dashboard summary.
+ * @returns The `UserProfile` component is being returned. It fetches user data from various APIs and
+ * displays the user's profile information, roles, KRA metrics, team members, and dashboard summary.
+ * The component includes loading states, error handling, and refresh buttons for different data
+ * sections.
+ */
 import React, { useState, useEffect } from 'react';
 import { userAPI, dashboardAPI } from '../../services/api';
 import './UserProfile.css';

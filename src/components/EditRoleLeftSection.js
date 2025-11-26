@@ -1,3 +1,12 @@
+/**
+ * The `EditRoleLeftSide` component in React handles the display and selection of various roles, along
+ * with associated data, for a user in an employee management system.
+ * @returns The `EditRoleLeftSide` component is being returned. It contains JSX elements for rendering
+ * a form with role selection dropdowns, date inputs, and buttons for submitting and adding more roles.
+ * It also displays KRAs and their weights if available. The component includes conditional rendering
+ * based on certain conditions like `isEdit`, `rc_mpp_status`, and the number of visible roles.
+ * Additionally, it handles
+ */
 
 import React, { useEffect, useState } from 'react';
 import { HiMiniArrowLongLeft } from 'react-icons/hi2';

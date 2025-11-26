@@ -1,3 +1,10 @@
+/**
+ * The provided JavaScript functions `loadAppraisalData` and `saveAppraisalData` help in loading and
+ * saving appraisal data respectively using localStorage.
+ * @returns The `loadAppraisalData` function returns the parsed data loaded from storage if it exists,
+ * or an empty object if no existing data is found. The `saveAppraisalData` function does not return
+ * anything explicitly, but it saves the merged data successfully to the localStorage.
+ */
 export const loadAppraisalData = () => {
   try {
     const stored = localStorage.getItem("appraisalFormData");

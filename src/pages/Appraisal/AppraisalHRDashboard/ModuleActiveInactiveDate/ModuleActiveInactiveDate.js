@@ -1,3 +1,12 @@
+/**
+ * The `ModuleActiveInactiveDate` component in React manages modules with active and inactive dates,
+ * allowing users to add, edit, and delete modules while providing pagination and filtering options.
+ * @returns The `ModuleActiveInactiveDate` component is being returned. It contains JSX elements for
+ * displaying a module active and inactive date management interface. The component includes filters
+ * for module name, financial year, quarter, and scale, as well as a table displaying module data with
+ * options to edit, delete, and add modules. Pagination functionality is also implemented to navigate
+ * through the data entries. Additionally, there is a loading
+ */
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./ModuleActiveInactiveDate.css";

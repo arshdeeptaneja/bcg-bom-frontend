@@ -1,3 +1,12 @@
+/**
+ * The `ExceptionHome` function component fetches exception dashboard data based on selected filters
+ * and displays KPI tabs for total and pending exceptions.
+ * @returns The `ExceptionHome` component is being returned. It includes JSX elements for displaying an
+ * exception resolution dashboard. The component fetches data using React Query based on selected
+ * filters like financial year, appraisal period, and quarter. It also includes UI elements like
+ * filters, KPI tabs for displaying exception counts, and a foot note section. If data is still
+ * loading, a loading spinner is displayed. If there is
+ */
 import AppraisalAccordion from '../../../components/Appraisal/AppraisalAccordion/AppraisalAccordion';
 import { KpiTab } from '../../../components/common';
 import './ExceptionHome.css';

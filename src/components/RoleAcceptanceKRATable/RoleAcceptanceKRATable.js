@@ -1,3 +1,12 @@
+/**
+ * The RoleAcceptanceKRATable component renders a table displaying Key Result Areas (KRAs) with their
+ * descriptions, weights, and frequencies along with a total weight calculation.
+ * @param props - The `RoleAcceptanceKRATable` component takes in the following props:
+ * @returns The `RoleAcceptanceKRATable` component is being returned. It renders a table displaying Key
+ * Result Areas (KRAs) with their descriptions, weights, and frequencies. The component receives
+ * `kraListData`, `kraTotal`, and `acceptanceKRADetails` as props. It maps over the `kraListData` array
+ * to display each KRA item in a table
+ */
 import React from 'react'
 import './RoleAcceptanceKRATable.css'
 
