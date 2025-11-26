@@ -75,7 +75,9 @@ function QuarterlyException() {
     mutationFn: ({ payload, attachment }) =>
       appraisalAPI.submitQuarterlyExceptionReport(payload, attachment),
     onSuccess: (data) => {
-      toast.success('Exception submitted successfully!');
+
+      console.log("data is: ", data)
+      toast.success(`Exception submitted successfully. Ticket ID: ${data.ticketId}`);
       // Clear localStorage after successful submission
       localStorage.removeItem('appraisalFormData');
       localStorage.removeItem('appraisalDeclaration');
