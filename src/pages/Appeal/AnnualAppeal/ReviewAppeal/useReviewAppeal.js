@@ -72,10 +72,11 @@ export const useReviewAppeal = () => {
       PostAppealScore: item.POST_APPEAL_SCORE || 0
     }));
 
-    // Transform measurable KRAs
+    // Transform measurable KRAs - use APPEAL_ID as unique identifier
     const measurableKrasList = rawData.result_kra_list_discretionary_measurable_child || [];
-    const measurableKras = Array.isArray(measurableKrasList) ? measurableKrasList.map(kra => ({
+    const measurableKras = Array.isArray(measurableKrasList) ? measurableKrasList.map((kra, index) => ({
       kraId: kra.AP_KRA_ID,
+      appealId: kra.APPEAL_ID || `m-${index}`, // Use APPEAL_ID as unique key
       kraName: kra.KRA_DESC || '',
       kraType: kra.KRA_TYPE || 'discretionary_measurable',
       description: kra.KRA_METRIC || '',
@@ -93,13 +94,15 @@ export const useReviewAppeal = () => {
       appraiserScore: kra.REPA_SCORE,
       reviewerScore: kra.REVA_SCORE,
       status: kra.STATUS || '',
-      appealId: kra.APPEAL_ID
+      mpbOldValue: kra.MPB_OLD_VALUE,
+      mpbNewValue: kra.MPB_NEW_VALUE
     })) : [];
 
-    // Transform non-measurable KRAs
+    // Transform non-measurable KRAs - use APPEAL_ID as unique identifier
     const nonMeasurableKrasList = rawData.result_kra_list_discretionary_non_measurable_child || [];
-    const nonMeasurableKras = Array.isArray(nonMeasurableKrasList) ? nonMeasurableKrasList.map(kra => ({
+    const nonMeasurableKras = Array.isArray(nonMeasurableKrasList) ? nonMeasurableKrasList.map((kra, index) => ({
       kraId: kra.AP_KRA_ID,
+      appealId: kra.APPEAL_ID || `nm-${index}`, // Use APPEAL_ID as unique key
       kraName: kra.KRA_DESC || '',
       kraType: kra.KRA_TYPE || 'discretionary_non_measurable',
       description: kra.KRA_METRIC || '',
@@ -117,7 +120,8 @@ export const useReviewAppeal = () => {
       appraiserScore: kra.REPA_SCORE,
       reviewerScore: kra.REVA_SCORE,
       status: kra.STATUS || '',
-      appealId: kra.APPEAL_ID
+      mpbOldValue: kra.MPB_OLD_VALUE,
+      mpbNewValue: kra.MPB_NEW_VALUE
     })) : [];
 
     // Calculate discretionary scores
@@ -228,12 +232,12 @@ export const useReviewAppeal = () => {
     setOverallComment(comment);
   }, []);
 
-  // Helper function to find KRA by ID
-  const findKraById = useCallback((kraId) => {
-    const measurable = data.measurableKras.find(k => k.kraId === kraId);
+  // Helper function to find KRA by appealId (unique identifier)
+  const findKraById = useCallback((appealId) => {
+    const measurable = data.measurableKras.find(k => k.appealId === appealId);
     if (measurable) return { kra: measurable, type: 'measurable' };
 
-    const nonMeasurable = data.nonMeasurableKras.find(k => k.kraId === kraId);
+    const nonMeasurable = data.nonMeasurableKras.find(k => k.appealId === appealId);
     if (nonMeasurable) return { kra: nonMeasurable, type: 'non-measurable' };
 
     return null;
