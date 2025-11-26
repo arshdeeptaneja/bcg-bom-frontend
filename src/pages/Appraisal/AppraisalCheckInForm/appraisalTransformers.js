@@ -80,6 +80,19 @@ const resolveFallbackMonth = (resultsData, rawData) => {
 };
 
 /**
+ * The above functions are data transformers that convert API responses for annual and quarterly
+ * appraisals into component-compatible formats.
+ * @param apiResponse - The `apiResponse` parameter in both `transformAnnualAppraisalData` and
+ * `transformQuarterlyAppraisalData` functions represents the data received from the API endpoint for
+ * annual and quarterly appraisals, respectively. This data is then transformed into a format that is
+ * compatible with the components in the application
+ * @returns For the `transformAnnualAppraisalData` function:
+ * - The function returns an object containing various transformed data from the annual appraisal API
+ * response, such as `finalScoreSummary`, `monthlyScoreSummary`, `measurableKras`, `nonMeasurableKras`,
+ * `totalMeasurableActual`, `totalMeasurableMax`, `totalNonMeasurableActual`, `totalNonMeasurableMax`,
+ * `
+ */
+/**
  * Data transformer for annual appraisal API response
  * Converts API response to component-compatible format
  * 

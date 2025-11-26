@@ -41,6 +41,7 @@ import {
   AnnualAppraisalReview,
   AnnualReview,
   AnnualReviewView,
+  QuaterlyAppraiserCheckIn,
 } from './pages';
 import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
 import ReviewAppeal from './pages/Appeal/AnnualAppeal/ReviewAppeal/ReviewAppeal';
@@ -570,6 +571,16 @@ function AppContent() {
               }
             />
 
+<Route
+  path="/quarterly/quaterly-appraiser-check-in"
+  element={
+    isAuthenticated ? (
+      <QuaterlyAppraiserCheckInLayout onLogout={handleLogout} />
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+ />
 
               <Route
               path="/utility/quarterly-appraiser-bulk"
@@ -1060,6 +1071,7 @@ const AdminSettingLayout = ({ onLogout }) => (
   </>
 );
 
+
 const AppealDeletionLayout = ({ onLogout }) => (
   <>
     <TopBar onLogout={onLogout} />
@@ -1110,6 +1122,12 @@ const AnnualReviewViewLayout = ({ onLogout }) => (
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <AnnualReviewView />
+//QuaterlyAppraiserCheckIn
+const QuaterlyAppraiserCheckInLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <QuaterlyAppraiserCheckIn />
   </>
 );
 

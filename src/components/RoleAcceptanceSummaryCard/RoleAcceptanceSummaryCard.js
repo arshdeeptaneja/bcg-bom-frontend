@@ -1,18 +1,23 @@
+/**
+ * The RoleAcceptanceSummaryCard component displays a summary of accepted roles with main role,
+ * location, and start date details.
+ * @param props - The `RoleAcceptanceSummaryCard` component takes a prop called `acceptedRoleSummary`,
+ * which is an array of objects containing information about accepted roles. Each object in the array
+ * should have the following properties:
+ * @returns The `RoleAcceptanceSummaryCard` component is being returned. It renders a card with role
+ * acceptance summary details including main role, location, and role start date for each accepted role
+ * in the `acceptedRoleSummary` array. The `dateConvert` function is used to format the role start
+ * date.
+ */
 import React from 'react'
 import './RoleAcceptanceSummaryCard.css'
+
+
+
 const RoleAcceptanceSummaryCard = (props) => {
   const { acceptedRoleSummary } = props;
   let startDate = acceptedRoleSummary && acceptedRoleSummary.length > 0 ? acceptedRoleSummary.ROLE_START_DATE : '';
 
-  // function dateConvert(dateStr) {
-  //   if (!dateStr) return "";
-  //   // Take only date part (YYYY-MM-DD)
-  //   const [year, month, day] = dateStr.split("T")[0].split("-");
-  //   // Format manually
-  //   const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-  //   const shortYear = year.slice(-2);
-  //   return `${day.padStart(2, "0")} ${months[month - 1]} ${shortYear}`;
-  // }
 
   function dateConvert(dateStr) {
     if (!dateStr) return "";

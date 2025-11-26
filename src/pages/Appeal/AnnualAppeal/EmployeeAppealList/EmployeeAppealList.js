@@ -1,3 +1,12 @@
+/**
+ * The `EmployeeAppealList` component in React fetches and displays appeal committee data for an
+ * employee, allowing filtering and pagination of the results.
+ * @returns The `EmployeeAppealList` component is being returned. It includes conditional rendering
+ * based on the loading and error states of the API call. If the data is still loading, a loading
+ * spinner is displayed. If there is an error in fetching the data, an error message is shown.
+ * Otherwise, the main content of the component is displayed, which includes a form for filtering data,
+ * a table displaying appeal
+ */
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BackButton } from "../../../../components/common";

@@ -1,3 +1,11 @@
+/**
+ * The `ExceptionDeletion` component in React handles searching and deleting exceptions based on EMP
+ * Number and displays the results in a table format.
+ * @returns The `ExceptionDeletion` component is being returned. It contains JSX elements for a page
+ * that includes a breadcrumb, search section, and table section for managing exceptions. The component
+ * uses state variables like `empNumber`, `loading`, `tableData`, and `noData` along with functions
+ * like `handleSearch` and `handleDelete` to interact with the API and update the UI based on the
+ */
 import React, { useState } from "react";
 import "./ExceptionDelection.css";
 import { BackButton } from "../../../../components/common";

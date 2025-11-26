@@ -1,3 +1,9 @@
+/**
+ * The QuarterlyAppraisee function fetches and displays appraisal data for a specific employee during a
+ * quarterly check-in period.
+ * @returns The `QuarterlyAppraisee` component is returning JSX elements based on different conditions.
+ * Here is a summary of what is being returned:
+ */
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BackButton } from '../../../components/common';
@@ -102,11 +108,19 @@ export default function QuarterlyAppraisee() {
   const responseData = data?.data || data;
   const redResult = responseData?.redresult || [];
 
+
   const appraisalScoreDash = responseData?.appraisal_score_dash || [];
-  const averageScore = responseData?.average_score ?? 0;
-  const maxScore = responseData?.max_score ?? 100;
+  const averageScore = responseData?.score ?? 0;
+            
+  const maxScore = responseData?.maxscore ?? 0;
   const cardData = responseData?.result?.[0] || responseData?.redresult?.[0] || null;
 
+  const additionalRoles = [
+    cardData?.ADDITIONAL_ROLE_1,
+    cardData?.ADDITIONAL_ROLE_2,
+    cardData?.ADDITIONAL_ROLE_3,
+    cardData?.ADDITIONAL_ROLE_4,
+  ].filter(role => role && role !== "none");
 
   const hasCardData = !!cardData;
 
@@ -121,9 +135,9 @@ export default function QuarterlyAppraisee() {
       appraiser: cardData?.reporting_authority_name || 'N/A',
     })
     : null;
-    console.log("RED RESULT:", redResult);
-console.log("CARD DATA:", cardData);
-console.log("EMPLOYEE MODEL:", employeeModel);
+  console.log("RED RESULT:", redResult);
+  console.log("CARD DATA:", cardData);
+  console.log("EMPLOYEE MODEL:", employeeModel);
 
   return (
     <div className="pageWrapper">
@@ -162,10 +176,11 @@ console.log("EMPLOYEE MODEL:", employeeModel);
             employee={employeeModel}
             dateRange={cardDateRange}
             redResult={redResult}
-            primaryRole={cardData?.MAIN_ROLE || cardData?.primaryRole || 'Role 1'}
-            appraisalStatus={cardData?.APPRAISAL_STATUS || 'PENDING AT APPRAISEE'}
+            primaryRole={cardData?.MAIN_ROLE || cardData?.primary || 'Role 1'}
+            appraisalStatus={cardData?.appraisalStatus || 'PENDING AT APPRAISEE'}
             exceptionStatus="COMPLETED"
-            organization={cardData?.ORGANIZATION || cardData?.organization || 'Dhanetha'}
+            organization={cardData?.organization || 'Dhanetha'}
+            additionalRoles={additionalRoles}
             quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
             appraisalPeriod={appraisalPeriod}
             scoreData={appraisalScoreDash}

@@ -1,3 +1,11 @@
+/**
+ * The `DeclarationSection` component in React manages a declaration checkbox, file upload
+ * functionality, and error handling for a quarterly exception form.
+ * @returns The `DeclarationSection` component is being returned. It consists of a form with a checkbox
+ * for declaration, a file upload section, error messages for file validation, and a success popup
+ * message. The component allows the user to select a file, check a declaration checkbox, and handles
+ * file validation and storage using `useState` and `useEffect` hooks.
+ */
 import React, { useState, useEffect } from 'react';
 import { saveAppraisalData } from './localStorageHelpers';
 import './QuarterlyException.css';

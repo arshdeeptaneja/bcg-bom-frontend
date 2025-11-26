@@ -187,7 +187,7 @@ export const useExceptionValidator = ({
 
         // Build submission payload with nested structure
         const payload = buildValidatorPayload(selectedRows, {
-            urlId: reviewData?.urlId || urlId || empNo,
+            urlId: reviewData?.urlId || urlId || "U-34545",
             quarter,
             financialYear: Number(parsedFinancialYear) || new Date().getFullYear(),
             empNo,

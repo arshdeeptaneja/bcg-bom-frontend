@@ -1,3 +1,12 @@
+/**
+ * The `AppraiserCheckIn` function is a React component that displays an appraiser check-in dashboard
+ * with filters and employee appraisal cards based on fetched data.
+ * @returns The `AppraiserCheckIn` component is being returned. It is a functional component that
+ * displays an Appraiser Check-In Dashboard. The component fetches data using React Query based on
+ * financial year, appraisal period, and quarter. It then applies filters to the data and displays
+ * Employee Appraisal Cards based on the filtered results. The component also includes a filter panel
+ * with options to filter by employee number
+ */
 import { BackButton } from '../../../components/common';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import './AppraiserCheckIn.css';

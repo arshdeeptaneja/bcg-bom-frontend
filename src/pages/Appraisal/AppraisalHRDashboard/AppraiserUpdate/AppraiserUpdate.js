@@ -1,3 +1,10 @@
+/**
+ * The `AppraiserUpdate` component in JavaScript renders a dashboard for updating appraisals and
+ * reviews by employee number.
+ * @returns The `AppraiserUpdate` component is being returned. It contains JSX elements for a page
+ * layout with breadcrumb navigation, info section, title, input controls, appraisal period selection,
+ * quarterly period selection, a message for no data found, and a table structure.
+ */
 // AppraiserPage.jsx
 import { BackButton } from '../../../../components/common';
 import { FaInfoCircle } from "react-icons/fa";

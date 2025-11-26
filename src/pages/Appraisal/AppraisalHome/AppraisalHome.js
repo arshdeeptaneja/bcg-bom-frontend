@@ -1,3 +1,12 @@
+/**
+ * The `AppraisalHome` function in JavaScript fetches and displays appraisal dashboard data based on
+ * selected filters and allows navigation to different sections.
+ * @returns The `AppraisalHome` component is being returned. It contains JSX elements for displaying
+ * the dashboard of the appraisal system. The component includes filters for selecting the financial
+ * year, appraisal period, and quarter. It also displays KPI tabs for different check-ins and modes
+ * related to the appraisal process. Additionally, there is an accordion component for displaying the
+ * user's final score information and a foot note section with additional
+ */
 import AppraisalAccordion from '../../../components/Appraisal/AppraisalAccordion/AppraisalAccordion';
 import { KpiTab } from '../../../components/common';
 import './AppraisalHome.css';

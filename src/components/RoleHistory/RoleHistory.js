@@ -1,3 +1,12 @@
+/**
+ * The `RoleHistory` component in React manages the display and interaction for viewing, adding,
+ * editing, and responding to role history data for an employee.
+ * @returns The `RoleHistory` component is being returned. It displays the role history of an employee,
+ * allows adding new roles, editing existing roles, showing KRAs, and responding to role acceptance
+ * discussions. The component includes UI elements for role cards, timelines, KRA lists, and buttons
+ * for actions like adding new roles, editing roles, deleting roles, and responding to discussions. It
+ * also includes a side drawer
+ */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./RoleHistory.css";
 import EditRoleLeftSide from "../EditRoleLeftSection";

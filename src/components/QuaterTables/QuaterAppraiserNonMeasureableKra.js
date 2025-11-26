@@ -1,15 +1,17 @@
 /**
- * The QuaterNonMeasurable component renders a table displaying non-measurable Key Result Areas (KRAs)
- * along with their actual scores, total scores, max scores, and categories, based on the provided
- * data.
- * @returns The `QuaterNonMeasurable` component is being returned. It displays information related to
- * non-measurable Key Result Areas (KRAs) including the total actual score, total max score, and a list
- * of non-measurable KRAs with their details such as actual score, total score, max score, and
- * category. If there are no KRAs available, it displays a message indicating "Not applicable
+ * The QuaterAppraiserNonMeasureableKra component renders a list of non-measurable KRAs with actual,
+ * total, and max scores along with their categories in a table format.
+ * @returns The `QuaterAppraiserNonMeasureableKra` component is being returned. It renders a list of
+ * Non-Measurable KRAs along with their actual score, total score, max score, and KRA category. If
+ * there are no KRAs available, it displays a message "Not applicable." The component also checks for
+ * the existence of KRAs data before rendering them in a table format
  */
+/* The line `import { useState, useMemo } from 'react';` is importing the `useState` and `useMemo`
+hooks from the React library. These hooks are used in functional components to manage state and
+perform memoization respectively. */
 import { useState, useMemo } from 'react';
 
-export default function QuaterNonMeasurable({
+export default function QuaterAppraiserNonMeasureableKra({
   totalActualScore = 0,
   totalMaxScore = 0,
   kraListData = {},
@@ -25,17 +27,7 @@ export default function QuaterNonMeasurable({
   return (
     <div className="d-flex flex-column gap-4">
 
-      {/* Section Headline */}
-      <div className="table-headline d-flex flex-row justify-content-between">
-        <h5 className="fw-bold">Non - Measurable</h5>
-
-        <div className="d-flex flex-row gap-2">
-          <span className="text-muted">Discretionary Non - Measurable Score:</span>
-          <span className="fw-bold">
-            {totalActualScore.toFixed(1)} / {totalMaxScore.toFixed(1)}
-          </span>
-        </div>
-      </div>
+      
 
       {/* HEADER ROW */}
       <div

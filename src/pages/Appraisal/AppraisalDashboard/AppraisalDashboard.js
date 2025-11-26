@@ -1,3 +1,12 @@
+/**
+ * The `AppraisalDashboard` component is used to display an appraisal dashboard with various tabs and
+ * accordion sections based on fetched data.
+ * @returns The `AppraisalDashboard` component is being returned. It displays the appraisal dashboard
+ * with various sections such as FY Selection, Appraisal Tabs, and Accordions for Self-Appraisal,
+ * Reporting Authority, Exception Resolution, Exception Validation, and Appeal Resolution. The
+ * component fetches data using React Query based on the selected financial year and user details. It
+ * also includes loading spinner while data is being fetched and handles
+ */
 import './AppraisalDashboard.css';
 import { BackButton, ImageTab } from '../../../components/common';
 import LoadingSpinner from '../../../components/Spinner';
@@ -19,8 +28,8 @@ const AppraisalDashboard = () => {
   const navigate = useNavigate();
   const employeeDetails = getEmployeeDetails();
   const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
-  const sol = getUserProperty('sol', employeeDetails?.currentUser?.[0]?.LOCATION || '');
-  const roleType = getUserProperty('roleType', employeeDetails?.currentUser?.[0]?.ROLE_TYPE || '');
+  const sol = getUserProperty('LOCATION', employeeDetails?.currentUser?.[0]?.LOCATION || '');
+  const roleType = getUserProperty('ROLE_NAME', employeeDetails?.currentUser?.[0]?.ROLE_TYPE || '');
 
   const getFinancialYears = () => {
     const years = [];
@@ -70,11 +79,11 @@ const AppraisalDashboard = () => {
     appealcommitteezone: data?.tiles?.appealcommitteezone === 'yes',
     show_appeal_resolution_tile: data?.tiles?.show_appeal_resolution_tile === 'yes',
     show_exception_repoty_tile: data?.tiles?.show_exception_repoty_tile === 'yes',
-    show_excepption_resolution_tile: true, // TODO: Remove this after testing data?.tiles?.show_excepption_resolution_tile === 'yes',
+    show_excepption_resolution_tile: data?.tiles?.show_excepption_resolution_tile === 'yes',
     showappraisal: data?.tiles?.showappraisal === 'yes',
     appeal_committee_head: data?.tiles?.appeal_committee_head === 'yes',
     appeal_committee_position: data?.tiles?.appeal_committee_position === 'yes',
-    show_exception_validator_tile: true, // TODO: Remove this after testing data?.tiles?.show_exception_validator_tile === 'yes',
+    show_exception_validator_tile: data?.tiles?.show_exception_validator_tile === 'yes',
   };
 
   console.log(showTileMap);

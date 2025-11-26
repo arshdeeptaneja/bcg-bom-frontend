@@ -1,3 +1,12 @@
+/**
+ * The QuarterlyAppraiserBulk component renders a page for managing quarterly appraiser details in
+ * bulk, including file upload and download functionalities.
+ * @returns The `QuarterlyAppraiserBulk` functional component is being returned. It contains JSX
+ * elements for a page that allows users to upload, download, and view quarterly appraiser details in
+ * bulk. The page includes a breadcrumb header, info section, back button, page title, upload section
+ * for files, download buttons, a note about file extensions, and a table section (currently displaying
+ * "No records
+ */
 import React from "react";
 import { BackButton } from "../../../../components/common";
 import { FaInfoCircle } from "react-icons/fa";

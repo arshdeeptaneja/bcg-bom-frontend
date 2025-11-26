@@ -1,3 +1,15 @@
+/**
+ * The `AppealCommitteeReview` function in JavaScript is a React component that handles the review and
+ * submission of appeal committee decisions for employee appraisals.
+ * @param fy - The `fy` parameter in the code represents the financial year. It is used to determine
+ * the financial year for which the data is being fetched or processed. The `parseFinancialYear`
+ * function is used to extract the year from the financial year string provided.
+ * @returns The `AppealCommitteeReview` component is being returned. It contains JSX elements for
+ * rendering the appeal committee review page. The component includes sections for displaying employee
+ * details, appeal summary, KRA review table, committee decision options, committee remarks input,
+ * declaration confirmation checkbox, and action buttons for submitting the committee decision. The
+ * component also handles data fetching, state management, and form submission logic related to the
+ */
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
