@@ -106,7 +106,7 @@ function QuarterlyException() {
     queryFn: () =>
       appraisalAPI.getQuarterlyExceptionReport({
         empNo: empNo,
-        url: employee?.url || employee?.URL_ID || '',
+        url: employee?.url || employee?.URL_ID || 'U-34545',
         roleType: currentRole || role || 'APPRAISEE',
         financialYear: parseInt(extractYear(financialYear)),
         quarter: quarter || '',
