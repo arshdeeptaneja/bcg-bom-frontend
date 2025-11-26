@@ -4,3 +4,5 @@ export { default as AnnualAppraisalReview } from './AnnualAppraisalReview';
 export { useAnnualAppraisalReview } from './useAnnualAppraisalReview';
 export { default as AnnualReview } from './AnnualReview';
 export { useAnnualReview } from './useAnnualReview';
+export { default as AnnualReviewView } from './AnnualReviewView';
+export { useAnnualReviewView } from './useAnnualReviewView';
