@@ -1,3 +1,12 @@
+/**
+ * The QuaterlyAppraiserCheckIn function in React handles the display and submission of appraiser
+ * check-in data for a specific quarter, including measurable and non-measurable KRAs, development
+ * inputs, and saving/submission functionality.
+ * @returns The `QuaterlyAppraiserCheckIn` component is being returned. It contains conditional
+ * rendering based on the loading state, error state, and data availability. If the required parameters
+ * are missing, it displays a message indicating the missing parameters. If it is still loading, it
+ * shows a loading spinner. If there is an error while fetching data, it displays an error message.
+ */
 import React, { useState, useEffect } from 'react';
 import { BackButton } from '../../../../components/common';
 import { useLocation } from 'react-router-dom';

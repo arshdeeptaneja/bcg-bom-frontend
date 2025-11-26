@@ -1,3 +1,14 @@
+/**
+ * The QuaterAppraiserNonMeasureableKra component renders a list of non-measurable KRAs with actual,
+ * total, and max scores along with their categories in a table format.
+ * @returns The `QuaterAppraiserNonMeasureableKra` component is being returned. It renders a list of
+ * Non-Measurable KRAs along with their actual score, total score, max score, and KRA category. If
+ * there are no KRAs available, it displays a message "Not applicable." The component also checks for
+ * the existence of KRAs data before rendering them in a table format
+ */
+/* The line `import { useState, useMemo } from 'react';` is importing the `useState` and `useMemo`
+hooks from the React library. These hooks are used in functional components to manage state and
+perform memoization respectively. */
 import { useState, useMemo } from 'react';
 
 export default function QuaterAppraiserNonMeasureableKra({

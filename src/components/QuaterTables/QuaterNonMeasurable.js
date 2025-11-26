@@ -1,3 +1,12 @@
+/**
+ * The QuaterNonMeasurable component renders a table displaying non-measurable Key Result Areas (KRAs)
+ * along with their actual scores, total scores, max scores, and categories, based on the provided
+ * data.
+ * @returns The `QuaterNonMeasurable` component is being returned. It displays information related to
+ * non-measurable Key Result Areas (KRAs) including the total actual score, total max score, and a list
+ * of non-measurable KRAs with their details such as actual score, total score, max score, and
+ * category. If there are no KRAs available, it displays a message indicating "Not applicable
+ */
 import { useState, useMemo } from 'react';
 
 export default function QuaterNonMeasurable({

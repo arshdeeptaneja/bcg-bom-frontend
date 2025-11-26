@@ -1,3 +1,11 @@
+/**
+ * The `AppraiserCheckInDashboard` function in JavaScript is a React component that displays a
+ * dashboard for appraisers to check in on their reportees' appraisals, including filtering options and
+ * summary information.
+ * @returns The code is exporting a React functional component named `AppraiserCheckInDashboard`. This
+ * component renders a dashboard for an appraiser to check in on their reportees' appraisals for a
+ * specific financial year, appraisal period, and quarter.
+ */
 import { useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";

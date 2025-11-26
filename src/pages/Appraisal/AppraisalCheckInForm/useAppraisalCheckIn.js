@@ -1,3 +1,10 @@
+/**
+ * The `useAppraisalCheckIn` custom hook in JavaScript is used to manage state and actions related to
+ * employee appraisal check-ins, including fetching data, handling form changes, saving drafts, and
+ * submitting check-ins.
+ * @returns The `useAppraisalCheckIn` custom hook is being returned. It provides various values and
+ * functions to manage the appraisal check-in process. Here is a summary of what is being returned:
+ */
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';

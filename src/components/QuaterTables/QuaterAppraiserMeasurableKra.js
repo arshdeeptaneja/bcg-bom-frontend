@@ -1,3 +1,11 @@
+/**
+ * The QuaterAppraiserMeasurableKra component renders a table displaying measurable Key Result Areas
+ * (KRAs) with data fetched from an API or fallback dummy data.
+ * @returns The `QuaterAppraiserMeasurableKra` component is being returned. It renders a section with
+ * month tabs, a measurable table displaying Key Result Areas (KRAs) with their units, actual values,
+ * targets, max scores, actual scores, and categories. Additionally, it includes a section for
+ * Non-Measurable KRAs with a placeholder score, and a scale instruction list for scoring performance
+ */
 import React from "react";
 import "./QuaterMeasurableKra.css";
 

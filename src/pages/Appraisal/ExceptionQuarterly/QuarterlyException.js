@@ -1,3 +1,10 @@
+/**
+ * The `QuarterlyException` function in JavaScript is a React component that handles the submission of
+ * quarterly exception reports for employee appraisals, including fetching data from an API, displaying
+ * KRA details, and allowing users to save drafts or submit exceptions.
+ * @returns The `QuarterlyException` component is returning a JSX structure that includes the following
+ * sections:
+ */
 import React, { useState, useEffect, useCallback } from 'react';
 import { BackButton } from '../../../components/common';
 import { useLocation, useNavigate } from 'react-router-dom';

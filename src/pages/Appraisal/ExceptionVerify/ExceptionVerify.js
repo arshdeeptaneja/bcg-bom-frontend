@@ -1,3 +1,11 @@
+/**
+ * The `ExceptionVerify` function in JavaScript fetches and displays exception validation data based on
+ * selected filters and financial year.
+ * @returns The `ExceptionVerify` component is being returned. It includes JSX elements for displaying
+ * a dashboard related to exception validation. The component fetches data using React Query based on
+ * selected filters like financial year, appraisal period, and quarter. It displays loading spinner
+ * while data is being fetched and shows error toast if there is an API error.
+ */
 import AppraisalAccordion from '../../../components/Appraisal/AppraisalAccordion/AppraisalAccordion';
 import { KpiTab } from '../../../components/common';
 import './ExceptionVerify.css';

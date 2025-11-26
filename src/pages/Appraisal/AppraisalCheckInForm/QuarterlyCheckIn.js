@@ -1,3 +1,12 @@
+/**
+ * The QuarterlyCheckIn component in React handles the display and interaction logic for a quarterly
+ * check-in form, including sections for score summaries, KRA inputs, comments, and development inputs.
+ * @returns The `QuarterlyCheckIn` component is being returned. It contains JSX elements that make up
+ * the UI for a quarterly check-in form. The component includes various sections such as header,
+ * description, final score summary, monthly score summary, discretionary KRA sections for measurable
+ * and non-measurable KRAs, additional comments sections for different types of comments, development
+ * inputs section, and save/submit buttons.
+ */
 import React, { useState } from 'react';
 import { BackButton } from '../../../components/common';
 import LoadingSpinner from '../../../components/Spinner';

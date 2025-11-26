@@ -1,3 +1,13 @@
+/**
+ * The `EmployeeExceptionList` component in JavaScript fetches and displays exception quarterly
+ * validator review data for employees based on various filters and allows for searching and clearing
+ * filters.
+ * @returns The `EmployeeExceptionList` component is being returned. It includes functionality to fetch
+ * data using React Query, handle filters, display loading spinners and error messages, and render a
+ * table with data fetched from an API. The component also includes filter options for employee, role,
+ * branch, and status, as well as buttons for searching and clearing filters. The table displays
+ * information such as Ticket ID, Employee Number
+ */
 import { BackButton } from '../../../components/common';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from "react";

@@ -1,3 +1,12 @@
+/**
+ * The `AdminSetting` component in React displays a table of uploaded files with details like file
+ * name, date, status, records, and uploader, along with options to upload, download data table, and
+ * download sample files.
+ * @returns The `AdminSetting` component is being returned. It contains JSX elements for displaying a
+ * page with breadcrumb navigation, info section, upload functionality, and a table displaying data
+ * related to file uploads. The component also includes styling using classNames and inline styles for
+ * various elements.
+ */
 import React from "react";
 import { FaDownload } from "react-icons/fa";
 import { BackButton } from "../../../../components/common";

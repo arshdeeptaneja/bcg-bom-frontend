@@ -1,3 +1,12 @@
+/**
+ * The `HrDashboard` function in this JavaScript code is a React component that displays HR dashboard
+ * information and allows users to filter data based on financial year, appraisal period, and quarter.
+ * @returns The `HrDashboard` component is being returned. It contains JSX elements for displaying
+ * various sections of an HR dashboard, including filters selection, overall summary, completion cards
+ * grid, and other components like `UtilitiesSection` and `LogsAndAutoAnnuals`. The component fetches
+ * data using `useQuery` from the `appraisalAPI` service based on selected filters like appraisal
+ * period, financial year
+ */
 import React, { useState } from 'react';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import './HrDashboard.css';

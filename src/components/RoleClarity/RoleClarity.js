@@ -1,3 +1,11 @@
+/**
+ * The `RoleClarity` component in React displays user roles with additional details and allows toggling
+ * to view role history.
+ * @returns The `RoleClarity` component is being returned. It contains JSX elements to display role
+ * information based on the `dashboardData` prop passed to it. The component renders the main role
+ * details, role start and end dates, role status, and additional roles if present. It also provides a
+ * button to toggle and view role history if there are multiple roles available.
+ */
 import React, { useEffect, useState } from "react";
 import "./RoleClarity.css";
 import accepted from "../../assets/accepted-check.svg";
@@ -5,7 +13,6 @@ import { BsChevronDoubleDown, BsChevronDoubleUp } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useDispatch, useSelector } from "react-redux";
-// import { fetchStatus } from "../../features/dashboard/dashboardSlice";
 
 const RoleClarity = ({ dashboardData }) => {
   const [showHistory, setShowHistory] = useState(false);

@@ -1,3 +1,12 @@
+/**
+ * The `AnnualCheckIn` component in React renders an annual appraisal form with various sections and
+ * functionalities based on the provided data and state.
+ * @returns The `AnnualCheckIn` component is being returned. It contains JSX elements that make up the
+ * UI for an Annual Appraisal page. The component includes conditional rendering based on the
+ * `isLoading` state, and it renders different sections such as Header Section, Final Score Summary,
+ * Monthly Score Summary, Discretionary KRA, and Development Inputs based on the data received as
+ * props. The component also handles saving
+ */
 import React from 'react';
 import { BackButton } from '../../../components/common';
 import LoadingSpinner from '../../../components/Spinner';

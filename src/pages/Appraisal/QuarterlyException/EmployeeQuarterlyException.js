@@ -1,3 +1,15 @@
+/**
+ * The `EmployeeQuarterlyException` function in JavaScript is used to review and validate quarterly
+ * exceptions for employees, displaying relevant data and allowing for submission of validation.
+ * @param fy - The `fy` parameter in the code refers to the financial year. It is used to specify the
+ * financial year for which the data is being processed or displayed. The financial year typically
+ * consists of a start date and an end date and is commonly used in financial and accounting contexts
+ * to organize and report financial information
+ * @returns The `EmployeeQuarterlyException` component is being returned. It contains JSX elements for
+ * rendering a page where a user can review quarterly exceptions, view employee details, download
+ * attachments, review and submit KRAs, and provide comments. The component handles data fetching,
+ * mutation, and state management related to the review process.
+ */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BackButton } from '../../../components/common';
 import { useLocation, useNavigate } from 'react-router-dom';

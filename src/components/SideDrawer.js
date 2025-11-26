@@ -1,3 +1,12 @@
+/**
+ * The `SideDrawer` component in React handles various offcanvas interactions for accepting,
+ * discussing, and deleting roles, as well as responding to role acceptance discussions.
+ * @param props - The `SideDrawer` component receives the following props:
+ * @returns The `SideDrawer` component is being returned. It contains offcanvas elements for accepting
+ * a role mix, choosing a reason for discussion, deleting a role, and responding to a discussion. Each
+ * offcanvas section has specific UI elements and functionality related to role management and
+ * discussions.
+ */
 import React, { useEffect, useState } from "react";
 import * as bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 

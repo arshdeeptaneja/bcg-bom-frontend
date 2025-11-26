@@ -1,3 +1,5 @@
+/* This code snippet is defining a Redux slice using the `createSlice` function from the
+`@reduxjs/toolkit` package. */
 import { createSlice } from "@reduxjs/toolkit";
 import { FaCircleCheck, FaFlag } from "react-icons/fa6";
 import { BsFillPatchExclamationFill } from "react-icons/bs";

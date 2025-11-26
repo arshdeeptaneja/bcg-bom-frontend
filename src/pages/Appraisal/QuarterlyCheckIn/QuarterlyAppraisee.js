@@ -1,3 +1,9 @@
+/**
+ * The QuarterlyAppraisee function fetches and displays appraisal data for a specific employee during a
+ * quarterly check-in period.
+ * @returns The `QuarterlyAppraisee` component is returning JSX elements based on different conditions.
+ * Here is a summary of what is being returned:
+ */
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BackButton } from '../../../components/common';

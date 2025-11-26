@@ -1,3 +1,5 @@
+/* The User class represents an employee with properties such as employee number, name, scale, roles,
+appraiser, and primary role. */
 /**
  * User model for the employee
  * @param {Object} props - The user properties.

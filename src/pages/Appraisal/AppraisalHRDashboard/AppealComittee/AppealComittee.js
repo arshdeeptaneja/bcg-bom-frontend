@@ -1,3 +1,12 @@
+/**
+ * The `AppealComittee` component in React handles file upload, download, and display of error logs
+ * related to an appeal committee feature.
+ * @returns The `AppealComittee` component is being returned. It contains JSX elements for displaying a
+ * page related to the Appeal Committee functionality. The page includes a breadcrumb, header, file
+ * upload section, download buttons, and a table displaying logs. The component also includes state
+ * variables for file, logs, and loading status, as well as functions for fetching logs, handling file
+ * upload, downloading data table,
+ */
 import React, { useState, useEffect } from "react";
 import "./AppealComittee.css";
 import { BackButton } from "../../../../components/common";

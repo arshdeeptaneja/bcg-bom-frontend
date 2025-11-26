@@ -1,3 +1,11 @@
+/**
+ * The QuaterlyMeasurableKraTable component renders a table displaying key performance indicators with
+ * actual, target, max score, and actual score values.
+ * @returns The QuaterlyMeasurableKraTable component is being returned. It renders a table displaying
+ * key performance indicators (KPIs) data including KRA description, unit, actual value, target value,
+ * max score, actual score, and KRA category. The data displayed in the table is either from the
+ * provided 'data' prop or from a default set of KPIs if no data is
+ */
 import React from "react";
 import "./QuaterMeasurableKra.css";
 

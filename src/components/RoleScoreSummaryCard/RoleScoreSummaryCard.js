@@ -1,3 +1,15 @@
+/**
+ * The RoleScoreSummaryCard component displays a summary of KRA scores including measurable,
+ * non-measurable, discretionary KRAs, and the total score.
+ * @param props - The `RoleScoreSummaryCard` component receives a prop called
+ * `acceptedRoleSummaryList`, which is an object containing information about the role score summary.
+ * The component extracts specific values from this object such as "Total Non measurable KRAs Score"
+ * and "Total Score" to display in the table.
+ * @returns The `RoleScoreSummaryCard` component is being returned. It displays a table with KRA (Key
+ * Result Area) score summary information such as Total Measurable KRAs, Total Discretionary KRAs, and
+ * the Total Score. The data for Total Measurable KRAs and Total Discretionary KRAs are hardcoded as
+ * '70' and '30' respectively. The component receives `acceptedRole
+ */
 import React from 'react';
 import './RoleScoreSummaryCard.css'
 

@@ -1,3 +1,13 @@
+/**
+ * The QuaterlyAppraiseeCheckIn function in React handles the process of adding and submitting
+ * appraisee check-in data for a specific quarter, displaying measurable and non-measurable KRA tables,
+ * development inputs, and allowing for saving and submitting the check-in report.
+ * @returns The `QuaterlyAppraiseeCheckIn` component is being returned. It contains conditional
+ * rendering based on the loading state, error state, and data availability. If loading, it displays a
+ * loading spinner. If there is an error, it shows an error message. If data is available, it renders
+ * the check-in form with various sections like description, table of monthly scores, measurable and
+ * non-me
+ */
 import React, { useState, useEffect } from 'react';
 import { BackButton } from '../../../../components/common';
 import { useLocation, useNavigate } from 'react-router-dom';

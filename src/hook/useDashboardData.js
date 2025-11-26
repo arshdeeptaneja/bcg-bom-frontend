@@ -1,3 +1,9 @@
+/**
+ * The `useDashboardData` function fetches and manages dashboard data for a user based on their
+ * authentication details and updates the Redux store with the retrieved data.
+ * @returns The `useDashboardData` custom hook is being returned. It provides the following values and
+ * functions:
+ */
 import { useState, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useAuth } from "../contexts/AuthContext";

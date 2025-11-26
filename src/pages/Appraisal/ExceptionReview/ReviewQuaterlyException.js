@@ -1,3 +1,16 @@
+/**
+ * The `ReviewQuarterlyException` function in JavaScript is used to handle the review process for
+ * quarterly exceptions in an appraisal system, including fetching data, displaying a table for review,
+ * and submitting the review with validations.
+ * @param fy - The `fy` parameter in the code refers to the financial year. It is used to specify the
+ * financial year for which the data is being retrieved or processed. The `parseFinancialYear` function
+ * is used to extract and format the financial year from the provided input.
+ * @returns The `ReviewQuarterlyException` component is being returned. It contains JSX elements for
+ * rendering the header section, content, and a loading spinner if data is still loading. The component
+ * displays information related to reviewing quarterly exceptions, including employee details, date
+ * range, a download button for attachments, a note section, and a table for handling KRAs with options
+ * for submitting the review.
+ */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { BackButton } from '../../../components/common';
 import { useLocation, useNavigate } from 'react-router-dom';

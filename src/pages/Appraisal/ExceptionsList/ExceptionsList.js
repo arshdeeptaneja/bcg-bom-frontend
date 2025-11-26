@@ -1,3 +1,11 @@
+/**
+ * The `ExceptionsList` function component fetches exception data based on filters and displays it in a
+ * table for review.
+ * @returns The `ExceptionsList` component is being returned. It includes various functionalities such
+ * as fetching exception dashboard data using React Query, handling filters for employee, primary role,
+ * branch, and exception status, displaying a loading spinner while data is being fetched, and
+ * rendering an ExceptionListTable component with exception data.
+ */
 import { BackButton } from '../../../components/common';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';

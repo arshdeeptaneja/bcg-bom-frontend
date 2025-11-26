@@ -1,3 +1,12 @@
+/**
+ * The `AppraisalDashboard` component is used to display an appraisal dashboard with various tabs and
+ * accordion sections based on fetched data.
+ * @returns The `AppraisalDashboard` component is being returned. It displays the appraisal dashboard
+ * with various sections such as FY Selection, Appraisal Tabs, and Accordions for Self-Appraisal,
+ * Reporting Authority, Exception Resolution, Exception Validation, and Appeal Resolution. The
+ * component fetches data using React Query based on the selected financial year and user details. It
+ * also includes loading spinner while data is being fetched and handles
+ */
 import './AppraisalDashboard.css';
 import { BackButton, ImageTab } from '../../../components/common';
 import LoadingSpinner from '../../../components/Spinner';

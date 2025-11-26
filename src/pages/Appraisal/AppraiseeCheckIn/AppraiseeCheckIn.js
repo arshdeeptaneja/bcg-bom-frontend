@@ -1,3 +1,10 @@
+/**
+ * The `AppraiseeCheckIn` function is a React component that fetches and displays appraisal dashboard
+ * data for an appraisee based on financial year, appraisal period, and quarter parameters.
+ * @returns The `AppraiseeCheckIn` component is being returned. This component fetches data using React
+ * Query based on the financial year, appraisal period, and quarter parameters. It handles different
+ * states such as loading, error, and successful data retrieval.
+ */
 import { BackButton } from '../../../components/common';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import './AppraiseeCheckIn.css';
