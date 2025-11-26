@@ -12,14 +12,13 @@ import './AnnualReview.css';
  * Annual Review Component (Reviewer/Acceptor)
  * 
  * Displays both appraisee and appraiser data (read-only) with editable fields for:
- * - Reviewer/Acceptor scores (1-5) for each Non-Measurable KRA
- * - Reviewer/Acceptor comments for each KRA (3-column layout)
+ * - Reviewer scores (1-5) for each Non-Measurable KRA
+ * - Reviewer comments for each KRA (3-column layout)
  * - Reviewing Authority questions (IDs 12-18)
  * - Integrity assessment
  * 
  * Key Features:
- * - Role switcher dropdown (REVIEWER / ACCEPTOR)
- * - 3-column layout: Appraisee | Appraiser | Reviewer/Acceptor
+ * - 3-column layout: Appraisee | Appraiser | Reviewer
  * - Yellow highlighting for editable sections
  */
 const AnnualReview = () => {
@@ -29,13 +28,11 @@ const AnnualReview = () => {
     isLoading,
     isError,
     context,
-    roleState,
     formState,
     actions,
   } = useAnnualReview();
 
   const { employee, dateRange, metadata } = context;
-  const { currentRole, handleRoleChange } = roleState;
   const { reviewerScores, reviewerDevResponses, reviewerOptionResponses } = formState;
   const {
     handleSubmit,
@@ -61,9 +58,6 @@ const AnnualReview = () => {
   const nonMeasurableKraListData = data?.nonMeasurableKras || {};
   const totalNonMeasurableActual = data?.totalNonMeasurableActual || 0;
   const totalNonMeasurableMax = data?.totalNonMeasurableMax || 0;
-
-  // Role label for display
-  const roleLabel = currentRole === 'REVIEWER' ? 'Reviewer' : 'Acceptor';
 
   // Handle missing context
   if (!context.financialYear || !context.appraisalPeriod) {
@@ -97,7 +91,7 @@ const AnnualReview = () => {
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
             <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-              Annual Appraisal - {roleLabel} Review
+              Annual Appraisal - Reviewer
             </h1>
           </div>
         </div>
@@ -113,23 +107,8 @@ const AnnualReview = () => {
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-            Annual Appraisal - {roleLabel} Review
+            Annual Appraisal - Reviewer
           </h1>
-        </div>
-        <div className="d-flex flex-row align-items-center">
-          <label htmlFor="roleSelect" className="me-2 text-muted fw-bold">
-            Role:
-          </label>
-          <select
-            id="roleSelect"
-            value={currentRole}
-            onChange={handleRoleChange}
-            className="form-select form-select-sm"
-            style={{ width: '180px' }}
-          >
-            <option value="REVIEWER">Reviewing Authority</option>
-            <option value="ACCEPTOR">Accepting Authority</option>
-          </select>
         </div>
       </div>
 
@@ -277,12 +256,12 @@ const AnnualReview = () => {
                                     </div>
 
                                     <label className="fw-semibold text-muted mb-2">
-                                      {roleLabel} Comment:
+                                      Reviewer Comment:
                                     </label>
                                     <textarea
                                       className="form-control"
                                       rows={3}
-                                      placeholder={`Enter ${roleLabel} Comment`}
+                                      placeholder="Enter Reviewer Comment"
                                       value={reviewerInput.comment || ''}
                                       onChange={(e) => handleReviewerCommentChange(kraId, e.target.value)}
                                     />
