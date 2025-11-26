@@ -36,7 +36,6 @@ export const useAnnualReview = () => {
     employee: employeeFromState,
     appraisalPeriod = searchParams.get('appraisalPeriod') || 'Annual',
     dateRange: dateRangeFromState,
-    currentAuthority = searchParams.get('currentAuthority') || 'REVIEWER', // REVIEWER or ACCEPTOR
   } = stateParams;
 
   // Normalize financial year (e.g., "FY 2024-25" -> "2024")
@@ -48,9 +47,6 @@ export const useAnnualReview = () => {
 
   // Context validation
   const isContextValid = Boolean(empNo && normalizedFinancialYear && (url || urlId));
-
-  // Role state (REVIEWER vs ACCEPTOR)
-  const [currentRole, setCurrentRole] = useState(currentAuthority || 'REVIEWER');
 
   // Reviewer scores per KRA: { [AP_KRA_ID]: { score, comment } }
   const [reviewerScores, setReviewerScores] = useState({});
@@ -96,7 +92,6 @@ export const useAnnualReview = () => {
     zoneName,
     roleType,
     isContextValid,
-    currentRole,
   });
 
   // Fetch acceptor appraisal data
@@ -266,14 +261,14 @@ export const useAnnualReview = () => {
   useEffect(() => {
     if (!transformedData) return;
 
-    // Initialize reviewer scores from existing REVA/AC data
+    // Initialize reviewer scores from existing data
     const initialReviewerScores = {};
     if (transformedData.nonMeasurableKras) {
       Object.values(transformedData.nonMeasurableKras).forEach((kraList) => {
         kraList.forEach((kra) => {
           initialReviewerScores[kra.KraId] = {
-            score: currentRole === 'REVIEWER' ? kra.RevaActuals : kra.AcActuals,
-            comment: currentRole === 'REVIEWER' ? kra.CommentReva : kra.CommentAc,
+            score: kra.RevaActuals || kra.AcActuals || null,
+            comment: kra.CommentReva || kra.CommentAc || '',
           };
         });
       });
@@ -283,23 +278,23 @@ export const useAnnualReview = () => {
     // Initialize reviewer development responses
     const initialDevResponses = {};
     developmentInputs.reportingReviewAuthority?.forEach((q) => {
-      const existingResponse = currentRole === 'REVIEWER' ? q.revaResponse : q.acResponse;
-      initialDevResponses[q.id] = existingResponse || '';
+      const existingResponse = q.revaResponse || q.acResponse || '';
+      initialDevResponses[q.id] = existingResponse;
     });
     setReviewerDevResponses(initialDevResponses);
 
     // Initialize reviewer option responses
     developmentInputs.optionBased?.forEach((q) => {
       if (q.key === 'integrity' && q.editableBy === 'REVIEWER_ACCEPTOR') {
-        const existingResponse = currentRole === 'REVIEWER' ? q.revaResponse : q.acResponse;
+        const existingResponse = q.revaResponse || q.acResponse || null;
         setReviewerOptionResponses((prev) => ({
           ...prev,
-          integrity: existingResponse || null,
+          integrity: existingResponse,
         }));
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transformedData, currentRole]);
+  }, [transformedData]);
 
   // Error handling
   useEffect(() => {
@@ -347,68 +342,37 @@ export const useAnnualReview = () => {
     setIsDirty(true);
   };
 
-  const handleRoleChange = (e) => {
-    if (isDirty) {
-      const confirmed = window.confirm(
-        'Changing roles will reload the form. Any unsaved changes will be lost. Continue?'
-      );
-      if (!confirmed) return;
-    }
-    setCurrentRole(e.target.value);
-    setIsDirty(false);
-  };
-
   /**
    * Build submit payload for reviewer/acceptor
    */
   const buildSubmitPayload = () => {
-    // Build kraData array with reviewer/acceptor updates
+    // Build kraData array with reviewer updates
     const kraData = rawKraData.map((originalKra) => {
       const kraId = originalKra.AP_KRA_ID;
       const reviewerInput = reviewerScores[kraId] || {};
 
-      // Determine which fields to update based on current role
-      const updates = {};
-      if (currentRole === 'REVIEWER') {
-        updates.REVA_ACTUALS = reviewerInput.score || originalKra.REVA_ACTUALS;
-        updates.COMMENT_REVA = reviewerInput.comment || originalKra.COMMENT_REVA || null;
-        updates.REVA_SCORE = reviewerInput.score || originalKra.REVA_SCORE;
-      } else if (currentRole === 'ACCEPTOR') {
-        updates.AC_ACTUALS = reviewerInput.score || originalKra.AC_ACTUALS;
-        updates.COMMENT_AC = reviewerInput.comment || originalKra.COMMENT_AC || null;
-        updates.AC_SCORE = reviewerInput.score || originalKra.AC_SCORE;
-      }
-
       return {
         ...originalKra,
-        ...updates,
+        REVA_ACTUALS: reviewerInput.score || originalKra.REVA_ACTUALS,
+        COMMENT_REVA: reviewerInput.comment || originalKra.COMMENT_REVA || null,
+        REVA_SCORE: reviewerInput.score || originalKra.REVA_SCORE,
+        AC_ACTUALS: reviewerInput.score || originalKra.AC_ACTUALS,
+        COMMENT_AC: reviewerInput.comment || originalKra.COMMENT_AC || null,
+        AC_SCORE: reviewerInput.score || originalKra.AC_SCORE,
+        // FIRSTCOMMENT field as per CURL payload
+        FIRSTCOMMENT: reviewerInput.comment || originalKra.COMMENT_REVA || originalKra.COMMENT_AC || null,
       };
     });
 
-    // Build questions array with reviewer/acceptor responses
+    // Build questions array with reviewer responses
     const questions = rawQuestionsData.map((originalQuestion) => {
       const questionId = originalQuestion.ID;
       const reviewerResponse = reviewerDevResponses[questionId];
 
-      const updates = {};
-      if (reviewerResponse !== undefined) {
-        if (currentRole === 'REVIEWER') {
-          updates.REVA_RESPONSE = reviewerResponse;
-        } else if (currentRole === 'ACCEPTOR') {
-          updates.AC_RESPONSE = reviewerResponse;
-        }
-      }
-
-      // Handle option-based responses (integrity)
-      if (originalQuestion.CATEGORY === 'Development Inputs' &&
-          originalQuestion.SUB_CATEGORY === 'Integrity') {
-        if (currentRole === 'REVIEWER' && reviewerOptionResponses.integrity) {
-          updates.REVA_RESPONSE = reviewerOptionResponses.integrity;
-          updates.OPTIONS_REVA = reviewerOptionResponses.integrity;
-        } else if (currentRole === 'ACCEPTOR' && reviewerOptionResponses.integrity) {
-          updates.AC_RESPONSE = reviewerOptionResponses.integrity;
-        }
-      }
+      // Determine integrityOption for integrity questions
+      const isIntegrityQuestion = originalQuestion.CATEGORY === 'Development Inputs' &&
+          originalQuestion.SUB_CATEGORY === 'Integrity';
+      const integrityValue = isIntegrityQuestion ? reviewerOptionResponses.integrity : null;
 
       return {
         QUESTION_ID: originalQuestion.ID,
@@ -421,12 +385,13 @@ export const useAnnualReview = () => {
         RESPONSE_ID: originalQuestion.RESPONSE_ID || null,
         SELF_RESPONSE: originalQuestion.SELF_RESPONSE || null,
         SELF_RESPONSE_2: originalQuestion.SELF_RESPONSE_2 || null,
+        SELF_RESPONSE_OPTION: originalQuestion.SELF_RESPONSE || null,
         REPA_RESPONSE: originalQuestion.REPA_RESPONSE || null,
-        REVA_RESPONSE: originalQuestion.REVA_RESPONSE || null,
-        AC_RESPONSE: originalQuestion.AC_RESPONSE || null,
+        REVA_RESPONSE: reviewerResponse || originalQuestion.REVA_RESPONSE || null,
+        AC_RESPONSE: reviewerResponse || originalQuestion.AC_RESPONSE || null,
         OPTIONS_REPA: originalQuestion.OPTIONS_REPA || null,
-        OPTIONS_REVA: originalQuestion.OPTIONS_REVA || null,
-        ...updates,
+        OPTIONS_REVA: integrityValue || originalQuestion.OPTIONS_REVA || null,
+        integrityOption: integrityValue,
       };
     });
 
@@ -438,9 +403,8 @@ export const useAnnualReview = () => {
       empNo,
       ecNumber: empNo,
       financialYear: parseInt(normalizedFinancialYear, 10),
-      roleType: currentRole, // 'REVIEWER' or 'ACCEPTOR'
 
-      // Learning metrics (if available)
+      // Learning metrics
       continuousLearningPresent: learningMetrics.continuousLearningPresent,
       mandatoryCourses: learningMetrics.mandatoryCourses,
       learningCourses: learningMetrics.learningCourses,
@@ -451,6 +415,11 @@ export const useAnnualReview = () => {
       functions,
       questions,
       feedbackInput: [],
+
+      // Performance comments (empty for now, can be added to UI later)
+      performanceMeasurableComment: '',
+      performanceNonMeasurableComment: '',
+      performanceSemiMeasurableComment: '',
 
       warningFlag: false,
       warningComment: '',
@@ -497,22 +466,15 @@ export const useAnnualReview = () => {
     };
   };
 
-  // Submit mutation (mocked for now)
+  // Submit mutation
   const submitMutation = useMutation({
     mutationFn: (payload) => {
-      // MOCKED - Replace with real API when ready
-      console.log('[Mock] Submitting acceptor review:', payload);
-      return Promise.resolve({
-        success: true,
-        message: 'Review submitted successfully',
-      });
-
-      // UNCOMMENT when backend is ready:
-      // return appraisalAPI.submitAcceptorAppraisal(payload);
+      console.log('[useAnnualReview] Submitting acceptor review:', payload);
+      return appraisalAPI.submitAcceptorAppraisal(payload);
     },
     onSuccess: (response) => {
       console.log('[useAnnualReview] Submit success:', response);
-      toast.success(response.message || 'Review submitted successfully');
+      toast.success(response?.MSG === 'success' ? 'Review submitted successfully' : (response?.MSG || 'Review submitted successfully'));
       setIsDirty(false);
       navigate(-1);
     },
@@ -567,12 +529,6 @@ export const useAnnualReview = () => {
         acceptingAuthorityName: apiResponse?.ACCEPTING_AUTHORITY_NAME || '',
         ...(transformedData?.metadata || {}),
       },
-    },
-
-    // Role state
-    roleState: {
-      currentRole,
-      handleRoleChange,
     },
 
     // Form state
