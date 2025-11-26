@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '../../common/Modal/Modal';
-import  RoleTimeline  from '../../../components/Appraisal/CheckInDescriptionSection/RoleTimeline';
+import RoleTimeline from '../../../components/Appraisal/CheckInDescriptionSection/RoleTimeline';
 /**
  * Employee Appraisal summary card
  * Accepts an EmployeeModel instance (`employee`) and renders key details with actions.
@@ -15,12 +15,17 @@ export default function EmployeeAppraisalCard({
   quarter,
   appraisalPeriod,
   primaryRole,
-  additionalRoles = [],
+  
   organization,
   appraisalStatus = 'PENDING AT APPRAISEE',
   exceptionStatus = 'NOT CREATED',
+
+
+  // Individual additional roles
+
+  additionalRoles = [],
   scoreData = [],
-    redResult = [],  
+  redResult = [],
   onAddCheckIn,
   onViewSummary,
   onAddException,
@@ -46,7 +51,7 @@ export default function EmployeeAppraisalCard({
   // Format the date range properly
   const getFormattedDateRange = () => {
     if (!dateRange) return 'N/A';
-    
+
     // Check if it contains ISO dates (with T and Z)
     if (dateRange.includes('T')) {
       // Split by → separator
@@ -57,7 +62,7 @@ export default function EmployeeAppraisalCard({
         return `${startDate} → ${endDate}`;
       }
     }
-    
+
     // If already formatted, return as is
     return dateRange;
   };
@@ -159,7 +164,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Number</div>
-              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{employee.empNo}</div>
+              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{employee.empNo}</div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -171,7 +176,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Date</div>
-              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{getFormattedDateRange()}</div>
+              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{getFormattedDateRange()}</div>
             </div>
           </div>
         </div>
@@ -186,7 +191,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Name</div>
-              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{employee.employeeName}</div>
+              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{employee.employeeName}</div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -198,7 +203,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Primary Role</div>
-              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{primaryRole}</div>
+              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{primaryRole}</div>
             </div>
           </div>
         </div>
@@ -213,7 +218,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Scale</div>
-              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>{employee.employeeScale}</div>
+              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{employee.employeeScale}</div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -225,7 +230,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Appraiser</div>
-              <div className="fw-semibold" style={{fontSize:"0.9rem"}}>
+              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>
                 {employee.appraiser?.name || employee.appraiser || 'N/A'}
               </div>
             </div>
@@ -294,12 +299,12 @@ export default function EmployeeAppraisalCard({
           <div className="primary-role-badge mb-3">
             <span className="badge bg-light text-dark px-3 py-2 d-inline-flex align-items-center gap-2">
               <i className="bi bi-star-fill text-success" />
-              <span className="fw-semibold" style={{fontSize:"1rem"}}>{primaryRole || 'N/A'}</span>
+              <span className="fw-semibold" style={{ fontSize: "1rem" }}>{primaryRole || 'N/A'}</span>
             </span>
           </div>
 
           {/* Additional Roles Timeline */}
-          <RoleTimeline additionalRoles={additionalRoles} />
+<RoleTimeline additionalRoles={additionalRoles} />
 
           {/* Organization */}
           <div className="organization-section">
@@ -357,7 +362,7 @@ EmployeeAppraisalCard.propTypes = {
   }).isRequired,
   dateRange: PropTypes.string,
   primaryRole: PropTypes.string,
-  additionalRoles: PropTypes.arrayOf(PropTypes.string),
+  additionalRoles: PropTypes.arrayOf(PropTypes.string),  // <-- Correct
   organization: PropTypes.string,
   appraisalStatus: PropTypes.string,
   exceptionStatus: PropTypes.string,
