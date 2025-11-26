@@ -934,6 +934,40 @@ if (filterStatus) params.append("STATUS", filterStatus);
     }
   },
 
+  // GET: Fetch acceptor (reviewer) appraisal view-only payload
+  getAcceptorAppraisalView: async ({
+    empNo,
+    url,
+    zoneName,
+    roleType,
+    financialYear,
+    quarter,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'url', url);
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'quarter', quarter);
+
+      const response = await apiClient.get(
+        `/appraisal/acceptor_appraisal/view?${params.toString()}`,
+        {
+          headers: {
+            accept: '*/*',
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('getAcceptorAppraisalView error', error);
+      throw error;
+    }
+  },
+
   // Fetch reporting authority bulk upload history
   reportingAuthorityBulkList: async ({ financialYear }) => {
     try {
@@ -1000,16 +1034,15 @@ if (filterStatus) params.append("STATUS", filterStatus);
 
 
 
-  // GET: Get appeal report data
+  // GET: Get appeal report data for appraisee to view KRAs and submit appeal
   getAppealReport: async ({ roleId, roleType }) => {
     try {
-      const params = new URLSearchParams({
-        roleId,
-        roleType
-      });
-      // TODO: Verify this endpoint. It was lost in a merge conflict.
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'roleType', roleType);
+      
       const response = await apiClient.get(
-        `/appraisal/appeal/report?${params.toString()}`
+        `/appraisal/appeal_report?${params.toString()}`
       );
       return response.data;
     } catch (error) {
@@ -1158,11 +1191,15 @@ if (filterStatus) params.append("STATUS", filterStatus);
   },
 
   // POST: Submit appeal report with file attachment
+  // Payload structure: { id, empNo, reportingAuthorityNo, kraData: [{ target: {...} }], declarationOption }
+  // Returns: { TICKETID: number, type: "success" }
   submitAppealReport: async (payload, attachment) => {
     try {
       const formData = new FormData();
       formData.append('payload', JSON.stringify(payload));
+      if (attachment) {
       formData.append('attachment', attachment);
+      }
       const response = await apiClient.post(
         '/appraisal/appeal_report/submit',
         formData,
@@ -1217,6 +1254,31 @@ if (filterStatus) params.append("STATUS", filterStatus);
       return response.data;
     } catch (error) {
       console.error("Error fetching appeal committee data:", error);
+      throw error;
+    }
+  },
+
+  // POST: Approve appeal review (Appraiser/Reviewer decision)
+  approveAppealReview: async (payload = {}) => {
+    try {
+      // Mock implementation - simulate API call
+      console.log('Mock: Approving appeal review', payload);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+
+      return {
+        success: true,
+        message: 'Appeal review approved successfully',
+        ticketId: payload.custTicketId || 'APPEAL-' + Date.now()
+      };
+
+      // Real implementation (uncomment when backend is ready):
+      // const response = await apiClient.post(
+      //   '/appraisal/appeal_report/review/approve',
+      //   payload
+      // );
+      // return response.data;
+    } catch (error) {
+      console.error('approveAppealReview error', error);
       throw error;
     }
   },

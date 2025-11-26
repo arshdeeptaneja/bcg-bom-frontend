@@ -40,9 +40,11 @@ import {
   ReviewerMode,
   AnnualAppraisalReview,
   AnnualReview,
+  AnnualReviewView,
   QuaterlyAppraiserCheckIn,
 } from './pages';
 import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
+import ReviewAppeal from './pages/Appeal/AnnualAppeal/ReviewAppeal/ReviewAppeal';
 import { TopBar, LeftNavigation } from './components/common';
 import UserProfile from './components/UserProfile/UserProfile';
 import ApiTest from './components/ApiTest';
@@ -458,6 +460,18 @@ function AppContent() {
                 )
               }
             />
+
+            <Route
+              path="/appeal/review"
+              element={
+                isAuthenticated ? (
+                  <AppealReviewLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
             <Route
               path="/appraiser/dashboard"
               element={
@@ -627,6 +641,17 @@ function AppContent() {
               element={
                 isAuthenticated ? (
                   <AnnualReviewLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/appraisal/annual/view"
+              element={
+                isAuthenticated ? (
+                  <AnnualReviewViewLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )
@@ -1064,6 +1089,15 @@ const AppealCommitteeReviewLayout = ({ onLogout }) => (
   </>
 );
 
+// Appeal Review (Appraiser/Reviewing Authority)
+const AppealReviewLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <ReviewAppeal />
+  </>
+);
+
 // Annual Appraisal Review (Appraiser/Reviewer)
 const AnnualAppraisalReviewLayout = ({ onLogout }) => (
   <>
@@ -1082,6 +1116,12 @@ const AnnualReviewLayout = ({ onLogout }) => (
   </>
 );
 
+// Annual Review View-Only
+const AnnualReviewViewLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AnnualReviewView />
 //QuaterlyAppraiserCheckIn
 const QuaterlyAppraiserCheckInLayout = ({ onLogout }) => (
   <>

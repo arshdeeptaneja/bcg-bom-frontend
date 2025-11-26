@@ -103,6 +103,7 @@ const resolveFallbackMonth = (resultsData, rawData) => {
  * - result_questions.development_inputs for question sections
  */
 export const transformAnnualAppraisalData = (apiResponse) => {
+  console.log('transformAnnualAppraisalData input:', apiResponse);
   if (!apiResponse) return null;
 
   // Extract annual_score_data for Final Score Summary
@@ -113,7 +114,9 @@ export const transformAnnualAppraisalData = (apiResponse) => {
     .filter((item) => item.CATEGORY && item.MAX_SCORE != null)
     .map((item) => ({
       Category: item.CATEGORY,
+      KraName: item.CATEGORY, // Map for FinalScoreSummaryTable
       MaxScore: item.MAX_SCORE || 0,
+      KraWeight: item.MAX_SCORE || 0, // Map for FinalScoreSummaryTable
       SelfScore: item.SELF_SCORE || 0,
       ReportingAuthorityScore: item.BY_REPORTING_AUTHORITY || 0,
       ReviewingAuthorityScore: item.BY_REVIEVING_AUTHORITY || 0,
@@ -289,6 +292,8 @@ export const transformAnnualAppraisalData = (apiResponse) => {
   const isReadOnly = apiResponse.status === 'complete_self' || 
     apiResponse.status === 'complete_repa' || 
     apiResponse.status === 'complete_reva';
+
+  console.log('transformAnnualAppraisalData output nonMeasurableKras:', nonMeasurableKras);
 
   return {
     finalScoreSummary,
