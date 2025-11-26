@@ -437,7 +437,6 @@ getAppraiserCheckInDashboard: async ({
   financialYear,
   quarter,
   appraisalPeriod,
-
   filterEmpId,
   filterName,
   filterRole,
@@ -459,9 +458,18 @@ getAppraiserCheckInDashboard: async ({
     if (filterAppraiser) params.append("appraiser", filterAppraiser);
     if (filterStatus) params.append("status", filterStatus);
 
-    const response = await apiClient.get(
-      `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
-    );
+    let response;
+    if(appraisalPeriod === "quarter"){
+       response = await apiClient.get(
+        `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
+      );
+    }else{
+      response = await apiClient.get(
+        `/appraisal/reportee_appraisal/dashboard?${params.toString()}`
+      );
+    }
+
+    console.log("response: ", response)
 
     return response.data;
   } catch (error) {
@@ -541,49 +549,6 @@ getAppraiserCheckInDashboard: async ({
   }
 },
 
-
-
-
-
-
-    // GET: Get quarterly exception report data
-getAppraiserCheckInDashboard: async ({
-  empNo,
-  financialYear,
-  quarter,
-  appraisalPeriod,
-  filterEmpId,
-  filterName,
-  filterRole,
-  filterAppraiser,
-  filterStatus,
-}) => {
-  try {
-    const params = new URLSearchParams({
-      empNo,
-      financialYear,
-      quarter,
-      appraisalPeriod,
-    });
-
-    // Add filters to API params
-   if (filterEmpId) params.append("EC_NUMBER", filterEmpId);
-if (filterName) params.append("EMP_NAME", filterName);
-if (filterRole) params.append("MAIN_ROLE", filterRole);
-if (filterAppraiser) params.append("REPORTING_AUTHORITY_NAME", filterAppraiser);
-if (filterStatus) params.append("STATUS", filterStatus);
-
-
-    const response = await apiClient.get(
-      `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
-    );
-
-    return response.data;
-  } catch (error) {
-    console.log("error", error);
-    throw error;
-  }
-},
 
   // POST: Submit quarterly exception report with file attachment
 

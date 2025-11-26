@@ -23,43 +23,18 @@ export default function AppraisalHome() {
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
   const navigate = useNavigate();
+  // Extract empNo and user info from AuthContext
   const { getEmployeeDetails, getUserProperty, user } = useAuth();
   const employeeDetails = getEmployeeDetails();
-  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID ?? '36663');
+  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '36663');
   console.log('Employee Number:', empNo);
-  const role = user?.roles?.[0] ?? 'emp';
+  const role = user?.roles?.[0] || 'emp'; // Get first role or default to 'emp'
 
-  const getValueOrZero = (value) => (value === undefined || value === '') ? 0 : value;
-
+  // Helper function to extract year from "FY 2024-25" format
   const extractYear = (fy) => {
     const match = fy.match(/FY (\d{4})/);
     return match ? match[1] : new Date().getFullYear().toString();
   };
-
-  const buildNavigationUrl = (basePath, params = {}) => {
-    const queryParams = new URLSearchParams({
-      financialYear,
-      appraisalPeriod,
-      quarter: selectedQuarter,
-      ...params,
-    }).toString();
-    return `${basePath}?${queryParams}`;
-  };
-
-  const renderToggleButtons = (options, selected, onSelect, outlineClass = 'btn-outline-primary') => (
-    <div className="btn-group" role="group">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          className={`btn px-2 ${selected === opt.value ? 'btn-primary text-white' : outlineClass}`}
-          onClick={() => onSelect(opt.value)}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
 
   const getFinancialYears = () => {
     const years = [];
@@ -124,94 +99,178 @@ export default function AppraisalHome() {
           ))}
         </select>
 
+        {/* Appraisal Period Selection */}
         <span className="text-muted fw-semibold ms-4">Appraisal Period</span>
-        {renderToggleButtons(
-          [
-            { value: 'Annual', label: 'Annual Year' },
-            { value: 'Quarterly', label: 'Quarterly' },
-          ],
-          appraisalPeriod,
-          setAppraisalPeriod,
-          'btn-outline-primarys'
-        )}
+        <div className="btn-group" role="group" aria-label="Appraisal period selector">
+          <button
+            type="button"
+            className={`btn px-2 ${
+              appraisalPeriod === 'Annual' ? 'btn-primary text-white' : 'btn-outline-primarys'
+            }`}
+            onClick={() => setAppraisalPeriod('Annual')}
+          >
+            Annual Year
+          </button>
+          <button
+            type="button"
+            className={`btn px-2 ${
+              appraisalPeriod === 'Quarterly' ? 'btn-primary text-white' : 'btn-outline-primarys'
+            }`}
+            onClick={() => setAppraisalPeriod('Quarterly')}
+          >
+            Quarterly
+          </button>
+        </div>
 
+        {/* Quarter Selection */}
         {appraisalPeriod === 'Quarterly' && (
           <>
             <span className="text-muted fw-semibold ms-4">Quarter</span>
-            {renderToggleButtons(
-              [
-                { value: 'Q1', label: 'Q1' },
-                { value: 'Q2', label: 'Q2' },
-                { value: 'Q3', label: 'Q3' },
-                { value: 'Q4', label: 'Q4' },
-              ],
-              selectedQuarter,
-              setSelectedQuarter
-            )}
+            <div className="btn-group" role="group" aria-label="Quarter selector">
+              <button
+                type="button"
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
+                onClick={() => setSelectedQuarter('Q1')}
+              >
+                Q1
+              </button>
+              <button
+                type="button"
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
+                onClick={() => setSelectedQuarter('Q2')}
+              >
+                Q2
+              </button>
+              <button
+                type="button"
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
+                onClick={() => setSelectedQuarter('Q3')}
+              >
+                Q3
+              </button>
+              <button
+                type="button"
+                className={`btn px-2 ${
+                  selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
+                }`}
+                onClick={() => setSelectedQuarter('Q4')}
+              >
+                Q4
+              </button>
+            </div>
           </>
         )}
       </div>
 
+      {/* KPI Tabs */}
       <div className="kpi-tabs mt-3 d-flex flex-row gap-3">
         <KpiTab
           heading="Appraisee Check-in"
           kpiData={[
             {
-              value: getValueOrZero(
+              value:
                 appraisalPeriod === 'Quarterly'
-                  ? data?.self_count_quarterly
-                  : data?.pending_appraisal_count
-              ),
+                  ? data?.appraisal_count === undefined || data?.appraisal_count === ''
+                    ? 0
+                    : data?.appraisal_count
+                  : data?.self_count === undefined ||
+                    data?.self_count === ''
+                  ? 0
+                  : data?.self_count,
               label: 'Appraisal(s) to be filled',
             },
             {
-              value: getValueOrZero(
+              value:
                 appraisalPeriod === 'Quarterly'
-                  ? data?.self_pending_appraisal_count
-                  : data?.pending_appraisal_count
-              ),
+                  ? data?.pending_appraisal_count === undefined ||
+                    data?.pending_appraisal_count === ''
+                    ? 0
+                    : data?.pending_appraisal_count
+                  : data?.self_appraisal_status === undefined ||
+                    data?.self_appraisal_status === ''
+                  ? 0
+                  : data?.self_appraisal_status,
               label: 'Pending Appraisal(s)',
             },
           ]}
           onClick={() => {
-            const basePath = appraisalPeriod === 'Annual'
-              ? '/appraisal/appraisee-check-in'
-              : '/quarterly/quarterly-appraisee';
-            navigate(buildNavigationUrl(basePath));
+            navigate(
+              appraisalPeriod === 'Annual'
+                ? `/appraisal/appraisee-check-in?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+                : `/quarterly/quarterly-appraisee?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+            );
           }}
         />
 
         <KpiTab
           heading="Appraiser Check-in"
           kpiData={[
-            { value: 0, label: 'Appraisals to be filled' },
-            { value: 0, label: 'Pending Appraisals(s)' },
+            {
+              value:
+                appraisalPeriod === 'Quarterly'
+                  ? data?.reportee_quarterly_count === undefined || data?.reportee_quarterly_count === ''  || data?.reportee_quarterly_count === null
+                    ? 0
+                    : data?.reportee_quarterly_count
+                  : data?.ra_count === undefined ||
+                    data?.ra_count === '' || data?.ra_count === null
+                  ? 0
+                  : data?.ra_count,
+              label: 'Appraisal(s) to be filled',
+            },
+            {
+              value:
+                appraisalPeriod === 'Quarterly'
+                  ? data?.reportee_quarterly_pending_count === undefined ||
+                    data?.reportee_quarterly_pending_count === '' || data?.reportee_quarterly_pending_count === null
+                    ? 0
+                    : data?.reportee_quarterly_pending_count
+                  : data?.ra_status === undefined ||
+                    data?.ra_status === '' || data?.ra_status === null
+                  ? 0
+                  : data?.ra_status,
+              label: 'Pending Appraisal(s)',
+            },
           ]}
           onClick={() => {
-            const basePath = appraisalPeriod === 'Annual'
-              ? '/appraiser/annual-appraisal-home'
-              : '/appraisal/appraiser-check-in';
-            navigate(buildNavigationUrl(basePath));
+            navigate(
+              `/appraisal/appraiser-check-in?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+            );
           }}
         />
         
-        {/* Reviewer card - show if reviewer data is available */}
-        {(data?.reviewer_pending_appraisals !== undefined || 
-          data?.reviewer_completed_appraisals !== undefined) && (
-          <KpiTab
-            heading="Reviewer Mode"
-            kpiData={[
-              {
-                value: getValueOrZero(data?.reviewer_pending_appraisals),
-                label: 'Roles to be reviewed',
-              },
-              {
-                value: getValueOrZero(data?.reviewer_completed_appraisals),
-                label: 'Pending Appraisal(s)',
-              },
-            ]}
-            onClick={() => navigate(buildNavigationUrl('/appraiser/reviewer-dashboard'))}
-          />
+        {appraisalPeriod === 'Annually' && (
+        <KpiTab
+          heading="Reviewer Mode"
+          kpiData={[
+            {
+              value:
+                data?.reviewer_pending_appraisals === undefined ||
+                data?.reviewer_pending_appraisals === ''
+                  ? 0
+                  : data?.reviewer_pending_appraisals,
+              label: 'Pending Reviews',
+            },
+            {
+              value:
+                data?.reviewer_completed_appraisals === undefined ||
+                data?.reviewer_completed_appraisals === ''
+                  ? 0
+                  : data?.reviewer_completed_appraisals,
+              label: 'Completed Reviews',
+            },
+          ]}
+          onClick={() => {
+            navigate(
+              `/appraiser/reviewer-dashboard?financialYear=${financialYear}&appraisalPeriod=${appraisalPeriod}&quarter=${selectedQuarter}`
+            );
+          }}
+        />
         )}
       </div>
       {/* Accordion for My Final Score */}

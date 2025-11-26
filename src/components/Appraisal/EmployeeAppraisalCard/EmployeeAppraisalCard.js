@@ -15,12 +15,11 @@ export default function EmployeeAppraisalCard({
   quarter,
   appraisalPeriod,
   primaryRole,
-  
   organization,
   appraisalStatus = 'PENDING AT APPRAISEE',
   exceptionStatus = 'NOT CREATED',
 
-
+  userType = "self", // Two options - self, appraiser
   // Individual additional roles
 
   additionalRoles = [],
@@ -245,13 +244,26 @@ export default function EmployeeAppraisalCard({
           >
             {appraisalStatus}
           </span>
-          <p className="status-label fw-bold mt-3 mb-1">Exception Status</p>
-          <span
-            className="badge rounded-pill px-4 my-0"
-            style={{ backgroundColor: getStatusColor(exceptionStatus), color: 'white' }}
-          >
-            {exceptionStatus}
-          </span>
+          {
+
+          }
+            {userType === "self" && (
+              <>
+                <p className="status-label fw-bold mt-3 mb-1">
+                  {appraisalPeriod === "Quarterly" ? "Exception Status" : "Appeal Status"}
+                </p>
+
+                <span
+                  className="badge rounded-pill px-4 my-0"
+                  style={{
+                    backgroundColor: getStatusColor(exceptionStatus),
+                    color: "white",
+                  }}
+                >
+                  {exceptionStatus}
+                </span>
+              </>
+            )}
         </div>
       </div>
 
@@ -336,15 +348,18 @@ export default function EmployeeAppraisalCard({
             </button>
           </div>
           <div className="button-row">
+          {userType === "self" && (
             <button
               type="button"
               className="btn-fade"
-              onClick={() => navigate('/appraisal/exception-quarterly')}
+              onClick={() => {
+                onAddException()
+              }}
             >
-              Add Exception
+              Add Exception 
               <span className="ms-2">→</span>
             </button>
-
+          )}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 /**
  * The QuaterlyAppraiseeCheckIn function in React handles the process of adding and submitting
+ * QuaterlyAppraiseeCheckIn function handles both appraisee and appraiser check-in forms
  * appraisee check-in data for a specific quarter, displaying measurable and non-measurable KRA tables,
  * development inputs, and allowing for saving and submitting the check-in report.
  * @returns The `QuaterlyAppraiseeCheckIn` component is being returned. It contains conditional
@@ -41,26 +42,28 @@ function QuaterlyAppraiseeCheckIn() {
   };
 
 
-
-
   const [activeMonth, setActiveMonth] = useState("April");
   const [months, setMonths] = useState(["April", "May", "June"]);
 
   // Get data from location state
-  const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {
+  const { financialYear, appraisalPeriod, quarter, dateRange, employee, intent, page_type } = location.state || {
     financialYear: "2025",
     appraisalPeriod: "Mid-Year",
     quarter: "Q2",
+    url: "U-34545",
     dateRange: "2025",
+    page_type: "self",
     employee: { name: "John Doe", empNo: "36665", appraisalStatus: "pending", url: 'U-34545' },
-    role: "Administrative Officers",
+    intent: "Fill"
   };
 
+  console.log("EMPLOYEE IS: ", employee)
   // Get employee number from auth context as fallback
   const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
   const empNoFromAuth = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
-  const empNo = employee?.empNo || employee?.id || employee?.EMP_ID || empNoFromAuth;
+  const empNo = empNoFromAuth || employee?.empNo || employee?.id || employee?.EMP_ID ;
+  const role = getUserProperty("ROLE_NAME", "Administrative Officers")
 
   // Extract year from financial year format
   const extractYear = (fy) => {
@@ -103,8 +106,6 @@ function QuaterlyAppraiseeCheckIn() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  let page_type = "self"
-
   // Submit mutation for quarterly appraisee check-in
   const submitMutation = useMutation({
     mutationFn: (payload) =>
@@ -132,7 +133,6 @@ function QuaterlyAppraiseeCheckIn() {
   });
 };
 
-
 const buildPerformanceMeasurableComments = () => {
   return months.map((m) => {
     const index = getMonthNumber(m) - 1;
@@ -140,24 +140,22 @@ const buildPerformanceMeasurableComments = () => {
   });
 };
 
-
-
-
   // React Query to fetch quarterly check-in report data
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['quarterlyCheckInReport', financialYear, appraisalPeriod, quarter, empNo, currentRole],
     queryFn: () =>
       appraisalAPI.getQuarterlyCheckInReport({
-        empNo: "38096",
+        empNo: empNo,
         // url: employee?.url || employee?.URL_ID || '',
-        url: "U-34545",
+        //url: employee.url,
+        url: "U-34545", //TODO: Change this
         //roleType: currentRole || role || 'APPRAISEE',
-        roleType: "Administrative Officers",
+        roleType: role,
         financialYear: parseInt(extractYear(financialYear)),
         quarter: quarter || '',
         pageType: page_type,
         appraisalStatus: employee?.appraisalStatus || employee?.APPRAISAL_STATUS || 'PENDING',
-        intent: 'Fill',
+        intent: intent,
       }),
     enabled: !!empNo && !!financialYear && !!quarter,
   });
@@ -276,16 +274,14 @@ const buildPerformanceMeasurableComments = () => {
       quarter: quarter,
       empNumber: empNo,
       urlId: employee?.url || "U-34545",
-
       kraData: kraDataPayload,
-
-      submittype: "self",
+      submittype: page_type,
 
       startDate: "2024-07-01 00:00:00.0",
       endDate: "2024-09-30 00:00:00.0",
 
       reportingAuthority: employee?.appraiser || "",
-      organizationName: employee?.organization || "",
+      organizationName: employee?.branch || "",
 
       performanceMeasurableComment: measurableCommentsPayload,
       nonMeasurableComment: formInputs.nonMeasurableComment,
@@ -319,7 +315,7 @@ const buildPerformanceMeasurableComments = () => {
       empNumber: empNo || employee?.empNo || '',
       urlId: employee?.URL_ID || employee?.url || 'U-34545',
       kraData: measurableKraListData,
-      submittype: 'self',
+      submittype: page_type,
       startDate: location.state?.dateRange?.split(' - ')[0]?.trim() || '2024-07-01 00:00:00.0',
       endDate: location.state?.dateRange?.split(' - ')[1]?.trim() || '2024-09-30 00:00:00.0',
       reportingAuthority: employee?.appraiser || '',

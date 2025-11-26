@@ -55,6 +55,8 @@ export default function AppraiseeCheckIn() {
   const appraisalPeriod = searchParams.get('appraisalPeriod');
   const quarter = searchParams.get('quarter');
 
+  
+
   // Extract empNo from AuthContext
   const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
@@ -77,6 +79,42 @@ export default function AppraiseeCheckIn() {
     }),
     enabled: !!empNo && !!financialYear && !!appraisalPeriod,
   });
+
+    const responseData = data?.data || data;
+    const redResult = responseData?.redresult || [];
+  
+  
+    const appraisalScoreDash = responseData?.appraisal_score_dash || [];
+    const averageScore = responseData?.overall_avg_score ?? 0;
+              
+    const maxScore = responseData?.overall_max_score ?? 0;
+    const cardData = responseData?.result?.[0] || responseData?.redresult?.[0] || null;
+  
+    const additionalRoles = [
+      cardData?.ADDITIONAL_ROLE_1,
+      cardData?.ADDITIONAL_ROLE_2,
+      cardData?.ADDITIONAL_ROLE_3,
+      cardData?.ADDITIONAL_ROLE_4,
+    ].filter(role => role && role !== "none");
+  
+    const hasCardData = !!cardData;
+  
+    const cardDateRange = cardData?.date || 'N/A';
+  
+    const employeeModel = hasCardData
+      ? new EmployeeModel({
+        empNo: cardData?.pf_number || 'N/A',
+        employeeName: cardData?.emp_name || 'N/A',
+        employeeScale: cardData?.scale || 'N/A',
+        branch: cardData?.organization,
+        roles: [cardData?.secondary, cardData?.tertiary,cardData?. ADDITIONAL_ROLE_3, cardData?.ADDITIONAL_ROLE_4 ],
+        appraiser: cardData?.reporting_authority_name || 'N/A',
+        primaryRole: cardData?.primary
+      })
+      : null;
+    console.log("RED RESULT:", redResult);
+    console.log("CARD DATA:", cardData);
+    console.log("EMPLOYEE MODEL:", employeeModel);
 
   
 
@@ -157,22 +195,14 @@ export default function AppraiseeCheckIn() {
             <EmployeeAppraisalCard
               key={employee.EMP_ID || index}
               employee={
-                new EmployeeModel({
-                  empNo: employee.EMP_ID || '',
-                  employeeName: employee.EMP_NAME || '',
-                  employeeScale: employee.SCALE || '',
-                  roles: employee.ADDITIONAL_ROLE_1 || employee.ADDITIONAL_ROLE_2 
-                    ? [employee.ADDITIONAL_ROLE_1, employee.ADDITIONAL_ROLE_2].filter(Boolean) 
-                    : [],
-                  appraiser: employee.REPORTING_AUTHORITY_NAME || '',
-                })
+                employeeModel
               }
               dateRange={employee.START_DATE && employee.END_DATE 
                 ? `${employee.START_DATE} to ${employee.END_DATE}` 
                 : ''}
-              primaryRole={employee.MAIN_ROLE || ''}
+              primaryRole={employeeModel.primaryRole || ''}
               appraisalStatus={getDisplayStatus(employee.APPRAISAL_STATUS)}
-              exceptionStatus="NOT CREATED"
+              exceptionStatus={employee.APPEAL_STATUS}
               organization={employee.ORGANIZATION || ''}
               quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
               appraisalPeriod={appraisalPeriod}
@@ -186,21 +216,26 @@ export default function AppraiseeCheckIn() {
                     dateRange: employee.START_DATE && employee.END_DATE 
                       ? `${employee.START_DATE} to ${employee.END_DATE}` 
                       : '',
-                    employee: {
-                      empNo: employee.EMP_ID || '',
-                      employeeName: employee.EMP_NAME || '',
-                      employeeScale: employee.SCALE || '',
-                      roles: employee.ADDITIONAL_ROLE_1 || employee.ADDITIONAL_ROLE_2 
-                        ? [employee.ADDITIONAL_ROLE_1, employee.ADDITIONAL_ROLE_2].filter(Boolean) 
-                        : [],
-                      primaryRole: employee.MAIN_ROLE || '',
-                      appraiser: employee.REPORTING_AUTHORITY_NAME || '',
-                    },
+                    employee: employeeModel
                   },
                 });
               }}
               onViewSummary={() => {}}
-              onAddException={() => {}}
+              onAddException={() => {
+                console.log("button pressed")
+                navigate('/appraisal/exception-quarterly', {
+                  state: {
+                    financialYear,
+                    appraisalPeriod,
+                    quarter,
+                    dateRange: employee.START_DATE && employee.END_DATE 
+                      ? `${employee.START_DATE} to ${employee.END_DATE}` 
+                      : '',
+                    employee: employeeModel,
+                    role: employeeModel.primaryRole
+                  },
+                });
+              }}
             />
           ))
         )}

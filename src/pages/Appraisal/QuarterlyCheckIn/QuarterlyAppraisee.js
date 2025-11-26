@@ -110,9 +110,9 @@ export default function QuarterlyAppraisee() {
 
 
   const appraisalScoreDash = responseData?.appraisal_score_dash || [];
-  const averageScore = responseData?.score ?? 0;
+  const averageScore = responseData?.overall_avg_score ?? 0;
             
-  const maxScore = responseData?.maxscore ?? 0;
+  const maxScore = responseData?.overall_max_score ?? 0;
   const cardData = responseData?.result?.[0] || responseData?.redresult?.[0] || null;
 
   const additionalRoles = [
@@ -131,8 +131,11 @@ export default function QuarterlyAppraisee() {
       empNo: cardData?.pf_number || 'N/A',
       employeeName: cardData?.emp_name || 'N/A',
       employeeScale: cardData?.scale || 'N/A',
-      roles: [],
+      branch: cardData?.organization,
+      url: cardData?.url_id,
+      roles: [cardData?.secondary, cardData?.tertiary,cardData?. ADDITIONAL_ROLE_3, cardData?.ADDITIONAL_ROLE_4 ],
       appraiser: cardData?.reporting_authority_name || 'N/A',
+      primaryRole: cardData?.primary
     })
     : null;
   console.log("RED RESULT:", redResult);
@@ -178,32 +181,40 @@ export default function QuarterlyAppraisee() {
             redResult={redResult}
             primaryRole={cardData?.MAIN_ROLE || cardData?.primary || 'Role 1'}
             appraisalStatus={cardData?.appraisalStatus || 'PENDING AT APPRAISEE'}
-            exceptionStatus="COMPLETED"
+            exceptionStatus={cardData.EXCEPTION_STATUS}
             organization={cardData?.organization || 'Dhanetha'}
             additionalRoles={additionalRoles}
             quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
             appraisalPeriod={appraisalPeriod}
             scoreData={appraisalScoreDash}
             onAddCheckIn={() => {
+              console.log("Add checkin is working")
               navigate('/quarterly/quaterly-appraisee-check-in', {
                 state: {
                   financialYear,
                   appraisalPeriod,
                   quarter,
+                  page_type: "self",
                   dateRange: cardDateRange,
-                  employee: {
-                    empNo: employeeModel.empNo,
-                    employeeName: employeeModel.employeeName,
-                    employeeScale: employeeModel.employeeScale,
-                    roles: employeeModel.roles,
-                    primaryRole: cardData?.MAIN_ROLE || cardData?.primaryRole || 'Role 1',
-                    appraiser: employeeModel.appraiser,
-                  },
+                  employee: employeeModel,
+                  intent: "Fill"
                 },
               });
             }}
             onViewSummary={() => { }}
-            onAddException={() => { }}
+            onAddException={() => {
+              navigate('/appraisal/exception-quarterly', {
+                state: {
+                  financialYear,
+                  appraisalPeriod,
+                  quarter,
+                  page_type: "self",
+                  dateRange: cardDateRange,
+                  employee: employeeModel,
+                  intent: "Fill"
+                },
+              });
+            }}
           />
         )}
       </div>

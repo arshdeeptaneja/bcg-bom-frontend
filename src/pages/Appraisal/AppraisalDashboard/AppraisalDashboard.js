@@ -95,13 +95,13 @@ const AppraisalDashboard = () => {
       body: 'Click here for Appraisal',
       url: '/appraisal/home',
     },
+    // {
+    //   key: 'show_exception_repoty_tile',
+    //   heading: 'Exception Reporting',
+    //   body: 'Click here for Exception Reporting',
+    // },
     {
       key: 'show_exception_repoty_tile',
-      heading: 'Exception Reporting',
-      body: 'Click here for Exception Reporting',
-    },
-    {
-      key: 'show_excepption_resolution_tile',
       heading: 'Exception Resolution',
       body: 'Click here for Exception Resolution',
       url: '/appraisal/exception-resolution',

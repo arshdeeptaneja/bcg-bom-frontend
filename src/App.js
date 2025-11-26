@@ -571,7 +571,7 @@ function AppContent() {
               }
             />
 
-<Route
+{/* <Route
   path="/quarterly/quaterly-appraiser-check-in"
   element={
     isAuthenticated ? (
@@ -580,7 +580,7 @@ function AppContent() {
       <Navigate to="/login" replace />
     )
   }
- />
+ /> */}
 
               <Route
               path="/utility/quarterly-appraiser-bulk"

@@ -72,9 +72,9 @@ const extractYear = (fyLabel) => {
 
 const buildAdditionalRoles = (r) => {
   return [
-    r?.ADDITIONAL_ROLE_1,
     r?.ADDITIONAL_ROLE_2,
     r?.ADDITIONAL_ROLE_3,
+    r?.ADDITIONAL_ROLE_4,
   ]
     .filter(Boolean)
     .map((x) => String(x));
@@ -135,7 +135,7 @@ export default function AppraiserCheckInDashboard() {
         //empNo: "38096",
         financialYear: extractYear(financialYear),
         quarter,
-        appraisalPeriod: "quarterly",
+        appraisalPeriod: appraisalPeriod === "Quarterly" ? "quarter" : "annual",
       }),
 
     enabled: Boolean(authEmpNo && financialYear && quarter),
@@ -213,29 +213,29 @@ export default function AppraiserCheckInDashboard() {
   };
 
   // -------------------- SCORES -------------------------
-  const averageScore = useMemo(() => {
-    const summaryAvg = pickNumericValue(scoreSummary, [
-      "averageScore",
-      "avgScore",
-      "AVERAGE_SCORE",
-    ]);
-    return Number.isNaN(summaryAvg)
-      ? computeAverageFromScoreTable(scoreTable)
-      : summaryAvg;
-  }, [scoreSummary, scoreTable]);
+  // const averageScore = useMemo(() => {
+  //   const summaryAvg = pickNumericValue(scoreSummary, [
+  //     "averageScore",
+  //     "avgScore",
+  //     "AVERAGE_SCORE",
+  //   ]);
+  //   return Number.isNaN(summaryAvg)
+  //     ? computeAverageFromScoreTable(scoreTable)
+  //     : summaryAvg;
+  // }, [scoreSummary, scoreTable]);
 
-  const maxScore = useMemo(() => {
-    const summaryMax = pickNumericValue(scoreSummary, [
-      "maxScore",
-      "MAX_SCORE",
-    ]);
-    if (!Number.isNaN(summaryMax)) return summaryMax;
+  // const maxScore = useMemo(() => {
+  //   const summaryMax = pickNumericValue(scoreSummary, [
+  //     "maxScore",
+  //     "MAX_SCORE",
+  //   ]);
+  //   if (!Number.isNaN(summaryMax)) return summaryMax;
 
-    return scoreTable.reduce((maxValue, entry) => {
-      const val = Number(entry?.MAX_SCORE ?? entry?.WEIGHTAGE ?? 0);
-      return Number.isNaN(val) ? maxValue : Math.max(maxValue, val);
-    }, 0);
-  }, [scoreSummary, scoreTable]);
+  //   return scoreTable.reduce((maxValue, entry) => {
+  //     const val = Number(entry?.MAX_SCORE ?? entry?.WEIGHTAGE ?? 0);
+  //     return Number.isNaN(val) ? maxValue : Math.max(maxValue, val);
+  //   }, 0);
+  // }, [scoreSummary, scoreTable]);
 
   // -------------------- LOADING / ERROR -------------------------
   if (!financialYear || !appraisalPeriod || !quarter) {
@@ -248,15 +248,15 @@ export default function AppraiserCheckInDashboard() {
     );
   }
 
-  if (!isQuarterlyFlow) {
-    return (
-      <div className="pageWrapper">
-        <div className="text-center mt-5 text-danger fw-bold">
-          This route is only for quarterly flows.
-        </div>
-      </div>
-    );
-  }
+  // if (!isQuarterlyFlow) {
+  //   return (
+  //     <div className="pageWrapper">
+  //       <div className="text-center mt-5 text-danger fw-bold">
+  //         This route is only for quarterly flows.
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (isLoading)
     return (
@@ -274,6 +274,16 @@ export default function AppraiserCheckInDashboard() {
         <p className="text-center text-muted">{error?.message}</p>
       </div>
     );
+
+    if(data.text){
+      return (
+        <div className="pageWrapper">
+          <div className="text-center mt-5 text-danger fw-bold">
+            {data.text}
+          </div>
+        </div>
+      );
+    }
 
   // -------------------- UI -------------------------
   return (
@@ -389,7 +399,7 @@ export default function AppraiserCheckInDashboard() {
       </div>
 
       {/* ---------------- SUMMARY CARD ---------------- */}
-      <div className="summary-row border rounded-2 px-5 py-3 mt-3 d-flex justify-content-between align-items-end shadow-sm">
+      {/* <div className="summary-row border rounded-2 px-5 py-3 mt-3 d-flex justify-content-between align-items-end shadow-sm">
         <h2 className="text-muted fw-bold mb-0">Average Score for Quarter</h2>
         <div className="summary-card-content">
           <span className="fw-bold">Score:</span>
@@ -399,7 +409,7 @@ export default function AppraiserCheckInDashboard() {
           <span className="fw-bold">Max Score:</span>
           <span className="text-primary ms-3">{maxScore}</span>
         </div>
-      </div>
+      </div> */}
 
       {/* ---------------- EMPLOYEE CARDS ---------------- */}
       <div className="employee-appraisal-cards mt-4">
@@ -414,8 +424,11 @@ export default function AppraiserCheckInDashboard() {
           const employeeModel = new EmployeeModel({
             empNo: record?.EMP_ID,
             employeeName: record?.EMP_NAME,
+            url: record?.URL_ID,
+            appraisalStatus: record?.APPRAISAL_STATUS,
             employeeScale: record?.SCALE,
             additionalRoles: buildAdditionalRoles(record),
+            branch: record?.ORGANIZATION,
             appraiser: record?.REPORTING_AUTHORITY_NAME,
             primaryRole: record?.MAIN_ROLE,
           });
@@ -433,17 +446,19 @@ export default function AppraiserCheckInDashboard() {
               primaryRole={record?.MAIN_ROLE}
               additionalRoles={buildAdditionalRoles(record)}
               organization={record?.ORGANIZATION}
+              userType="appraiser"
               appraisalStatus={getDisplayStatus(
                 record?.APPRAISAL_STATUS
               )}
               exceptionStatus={record?.EXCEPTION_STATUS || "NOT CREATED"}
               scoreData={scoreTable}
               onAddCheckIn={() =>
-                navigate("/quarterly/quaterly-appraiser-check-in", {
+                navigate("/quarterly/quaterly-appraisee-check-in", {
                   state: {
                     financialYear,
                     appraisalPeriod,
                     quarter,
+                    page_type: "repa",
                     dateRange,
                     employee: employeeModel,
                     organizationName: record?.ORGANIZATION,

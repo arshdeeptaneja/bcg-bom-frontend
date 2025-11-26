@@ -57,7 +57,7 @@ export default function ExceptionHome() {
       appraisalAPI.getExceptionDashboard({
         fy: extractYear(financialYear),
         quarter: selectedQuarter,
-        exception_period: appraisalPeriod.toLowerCase(),
+        exception_period: appraisalPeriod.toLowerCase() === "quarterly"?"quarter":"annual",
         empNo: empNo,
       }),
     enabled: !!empNo, // Only run query if empNo is available

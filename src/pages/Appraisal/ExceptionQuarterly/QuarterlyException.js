@@ -506,9 +506,9 @@ function QuarterlyException() {
       </div>
 
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
-        <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSubmitting}>
+        {/* <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSubmitting}>
           Save Draft
-        </button>
+        </button> */}
         <button
           className="btn"
           style={{
