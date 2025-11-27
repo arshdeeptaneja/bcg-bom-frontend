@@ -204,10 +204,10 @@ const AppraisalDashboard = () => {
   const exceptionResolutionAccordionData = {
     heading: 'Exception Resolution',
     pendingCount:
-      (data?.resultTable?.Exception_Resolution_Q1[0]?.['PENDING APPRAISALS'] || 0) +
-      (data?.resultTable?.Exception_Resolution_Q2[0]?.['PENDING APPRAISALS'] || 0) +
-      (data?.resultTable?.Exception_Resolution_Q3[0]?.['PENDING APPRAISALS'] || 0) +
-      (data?.resultTable?.Exception_Resolution_Q4[0]?.['PENDING APPRAISALS'] || 0),
+      (data?.resultTable?.Exception_Resolution_Q1[0]?.['PENDING_COUNT'] || 0) +
+      (data?.resultTable?.Exception_Resolution_Q2[0]?.['PENDING_COUNT'] || 0) +
+      (data?.resultTable?.Exception_Resolution_Q3[0]?.['PENDING_COUNT'] || 0) +
+      (data?.resultTable?.Exception_Resolution_Q4[0]?.['PENDING_COUNT'] || 0),
     tableData: [
       {
         '#': 'Q1',
@@ -235,10 +235,10 @@ const AppraisalDashboard = () => {
   const exceptionValidationAccordionData = {
     heading: 'Exception Validation',
     pendingCount:
-      (data?.resultTable?.Exception_Validation_Q1[0]?.['PENDING APPRAISALS'] || 0) +
-      (data?.resultTable?.Exception_Validation_Q2[0]?.['PENDING APPRAISALS'] || 0) +
-      (data?.resultTable?.Exception_Validation_Q3[0]?.['PENDING APPRAISALS'] || 0) +
-      (data?.resultTable?.Exception_Validation_Q4[0]?.['PENDING APPRAISALS'] || 0),
+      (data?.resultTable?.Exception_Validation_Q1[0]?.['PENDING_COUNT'] || 0) +
+      (data?.resultTable?.Exception_Validation_Q2[0]?.['PENDING_COUNT'] || 0) +
+      (data?.resultTable?.Exception_Validation_Q3[0]?.['PENDING_COUNT'] || 0) +
+      (data?.resultTable?.Exception_Validation_Q4[0]?.['PENDING_COUNT'] || 0),
     tableData: [
       {
         '#': 'Q1',

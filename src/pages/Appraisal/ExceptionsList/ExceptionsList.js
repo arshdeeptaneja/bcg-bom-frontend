@@ -27,10 +27,7 @@ export default function ExceptionsList() {
 
   const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
-  const empNo = getUserProperty(
-    'empNo',
-    employeeDetails?.currentUser?.[0]?.EMP_ID || ''
-  );
+  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
 
   /** Extract base year from "FY 2025-26" → 2025 */
   const extractYear = (fy) => {
@@ -53,11 +50,7 @@ export default function ExceptionsList() {
 
   useEffect(() => {
     if (isError) {
-      toast.error(
-        `Failed to fetch exception data: ${
-          error?.message || 'Unknown error'
-        }`
-      );
+      toast.error(`Failed to fetch exception data: ${error?.message || 'Unknown error'}`);
     }
   }, [isError, error]);
 
@@ -78,9 +71,9 @@ export default function ExceptionsList() {
         zone: item.ZNNAME,
       },
       exceptionDescription: item.FINAL_APPEAL_STATUS,
-      preExceptionScore: item.TOTAL_SCORE,
-      postExceptionScore: item.TOTAL_FINAL_SCORE,
-      exceptionStatus: item.STATUS,
+      preExceptionScore: `${item.TOTAL_SCORE}/${item.TOTAL_MAX_SCORE}`,
+      postExceptionScore: `${item.TOTAL_FINAL_SCORE || ''}/${item.TOTAL_MAX_SCORE}`,
+      exceptionStatus: item.FINAL_APPEAL_STATUS,
     })) || [];
 
   /** Build quarter date label */
@@ -104,7 +97,7 @@ export default function ExceptionsList() {
 
   /** Handle Review button */
   const handleReviewException = (exception) => {
-    console.log("Running: ", exception)
+    console.log('Running: ', exception);
     navigate('/appraisal/review-quarterly-exception', {
       state: {
         financialYear,
@@ -118,7 +111,7 @@ export default function ExceptionsList() {
           primaryRole: exception.employee.primaryRole,
           appraiser: exception.employee.appraiser,
           zone: exception.employee.zone,
-          url: exception.urlId
+          url: exception.urlId,
         },
 
         role: 'APPRAISER',
@@ -166,9 +159,7 @@ export default function ExceptionsList() {
       <div className="pageWrapper">
         <div className="pageWrapper-header">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-            Exception Resolution
-          </h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exception Resolution</h1>
         </div>
         <LoadingSpinner />
       </div>
@@ -179,25 +170,18 @@ export default function ExceptionsList() {
     <div className="pageWrapper">
       <div className="pageWrapper-header">
         <BackButton />
-        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-          Exceptions List
-        </h1>
+        <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Exceptions List</h1>
       </div>
 
       {/* FILTER PANEL */}
       <div className="filter-panel mt-4 d-flex align-items-end gap-3">
-
         {/* Employee */}
         <div className="filter-group">
-          <label className="filter-label text-primary fw-semibold">
-            Employee
-          </label>
+          <label className="filter-label text-primary fw-semibold">Employee</label>
           <select
             className="form-select filter-select"
             value={filters.employee}
-            onChange={(e) =>
-              handleFilterChange('employee', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('employee', e.target.value)}
           >
             <option value="">-Select-</option>
             {data?.EMP_NAME?.map((name) => (
@@ -210,15 +194,11 @@ export default function ExceptionsList() {
 
         {/* Primary Role */}
         <div className="filter-group">
-          <label className="filter-label text-primary fw-semibold">
-            Primary Role
-          </label>
+          <label className="filter-label text-primary fw-semibold">Primary Role</label>
           <select
             className="form-select filter-select"
             value={filters.primaryRole}
-            onChange={(e) =>
-              handleFilterChange('primaryRole', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('primaryRole', e.target.value)}
           >
             <option value="">-Select-</option>
             {data?.PRIMARY_ROLE?.map((role) => (
@@ -231,15 +211,11 @@ export default function ExceptionsList() {
 
         {/* Branch */}
         <div className="filter-group">
-          <label className="filter-label text-primary fw-semibold">
-            Branch
-          </label>
+          <label className="filter-label text-primary fw-semibold">Branch</label>
           <select
             className="form-select filter-select"
             value={filters.branch}
-            onChange={(e) =>
-              handleFilterChange('branch', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('branch', e.target.value)}
           >
             <option value="">-Select-</option>
             {data?.BRANCH_NAME?.map((branch) => (
@@ -252,15 +228,11 @@ export default function ExceptionsList() {
 
         {/* Exception Status */}
         <div className="filter-group">
-          <label className="filter-label text-primary fw-semibold">
-            Exception Status
-          </label>
+          <label className="filter-label text-primary fw-semibold">Exception Status</label>
           <select
             className="form-select filter-select"
             value={filters.exceptionStatus}
-            onChange={(e) =>
-              handleFilterChange('exceptionStatus', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('exceptionStatus', e.target.value)}
           >
             <option value="">-Select-</option>
             {data?.TICKET_STATUS?.map((status) => (
@@ -273,11 +245,7 @@ export default function ExceptionsList() {
 
         {/* Action Buttons */}
         <div className="filter-actions d-flex gap-2">
-          <button
-            type="button"
-            className="btn btn-primary search-btn"
-            onClick={handleSearch}
-          >
+          <button type="button" className="btn btn-primary search-btn" onClick={handleSearch}>
             Search
           </button>
 
