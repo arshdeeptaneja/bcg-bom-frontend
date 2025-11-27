@@ -103,10 +103,11 @@ export const VALIDATOR_FIELDS = {
  * @returns {Array} - Normalized KRA rows with UI state properties
  */
 export const normalizeKraRows = (payload = [], fieldConfig = VERIFY_FIELDS) => {
+    console.log("payload", payload)
     if (!Array.isArray(payload)) return [];
     
     const { normalize } = fieldConfig;
-    
+    console.log("payload: ",payload)
     return payload.map((item, index) => {
         const normalized = {
             // UI state properties
@@ -139,6 +140,8 @@ export const normalizeKraRows = (payload = [], fieldConfig = VERIFY_FIELDS) => {
                 normalized[key] = value ?? '';
             }
         });
+
+        console.log("normalized data: ", normalized)
         
         return normalized;
     });

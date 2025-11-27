@@ -104,6 +104,7 @@ export default function ExceptionsList() {
 
   /** Handle Review button */
   const handleReviewException = (exception) => {
+    console.log("Running: ", exception)
     navigate('/appraisal/review-quarterly-exception', {
       state: {
         financialYear,
@@ -117,6 +118,7 @@ export default function ExceptionsList() {
           primaryRole: exception.employee.primaryRole,
           appraiser: exception.employee.appraiser,
           zone: exception.employee.zone,
+          url: exception.urlId
         },
 
         role: 'APPRAISER',

@@ -1122,6 +1122,8 @@ const AnnualReviewViewLayout = ({ onLogout }) => (
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <AnnualReviewView />
+  </>
+)
 //QuaterlyAppraiserCheckIn
 const QuaterlyAppraiserCheckInLayout = ({ onLogout }) => (
   <>

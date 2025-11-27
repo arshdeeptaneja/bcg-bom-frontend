@@ -84,7 +84,9 @@ export const useExceptionReview = ({
     useEffect(() => {
         if (!reviewData) return;
         const sourceRows =
-            reviewData?.kraData || reviewData?.result?.kraData || reviewData?.result || [];
+            reviewData?.results_KRA_LIST_Measurable || reviewData?.result?.kraData || reviewData?.result || [];
+            console.log("review data ",reviewData)
+            console.log("sr ",sourceRows)
         setKraRows(normalizeKraRows(sourceRows, VERIFY_FIELDS));
     }, [reviewData]);
 

@@ -27,7 +27,7 @@ function ReviewQuarterlyException() {
 
     const employeeDetails = getEmployeeDetails();
     const loggedInEmpNo = getUserProperty('empNo', employeeDetails?.currentUser?.EMP_ID || '');
-
+    const zone = getUserProperty('ZNNAME', employeeDetails?.currentUser?.ZNNAME || '');
     const fallbackEmployee = useMemo(
         () => ({
             empNo: loggedInEmpNo,
@@ -49,16 +49,15 @@ function ReviewQuarterlyException() {
         role = 'APPRAISER',
         roleName,
         roleId,
-        zone,
         custTicketId,
         exceptionId,
         urlId,
     } = location.state || {};
 
     const reviewEmployee = employee || fallbackEmployee;
-    const reviewEmpNo = reviewEmployee?.empNo || loggedInEmpNo;
-    const reviewerRoleName = roleName || role || 'APPRAISER';
-    const reviewerRoleId = roleId || role || 'APPRAISER';
+    const reviewEmpNo = loggedInEmpNo || reviewEmployee?.empNo;
+    const reviewerRoleName = employee.primaryRole || role || 'APPRAISER';
+    const reviewerRoleId = employee.url || role || 'APPRAISER';
     const reviewerZone = zone || reviewEmployee?.zone || employeeDetails?.currentUser?.ZONE_NAME || '';
 
     // Use custom hook for all business logic
