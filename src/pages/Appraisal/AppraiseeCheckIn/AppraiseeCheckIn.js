@@ -166,7 +166,7 @@ export default function AppraiseeCheckIn() {
   }
 
   // Extract results from API response
-  const results = data?.result || [];
+  const results = data?.allResults || [];
   const scoreData = data?.appraisal_score_dash || [];
 
   return (
@@ -197,9 +197,10 @@ export default function AppraiseeCheckIn() {
               employee={
                 employeeModel
               }
-              dateRange={employee.START_DATE && employee.END_DATE 
-                ? `${employee.START_DATE} to ${employee.END_DATE}` 
-                : ''}
+              // dateRange={employee.START_DATE && employee.END_DATE 
+              //   ? `${employee.START_DATE} to ${employee.END_DATE}` 
+              //   : ''}
+              dateRange={cardDateRange}
               primaryRole={employeeModel.primaryRole || ''}
               appraisalStatus={getDisplayStatus(employee.APPRAISAL_STATUS)}
               exceptionStatus={employee.APPEAL_STATUS}

@@ -180,7 +180,7 @@ export default function QuarterlyAppraisee() {
             dateRange={cardDateRange}
             redResult={redResult}
             primaryRole={cardData?.MAIN_ROLE || cardData?.primary || 'Role 1'}
-            appraisalStatus={cardData?.appraisalStatus || 'PENDING AT APPRAISEE'}
+            appraisalStatus={cardData?.appraisal_status || 'PENDING AT APPRAISEE'}
             exceptionStatus={cardData.EXCEPTION_STATUS}
             organization={cardData?.organization || 'Dhanetha'}
             additionalRoles={additionalRoles}
