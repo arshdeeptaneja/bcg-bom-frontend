@@ -37,6 +37,10 @@ import {
   AppealDelection,
   ReviewerDashboard,
   ReviewerMode,
+  AnnualAppraisalReview,
+  AnnualReview,
+  QuaterlyAppraiserCheckIn,
+  ReportingAuthorityReviewBulk
 } from './pages';
 import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
 import { TopBar, LeftNavigation } from './components/common';
@@ -51,7 +55,7 @@ import { store, persistor } from './store/store';
 import JobFamily from './pages/JobFamily/JobFamily';
 import HrDashboard from './pages/Appraisal/AppraisalHRDashboard/HrDashboard';
 import AppraiserUpdate from './pages/Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate';
-import ReportingReviewBulk from './pages/Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityBulk';
+import ReportingReviewBulk from './pages/Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityReviewBulk';
 import AppealDeletion from './pages/Appraisal/AppraisalHRDashboard/AppealDelection/AppealDelection';
 import AppraiserCheckInDashboard from './pages/Appraiser/AppraiserDashboardCheckIn/AppraiserCheckInDashboard';
 import EmployeeAppraisalCard from './components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
@@ -92,7 +96,6 @@ function AppContent() {
   const { isAuthenticated, loading, login, logout, setTeamDashboardData } = useAuth();
 
   console.log('isAuthenticated', isAuthenticated);
-
   useEffect(() => {
     if (isAuthenticated) {
       setTeamDashboardData();
@@ -100,6 +103,7 @@ function AppContent() {
   }, [isAuthenticated, setTeamDashboardData]);
 
   const handleLogin = (loginResponseData) => {
+    
     return login(loginResponseData);
   };
 
@@ -555,6 +559,36 @@ function AppContent() {
               }
             />
 
+
+  <Route
+              path="/utility/authority-reviewing-authority-bulk"
+              element={
+                isAuthenticated ? (
+                  <ReportingAuthorityReviewBulkLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <Route
               path="/appraisal/exception-score"
               element={
@@ -759,12 +793,23 @@ const AppraisalAppealComittee = ({ onLogout }) => {
 };
 
 //ReportingAuthorityBulk
-const ReportingAuthorityReviewBulk = ({ onLogout }) => {
+const ReportingReviewBulklayout = ({ onLogout }) => {
   return (
     <>
       <TopBar onLogout={onLogout} />
       <LeftNavigation />
       <ReportingReviewBulk />
+    </>
+  );
+};
+
+//Reporting Authority and Reviewing Authority update in bulk
+const ReportingAuthorityReviewBulkLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      <ReportingAuthorityReviewBulk />
     </>
   );
 };

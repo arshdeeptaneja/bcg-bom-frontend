@@ -37,7 +37,8 @@
 }
 
 .search-btn:hover {
-  color: white;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
 }
 
 .clear-filter-btn {

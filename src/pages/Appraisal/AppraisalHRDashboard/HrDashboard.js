@@ -270,7 +270,10 @@ const employee = JSON.parse(localStorage.getItem("adminData"));
             </button>
           </div>
         </section>
-        <UtilitiesSection />
+<UtilitiesSection 
+  financialYear={financialYear}
+  quarter={selectedQuarter}
+/>
          <LogsAndAutoAnnuals/>
         {/* <ReportingAuthority /> */}
 

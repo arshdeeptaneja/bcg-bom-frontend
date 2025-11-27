@@ -102,6 +102,7 @@ export default function QuaterlyMeasurableKraTable() {
           </thead>
 
           <tbody>
+<<<<<<< Updated upstream
             {data.map((row, idx) => (
               <tr key={idx}>
                 <td className="Q-tds">{row.kra}</td>
@@ -113,6 +114,22 @@ export default function QuaterlyMeasurableKraTable() {
                 <td className="Q-tds">{row.category}</td>
               </tr>
             ))}
+=======
+            {displayData.map((row, idx) => {
+              const normalizedRow = normalizeRow(row);
+              return (
+                <tr key={idx} className="Q-trs">
+                  <td className="Q-tds">{normalizedRow.kra}</td>
+                  <td className="Q-tds">{normalizedRow.unit}</td>
+                  <td className="Q-tds">{normalizedRow.actual}</td>
+                  <td className="Q-tds">{normalizedRow.target}</td>
+                  <td className="Q-tds">{normalizedRow.maxScore}</td>
+                  <td className="Q-tds">{normalizedRow.actualScore}</td>
+                  <td className="Q-tds">{normalizedRow.category}</td>
+                </tr>
+              );
+            })}
+>>>>>>> Stashed changes
           </tbody>
         </table>
       </div>

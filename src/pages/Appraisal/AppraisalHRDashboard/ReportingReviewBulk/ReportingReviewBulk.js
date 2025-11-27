@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import { FaDownload } from "react-icons/fa";
 import "./ReportingReviewBulk.css";
 import { BackButton } from "../../../../components/common";
@@ -36,14 +38,18 @@ const ReportingReviewBulk = () => {
         return years;
     };
 
-    const financialYears = getFinancialYears();
-    const [financialYear, setFinancialYear] = useState(financialYears[0]);
+    // const financialYears = getFinancialYears();
+    // const [financialYear, setFinancialYear] = useState(financialYears[0]);
 
     // Extract the year as "2025"
     const extractYear = (fy) => {
         const match = fy.match(/FY (\d{4})/);
         return match ? match[1] : new Date().getFullYear().toString();
     };
+    const [searchParams] = useSearchParams();
+
+const quarter = searchParams.get("quarter");               // Q1
+const financialYear = searchParams.get("financialYear"); 
     
     //handles file upload
     const handleUpload = async () => {

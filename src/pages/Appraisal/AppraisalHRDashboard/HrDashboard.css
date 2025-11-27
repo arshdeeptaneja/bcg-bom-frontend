@@ -282,7 +282,8 @@
 
 .download-list-btn:hover {
   background-color: #f9fafb;
-  border-color: var(--accent-color);
+  color:var(--accent-color);
+  border-color: 1px solid var(--accent-color);
 }
 
 /* Responsive Design */

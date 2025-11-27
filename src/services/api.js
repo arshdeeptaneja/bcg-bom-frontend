@@ -36,6 +36,7 @@ const apiClient = axios.create({
   },
 });
 
+<<<<<<< Updated upstream
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
@@ -43,6 +44,34 @@ apiClient.interceptors.request.use(
     const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+=======
+// Appraisal client for appraisal endpoints
+const appraisalClient = axios.create({
+  baseURL: APPRAISAL_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    'Cache-Control': 'no-cache',
+  },
+});
+
+// Legacy alias (points to appraisal by default for backward compatibility)
+const apiClient = appraisalClient;
+
+// Request interceptor to add auth token (shared by both clients)
+const addAuthTokenInterceptor = (client) => {
+  client.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('accessToken');
+      //const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+>>>>>>> Stashed changes
     }
     return config;
   },
@@ -1048,33 +1077,33 @@ if (filterStatus) params.append("STATUS", filterStatus);
   },
 
   // Download sample Excel for reporting authority bulk update
-  reportingAuthorityBulkDownloadDataTable: async ({
-    roleName,
-    regionCode,
-    quarter,
-    financialYear,
-  }) => {
-    try {
-      const params = new URLSearchParams({
-        roleName,
-        regionCode,
-        quarter,
-        financialYear,
-      });
+ reportingAuthorityBulkDownloadDataTable: async ({
+  roleName,
+  regionCode,
+  quarter,
+  financialYear,
+}) => {
+  try {
+    const params = new URLSearchParams({
+      roleName,
+      regionCode,
+      quarter,
+      financialYear,
+    });
 
-      const response = await apiClient.get(
-        `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_data_table?${params.toString()}`,
-        {
-          responseType: "blob",
-        }
-      );
+    const response = await apiClient.get(
+      `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_data_table?${params.toString()}`,
+      {
+        responseType: "blob",
+      }
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error("Error downloading sample file:", error);
-      throw error;
-    }
-  },
+    return response.data;
+  } catch (error) {
+    console.error("Error downloading sample file:", error);
+    throw error;
+  }
+},
 
   // Get error logs for reporting authority bulk update
   reportingAuthorityBulkErrorLogs: async ({ financialYear }) => {
@@ -1194,22 +1223,35 @@ if (filterStatus) params.append("STATUS", filterStatus);
   },
 
   // SEARCH EMPLOYEE STATUS CHANGE LIST
-  searchHRStatusUpdate: async ({ empNo }) => {
-    try {
-      const params = new URLSearchParams({
-        empNo: empNo || ""
-      });
+searchHRStatusUpdate: async ({ 
+  financialYear, 
+  appraisalPeriod,
+  
+  empNo,
+  searchEmpNo
+}) => {
 
-      const response = await apiClient.get(
-        `/admin/hr_status_update_utility?${params.toString()}`
-      );
+  try {
+    const params = new URLSearchParams({
+      financialYear,
+      appraisalPeriod,
+      
+      empNo,
+      searchEmpNo
+    });
 
-      return response.data;
-    } catch (error) {
-      console.error("HR Status Search Error:", error);
-      throw error;
-    }
-  },
+    const response = await apiClient.get(
+      `/appraisal/admin/hr_status_update_utility?${params.toString()}`
+    );
+
+    return response.data;
+
+  } catch (error) {
+    console.error("HR Status Search Error:", error);
+    throw error;
+  }
+},
+
 
 
   //Appraisal Status Change Utility--Update Status
@@ -1231,40 +1273,47 @@ if (filterStatus) params.append("STATUS", filterStatus);
   },
 
   // SEARCH EMP EXCEPTION DELETE URL LIST
-  searchExceptionDeleteURL: async ({ empNo }) => {
-    try {
-      const params = new URLSearchParams({
-        empNo: empNo || "",
-      });
+ searchExceptionDeleteURL: async ({
+  searchEmpNo,
+  roleName,
+  sol,
+  financialYear,
+}) => {
+  try {
+    const params = new URLSearchParams({
+      searchEmpNo,
+      roleName,
+      sol,
+      financialYear,
+    });
 
-      const response = await apiClient.get(
-        `/admin/hr_exception_delete_urlid?${params.toString()}`
-      );
+    const response = await apiClient.get(
+      `/appraisal/admin/hr_exception_delete_urlid?${params.toString()}`
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching exception delete url:", error);
-      throw error;
-    }
-  },
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching exception delete URL:", error);
+    throw error;
+  }
+}
+,
 
   //EXCEPTION DELETE BUTTON TO DELETE 
-  deleteExceptionURL: async ({ urlId }) => {
-    try {
-      const params = new URLSearchParams({
-        urlId: urlId
-      });
+deleteExceptionURL: async (payload) => {
+  try {
+    const response = await apiClient.post(
+      `/appraisal/admin/hr_exception_delete_urlid/delete`,
+      payload
+    );
+    return response.data;
 
-      const response = await apiClient.delete(
-        `/admin/hr_exception_delete_urlid/delete?${params.toString()}`
-      );
+  } catch (error) {
+    console.error("Error deleting exception URL:", error);
+    throw error;
+  }
+},
 
-      return response.data;
-    } catch (error) {
-      console.error("Error deleting exception URL:", error);
-      throw error;
-    }
-  },
 
   //SEARCH APPEAL DELECTION
   searchAppealDeleteURL: async ({ empNo }) => {

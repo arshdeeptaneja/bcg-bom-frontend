@@ -112,7 +112,7 @@ const AppealComittee = () => {
 
             {/* FILE UPLOAD */}
             <div className="d-flex align-items-center" style={{ border: "1px solid #3fa8e7", borderRadius: "9px" }}>
-              <label className="btn btn-outline-secondary">
+              <label className="btn">
                 SELECT A FILE
                 <input
                   type="file"

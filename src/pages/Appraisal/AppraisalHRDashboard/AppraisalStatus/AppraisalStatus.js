@@ -1,4 +1,6 @@
 // AppraiserPage.jsx
+import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../../../../contexts/AuthContext";
 import { BackButton } from '../../../../components/common';
 import { FaInfoCircle } from "react-icons/fa";
 import { appraisalAPI } from '../../../../services/api';
@@ -14,33 +16,81 @@ const AppraiserStatus = () => {
   const [tableData, setTableData] = useState([]);
   const [noData, setNoData] = useState(false);
 
+  const mapQuarterToCycle = (q) => {
+  switch (q) {
+    case "Q1": return "JUNE";       // Q1 closes in June
+    case "Q2": return "SEPTEMBER";  // Q2 closes in Sep
+    case "Q3": return "DECEMBER";   // Q3 closes in Dec
+    case "Q4": return "MARCH";      // Q4 closes in March
+    default: return "";
+  }
+};
 
-  const handleSearch = async () => {
-    if (!ecNumber.trim()) {
-      alert("Please enter EC Number");
-      return;
-    }
+    const extractYear = (fy) => {
+        const match = fy.match(/FY (\d{4})/);
+        return match ? match[1] : new Date().getFullYear().toString();
+    };
 
-    try {
-      setLoading(true);
-      setNoData(false);
+      const { getUserProperty } = useAuth();
+    
+    // these are directly stored in userData in AuthContext.localStorage
+    const sol = getUserProperty("sol") 
+             || getUserProperty("LOCATION") 
+             || getUserProperty("solId");
+             
+    const empNo = getUserProperty("empNo") 
+               || getUserProperty("EMP_ID");
+    
+    const roleName = getUserProperty("ROLE_TYPE") 
+                  || getUserProperty("roleType") 
+                  || getUserProperty("designation")
+                  || getUserProperty("ROLE_NAME");
+    
+    console.log({roleName, sol, empNo});
 
-      const res = await appraisalAPI.searchHRStatusUpdate({ empNo: ecNumber });
+// const cycle = mapQuarterToCycle(selectedQuarter);
 
-      if (res && res.length > 0) {
-        setTableData(res);
-      } else {
-        setTableData([]);
-        setNoData(true);
-      }
+const [searchParams] = useSearchParams();
 
-    } catch (error) {
-      console.error(error);
+const quarter = searchParams.get("quarter");               // Q1
+const financialYear = searchParams.get("financialYear"); 
+
+const handleSearch = async () => {
+  if (!ecNumber.trim()) {
+    alert("Please enter EC Number");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setNoData(false);
+
+    // Convert selected quarter to cycle month
+    const cycle = mapQuarterToCycle(selectedQuarter);
+
+    const res = await appraisalAPI.searchHRStatusUpdate({
+     financialYear: extractYear(financialYear),                 // Later you can use extractYear if FY dropdown added
+      appraisalPeriod: "JUNE",                 // <----- HERE
+      // quarter: quarter,                         // <----- HERE
+      empNo: ecNumber,                        // HR EC / user EC
+      searchEmpNo: ecNumber,                  // search input value
+    });
+
+    if (res && res.length > 0) {
+      setTableData(res);
+    } else {
+      setTableData([]);
       setNoData(true);
-    } finally {
-      setLoading(false);
     }
-  };
+
+  } catch (error) {
+    console.error(error);
+    setNoData(true);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 
   const handleReset = () => {
@@ -50,7 +100,7 @@ const AppraiserStatus = () => {
   };
 
 
-  const handleStatusChange = async (assignmentId, newStatus) => {
+const handleStatusChange = async (item, newStatus) => {
   if (!newStatus) return;
 
   try {
@@ -60,26 +110,56 @@ const AppraiserStatus = () => {
 
     if (!confirmUpdate) return;
 
-    const res = await appraisalAPI.updateHRStatus({
-      assignmentId,
-      newStatus,
-    });
+    // Quarter → Cycle mapping
+    const cycle = mapQuarterToCycle(selectedQuarter);
+
+    // Get values from Auth Context
+    const roleName = getUserProperty("roleType") || getUserProperty("ROLE_TYPE");
+    const sol = getUserProperty("sol") || getUserProperty("LOCATION");
+    const empNo = getUserProperty("empNo");
+    const empName = getUserProperty("name");
+
+    // Extract year number from FY dropdown if needed
+    const numericFY = "2025"; // or extractYear(financialYear)
+
+    // Prepare payload EXACTLY as backend expects
+    const payload = {
+      statusUpdates: [
+        {
+          urlid: item.urlId,
+          rolecode: item.roleCode || "", // ensure correct field name
+          status: newStatus,
+          comment: item.reason || ""     // or "" if no comment
+        }
+      ],
+      roleName: roleName,
+      solId: sol,
+      appraisalPeriod: appraisalPeriod === "Annual" ? "annual" : cycle.toLowerCase(),
+      quarter: appraisalPeriod === "Annual" ? null : cycle,
+      financialYear: Number(numericFY),
+      empNo: empNo,
+      empName: empName
+    };
+
+    console.log("Final Payload Sent:", payload);
+
+    const res = await appraisalAPI.updateHRStatus(payload);
 
     alert("Status updated successfully!");
 
-    // update UI instantly
+    // Update UI instantly
     setTableData((prev) =>
       prev.map((row) =>
-        row.assignmentId === assignmentId
-          ? { ...row, action: newStatus }
-          : row
+        row.urlId === item.urlId ? { ...row, action: newStatus } : row
       )
     );
+
   } catch (error) {
-    alert("Failed to update status!");
     console.error(error);
+    alert("Failed to update status!");
   }
 };
+
 
 
 
@@ -167,35 +247,35 @@ const AppraiserStatus = () => {
               {appraisalPeriod === 'Quarterly' &&
                 <div className="period-section">
                   <label className="period-title">Quarterly Period</label>
-                  <div className="btn-group mt-2" role="group">
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+                  <div className="period-btns mt-2" role="group">
+                    <div 
+                      className={`period-btn ${selectedQuarter === 'Q1' ? 'active' : ''
                         }`}
                       onClick={() => setSelectedQuarter('Q1')}
                     >
                       Q1
-                    </button>
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q2' ? 'active' : ''
                         }`}
                       onClick={() => setSelectedQuarter('Q2')}
                     >
                       Q2
-                    </button>
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q3' ? 'active' : ''
                         }`}
                       onClick={() => setSelectedQuarter('Q3')}
                     >
                       Q3
-                    </button>
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q4' ? 'active' : ''
                         }`}
                       onClick={() => setSelectedQuarter('Q4')}
                     >
                       Q4
-                    </button>
+                    </div>
                   </div>
                 </div>
               }
@@ -249,7 +329,8 @@ const AppraiserStatus = () => {
                         <select
                           className="form-select custom-select"
                           value={item.action}
-                          onChange={(e) => handleStatusChange(item.assignmentId, e.target.value)}
+                        onChange={(e) => handleStatusChange(item, e.target.value)}
+
                         >
                           <option value="">-Select-</option>
                           <option value="Approved">Approved</option>

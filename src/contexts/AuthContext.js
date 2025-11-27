@@ -15,7 +15,7 @@ export const useAuth = () => {
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // only testing, set it true 
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [statusCount, setStatusCount] = useState({});
@@ -33,6 +33,10 @@ export const AuthProvider = ({ children }) => {
           setUser(parsedUserData);
           setIsAuthenticated(true);
         }
+//         else {
+//   setIsAuthenticated(true);  // <--- force bypass login
+// }
+
       } catch (error) {
         console.error('Error initializing auth:', error);
         // Clear invalid data

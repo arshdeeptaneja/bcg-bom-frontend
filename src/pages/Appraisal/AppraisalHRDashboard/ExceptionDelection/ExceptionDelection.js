@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./ExceptionDelection.css";
+import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../../../../contexts/AuthContext";
 import { BackButton } from "../../../../components/common";
 import { appraisalAPI } from "../../../../services/api";
 import { FaInfoCircle } from "react-icons/fa";
@@ -10,64 +12,117 @@ const ExceptionDeletion = () => {
     const [tableData, setTableData] = useState([]);
     const [noData, setNoData] = useState(false);
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
+      const extractYear = (fy) => {
+            const match = fy.match(/FY (\d{4})/);
+            return match ? match[1] : new Date().getFullYear().toString();
+        };
+    
+          const { getUserProperty } = useAuth();
+        
+        // these are directly stored in userData in AuthContext.localStorage
+        const sol = getUserProperty("sol") 
+                 || getUserProperty("LOCATION") 
+                 || getUserProperty("solId");
+                 
+        const empNo = getUserProperty("empNo") 
+                   || getUserProperty("EMP_ID");
+        
+        const roleName = getUserProperty("ROLE_TYPE") 
+                      || getUserProperty("roleType") 
+                      || getUserProperty("designation")
+                      || getUserProperty("ROLE_NAME");
+        
+        console.log({roleName, sol, empNo});
+    
 
-        if (!empNumber.trim()) {
-            alert("Please enter EMP Number");
-            return;
+        const [searchParams] = useSearchParams();
+        
+        const quarter = searchParams.get("quarter");               // Q1
+        const financialYear = searchParams.get("financialYear"); 
+
+   const handleSearch = async (e) => {
+  e.preventDefault();
+
+  if (!empNumber.trim()) {
+    alert("Please enter EMP Number");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setNoData(false);
+
+    const res = await appraisalAPI.searchExceptionDeleteURL({
+      searchEmpNo: empNumber,
+      roleName: roleName,
+      sol: sol,
+    financialYear: extractYear(financialYear)
+    });
+
+    if (res && res.length > 0) {
+      setTableData(res);
+    } else {
+      setTableData([]);
+      setNoData(true);
+    }
+
+  } catch (error) {
+    console.error(error);
+    setNoData(true);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  const handleDelete = async (item) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this exception?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    setLoading(true);
+
+    const payload = {
+      deleteRequests: [
+        {
+          empnumber: item.ecNumber,
+          urlid: item.urlId,
+          period: item.quarter === "ANNUAL" ? "annual" : item.quarter,
+          comment: ""  // optional user comment
         }
-
-        try {
-            setLoading(true);
-            setNoData(false);
-
-            const res = await appraisalAPI.searchExceptionDeleteURL({
-                empNo: empNumber,
-            });
-
-            if (res && res.length > 0) {
-                setTableData(res);
-            } else {
-                setTableData([]);
-                setNoData(true);
-            }
-        } catch (error) {
-            console.error(error);
-            setNoData(true);
-        } finally {
-            setLoading(false);
-        }
+      ],
+      roleName: roleName,
+      solId: sol,
+      appraisalPeriod: item.quarter === "ANNUAL" ? "annual" : item.quarter,
+      quarter: item.quarter === "ANNUAL" ? null : item.quarter,
+      financialYear: Number(extractYear(financialYear)),
+      empNo: empNo,
+      empNoToDelete: item.ecNumber,
+      empName: getUserProperty("name")
     };
 
-    const handleDelete = async (urlId) => {
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this exception?"
-        );
+    console.log("DELETE PAYLOAD:", payload);
 
-        if (!confirmDelete) return;
+    await appraisalAPI.deleteExceptionURL(payload);
 
-        try {
-            setLoading(true);
+    alert("Exception deleted successfully!");
 
-            const res = await appraisalAPI.deleteExceptionURL({ urlId });
+    // Remove from table
+    setTableData(prev => prev.filter(r => r.urlId !== item.urlId));
 
-            alert("Exception deleted successfully!");
+    if (tableData.length === 1) setNoData(true);
 
-            // remove deleted row from UI
-            setTableData((prev) => prev.filter((row) => row.urlId !== urlId));
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete exception!");
+  } finally {
+    setLoading(false);
+  }
+};
 
-            if (tableData.length === 1) {
-                setNoData(true);
-            }
-
-        } catch (error) {
-            alert("Failed to delete exception!");
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
 
     return (
@@ -159,7 +214,7 @@ const ExceptionDeletion = () => {
                                         <td>
                                             <button
                                                 className="btn btn-danger btn-sm"
-                                                onClick={() => handleDelete(item.urlId)}
+                                                onClick={() => handleDelete(item)}
                                             >
                                                 Delete
                                             </button>
