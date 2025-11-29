@@ -28,6 +28,7 @@ export default function EmployeeAppraisalCard({
   onAddCheckIn,
   onViewSummary,
   onAddException,
+  onAddAppeal,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
@@ -348,7 +349,7 @@ export default function EmployeeAppraisalCard({
             </button>
           </div>
           <div className="button-row">
-          {userType === "self" && (
+          {userType === "self" && appraisalPeriod === "Quarterly" && (
             <button
               type="button"
               className="btn-fade"
@@ -357,6 +358,18 @@ export default function EmployeeAppraisalCard({
               }}
             >
               Add Exception 
+              <span className="ms-2">→</span>
+            </button>
+          )}
+          {userType === "self" && appraisalPeriod === "Annual" && (
+            <button
+              type="button"
+              className="btn-fade"
+              onClick={() => {
+                onAddAppeal && onAddAppeal()
+              }}
+            >
+              Add Appeal
               <span className="ms-2">→</span>
             </button>
           )}
@@ -390,6 +403,7 @@ EmployeeAppraisalCard.propTypes = {
   onAddCheckIn: PropTypes.func,
   onViewSummary: PropTypes.func,
   onAddException: PropTypes.func,
+  onAddAppeal: PropTypes.func,
   redResult: PropTypes.array,
 
 };

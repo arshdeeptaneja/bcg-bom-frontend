@@ -37,6 +37,9 @@ const AnnualCheckIn = () => {
   const { currentRole, isEditableBy, handleRoleChange } = roleState;
   const { handleSubmit, handleDevelopmentInputChange, isSubmitting } = actions;
 
+  console.log('AnnualCheckIn data:', data);
+  console.log('developmentInputs:', developmentInputs);
+
   // Use API data or fallback to empty/mock data
   const kraData = data?.finalScoreSummary || [];
   const measurableKraListData = data?.measurableKras || [];
@@ -164,7 +167,7 @@ const AnnualCheckIn = () => {
         )}
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Development Inputs</h5>
-          {developmentInputs.length > 0 ? (
+          {developmentInputs.length > 0 ? ( 
             developmentInputs.map((input, index) => (
               <div className="mb-3" key={input.id}>
                 <label className="form-label fw-bold text-dark">

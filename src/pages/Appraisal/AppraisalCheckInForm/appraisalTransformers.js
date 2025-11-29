@@ -111,7 +111,7 @@ export const transformAnnualAppraisalData = (apiResponse) => {
   
   // Transform Final Score Summary from annual_score_data
   const finalScoreSummary = scoreData
-    .filter((item) => item.CATEGORY && item.MAX_SCORE != null)
+    .filter((item) => item.CATEGORY)
     .map((item) => ({
       Category: item.CATEGORY,
       KraName: item.CATEGORY, // Map for FinalScoreSummaryTable

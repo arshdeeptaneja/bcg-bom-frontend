@@ -123,6 +123,16 @@ export const useAnnualAppraisal = () => {
 
   // Fetch annual appraisal data
   // Note: quarter is hardcoded to 'Q2' as a backend workaround for annual appraisals
+  const isQueryEnabled = isContextValid && appraisalPeriod?.toLowerCase() === 'annual';
+  
+  console.log('[useAnnualAppraisal] useQuery enabled params:', {
+    isContextValid,
+    appraisalPeriod,
+    appraisalPeriodLowercase: appraisalPeriod?.toLowerCase(),
+    isAnnual: appraisalPeriod?.toLowerCase() === 'annual',
+    isQueryEnabled,
+  });
+
   const { data: apiResponse, isLoading, isError } = useQuery({
     queryKey,
     queryFn: () => {
@@ -139,7 +149,7 @@ export const useAnnualAppraisal = () => {
       console.log('[useAnnualAppraisal] API call params:', apiParams);
       return appraisalAPI.getEmployeeSelfAppraisal(apiParams);
     },
-    enabled: isContextValid && appraisalPeriod?.toLowerCase() === 'annual',
+    enabled: isQueryEnabled,
   });
 
   // Transform API response to component-compatible format
@@ -476,7 +486,7 @@ export const useAnnualAppraisal = () => {
         // Update with user input
         SELF_RESPONSE: userInput.response || originalQuestion.SELF_RESPONSE || null,
         SELF_RESPONSE_2: userInput.response2 || originalQuestion.SELF_RESPONSE_2 || null,
-        SELF_RESPONSE_OPTIONS: originalQuestion.SELF_RESPONSE_OPTIONS || null,
+        SELF_RESPONSE_OPTIONS: userInput.response ||  originalQuestion.SELF_RESPONSE_OPTIONS || null,
         REPA_RESPONSE: originalQuestion.REPA_RESPONSE || null,
         REVA_RESPONSE: originalQuestion.REVA_RESPONSE || null,
         AC_RESPONSE: originalQuestion.AC_RESPONSE || null,

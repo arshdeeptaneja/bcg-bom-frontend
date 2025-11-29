@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../../services/api';
 import { toast } from 'react-toastify';
 import { transformAnnualAppraisalData } from '../appraisalTransformers';
+import { useAuth } from '../../../../contexts/AuthContext';
 
 /**
  * Annual Appraisal Review Hook (Appraiser/Reviewer)
@@ -21,6 +22,8 @@ export const useAnnualAppraisalReview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const {getUserProperty} = useAuth();
+  const  ecNumber = getUserProperty("empNo"); 
 
   // Extract params from location.state first, fallback to URL search params
   const stateParams = location.state || {};
@@ -363,6 +366,7 @@ export const useAnnualAppraisalReview = () => {
         ...originalKra,
         REPA_ACTUALS: appraiserInput.score || originalKra.REPA_ACTUALS,
         COMMENT_REPA: appraiserInput.comment || originalKra.COMMENT_REPA || null,
+        FIRSTCOMMENT: appraiserInput.comment || originalKra.FIRSTCOMMENT || null,
       };
     });
 
@@ -393,7 +397,7 @@ export const useAnnualAppraisalReview = () => {
     return {
       id: url || null,
       empNo,
-      ecNumber: empNo,
+      ecNumber: ecNumber,
       financialYear: parseInt(normalizedFinancialYear, 10),
       
       continuousLearningPresent: learningMetrics.continuousLearningPresent,
@@ -456,7 +460,7 @@ export const useAnnualAppraisalReview = () => {
       const successMessage = response.message || response.MSG || 'Appraisal submitted successfully';
       toast.success(successMessage);
       setIsDirty(false);
-      navigate(-1);
+      // navigate(-1);
     },
     onError: (error) => {
       console.error('[useAnnualAppraisalReview] Submit error:', error);
@@ -465,9 +469,14 @@ export const useAnnualAppraisalReview = () => {
     },
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    // Prevent default form submission behavior (page reload)
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+
     const { isValid, errors } = validateForm();
-    
+
     if (!isValid) {
       const displayErrors = errors.slice(0, 3);
       displayErrors.forEach((err) => toast.error(err));

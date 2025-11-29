@@ -108,12 +108,7 @@
   padding: 10px 12px;
 }
 
-/* File Download Card */
-.file-download-card {
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-}
+
 
 /* ============================================
    KRA Review Table - Green structure, Blue theme
@@ -421,22 +416,7 @@
   color: #888;
 }
 
-/* Download Attachment Button */
-.btn-download-attachment {
-  background-color: var(--accent-color, #0189d0);
-  color: white;
-  padding: 10px 24px;
-  border-radius: 6px;
-  text-decoration: none;
-  display: inline-block;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
 
-.btn-download-attachment:hover {
-  background-color: #0056b3;
-  color: white;
-}
 
 /* Note Section */
 .note-section {

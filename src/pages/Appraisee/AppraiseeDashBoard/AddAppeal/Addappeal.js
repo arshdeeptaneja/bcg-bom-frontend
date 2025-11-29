@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { BackButton } from '../../../../components/common';
+import LoadingSpinner from '../../../../components/Spinner';
 import { CheckInDescriptionSection, FinalScoreSummaryTable } from '../../../../components/Appraisal';
 import { useAddAppeal } from './useAddAppeal';
 import AppealKRASection from './AppealKRASection';
 import FileUploadSection from './FileUploadSection';
-import './AddAppeal.css';
 
 function AddAppeal() {
   const navigate = useNavigate();
@@ -91,10 +91,13 @@ function AddAppeal() {
   if (isLoading) {
     return (
       <div className="pageWrapper">
-        <div className="loading-overlay">
-          <div className="loading-spinner"></div>
-          <p className="mt-3 text-muted">Loading appraisal data...</p>
+        <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
+          <div className="headline d-flex flex-row justify-content-between align-items-center">
+            <BackButton />
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appeal</h1>
+          </div>
         </div>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -150,16 +153,16 @@ function AddAppeal() {
   }
 
   return (
-    <div className="pageWrapper add-appeal-container">
+    <div className="pageWrapper">
       {/* Header Section */}
-      <div className="pageWrapper-header add-appeal-header">
+      <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appeal</h1>
         </div>
       </div>
 
-      <div className="pageWrapper-content add-appeal-content">
+      <div className="pageWrapper-content d-flex flex-column m-1 p-3">
         {/* Validation Errors Summary */}
         {validationErrors.length > 0 && (
           <div className="validation-summary">
@@ -176,35 +179,29 @@ function AddAppeal() {
         )}
 
         {/* Employee Information Section */}
-        <div className="appeal-section">
-          <CheckInDescriptionSection 
-            employee={context.employee} 
-            dateRange={context.dateRange} 
-          />
-        </div>
+        <CheckInDescriptionSection 
+          employee={context.employee} 
+          dateRange={context.dateRange} 
+        />
 
         {/* Note Section */}
-        <div className="note-text mb-4">
-          <i className="bi bi-info-circle-fill me-2"></i>
-          <strong>Note:</strong> Please raise an exception if actual or target values are incorrect. 
-          This appeal form is for appealing against the scores assigned by your appraiser.
+        <div className="note mt-5 mb-5">
+          <span className="text-muted fw-bold">Note: </span>
+          <span className="text-muted">
+            Please raise an exception if actual or target values are incorrect. 
+            This appeal form is for appealing against the scores assigned by your appraiser.
+          </span>
         </div>
 
         {/* Final Score Summary Section */}
-        <div className="appeal-section">
-          <h5 className="appeal-section-title">
-            <i className="bi bi-bar-chart-fill me-2"></i>
-            Final Score Summary
-          </h5>
+        <div className="final-score-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
+          <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
           <FinalScoreSummaryTable kraListData={data.finalScoreSummary} />
         </div>
 
         {/* Discretionary KRAs Section */}
-        <div className="appeal-section">
-          <h5 className="appeal-section-title">
-            <i className="bi bi-list-check me-2"></i>
-            Discretionary KRAs - Select KRAs to Appeal
-          </h5>
+        <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
+          <h5 className="text-primary fw-bold mb-3">Discretionary KRAs - Select KRAs to Appeal</h5>
 
           {/* Measurable KRAs */}
           {Object.entries(data.measurableKras).map(([groupName, kras]) => (
@@ -273,7 +270,8 @@ function AddAppeal() {
         </div>
 
         {/* File Upload Section */}
-        <div className="appeal-section">
+        <div className="file-upload-section d-flex flex-column shadow-sm m-1 p-3">
+          <h5 className="text-primary fw-bold mb-3">Supporting Documents</h5>
           <FileUploadSection
             files={formState.uploadedFiles}
             onFileUpload={handleFileUpload}
@@ -281,10 +279,12 @@ function AddAppeal() {
           />
         </div>
 
+      </div>
+
         {/* Submit Button */}
-        <div className="appeal-section text-end">
+        <div className="save-and-submit-button-section d-flex flex-column align-items-end gap-2 m-3">
           <button
-            className="btn btn-submit-appeal"
+            className="btn btn-primary"
             onClick={handleSubmit}
             disabled={!isValid || actions.isSubmitting}
             title={!isValid ? 'Please select at least one KRA and provide justification' : ''}
@@ -302,13 +302,12 @@ function AddAppeal() {
             )}
           </button>
           {!isValid && formState.selectedKras.size === 0 && (
-            <div className="text-muted small mt-2">
+            <div className="text-muted small">
               <i className="bi bi-info-circle me-1"></i>
               Please select at least one KRA to enable submission
             </div>
           )}
         </div>
-      </div>
 
       {/* Success Modal */}
       {showSuccessModal && (

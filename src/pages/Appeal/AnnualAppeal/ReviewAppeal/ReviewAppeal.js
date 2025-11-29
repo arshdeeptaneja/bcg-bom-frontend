@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { BackButton } from '../../../../components/common';
+import { CheckInDescriptionSection } from '../../../../components/Appraisal';
+import LoadingSpinner from '../../../../components/Spinner';
 import { useReviewAppeal } from './useReviewAppeal';
 import AppealReviewKRASection from './AppealReviewKRASection';
-import './ReviewAppeal.css';
 
 function ReviewAppeal() {
   const navigate = useNavigate();
@@ -50,13 +51,30 @@ function ReviewAppeal() {
     navigate(-1);
   };
 
+  // Prepare employee data for CheckInDescriptionSection
+  const descriptionEmployee = useMemo(
+    () => ({
+      empNo: data?.employee?.empNo || context.empNo,
+      employeeName: data?.employee?.employeeName || '-',
+      branch: data?.employee?.branch || '-',
+      primaryRole: data?.employee?.primaryRole || '-',
+      appraiser: data?.employee?.appraiser || '-',
+    }),
+    [data, context.empNo]
+  );
+
+  const roleLabel = context.role === 'REVIEWER' ? 'Reviewing Authority' : 'Reporting Authority (Appraiser)';
+
   // Loading state
   if (isLoading) {
     return (
       <div className="pageWrapper">
-        <div className="loading-overlay">
-          <div className="loading-spinner"></div>
-          <p className="mt-3 text-muted">Loading appeal review data...</p>
+        <div className="pageWrapper-header d-flex flex-row align-items-center">
+          <BackButton />
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Review Appeal</h1>
+        </div>
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '40vh' }}>
+          <LoadingSpinner />
         </div>
       </div>
     );
@@ -67,13 +85,13 @@ function ReviewAppeal() {
     return (
       <div className="pageWrapper">
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
-          <div className="headline d-flex flex-row justify-content-between align-items-center">
+          <div className="headline d-flex flex-row align-items-center">
             <BackButton />
             <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Review Appeal</h1>
           </div>
         </div>
-        <div className="pageWrapper-content m-3">
-          <div className="alert alert-danger">
+        <div className="card shadow-sm p-3">
+          <div className="alert alert-danger mb-0">
             <h5 className="alert-heading">
               <i className="bi bi-exclamation-triangle-fill me-2"></i>
               Error Loading Data
@@ -89,77 +107,43 @@ function ReviewAppeal() {
     );
   }
 
-  const roleLabel = context.role === 'REVIEWER' ? 'Reviewing Authority' : 'Reporting Authority (Appraiser)';
-
   return (
-    <div className="pageWrapper review-appeal-container">
+    <div className="pageWrapper">
       {/* Header */}
-      <div className="pageWrapper-header review-appeal-header">
-        <div className="headline d-flex flex-row justify-content-between align-items-center">
+      <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
+        <div className="headline d-flex flex-row align-items-center">
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Review Appeal</h1>
         </div>
-        <div className="d-flex gap-2">
-          <span className="badge bg-primary">FY {context.financialYear}</span>
-          <span className="badge bg-success">Annual Appraisal</span>
-        </div>
+        <h5 className="text-muted fw-bold mb-0">
+          FY {context.financialYear} · Annual Appraisal
+        </h5>
       </div>
 
-      <div className="pageWrapper-content review-appeal-content">
-        {/* Role Info Banner */}
-        <div className="role-info-banner mb-4">
-          <i className="bi bi-person-badge me-2"></i>
-          You are reviewing as: <strong>{roleLabel}</strong>
-        </div>
+      <div className="pageWrapper-content d-flex flex-column gap-3">
+        {/* Employee Information - CheckInDescriptionSection */}
+        <CheckInDescriptionSection 
+          employee={descriptionEmployee} 
+          dateRange={data.dateRange || ''} 
+          showDownloadButton={!!data.fileUrl}
+          onDownload={() => window.open(data.fileUrl, '_blank')}
+        />
 
-        {/* Employee Information */}
-        <div className="appeal-section mb-4">
-          <h5 className="section-title">
-            <i className="bi bi-person-fill me-2"></i>Employee Information
-          </h5>
-          <div className="employee-info-card">
-            <div className="row">
-              <div className="col-md-4">
-                <div className="info-item">
-                  <span className="info-label">Employee No:</span>
-                  <span className="info-value">{data.employee.empNo || context.empNo}</span>
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="info-item">
-                  <span className="info-label">Name:</span>
-                  <span className="info-value">{data.employee.employeeName || '-'}</span>
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="info-item">
-                  <span className="info-label">Branch:</span>
-                  <span className="info-value">{data.employee.branch || '-'}</span>
-                </div>
-              </div>
-            </div>
-            {data.dateRange && (
-              <div className="row mt-2">
-                <div className="col-12">
-                  <div className="info-item">
-                    <span className="info-label">Appraisal Period:</span>
-                    <span className="info-value">{data.dateRange}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Role Info Banner */}
+        <div className="alert alert-info d-flex align-items-center py-2 mb-0">
+          <i className="bi bi-person-badge me-2"></i>
+          You are reviewing as: <strong className="ms-1">{roleLabel}</strong>
         </div>
 
         {/* Final Score Summary */}
         {data.finalScoreSummary && data.finalScoreSummary.length > 0 && (
-          <div className="appeal-section mb-4">
-            <h5 className="section-title">
+          <div className="card shadow-sm p-4">
+            <h5 className="text-primary fw-bold mb-3">
               <i className="bi bi-bar-chart-fill me-2"></i>Final Score Summary
             </h5>
             <div className="table-responsive">
-              <table className="table table-bordered score-summary-table">
-                <thead>
+              <table className="table table-bordered">
+                <thead className="table-light">
                   <tr>
                     <th>Category</th>
                     <th className="text-center">Max Score</th>
@@ -188,24 +172,10 @@ function ReviewAppeal() {
           </div>
         )}
 
-        {/* File Download Section */}
-        {data.fileUrl && (
-          <div className="appeal-section mb-4">
-            <h5 className="section-title">
-              <i className="bi bi-file-earmark-pdf me-2"></i>Supporting Document
-            </h5>
-            <div className="file-download-card">
-              <a href={data.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary">
-                <i className="bi bi-download me-2"></i>Download Attachment
-              </a>
-            </div>
-          </div>
-        )}
-
         {/* Discretionary Non-Measurable KRAs */}
         {data.nonMeasurableKras && data.nonMeasurableKras.length > 0 && (
-          <div className="appeal-section mb-4">
-            <h5 className="section-title">
+          <div className="card shadow-sm p-4">
+            <h5 className="text-primary fw-bold mb-3">
               <i className="bi bi-list-check me-2"></i>
               Discretionary Non-Measurable KRAs ({data.nonMeasurableKras.length})
             </h5>
@@ -226,8 +196,8 @@ function ReviewAppeal() {
 
         {/* Discretionary Measurable KRAs */}
         {data.measurableKras && data.measurableKras.length > 0 && (
-          <div className="appeal-section mb-4">
-            <h5 className="section-title">
+          <div className="card shadow-sm p-4">
+            <h5 className="text-primary fw-bold mb-3">
               <i className="bi bi-graph-up me-2"></i>
               Discretionary Measurable KRAs ({data.measurableKras.length})
             </h5>
@@ -249,7 +219,7 @@ function ReviewAppeal() {
         {/* No KRAs Message */}
         {(!data.nonMeasurableKras || data.nonMeasurableKras.length === 0) && 
          (!data.measurableKras || data.measurableKras.length === 0) && (
-          <div className="alert alert-info">
+          <div className="alert alert-info mb-0">
             <i className="bi bi-info-circle me-2"></i>
             No KRAs available for review.
           </div>
@@ -257,15 +227,15 @@ function ReviewAppeal() {
 
         {/* Selection Summary */}
         {formState.selectedKras.size > 0 && (
-          <div className="selection-summary mb-4">
+          <div className="alert alert-success d-flex align-items-center mb-0">
             <i className="bi bi-check-circle-fill me-2"></i>
-            <strong>{formState.selectedKras.size}</strong> KRA(s) selected for review
+            <strong>{formState.selectedKras.size}</strong>&nbsp;KRA(s) selected for review
           </div>
         )}
 
         {/* Overall Comment */}
-        <div className="appeal-section mb-4">
-          <h5 className="section-title">
+        <div className="card shadow-sm p-4">
+          <h5 className="text-primary fw-bold mb-3">
             <i className="bi bi-chat-left-text me-2"></i>Overall Comment
           </h5>
           <textarea
@@ -282,54 +252,61 @@ function ReviewAppeal() {
             </div>
           )}
         </div>
-
-        {/* Submit Button */}
-        <div className="appeal-section text-end">
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={handleSubmitClick}
-            disabled={!isValid || actions.isSubmitting}
-          >
-            {actions.isSubmitting ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2"></span>
-                Submitting...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-send-fill me-2"></i>
-                Submit Review
-              </>
-            )}
-          </button>
-          {!isValid && (
-            <div className="text-muted small mt-2">
-              <i className="bi bi-info-circle me-1"></i>
-              Select KRAs, choose actions, and add overall comment to submit
-            </div>
-          )}
-        </div>
       </div>
+
+      {/* Submit Button - Outside main content wrapper */}
+      <div className="d-flex justify-content-end gap-3 py-3">
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={handleSubmitClick}
+          disabled={!isValid || actions.isSubmitting}
+        >
+          {actions.isSubmitting ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2"></span>
+              Submitting...
+            </>
+          ) : (
+            <>
+              <i className="bi bi-send-fill me-2"></i>
+              Submit Review
+            </>
+          )}
+        </button>
+      </div>
+      {!isValid && (
+        <div className="text-muted small text-end mb-3">
+          <i className="bi bi-info-circle me-1"></i>
+          Select KRAs, choose actions, and add overall comment to submit
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h5 className="mb-3">
-              <i className="bi bi-question-circle text-warning me-2"></i>
-              Confirm Submission
-            </h5>
-            <p>Are you sure you want to submit this appeal review?</p>
-            <p className="text-muted small">
-              You have reviewed <strong>{formState.selectedKras.size}</strong> KRA(s).
-            </p>
-            <div className="d-flex justify-content-end gap-2 mt-4">
-              <button className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>
-                Cancel
-              </button>
-              <button className="btn btn-primary" onClick={handleConfirmSubmit}>
-                Confirm
-              </button>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  <i className="bi bi-question-circle text-warning me-2"></i>
+                  Confirm Submission
+                </h5>
+                <button type="button" className="btn-close" onClick={() => setShowConfirmModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to submit this appeal review?</p>
+                <p className="text-muted small">
+                  You have reviewed <strong>{formState.selectedKras.size}</strong> KRA(s).
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>
+                  Cancel
+                </button>
+                <button className="btn btn-primary" onClick={handleConfirmSubmit}>
+                  Confirm
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -337,23 +314,25 @@ function ReviewAppeal() {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="modal-overlay">
-          <div className="modal-content text-center">
-            <div className="success-icon mb-3">
-              <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '4rem' }}></i>
-            </div>
-            <h4 className="text-primary mb-3">Review Submitted Successfully!</h4>
-            {responseData?.ticketId && (
-              <p className="mb-3">
-                <strong>Ticket ID:</strong> {responseData.ticketId}
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content text-center p-4">
+              <div className="mb-3">
+                <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '4rem' }}></i>
+              </div>
+              <h4 className="text-primary mb-3">Review Submitted Successfully!</h4>
+              {responseData?.ticketId && (
+                <p className="mb-3">
+                  <strong>Ticket ID:</strong> {responseData.ticketId}
+                </p>
+              )}
+              <p className="text-muted">
+                The appeal review has been recorded and the employee will be notified.
               </p>
-            )}
-            <p className="text-muted">
-              The appeal review has been recorded and the employee will be notified.
-            </p>
-            <button className="btn btn-primary mt-3" onClick={handleSuccessClose}>
-              OK
-            </button>
+              <button className="btn btn-primary mt-3" onClick={handleSuccessClose}>
+                OK
+              </button>
+            </div>
           </div>
         </div>
       )}

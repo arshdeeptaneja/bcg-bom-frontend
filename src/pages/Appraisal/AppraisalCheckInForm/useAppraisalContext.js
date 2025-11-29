@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { extractYear } from './appraisalTransformers';
+import { useAuth } from '../../../contexts/AuthContext';
 
 /**
  * Shared context hook for appraisal flows.
@@ -10,7 +11,8 @@ import { extractYear } from './appraisalTransformers';
 export const useAppraisalContext = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const {getUserProperty} = useAuth();
+  const zoneName = getUserProperty('ZNNAME');
   // Parse query parameters
   const searchParams = new URLSearchParams(location.search);
   const queryParams = Object.fromEntries(searchParams.entries());
@@ -33,7 +35,7 @@ export const useAppraisalContext = () => {
   const initialAppraisalStatus = stateOrQuery.appraisalStatus || queryParams.appraisalStatus;
 
   // Zone information (from employee data or direct state)
-  const zoneName = stateOrQuery.zoneName || stateOrQuery.employee?.zoneName || stateOrQuery.employee?.ZNNAME || queryParams.zoneName;
+  // const zoneName = stateOrQuery.zoneName || stateOrQuery.employee?.zoneName || stateOrQuery.employee?.ZNNAME || queryParams.zoneName;
 
   // Construct employee object if missing but empNo exists
   const employee = stateOrQuery.employee || (empNo ? { empNo, primaryRole: 'default' } : null);

@@ -380,6 +380,7 @@ const AnnualAppraisalReview = () => {
 
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button
+          type='submit'
           className="btn btn-primary"
           onClick={handleSubmit}
           disabled={isSubmitting}

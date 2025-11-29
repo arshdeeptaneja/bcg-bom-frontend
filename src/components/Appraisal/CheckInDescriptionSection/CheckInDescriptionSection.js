@@ -3,11 +3,11 @@ import './CheckInDescriptionSection.css';
 
 export default function CheckInDescriptionSection({ employee, dateRange, showDownloadButton = false, onDownload }) {
   return (
-    <div className="check-in-description-section">
+    <div className="check-in-description-section position-relative">
 
       {/* ✅ Download Button Positioned Top-Right (Only When Enabled) */}
       {showDownloadButton && (
-        <div className="text-end mb-3">
+        <div className="position-absolute top-0 end-0">
           <button
             className="btn"
             style={{

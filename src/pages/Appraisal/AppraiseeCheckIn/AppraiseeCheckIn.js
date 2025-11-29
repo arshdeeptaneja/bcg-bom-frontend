@@ -168,7 +168,7 @@ export default function AppraiseeCheckIn() {
   // Extract results from API response
   const results = data?.allResults || [];
   const scoreData = data?.appraisal_score_dash || [];
-
+console.log('results:', results);
   return (
     <div className="pageWrapper">
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
@@ -191,7 +191,7 @@ export default function AppraiseeCheckIn() {
             <p className="text-muted">Please check back later or contact HR if you believe this is an error.</p>
           </div>
         ) : (
-          results.map((employee, index) => (
+          results.map((employee, index) => (            
             <EmployeeAppraisalCard
               key={employee.EMP_ID || index}
               employee={
@@ -209,21 +209,38 @@ export default function AppraiseeCheckIn() {
               appraisalPeriod={appraisalPeriod}
               scoreData={scoreData}
               onAddCheckIn={() => {
-                navigate('/appraisal/check-in-form', {
-                  state: {
+                if (appraisalPeriod === 'Annual') {
+                  // Annual: pass as query params
+                  const queryParams = new URLSearchParams({
                     financialYear,
                     appraisalPeriod,
-                    quarter,
-                    dateRange: employee.START_DATE && employee.END_DATE 
-                      ? `${employee.START_DATE} to ${employee.END_DATE}` 
-                      : '',
-                    employee: employeeModel
-                  },
-                });
+                    urlId: employee.id || '',
+                    roleName: employee.primary || '',                    
+                    roleType: employee.primary || 'Administrative Officers',
+                  }).toString();
+                  navigate(`/appraisal/check-in-form?${queryParams}`, {
+                    state: {
+                      employee: employeeModel,
+                    },
+                  });
+                } else {
+                  // Quarterly: pass as state
+                  navigate('/appraisal/check-in-form', {
+                    state: {
+                      financialYear,
+                      appraisalPeriod,
+                      quarter,
+                      dateRange: employee.START_DATE && employee.END_DATE 
+                        ? `${employee.START_DATE} to ${employee.END_DATE}` 
+                        : '',
+                      employee: employeeModel,
+                    },
+                  });
+                }
               }}
               onViewSummary={() => {}}
               onAddException={() => {
-                console.log("button pressed")
+                console.log("button pressed")                
                 navigate('/appraisal/exception-quarterly', {
                   state: {
                     financialYear,
@@ -236,6 +253,18 @@ export default function AppraiseeCheckIn() {
                     role: employeeModel.primaryRole
                   },
                 });
+              }}
+              onAddAppeal={() => {
+                const queryParams = new URLSearchParams({
+                  roleId: employee.id || employee.URL_ID || '',
+                  roleType: employee.primary || employeeModel?.primaryRole || 'Administrative Officer',
+                  financialYear: financialYear?.replace('FY ', '') || '2025',
+                  appraisalPeriod: 'Annual',
+                  empNo: employeeModel?.empNo || '',
+                  employeeName: employeeModel?.employeeName || '',
+                  primaryRole: employeeModel?.primaryRole || '',
+                }).toString();
+                navigate(`/annual/add-appeal?${queryParams}`);
               }}
             />
           ))

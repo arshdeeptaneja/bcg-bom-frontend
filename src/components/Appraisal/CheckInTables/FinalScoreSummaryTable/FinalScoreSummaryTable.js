@@ -11,6 +11,8 @@ export default function FinalScoreSummaryTable({ kraListData }) {
     return <div>Not Applicable</div>;
   }
 
+  console.log('kraListData:', kraListData);
+
   return (
     <div className="table-responsive">
       <table className="table text-start final-score-summary-table" style={{ borderCollapse: 'collapse', border: '1px solid #ddd' }}>
@@ -32,14 +34,6 @@ export default function FinalScoreSummaryTable({ kraListData }) {
             </tr>
           ))}
         </tbody>
-        <tfoot style={{ backgroundColor: '#f8f9fa', fontWeight: 600 }}>
-          <tr className="fw-bold">
-            <td className="text-start" style={{ padding: "12px 16px", border: "1px solid #ddd" }}>Total Score</td>
-            <td className="text-center" style={{ padding: "12px 16px", border: "1px solid #ddd" }}>
-              {kraListData.reduce((acc, kra) => acc + kra.KraWeight, 0)}
-            </td>
-          </tr>
-        </tfoot>
       </table>
     </div>
   );

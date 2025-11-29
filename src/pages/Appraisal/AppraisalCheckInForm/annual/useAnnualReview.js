@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../../services/api';
 import { toast } from 'react-toastify';
 import { transformAnnualAppraisalData } from '../appraisalTransformers';
-
+import { useAuth } from '../../../../contexts/AuthContext';
 /**
  * Annual Review Hook (Reviewer/Acceptor)
  *
@@ -21,6 +21,8 @@ import { transformAnnualAppraisalData } from '../appraisalTransformers';
 export const useAnnualReview = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const {getUserProperty} = useAuth(); 
+  const ecNumber = getUserProperty('empNo') || '';
   const [searchParams] = useSearchParams();
 
   // Extract params from location.state first, fallback to URL search params
@@ -99,7 +101,7 @@ export const useAnnualReview = () => {
     queryKey,
     queryFn: () => {
       const apiParams = {
-        empNo,
+        empNo: ecNumber,
         url: url || urlId,
         roleType,
         roleId: null,
@@ -401,7 +403,7 @@ export const useAnnualReview = () => {
     return {
       id: url || urlId || null,
       empNo,
-      ecNumber: empNo,
+      ecNumber,
       financialYear: parseInt(normalizedFinancialYear, 10),
 
       // Learning metrics
@@ -476,7 +478,7 @@ export const useAnnualReview = () => {
       console.log('[useAnnualReview] Submit success:', response);
       toast.success(response?.MSG === 'success' ? 'Review submitted successfully' : (response?.MSG || 'Review submitted successfully'));
       setIsDirty(false);
-      navigate(-1);
+      // navigate(-1);
     },
     onError: (error) => {
       console.error('[useAnnualReview] Submit error:', error);
