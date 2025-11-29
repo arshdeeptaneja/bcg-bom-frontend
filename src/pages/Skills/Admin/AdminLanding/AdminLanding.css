@@ -1,0 +1,31 @@
+.admin-landing-header {
+  margin-bottom: 32px;
+}
+
+.admin-landing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .admin-landing-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-landing-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-landing-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

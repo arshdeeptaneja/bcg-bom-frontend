@@ -42,6 +42,13 @@ import {
   AnnualReview,
   AnnualReviewView,
   QuaterlyAppraiserCheckIn,
+  ManageFiles,
+  GenerateDetailedReport,
+  GenerateIDPs,
+  SetConfiguration,
+  AdminLanding,
+  ProfilerLandingPage,
+  SkillsDashboard,
 } from './pages';
 import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
 import ReviewAppeal from './pages/Appeal/AnnualAppeal/ReviewAppeal/ReviewAppeal';
@@ -571,7 +578,7 @@ function AppContent() {
               }
             />
 
-{/* <Route
+            {/* <Route
   path="/quarterly/quaterly-appraiser-check-in"
   element={
     isAuthenticated ? (
@@ -582,7 +589,7 @@ function AppContent() {
   }
  /> */}
 
-              <Route
+            <Route
               path="/utility/quarterly-appraiser-bulk"
               element={
                 isAuthenticated ? (
@@ -658,7 +665,86 @@ function AppContent() {
               }
             />
 
+            <Route
+              path="/skills/dashboard"
+              element={
+                isAuthenticated ? (
+                  <LayoutBuilder
+                    onLogout={handleLogout}
+                    component={<SkillsDashboard />}
+                    leftNavigation={false}
+                  />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
 
+            <Route
+              path="/skills/admin/manage-files"
+              element={
+                isAuthenticated ? (
+                  <ManageFilesLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/skills/admin/generate-detailed-report"
+              element={
+                isAuthenticated ? (
+                  <GenerateDetailedReportLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/skills/admin/generate-idps"
+              element={
+                isAuthenticated ? (
+                  <GenerateIDPsLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/skills/admin/set-configuration"
+              element={
+                isAuthenticated ? (
+                  <SetConfigurationLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/skills/profiler/landing-page"
+              element={
+                isAuthenticated ? (
+                  <ProfilerLandingPageLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+            <Route
+              path="/skills/admin/admin-landing"
+              element={
+                isAuthenticated ? (
+                  <AdminLandingLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
           </Routes>
         </div>
       </Router>
@@ -1045,13 +1131,12 @@ const QuaterlyAppraiseeCheckInLayout = ({ onLogout }) => (
   </>
 );
 
-
 //Quarterly Appraiser details in bulk utility
 const QuarterlyAppraiserBulkLayout = ({ onLogout }) => (
   <>
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
-  <QuarterlyAppraiserBulk />
+    <QuarterlyAppraiserBulk />
   </>
 );
 
@@ -1059,7 +1144,7 @@ const ExceptionScoreLayout = ({ onLogout }) => (
   <>
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
-   <ExceptionScore />
+    <ExceptionScore />
   </>
 );
 
@@ -1070,7 +1155,6 @@ const AdminSettingLayout = ({ onLogout }) => (
     <AdminSetting />
   </>
 );
-
 
 const AppealDeletionLayout = ({ onLogout }) => (
   <>
@@ -1123,13 +1207,69 @@ const AnnualReviewViewLayout = ({ onLogout }) => (
     <LeftNavigation />
     <AnnualReviewView />
   </>
-)
+);
 //QuaterlyAppraiserCheckIn
 const QuaterlyAppraiserCheckInLayout = ({ onLogout }) => (
   <>
     <TopBar onLogout={onLogout} />
     <LeftNavigation />
     <QuaterlyAppraiserCheckIn />
+  </>
+);
+
+const ManageFilesLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <ManageFiles />
+  </>
+);
+
+const GenerateDetailedReportLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <GenerateDetailedReport />
+  </>
+);
+
+const GenerateIDPsLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <GenerateIDPs />
+  </>
+);
+
+const SetConfigurationLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <SetConfiguration />
+  </>
+);
+
+const ProfilerLandingPageLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <ProfilerLandingPage />
+  </>
+);
+
+const AdminLandingLayout = ({ onLogout }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    <LeftNavigation />
+    <AdminLanding />
+  </>
+);
+
+const LayoutBuilder = ({ onLogout, component, leftNavigation = true }) => (
+  <>
+    <TopBar onLogout={onLogout} />
+    {leftNavigation && <LeftNavigation />}
+    <div className={leftNavigation ? '' : 'page-wrapper-no-nav'}>{component}</div>
   </>
 );
 

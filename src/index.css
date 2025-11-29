@@ -11,6 +11,10 @@
   min-height: calc(100vh - 72px);
 }
 
+.page-wrapper-no-nav .pageWrapper {
+  margin-left: 0;
+}
+
 .pageWrapper-header {
   margin-top: 1rem;
   margin-bottom: 24px;
