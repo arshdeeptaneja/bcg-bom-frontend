@@ -8,7 +8,10 @@
 }
 
 .primary-button:hover {
-  opacity: 0.9;
+  
+   border: 1.5px solid var(--accent-color);
+    border-radius: 0px;
+    color: var(--accent-color);
 }
 
 

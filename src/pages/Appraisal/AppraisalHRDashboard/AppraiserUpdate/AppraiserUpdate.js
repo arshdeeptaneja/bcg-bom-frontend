@@ -1,14 +1,178 @@
-// AppraiserPage.jsx
+/**
+ * Appraiser, Reviewer and Acceptor Update by Emp Number
+ * Allows HR admins to search and update appraiser/reviewer/acceptor assignments
+ */
+import { useSearchParams } from "react-router-dom";
 import { BackButton } from '../../../../components/common';
 import { FaInfoCircle } from "react-icons/fa";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { appraisalAPI } from '../../../../services/api';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 import "./AppraiserUpdate.css";
 import { useState } from 'react';
 
 const AppraiserUpdate = () => {
-  const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
-  const [selectedQuarter, setSelectedQuarter] = useState('Q1');
+  // State management
+  const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly'); // 'Quarterly' or 'Annual'
+  const [selectedQuarter, setSelectedQuarter] = useState('Q1'); // Q1, Q2, Q3, Q4
+  const [ecNumber, setEcNumber] = useState(""); // Employee EC number for search
+  const [shouldSearch, setShouldSearch] = useState(false); // Controls when to trigger search query
+  const queryClient = useQueryClient();
 
+  // Get user data from auth context
+  const { getUserProperty } = useAuth();
+  const empNo = getUserProperty("empNo") 
+             || getUserProperty("EMP_ID");
+  const solId = getUserProperty("sol")
+             || getUserProperty("LOCATION")
+             || getUserProperty("solId");
+  const roleNameRaw = getUserProperty("ROLE_TYPE")
+                   || getUserProperty("roleType")
+                   || getUserProperty("designation")
+                   || getUserProperty("ROLE_NAME");
+  // Decode URL-encoded roleName (e.g., "Administrative+Officers" -> "Administrative Officers")
+  const roleName = roleNameRaw ? roleNameRaw.replace(/\+/g, ' ') : '';
+  const zoneName = getUserProperty("zone") 
+                || getUserProperty("ZONE") 
+                || getUserProperty("zoneName");
+  const regionName = getUserProperty("region") 
+                  || getUserProperty("REGION") 
+                  || getUserProperty("regionName")
+                  || getUserProperty("LOCATION");
+
+  // Extract year from financial year string (e.g., "FY 2024" -> "2024")
+  const extractYear = (fy) => {
+    const match = fy?.match(/FY (\d{4})/);
+    return match ? match[1] : new Date().getFullYear().toString();
+  };
+
+  // Get query params from URL
+  const [searchParams] = useSearchParams();
+  const quarter = searchParams.get("quarter"); // Q1, Q2, Q3, Q4
+  const financialYear = searchParams.get("financialYear");
+
+  // Determine appraisal period value: use quarter from URL if Quarterly, else "annual"
+  const appraisalPeriodValue = appraisalPeriod === "Quarterly" 
+    ? selectedQuarter.toLowerCase() 
+    : "annual";
+
+  // React Query: Search HR Repa/Reva by EC Number
+  const {
+    data: tableData = [],
+    isLoading: loading,
+    isError: isSearchError,
+    error: searchError,
+    refetch: refetchSearch,
+  } = useQuery({
+    queryKey: [
+      "hrRepaRevaByEC",
+      ecNumber,
+      empNo,
+      appraisalPeriodValue,
+      selectedQuarter,
+      zoneName,
+      regionName,
+      extractYear(financialYear),
+    ],
+    queryFn: async () => {
+      const res = await appraisalAPI.searchHRRepaRevaByEC({
+        searchEmpNo: ecNumber,
+        empNo: empNo,
+        appraisalPeriod: appraisalPeriodValue, // "q1", "q2", etc. or "annual"
+        quarter: appraisalPeriod === "Quarterly" ? selectedQuarter : null,
+        zoneName:"North", //zoneName,
+        regionName:"Mumbai", //regionName,
+        financialYear: extractYear(financialYear),
+      });
+      return res || [];
+    },
+    enabled: shouldSearch && !!ecNumber.trim() && !!empNo && !!appraisalPeriodValue,
+    retry: false,
+  });
+
+  // Check if no data found after search
+  const noData = shouldSearch && !loading && tableData.length === 0;
+
+  // Trigger search query
+  const handleSearch = () => {
+    if (!ecNumber.trim()) {
+      toast.error("Please enter EC Number");
+      return;
+    }
+    setShouldSearch(true);
+    refetchSearch();
+  };
+
+  // Reset search form and clear query cache
+  const handleReset = () => {
+    setEcNumber("");
+    setShouldSearch(false);
+    queryClient.removeQueries({ queryKey: ["hrRepaRevaByEC"] });
+  };
+
+  // React Query mutation: Update HR Repa/Reva by EC
+  const updateMutation = useMutation({
+    mutationFn: async (updateData) => {
+      return await appraisalAPI.updateHRRepaRevaByEC(updateData);
+    },
+    onSuccess: (data) => {
+      console.log("Update success:", data);
+      toast.success("Update successful!");
+      // Refetch search results after successful update
+      if (shouldSearch) {
+        refetchSearch();
+      }
+    },
+    onError: (error) => {
+      console.error("Update error:", error);
+      const errorMessage = error?.response?.data?.message || error?.message || "Update failed!";
+      toast.error(errorMessage);
+    },
+  });
+
+  // Handle update - update all rows in tableData
+  const handleUpdate = () => {
+    if (!tableData || tableData.length === 0) {
+      toast.error("No data to update");
+      return;
+    }
+
+    if (!ecNumber || !empNo || !solId || !roleName) {
+      toast.error("Missing required user information");
+      return;
+    }
+
+    // Update each row in the table
+    const updatePromises = tableData.map((row) => {
+      const updatePayload = {
+        ecno: row.ecNumber || ecNumber,
+        urlId: row.urlId || row.assignmentId || "",
+        RA_Ecno: row.repaEmpNumber || row.RA_Ecno || "",
+        RE_Ecno: row.RE_Ecno || "",
+        AC_Ecno: row.AC_Ecno || "",
+        financialYear: Number(extractYear(financialYear)),
+        appraisalPeriod: appraisalPeriodValue === "annual" ? "annual" : "quarterly",
+        quarter: appraisalPeriod === "Quarterly" ? selectedQuarter : "Q1",
+        empNo: String(empNo),
+        selfEmpNo: String(empNo),
+        solId: String(solId),
+        roleName: roleName,
+      };
+
+      return updateMutation.mutateAsync(updatePayload);
+    });
+
+    // Execute all updates
+    Promise.all(updatePromises)
+      .then(() => {
+        toast.success(`Successfully updated ${tableData.length} record(s)`);
+      })
+      .catch((error) => {
+        console.error("Batch update error:", error);
+      });
+  };
 
   return (
     <div className="AppraiserContaniner">
@@ -19,7 +183,7 @@ const AppraiserUpdate = () => {
           <span className="breadcrumb-separator">/</span>
           <span className="breadcrumb-link">Appraisal HR Dashboard</span>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-active">Appraisal & Reviewing Update by Emp Number </span>
+          <span className="breadcrumb-active">Appraiser, Reviewer and Acceptor update by Emp Number Appraisal & Reviewing Update by Emp Number </span>
         </div>
 
         {/* Right Side: Info Section */}
@@ -34,7 +198,7 @@ const AppraiserUpdate = () => {
       </div>
        <div className="pageWrapper-header">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraisal & Reviewing Update by Emp Number </h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser, Reviewer and Acceptor update by Emp Number  </h1>
           </div>
       <div className="appraiser-page container-fluid p-4">
 
@@ -57,15 +221,19 @@ const AppraiserUpdate = () => {
                   className="form-control ec-input"
                   placeholder="Enter EC Number"
                   aria-label="Enter EC Number"
+                  value={ecNumber}
+                  onChange={(e) => setEcNumber(e.target.value)}
                 />
               </div>
 
               <div className="me-2 mb-2">
-                <button className="btn-search">Search</button>
+                <button className="btn-search" onClick={handleSearch} disabled={loading}>
+                  {loading ? "Searching..." : "Search"}
+                </button>
               </div>
 
               <div className="mb-2">
-                <button className=" btn-reset">Reset</button>
+                <button className="btn-reset" onClick={handleReset}>Reset</button>
               </div>
             </div>
           </div>
@@ -128,12 +296,29 @@ const AppraiserUpdate = () => {
               }
             </div>
           </div>
+
+          <div className="col-12 col-md-2">
+            <div className="mb-2">
+              <button 
+                className="btn-reset d-flex" 
+                style={{justifyContent:'left'}}
+                onClick={handleUpdate}
+                disabled={tableData.length === 0 || updateMutation.isPending}
+              >
+                {updateMutation.isPending ? "Updating..." : "Update"}
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* No data found */}
-        <div className="mb-2">
-          <small className="text-muted">No data found!</small>
-        </div>
+        {/* Error message */}
+        {isSearchError && (
+          <div className="mb-2">
+            <small className="text-danger">
+              Error: {searchError?.message || "Failed to fetch data"}
+            </small>
+          </div>
+        )}
 
         {/* Table */}
         <div className="table-wrap">
@@ -159,7 +344,33 @@ const AppraiserUpdate = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* empty body (matching "No data found!") */}
+                {tableData.length > 0 ? (
+                  tableData.map((item, index) => (
+                    <tr key={item.assignmentId || index}>
+                      <td>{item.assignmentId}</td>
+                      <td>{item.urlId}</td>
+                      <td>{item.ecNumber}</td>
+                      <td>{item.employeeName}</td>
+                      <td>{item.mainRole}</td>
+                      <td>{item.solId}</td>
+                      <td>{item.repaEmpNumber}</td>
+                      <td>{item.zone}</td>
+                      <td>{item.action}</td>
+                      <td>{item.additionalRole1}</td>
+                      <td>{item.additionalRole2}</td>
+                      <td>{item.startDate}</td>
+                      <td>{item.endDate}</td>
+                      <td>{item.repaName}</td>
+                      <td>{item.branch}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="15" className="text-center text-muted">
+                      {noData ? "No data found!" : "Enter EC Number & click Search"}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

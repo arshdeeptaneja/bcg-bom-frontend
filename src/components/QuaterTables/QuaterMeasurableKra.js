@@ -72,15 +72,16 @@ export default function QuaterlyMeasurableKraTable() {
     }
   ];
 
+  // 👉 FIXED: define displayData
+  const displayData = data;
+
+  // 👉 FIXED: define normalizeRow (simple pass-through)
+  const normalizeRow = (row) => row;
+
   return (
     <div className="measurable-wrapper mt-4">
-
-    
       <h4 className="fw-bold mb-3">Measurable</h4>
 
-   
-
-      {/* Table */}
       <div className="table-responsive">
         <table className="table table-bordered measurable-table">
           <thead className="table-header">
@@ -88,12 +89,10 @@ export default function QuaterlyMeasurableKraTable() {
               <th style={{ width: "35%" }}>KRA</th>
               <th>Unit</th>
               <th>
-                Actual
-                <i className="bi bi-info-circle ms-1"></i>
+                Actual <i className="bi bi-info-circle ms-1" />
               </th>
               <th>
-                Target
-                <i className="bi bi-info-circle ms-1"></i>
+                Target <i className="bi bi-info-circle ms-1" />
               </th>
               <th>Max Score</th>
               <th>Actual Score</th>
@@ -102,19 +101,6 @@ export default function QuaterlyMeasurableKraTable() {
           </thead>
 
           <tbody>
-<<<<<<< Updated upstream
-            {data.map((row, idx) => (
-              <tr key={idx}>
-                <td className="Q-tds">{row.kra}</td>
-                <td className="Q-tds">{row.unit}</td>
-                <td className="Q-tds">{row.actual}</td>
-                <td className="Q-tds">{row.target}</td>
-                <td className="Q-tds">{row.maxScore}</td>
-                <td className="Q-tds">{row.actualScore}</td>
-                <td className="Q-tds">{row.category}</td>
-              </tr>
-            ))}
-=======
             {displayData.map((row, idx) => {
               const normalizedRow = normalizeRow(row);
               return (
@@ -129,7 +115,6 @@ export default function QuaterlyMeasurableKraTable() {
                 </tr>
               );
             })}
->>>>>>> Stashed changes
           </tbody>
         </table>
       </div>

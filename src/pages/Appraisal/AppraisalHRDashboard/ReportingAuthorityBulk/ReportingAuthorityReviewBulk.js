@@ -15,14 +15,14 @@ import { BackButton } from "../../../../components/common";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { appraisalAPI } from "../../../../services/api";
 import LoadingSpinner from "../../../../components/Spinner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FaInfoCircle } from "react-icons/fa";
 import { IoMdDownload } from "react-icons/io";
 import { toast } from "react-toastify";
 
 const ReportingAuthorityReviewBulk = () => {
 
-  
+  const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState(null);
 
 
@@ -79,27 +79,51 @@ const financialYear = searchParams.get("financialYear");   // FY 2025-26
   };
 const numericYear = extractYear(financialYear);   // → "2025"
 
-  
-  //handles file upload
-  const handleUpload = async () => {
+  // React Query mutation: Upload file
+  const uploadMutation = useMutation({
+    mutationFn: async ({ file }) => {
+      if (!file) {
+        throw new Error("No file selected");
+      }
+      return await appraisalAPI.reportingAuthorityAndReviewAnnualUpload({
+        file,
+        sol,
+        roleName,
+        empNo,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Upload successful!");
+      setSelectedFile(null);
+      // Refresh error logs after successful upload
+      queryClient.invalidateQueries({
+        queryKey: ["reportingAuthorityAndReviewAnnualErrorLogs"],
+      });
+    },
+    onError: (error) => {
+      console.error("Upload error:", error);
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "Upload failed!";
+      toast.error(errorMessage);
+    },
+  });
+
+  // Auto-upload when file is selected
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      uploadMutation.mutate({ file });
+    }
+  };
+
+  // Manual upload handler (keeps button functionality)
+  const handleUpload = () => {
     if (!selectedFile) {
       toast.error("Please select a file first.");
       return;
     }
-
-    try {
-      await appraisalAPI.reportingAuthorityAndReviewAnnualUpload({
-        file: selectedFile,
-        sol: sol,
-        roleName: roleName,
-        empNo: empNo,
-      });
-
-      toast.success("Upload successful!");
-    } catch (err) {
-      toast.error("Upload failed.");
-      console.error(err);
-    }
+    uploadMutation.mutate({ file: selectedFile });
   };
 
   //CANNOT FIND QUARTER.
@@ -270,13 +294,22 @@ Reporting Authority and Reviewing Authority update in bulk          </h1>
           <div className="d-flex align-items-center" style={{ border: "1px solid #3fa8e7", padding: "2px" }}>
             <label className="btn" style={{ border: "1.5px solid #3fa8e7", borderRadius: "0px", color: "#3fa8e7" }}>
               SELECT A FILE
-              <input type="file" hidden onChange={(e) => setSelectedFile(e.target.files[0])}
+              <input
+                type="file"
+                hidden
+                accept=".xlsx"
+                onChange={handleFileChange}
               />
             </label>
-            <button className="btn" style={{ color: "#2a2929ff" }} onClick={handleUpload}
+            <button
+              className="btn"
+              style={{ color: "#2a2929ff" }}
+              onClick={handleUpload}
+              disabled={uploadMutation.isPending}
             >
               <IoMdDownload />
-              UPLOAD</button>
+              {uploadMutation.isPending ? "UPLOADING..." : "UPLOAD"}
+            </button>
           </div>
 
           <div className="d-flex gap-2">

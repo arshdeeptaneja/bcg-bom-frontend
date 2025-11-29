@@ -1,3 +1,7 @@
+/**
+ * Exception Deletion Utility
+ * Allows HR admins to search and delete exception records by employee number
+ */
 import React, { useState } from "react";
 import "./ExceptionDelection.css";
 import { useSearchParams } from "react-router-dom";
@@ -5,123 +9,133 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { BackButton } from "../../../../components/common";
 import { appraisalAPI } from "../../../../services/api";
 import { FaInfoCircle } from "react-icons/fa";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const ExceptionDeletion = () => {
+    // State management
     const [empNumber, setEmpNumber] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [tableData, setTableData] = useState([]);
-    const [noData, setNoData] = useState(false);
+    const [shouldSearch, setShouldSearch] = useState(false);
+    const queryClient = useQueryClient();
 
-      const extractYear = (fy) => {
-            const match = fy.match(/FY (\d{4})/);
-            return match ? match[1] : new Date().getFullYear().toString();
-        };
-    
-          const { getUserProperty } = useAuth();
-        
-        // these are directly stored in userData in AuthContext.localStorage
-        const sol = getUserProperty("sol") 
-                 || getUserProperty("LOCATION") 
-                 || getUserProperty("solId");
-                 
-        const empNo = getUserProperty("empNo") 
-                   || getUserProperty("EMP_ID");
-        
-        const roleName = getUserProperty("ROLE_TYPE") 
-                      || getUserProperty("roleType") 
-                      || getUserProperty("designation")
-                      || getUserProperty("ROLE_NAME");
-        
-        console.log({roleName, sol, empNo});
-    
-
-        const [searchParams] = useSearchParams();
-        
-        const quarter = searchParams.get("quarter");               // Q1
-        const financialYear = searchParams.get("financialYear"); 
-
-   const handleSearch = async (e) => {
-  e.preventDefault();
-
-  if (!empNumber.trim()) {
-    alert("Please enter EMP Number");
-    return;
-  }
-
-  try {
-    setLoading(true);
-    setNoData(false);
-
-    const res = await appraisalAPI.searchExceptionDeleteURL({
-      searchEmpNo: empNumber,
-      roleName: roleName,
-      sol: sol,
-    financialYear: extractYear(financialYear)
-    });
-
-    if (res && res.length > 0) {
-      setTableData(res);
-    } else {
-      setTableData([]);
-      setNoData(true);
-    }
-
-  } catch (error) {
-    console.error(error);
-    setNoData(true);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  const handleDelete = async (item) => {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this exception?"
-  );
-
-  if (!confirmDelete) return;
-
-  try {
-    setLoading(true);
-
-    const payload = {
-      deleteRequests: [
-        {
-          empnumber: item.ecNumber,
-          urlid: item.urlId,
-          period: item.quarter === "ANNUAL" ? "annual" : item.quarter,
-          comment: ""  // optional user comment
-        }
-      ],
-      roleName: roleName,
-      solId: sol,
-      appraisalPeriod: item.quarter === "ANNUAL" ? "annual" : item.quarter,
-      quarter: item.quarter === "ANNUAL" ? null : item.quarter,
-      financialYear: Number(extractYear(financialYear)),
-      empNo: empNo,
-      empNoToDelete: item.ecNumber,
-      empName: getUserProperty("name")
+    // Extract year from financial year string (e.g., "FY 2024" -> "2024")
+    const extractYear = (fy) => {
+        const match = fy?.match(/FY (\d{4})/);
+        return match ? match[1] : new Date().getFullYear().toString();
     };
 
-    console.log("DELETE PAYLOAD:", payload);
+    // Get user data from auth context
+    const { getUserProperty } = useAuth();
+    const sol = getUserProperty("sol") 
+             || getUserProperty("LOCATION") 
+             || getUserProperty("solId");
+    const empNo = getUserProperty("empNo") 
+               || getUserProperty("EMP_ID");
+    const roleNameRaw = getUserProperty("ROLE_TYPE") 
+                     || getUserProperty("roleType") 
+                     || getUserProperty("designation")
+                     || getUserProperty("ROLE_NAME");
+    // Decode URL-encoded roleName (e.g., "Administrative+Officers" -> "Administrative Officers")
+    const roleName = roleNameRaw ? roleNameRaw.replace(/\+/g, ' ') : '';
 
-    await appraisalAPI.deleteExceptionURL(payload);
+    // Get query params from URL
+    const [searchParams] = useSearchParams();
+    const quarter = searchParams.get("quarter"); // Q1, Q2, Q3, Q4
+    const financialYear = searchParams.get("financialYear"); 
 
-    alert("Exception deleted successfully!");
+    // React Query: Search exception deletion records
+    const {
+        data: searchResponse,
+        isLoading: loading,
+        isError: isSearchError,
+        error: searchError,
+        refetch: refetchSearch,
+    } = useQuery({
+        queryKey: ["exceptionDeleteSearch", empNumber, roleName, sol, extractYear(financialYear)],
+        queryFn: async () => {
+            const res = await appraisalAPI.searchExceptionDeleteURL({
+                searchEmpNo: empNumber,
+                roleName: roleName,
+                sol: sol,
+                financialYear: extractYear(financialYear),
+            });
+            // Handle response structure: { "list_data": [...] } or { "list_data": null } or direct array
+            return res || {};
+        },
+        enabled: shouldSearch && !!empNumber.trim() && !!roleName && !!sol,
+        retry: false,
+    });
 
-    // Remove from table
-    setTableData(prev => prev.filter(r => r.urlId !== item.urlId));
+    // Extract list_data from response, handle null case
+    const tableData = searchResponse?.list_data 
+        || (Array.isArray(searchResponse) ? searchResponse : []);
 
-    if (tableData.length === 1) setNoData(true);
+    // Check if no data found after search
+    const noData = shouldSearch && !loading && (!tableData || tableData.length === 0);
 
-  } catch (error) {
-    console.error(error);
-    alert("Failed to delete exception!");
-  } finally {
-    setLoading(false);
-  }
-};
+    // Trigger search query
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (!empNumber.trim()) {
+            toast.error("Please enter EMP Number");
+            return;
+        }
+        setShouldSearch(true);
+        refetchSearch();
+    };
+
+
+    // Reset search form and clear query cache
+    const handleReset = () => {
+        setEmpNumber("");
+        setShouldSearch(false);
+        queryClient.removeQueries({ queryKey: ["exceptionDeleteSearch"] });
+    };
+
+    // React Query mutation: Delete exception record
+    const deleteExceptionMutation = useMutation({
+        mutationFn: async ({ item }) => {
+            const payload = {
+                deleteRequests: [
+                    {
+                        empnumber: item.ecNumber || item.empNumber,
+                        urlid: item.urlId,
+                        period: item.quarter === "ANNUAL" ? "annual" : (item.quarter || item.period || "annual"),
+                        comment: "Deleting exception as per HR request"
+                    }
+                ],
+                roleName: roleName,
+                solId: sol,
+                appraisalPeriod: item.quarter === "ANNUAL" ? "annual" : (item.quarter || item.period || "annual"),
+                quarter: item.quarter === "ANNUAL" ? null : (item.quarter || null),
+                financialYear: Number(extractYear(financialYear)),
+                empNo: empNo,
+                empNoToDelete: item.ecNumber || item.empNumber,
+                empName: item.employeeName || item.empName || ""
+            };
+
+            return await appraisalAPI.deleteExceptionURL(payload);
+        },
+        onSuccess: () => {
+            toast.success("Exception deleted successfully!");
+            queryClient.invalidateQueries({ queryKey: ["exceptionDeleteSearch"] }); // Refresh search results
+        },
+        onError: (error) => {
+            console.error("Delete exception error:", error);
+            const errorMessage = error?.response?.data?.message || error?.message || "Failed to delete exception!";
+            toast.error(errorMessage);
+        },
+    });
+
+    // Handle delete with confirmation
+    const handleDelete = (item) => {
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this exception?"
+        );
+        if (!confirmDelete) return;
+
+        deleteExceptionMutation.mutate({ item });
+    };
 
 
 
@@ -178,6 +192,15 @@ const ExceptionDeletion = () => {
                 </form>
             </section>
 
+            {/* Error message */}
+            {isSearchError && (
+                <section className="p-4">
+                    <p className="text-danger fw-semibold">
+                        Error: {searchError?.message || "Failed to fetch data"}
+                    </p>
+                </section>
+            )}
+
             {/* Table Section */}
             <section className="p-4">
                 {loading && <p className="text-muted">Loading...</p>}
@@ -186,7 +209,7 @@ const ExceptionDeletion = () => {
                     <p className="text-danger fw-semibold">No data found!</p>
                 )}
 
-                {tableData.length > 0 && (
+                {!loading && !noData && tableData.length > 0 && (
                     <div className="table-responsive mt-3">
                         <table className="table table-bordered align-middle">
                             <thead className="table-header">
@@ -197,34 +220,37 @@ const ExceptionDeletion = () => {
                                     <th>Quarter</th>
                                     <th>Zone</th>
                                     <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
 
                             <tbody>
                                 {tableData.map((item, index) => (
-                                    <tr key={index}>
-                                        <td>{item.ecNumber}</td>
-                                        <td>{item.employeeName}</td>
-                                        <td>{item.urlId}</td>
-                                        <td>{item.quarter}</td>
-                                        <td>{item.zoneName}</td>
-                                        <td>{item.status}</td>
-
-                                        {/* DELETE BUTTON */}
+                                    <tr key={item.urlId || index}>
+                                        <td>{item.ecNumber || item.empNumber || '-'}</td>
+                                        <td>{item.employeeName || item.empName || '-'}</td>
+                                        <td>{item.urlId || '-'}</td>
+                                        <td>{item.quarter || item.period || '-'}</td>
+                                        <td>{item.zoneName || item.zone || '-'}</td>
+                                        <td>{item.status || '-'}</td>
                                         <td>
                                             <button
                                                 className="btn btn-danger btn-sm"
                                                 onClick={() => handleDelete(item)}
+                                                disabled={deleteExceptionMutation.isPending}
                                             >
-                                                Delete
+                                                {deleteExceptionMutation.isPending ? "Deleting..." : "Delete"}
                                             </button>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
-
                         </table>
                     </div>
+                )}
+
+                {!loading && !noData && tableData.length === 0 && shouldSearch && (
+                    <p className="text-muted">Enter EMP Number & click Search</p>
                 )}
             </section>
         </div>

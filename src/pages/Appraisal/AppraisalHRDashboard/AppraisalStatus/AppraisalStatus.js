@@ -1,164 +1,148 @@
-// AppraiserPage.jsx
+/**
+ * Appraisal Status Change Utility
+ * Allows HR admins to search and update appraisal status for employees
+ */
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { BackButton } from '../../../../components/common';
 import { FaInfoCircle } from "react-icons/fa";
 import { appraisalAPI } from '../../../../services/api';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 import "./AppraisalStatus.css";
 import { useState } from 'react';
 
 const AppraiserStatus = () => {
-  const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
-  const [selectedQuarter, setSelectedQuarter] = useState('Q1');
-  const [ecNumber, setEcNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [tableData, setTableData] = useState([]);
-  const [noData, setNoData] = useState(false);
+  // State management
+  const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly'); // 'Quarterly' or 'Annual'
+  const [selectedQuarter, setSelectedQuarter] = useState('Q1'); // Q1, Q2, Q3, Q4
+  const [ecNumber, setEcNumber] = useState(""); // Employee EC number for search
+  const [shouldSearch, setShouldSearch] = useState(false); // Controls when to trigger search query
+  const queryClient = useQueryClient();
 
-  const mapQuarterToCycle = (q) => {
-  switch (q) {
-    case "Q1": return "JUNE";       // Q1 closes in June
-    case "Q2": return "SEPTEMBER";  // Q2 closes in Sep
-    case "Q3": return "DECEMBER";   // Q3 closes in Dec
-    case "Q4": return "MARCH";      // Q4 closes in March
-    default: return "";
-  }
-};
+  // Extract year from financial year string (e.g., "FY 2024" -> "2024")
+  const extractYear = (fy) => {
+    const match = fy.match(/FY (\d{4})/);
+    return match ? match[1] : new Date().getFullYear().toString();
+  };
 
-    const extractYear = (fy) => {
-        const match = fy.match(/FY (\d{4})/);
-        return match ? match[1] : new Date().getFullYear().toString();
-    };
+  // Get user data from auth context
+  const { getUserProperty } = useAuth();
+  const sol = getUserProperty("sol") 
+           || getUserProperty("LOCATION") 
+           || getUserProperty("solId");
+  const empNo = getUserProperty("empNo") 
+             || getUserProperty("EMP_ID");
+  const roleName = getUserProperty("ROLE_TYPE") 
+                || getUserProperty("roleType") 
+                || getUserProperty("designation")
+                || getUserProperty("ROLE_NAME");
 
-      const { getUserProperty } = useAuth();
-    
-    // these are directly stored in userData in AuthContext.localStorage
-    const sol = getUserProperty("sol") 
-             || getUserProperty("LOCATION") 
-             || getUserProperty("solId");
-             
-    const empNo = getUserProperty("empNo") 
-               || getUserProperty("EMP_ID");
-    
-    const roleName = getUserProperty("ROLE_TYPE") 
-                  || getUserProperty("roleType") 
-                  || getUserProperty("designation")
-                  || getUserProperty("ROLE_NAME");
-    
-    console.log({roleName, sol, empNo});
+  // Get query params from URL
+  const [searchParams] = useSearchParams();
+  const quarter = searchParams.get("quarter"); // Q1, Q2, Q3, Q4
+  const financialYear = searchParams.get("financialYear"); 
 
-// const cycle = mapQuarterToCycle(selectedQuarter);
+  // Determine appraisal period value: use quarter from URL if Quarterly, else "Annual"
+  const appraisalPeriodValue = appraisalPeriod === "Quarterly" ? quarter : "Annual";
 
-const [searchParams] = useSearchParams();
+  // React Query: Search HR status records
+  const {
+    data: tableData = [],
+    isLoading: loading,
+    isError: isSearchError,
+    error: searchError,
+    refetch: refetchSearch,
+  } = useQuery({
+    queryKey: ["hrStatusSearch", ecNumber, extractYear(financialYear), appraisalPeriodValue],
+    queryFn: async () => {
+      const res = await appraisalAPI.searchHRStatusUpdate({
+        financialYear: extractYear(financialYear),
+        appraisalPeriod: appraisalPeriodValue, // Q1/Q2/Q3/Q4 or "Annual"
+        empNo: empNo,
+        searchEmpNo: ecNumber,
+      });
+      return res || [];
+    },
+    enabled: shouldSearch && !!ecNumber.trim() && !!appraisalPeriodValue,
+    retry: false,
+  });
 
-const quarter = searchParams.get("quarter");               // Q1
-const financialYear = searchParams.get("financialYear"); 
+  // Check if no data found after search
+  const noData = shouldSearch && !loading && tableData.length === 0;
 
-const handleSearch = async () => {
-  if (!ecNumber.trim()) {
-    alert("Please enter EC Number");
-    return;
-  }
-
-  try {
-    setLoading(true);
-    setNoData(false);
-
-    // Convert selected quarter to cycle month
-    const cycle = mapQuarterToCycle(selectedQuarter);
-
-    const res = await appraisalAPI.searchHRStatusUpdate({
-     financialYear: extractYear(financialYear),                 // Later you can use extractYear if FY dropdown added
-      appraisalPeriod: "JUNE",                 // <----- HERE
-      // quarter: quarter,                         // <----- HERE
-      empNo: ecNumber,                        // HR EC / user EC
-      searchEmpNo: ecNumber,                  // search input value
-    });
-
-    if (res && res.length > 0) {
-      setTableData(res);
-    } else {
-      setTableData([]);
-      setNoData(true);
+  // Trigger search query
+  const handleSearch = () => {
+    if (!ecNumber.trim()) {
+      toast.error("Please enter EC Number");
+      return;
     }
-
-  } catch (error) {
-    console.error(error);
-    setNoData(true);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-  const handleReset = () => {
-    setEcNumber("");
-    setTableData([]);
-    setNoData(false);
+    setShouldSearch(true);
+    refetchSearch();
   };
 
 
-const handleStatusChange = async (item, newStatus) => {
-  if (!newStatus) return;
 
-  try {
+  // Reset search form and clear query cache
+  const handleReset = () => {
+    setEcNumber("");
+    setShouldSearch(false);
+    queryClient.removeQueries({ queryKey: ["hrStatusSearch"] });
+  };
+
+
+  // React Query mutation: Update appraisal status
+  const statusUpdateMutation = useMutation({
+    mutationFn: async ({ item, newStatus }) => {
+      const roleName = getUserProperty("roleType") || getUserProperty("ROLE_TYPE");
+      const sol = getUserProperty("sol") || getUserProperty("LOCATION");
+      const empNo = getUserProperty("empNo");
+      const empName = getUserProperty("name");
+      const numericFY = "2025"; // TODO: Use extractYear(financialYear)
+
+      const payload = {
+        statusUpdates: [
+          {
+            urlid: item.urlId,
+            rolecode: item.roleCode || "",
+            status: newStatus,
+            comment: item.reason || ""
+          }
+        ],
+        roleName: roleName,
+        solId: sol,
+        appraisalPeriod: appraisalPeriod === "Annual" ? "annual" : selectedQuarter.toLowerCase(),
+        quarter: appraisalPeriod === "Annual" ? null : selectedQuarter,
+        financialYear: Number(numericFY),
+        empNo: empNo,
+        empName: empName
+      };
+
+      return await appraisalAPI.updateHRStatus(payload);
+    },
+    onSuccess: () => {
+      toast.success("Status updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["hrStatusSearch"] }); // Refresh search results
+    },
+    onError: (error) => {
+      console.error("Status update error:", error);
+      toast.error("Failed to update status!");
+    },
+  });
+
+  // Handle status change with confirmation
+  const handleStatusChange = async (item, newStatus) => {
+    if (!newStatus) return;
+
     const confirmUpdate = window.confirm(
       `Are you sure you want to update status to "${newStatus}"?`
     );
 
     if (!confirmUpdate) return;
 
-    // Quarter → Cycle mapping
-    const cycle = mapQuarterToCycle(selectedQuarter);
-
-    // Get values from Auth Context
-    const roleName = getUserProperty("roleType") || getUserProperty("ROLE_TYPE");
-    const sol = getUserProperty("sol") || getUserProperty("LOCATION");
-    const empNo = getUserProperty("empNo");
-    const empName = getUserProperty("name");
-
-    // Extract year number from FY dropdown if needed
-    const numericFY = "2025"; // or extractYear(financialYear)
-
-    // Prepare payload EXACTLY as backend expects
-    const payload = {
-      statusUpdates: [
-        {
-          urlid: item.urlId,
-          rolecode: item.roleCode || "", // ensure correct field name
-          status: newStatus,
-          comment: item.reason || ""     // or "" if no comment
-        }
-      ],
-      roleName: roleName,
-      solId: sol,
-      appraisalPeriod: appraisalPeriod === "Annual" ? "annual" : cycle.toLowerCase(),
-      quarter: appraisalPeriod === "Annual" ? null : cycle,
-      financialYear: Number(numericFY),
-      empNo: empNo,
-      empName: empName
-    };
-
-    console.log("Final Payload Sent:", payload);
-
-    const res = await appraisalAPI.updateHRStatus(payload);
-
-    alert("Status updated successfully!");
-
-    // Update UI instantly
-    setTableData((prev) =>
-      prev.map((row) =>
-        row.urlId === item.urlId ? { ...row, action: newStatus } : row
-      )
-    );
-
-  } catch (error) {
-    console.error(error);
-    alert("Failed to update status!");
-  }
-};
+    statusUpdateMutation.mutate({ item, newStatus });
+  };
 
 
 
@@ -281,12 +265,25 @@ const handleStatusChange = async (item, newStatus) => {
               }
             </div>
           </div>
+          <div className="col-12 col-md-2">
+
+              <div className="mb-2">
+                <button className="btn-reset d-flex" style={{justifyContent:'left'}} >
+                  Update
+                </button>
+              </div>
+              </div>
+
         </div>
 
-        {/* No data found */}
-        <div className="mb-2">
-          <small className="text-muted">No data found!</small>
-        </div>
+        {/* Error message */}
+        {isSearchError && (
+          <div className="mb-2">
+            <small className="text-danger">
+              Error: {searchError?.message || "Failed to fetch data"}
+            </small>
+          </div>
+        )}
 
         {/* Table */}
         <div className="table-wrap">

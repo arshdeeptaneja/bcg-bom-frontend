@@ -40,6 +40,7 @@ import {
   AnnualAppraisalReview,
   AnnualReview,
   QuaterlyAppraiserCheckIn,
+  ReportingReviewBulk,
   ReportingAuthorityReviewBulk
 } from './pages';
 import AppealCommitteeReview from './pages/Appeal/AppealCommittee/AppealCommitteeReview/AppealCommitteeReview';
@@ -55,7 +56,6 @@ import { store, persistor } from './store/store';
 import JobFamily from './pages/JobFamily/JobFamily';
 import HrDashboard from './pages/Appraisal/AppraisalHRDashboard/HrDashboard';
 import AppraiserUpdate from './pages/Appraisal/AppraisalHRDashboard/AppraiserUpdate/AppraiserUpdate';
-import ReportingReviewBulk from './pages/Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityReviewBulk';
 import AppealDeletion from './pages/Appraisal/AppraisalHRDashboard/AppealDelection/AppealDelection';
 import AppraiserCheckInDashboard from './pages/Appraiser/AppraiserDashboardCheckIn/AppraiserCheckInDashboard';
 import EmployeeAppraisalCard from './components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
@@ -331,15 +331,31 @@ function AppContent() {
               }
             />
             <Route
-              path="/appraisal/hr-dashboard/reporting-authority-reviewing-auth-bulk"
+              path="/appraisal/hr-dashboard/reporting-authority-reviewing-auth-bulks"
               element={
                 isAuthenticated ? (
-                  <ReportingAuthorityReviewBulk onLogout={handleLogout} />
+              <ReportingAuthorityReviewBulkLayout onLogout={handleLogout} />
                 ) : (
                   <Navigate to="/login" replace />
                 )
               }
             />
+
+ <Route
+              path="/appraisal/hr-dashboard/reporting-bulk-layout"
+              element={
+                isAuthenticated ? (
+                     <ReportingReviewBulkLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
+
+
+
+            
             <Route
               path="/appraisal/hr-dashboard/validator-update-utility"
               element={
@@ -793,7 +809,7 @@ const AppraisalAppealComittee = ({ onLogout }) => {
 };
 
 //ReportingAuthorityBulk
-const ReportingReviewBulklayout = ({ onLogout }) => {
+const ReportingReviewBulkLayout = ({ onLogout }) => {
   return (
     <>
       <TopBar onLogout={onLogout} />

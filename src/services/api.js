@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL = 'http://localhost:8084';
+const AUTH_BASE_URL = 'http://localhost:8090';  // Auth & Identity APIs
+const APPRAISAL_BASE_URL = 'http://localhost:8084';  // Appraisal APIs
 
 const appendQueryParam = (searchParams, key, value) => {
   if (value === undefined || value === null) {
@@ -17,7 +18,7 @@ const appendQueryParam = (searchParams, key, value) => {
 };
 
 const unauthClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: AUTH_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -25,10 +26,9 @@ const unauthClient = axios.create({
   },
 });
 
-// Create axios instance with default config
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  // timeout: 10000, // 10 seconds
+// Auth client for identity/auth endpoints
+const authClient = axios.create({
+  baseURL: AUTH_BASE_URL, // ✔ 8090
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -36,15 +36,8 @@ const apiClient = axios.create({
   },
 });
 
-<<<<<<< Updated upstream
-// Request interceptor to add auth token
-apiClient.interceptors.request.use(
-  (config) => {
-   //const token = localStorage.getItem('accessToken');
-    const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-=======
+
+
 // Appraisal client for appraisal endpoints
 const appraisalClient = axios.create({
   baseURL: APPRAISAL_BASE_URL,
@@ -58,66 +51,50 @@ const appraisalClient = axios.create({
 // Legacy alias (points to appraisal by default for backward compatibility)
 const apiClient = appraisalClient;
 
-// Request interceptor to add auth token (shared by both clients)
-const addAuthTokenInterceptor = (client) => {
-  client.interceptors.request.use(
-    (config) => {
-      const token = localStorage.getItem('accessToken');
-      //const token = 'kf93jF!8sh2%wX9aL0pQzV3rB8xYtU2eR6sD9jH1kM5nW4qT';
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
+
+// Response interceptor to handle token refresh (shared by both clients)
+const addRefreshTokenInterceptor = (client) => {
+  client.interceptors.response.use(
+    (response) => {
+      return response;
     },
-    (error) => {
-      return Promise.reject(error);
->>>>>>> Stashed changes
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+    async (error) => {
+      const originalRequest = error.config;
 
-// Response interceptor to handle token refresh
-apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config;
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+        try {
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const response = await axios.post(`${AUTH_BASE_URL}/auth/refresh`, {
+              refreshToken: refreshToken,
+            });
 
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken: refreshToken,
-          });
+            const { accessToken } = response.data;
+            localStorage.setItem('accessToken', accessToken);
 
-          const { accessToken } = response.data;
-          localStorage.setItem('accessToken', accessToken);
-
-          // Retry the original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return apiClient(originalRequest);
+            // Retry the original request with new token
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            return client(originalRequest);
+          }
+        } catch (refreshError) {
+          // Refresh failed, redirect to login
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          localStorage.removeItem('userDetailedInfo');
+          window.location.href = '/login';
         }
-      } catch (refreshError) {
-        // Refresh failed, redirect to login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userDetailedInfo');
-        window.location.href = '/login';
       }
-    }
 
-    return Promise.reject(error);
-  }
-);
+      return Promise.reject(error);
+    }
+  );
+};
+
+addRefreshTokenInterceptor(authClient);
+addRefreshTokenInterceptor(appraisalClient);
 
 // API service methods
 export const authAPI = {
@@ -125,7 +102,7 @@ export const authAPI = {
   login: async (credentials) => {
     try {
       console.log('Sending login request:', {
-        url: `${API_BASE_URL}/identity/auth/login`,
+        url: `${AUTH_BASE_URL}/identity/auth/login`,
 
         method: 'POST',
         credentials: {
@@ -134,7 +111,8 @@ export const authAPI = {
         },
       });
 
-      const response = await apiClient.post('/identity/auth/login', credentials);
+      const response = await authClient.post('/identity/auth/login', credentials);
+
       console.log('Login response received:', {
         status: response.status,
         statusText: response.statusText,
@@ -158,7 +136,8 @@ export const authAPI = {
   // POST: Refresh token
   refreshToken: async (refreshToken) => {
     try {
-      const response = await apiClient.post('/identity/auth/refresh', { refreshToken });
+     const response = await authClient.post('/identity/auth/refresh', { refreshToken });
+
       return response.data;
     } catch (error) {
       throw error;
@@ -223,7 +202,7 @@ export const userAPI = {
 export const generateCaptchaAPI = {
   getCaptchaImage: async () => {
     try {
-      const response = await apiClient.get('/identity/captcha/generate');
+      const response = await authClient.get('/identity/captcha/generate');
       return {
         id: response.data.captchaId,
         image: response.data.captchaImg,
@@ -236,7 +215,7 @@ export const generateCaptchaAPI = {
 
   validateCaptcha: async (captchaId, userInput) => {
     try {
-      const response = await apiClient.post('/identity/captcha/validate', null, {
+      const response = await authClient.post('/identity/captcha/validate', null, {
         params: {
           captchaId: captchaId,
           userInput: userInput,
@@ -256,7 +235,7 @@ export const generateCaptchaAPI = {
 
   getCaptchaImageByRefresh: async (captchaIdToRefresh) => {
     try {
-      const response = await apiClient.get(`/identity/captcha/refresh/${captchaIdToRefresh}`);
+      const response = await authClient.get(`/identity/captcha/refresh/${captchaIdToRefresh}`);
       return {
         id: response.data.captchaId,
         image: response.data.captchaImg,
@@ -1171,21 +1150,22 @@ if (filterStatus) params.append("STATUS", filterStatus);
   // Upload Annually reporting and reviewing
   reportingAuthorityAndReviewAnnualUpload: async ({ file, sol, roleName, empNo }) => {
     try {
-      const params = new URLSearchParams({
-        sol,
-        roleName,
-        empNo,
-      });
+      // Build query string manually to match cURL format
+      // POST /appraisal/admin/hr_update_annual_repa_reva_surl/upload?sol=256214&roleName=admin&empNo=38096
+      const queryParams = [];
+      if (sol) queryParams.push(`sol=${encodeURIComponent(String(sol))}`);
+      if (roleName) queryParams.push(`roleName=${encodeURIComponent(roleName)}`);
+      if (empNo) queryParams.push(`empNo=${encodeURIComponent(String(empNo))}`);
+      const queryString = queryParams.join("&");
 
       const formData = new FormData();
-      formData.append("file", file);
+      // Include filename explicitly to match typical multipart behavior
+      formData.append("file", file, file?.name);
 
       const response = await apiClient.post(
-        `/appraisal/admin/hr_update_annual_repa_reva_surl/upload?${params.toString()}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        `/appraisal/admin/hr_update_annual_repa_reva_surl/upload?${queryString}`,
+        formData
+        // Let the browser set Content-Type with boundary
       );
 
       return response.data;
@@ -1280,15 +1260,20 @@ searchHRStatusUpdate: async ({
   financialYear,
 }) => {
   try {
-    const params = new URLSearchParams({
-      searchEmpNo,
-      roleName,
-      sol,
-      financialYear,
-    });
+    // Ensure roleName is decoded (replace + with space) before encoding
+    const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
+
+    // Build query string manually to match cURL format (using %20 for spaces)
+    const queryParams = [];
+    if (searchEmpNo) queryParams.push(`searchEmpNo=${encodeURIComponent(String(searchEmpNo))}`);
+    if (decodedRoleName) queryParams.push(`roleName=${encodeURIComponent(decodedRoleName)}`); // Encodes space as %20
+    if (sol) queryParams.push(`sol=${encodeURIComponent(String(sol))}`);
+    if (financialYear) queryParams.push(`financialYear=${encodeURIComponent(String(financialYear))}`);
+
+    const queryString = queryParams.join('&');
 
     const response = await apiClient.get(
-      `/appraisal/admin/hr_exception_delete_urlid?${params.toString()}`
+      `/appraisal/admin/hr_exception_delete_urlid?${queryString}`
     );
 
     return response.data;
@@ -1315,61 +1300,64 @@ deleteExceptionURL: async (payload) => {
 },
 
 
-  //SEARCH APPEAL DELECTION
-  searchAppealDeleteURL: async ({ empNo }) => {
-    try {
-      const params = new URLSearchParams({
-        empNo: empNo || "",
-      });
 
-      const response = await apiClient.get(
-        `/admin/hr_appeal_delete_urlid?${params.toString()}`
-      );
+// SEARCH APPEAL DELETION
+searchAppealDeleteURL: async ({ searchEmpNo, roleName, sol, financialYear }) => {
+  try {
+    const params = new URLSearchParams({
+      searchEmpNo,
+      roleName,
+      sol,
+      financialYear,
+    });
 
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching Appeal delete url:", error);
-      throw error;
-    }
-  },
+    const response = await apiClient.get(
+      `/appraisal/admin/hr_appeal_delete_urlid?${params.toString()}`
+    );
 
-  //Appeal DELETE BUTTON TO DELETE 
-  deleteAppealURL: async ({ urlId }) => {
-    try {
-      const params = new URLSearchParams({
-        urlId: urlId
-      });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Appeal delete url:", error);
+    throw error;
+  }
+},
 
-      const response = await apiClient.delete(
-        `/admin/hr_appeal_delete_urlid/delete?${params.toString()}`
-      );
 
-      return response.data;
-    } catch (error) {
-      console.error("Error deleting exception URL:", error);
-      throw error;
-    }
-  },
+ 
+ // APPEAL DELETE API - CORRECT ONE
+deleteAppealURL: async (payload) => {
+  try {
+    const response = await apiClient.post(
+      `/appraisal/admin/hr_appeal_delete_urlid/delete`,
+      payload  // JSON body
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting appeal URL:", error);
+    throw error;
+  }
+},
+
 
   //Module Active Inactive Date
   // GET LIST 
-  moduleActiveInactiveDateGetList: async () => {
-    try {
-      const response = await apiClient.get(
-        `/admin/hr_module_active_inactive_date`
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching module active/inactive list:", error);
-      throw error;
-    }
-  },
+moduleActiveInactiveDateGetList: async () => { 
+  try {
+    const response = await apiClient.get(`/appraisal/admin/hr_module_active_inactive_date`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching module active/inactive list:", error);
+    throw error;
+  }
+},
+
 
   // COMMON UPDATE API (INSERT / UPDATE / DELETE)
   moduleActiveInactiveDateUpdate: async ({ intent, payload }) => {
     try {
       const response = await apiClient.post(
-        `/admin/hr_module_active_inactive_date/${intent}`,
+        `/appraisal/admin/hr_module_active_inactive_date/${intent}`,
         payload
       );
       return response.data;
@@ -1379,18 +1367,102 @@ deleteExceptionURL: async (payload) => {
     }
   },
 
-  //insert Annual Roles
-  insertAnnualRoles: async () => {
+ 
+ // Insert Annual Roles
+insertAnnualRoles: async () => {
+  try {
+    const response = await apiClient.get(`/appraisal/admin/hr_insert_annual_roles`);
+    return response.data;
+  } catch (error) {
+    console.error("Error inserting annual roles:", error);
+    throw error;
+  }
+},
+
+
+
+  // Search HR Repa/Reva by EC Number
+  searchHRRepaRevaByEC: async ({
+    searchEmpNo,
+    empNo,
+    appraisalPeriod,
+    quarter,
+    zoneName,
+    regionName,
+    financialYear,
+  }) => {
     try {
-      const response = await apiClient.post(`/admin/hr_insert_annual_roles`);
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'searchEmpNo', searchEmpNo);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'appraisalPeriod', appraisalPeriod);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'regionName', regionName);
+      appendQueryParam(params, 'financialYear', financialYear);
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_repa_reva_by_ec?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
-      console.error("Error inserting annual roles:", error);
+      console.error("Error searching HR Repa/Reva by EC:", error);
       throw error;
     }
   },
 
+  // Update HR Repa/Reva by EC Number
+  updateHRRepaRevaByEC: async ({
+    ecno,
+    urlId,
+    RA_Ecno,
+    RE_Ecno,
+    AC_Ecno,
+    financialYear,
+    appraisalPeriod,
+    quarter,
+    empNo,
+    selfEmpNo,
+    solId,
+    roleName,
+  }) => {
+    try {
+      // Ensure roleName is decoded (replace + with space) before sending
+      const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
 
+      const payload = {
+        ecno: String(ecno),
+        urlId: String(urlId),
+        RA_Ecno: String(RA_Ecno),
+        RE_Ecno: String(RE_Ecno),
+        AC_Ecno: String(AC_Ecno),
+        financialYear: Number(financialYear),
+        appraisalPeriod: String(appraisalPeriod),
+        quarter: String(quarter),
+        empNo: String(empNo),
+        selfEmpNo: String(selfEmpNo),
+        solId: String(solId),
+        roleName: decodedRoleName,
+      };
+
+      console.log("Update HR Repa/Reva by EC - Payload:", payload);
+
+      const response = await apiClient.post(
+        `/appraisal/admin/hr_update_repa_reva_by_ec/update`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating HR Repa/Reva by EC:", error);
+      throw error;
+    }
+  },
 
   // Appeal Committee APIs
   appealCommittee: {
@@ -1404,36 +1476,153 @@ deleteExceptionURL: async (payload) => {
     },
 
     // Upload Excel File
-    uploadFile: async ({ file }) => {
+    uploadFile: async ({ file, sol, roleName, empNo }) => {
       const formData = new FormData();
-      formData.append("file", file);
+      // Include filename explicitly to match typical multipart form behaviour
+      formData.append("file", file, file?.name);
 
       const response = await apiClient.post(
-        `/admin/hr_update_appeal_committee/upload`,
+        `/appraisal/admin/hr_update_appeal_committee/upload`,
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        {
+          // Let the browser set the correct multipart boundary
+          params: {
+            sol,
+            roleName,
+            empNo,
+          },
+        }
       );
       return response.data;
     },
+//appeal commitee download data table
+downloadDataTable: async ({ roleName, regionCode, quarter, financialYear }) => {
+  const response = await apiClient.get(
+    `/appraisal/admin/hr_update_appeal_committee/download_data_table`,
+    {
+      params: {
+        roleName,
+        regionCode,
+        quarter,
+        financialYear,
+      },
+      responseType: "blob",
+    }
+  );
 
-    // Download Data Table
-    downloadDataTable: async () => {
-      const response = await apiClient.get(
-        `/admin/hr_update_appeal_committee/download_data_table`,
-        { responseType: "blob" }
-      );
-      return response.data;
-    },
+  return response.data;
+},
+
+
 
     // Download Sample File
-    downloadSample: async () => {
-      const response = await apiClient.get(
-        `/admin/hr_update_appeal_committee/download_sample`,
-        { responseType: "blob" }
+   // Download Sample File ApppealComittee
+downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
+  const response = await apiClient.get(
+    `/admin/hr_update_appeal_committee/download_sample`,
+    {
+      params: {
+        roleName,
+        regionCode,
+        quarter,
+        financialYear,
+      },
+      responseType: "blob",
+    }
+  );
+  return response.data;
+},
+
+
+  },
+
+  // Validator Update APIs
+  validatorUpdate: {
+    // Upload Excel File
+    uploadFile: async ({ file, sol, roleName, empNo }) => {
+      const formData = new FormData();
+      formData.append("file", file, file?.name);
+
+      // Ensure roleName is decoded (replace + with space) before encoding
+      const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
+
+      // Build query string manually to match cURL format exactly (using %20 for spaces)
+      // Axios params encodes spaces as +, but backend expects %20
+      const queryParams = [];
+      if (sol) queryParams.push(`sol=${encodeURIComponent(String(sol))}`);
+      if (decodedRoleName) queryParams.push(`roleName=${encodeURIComponent(decodedRoleName)}`); // Encodes space as %20
+      if (empNo) queryParams.push(`empNo=${encodeURIComponent(String(empNo))}`);
+
+      const queryString = queryParams.join('&');
+      const fullUrl = `/appraisal/admin/hr_update_validator/upload?${queryString}`;
+
+      // Debug logging
+      console.log("Validator upload API - Full URL:", fullUrl);
+      console.log("Validator upload API - Parameters:", { 
+        sol, 
+        roleName, 
+        decodedRoleName, 
+        empNo,
+        file: { name: file?.name, size: file?.size, type: file?.type }
+      });
+      console.log("Validator upload API - Expected cURL format: sol=36663&roleName=HR%20Admin&empNo=65327");
+
+      const response = await apiClient.post(
+        fullUrl,
+        formData
+        // Don't set Content-Type header - let browser set it with boundary
       );
+
       return response.data;
     },
 
+    // Get error logs
+    getErrorLogs: async ({ financialYear, roleName }) => {
+      try {
+        // Ensure roleName is decoded (replace + with space) before encoding
+        const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
+
+        // Build query string manually to match cURL format (using %20 for spaces like cURL)
+        const queryParams = [];
+        if (financialYear) queryParams.push(`financialYear=${encodeURIComponent(financialYear)}`);
+        if (decodedRoleName) queryParams.push(`roleName=${encodeURIComponent(decodedRoleName)}`); // This will encode space as %20
+
+        const queryString = queryParams.join('&');
+
+        const response = await apiClient.get(
+          `/appraisal/admin/hr_update_validator/error_logs?${queryString}`
+        );
+
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching validator error logs:", error);
+        throw error;
+      }
+    },
+
+    // Download data table
+    downloadDataTable: async ({ roleName, regionCode, quarter, financialYear }) => {
+      try {
+        const params = new URLSearchParams({
+          roleName,
+          regionCode,
+          quarter,
+          financialYear,
+        });
+
+        const response = await apiClient.get(
+          `/appraisal/admin/hr_update_validator/download_data_table?${params.toString()}`,
+          {
+            responseType: "blob",
+          }
+        );
+
+        return response.data;
+      } catch (error) {
+        console.error("Error downloading validator data table:", error);
+        throw error;
+      }
+    },
   },
 
 };

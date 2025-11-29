@@ -3,11 +3,76 @@ import "./AppealComittee.css";
 import { BackButton } from "../../../../components/common";
 import { FaInfoCircle } from "react-icons/fa";
 import { appraisalAPI } from "../../../../services/api";
+import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 const AppealComittee = () => {
   const [file, setFile] = useState(null);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+
+  const extractYear = (fy) => {
+    const match = fy.match(/FY (\d{4})/);
+    return match ? match[1] : new Date().getFullYear().toString();
+  };
+
+  const { getUserProperty } = useAuth();
+
+  // these are directly stored in userData in AuthContext.localStorage
+  const sol = getUserProperty("sol")
+    || getUserProperty("LOCATION")
+    || getUserProperty("solId");
+
+  const empNo = getUserProperty("empNo")
+    || getUserProperty("EMP_ID");
+
+  const roleName = getUserProperty("ROLE_TYPE")
+    || getUserProperty("roleType")
+    || getUserProperty("designation")
+    || getUserProperty("ROLE_NAME");
+
+  console.log({ roleName, sol, empNo });
+
+
+  const [searchParams] = useSearchParams();
+  const quarter = searchParams.get("quarter");               // Q1
+  // Q1
+  const financialYear = searchParams.get("financialYear");
+  const requestBody = {
+    moduleName: "appraisal",
+    selectedYear: "2024",
+    selectedQuater: quarter,
+    selectedScale: "1",
+    activeDate: "2024-04-01",
+    inActiveDate: "2024-06-30",
+    employeeNumber: empNo
+  };
+
+
+
+  const downloadSample = async () => {
+    try {
+      const blob = await appraisalAPI.appealCommittee.downloadSample({
+        roleName: "HR%20Admin",
+        regionCode: empNo,
+        quarter: quarter,
+        financialYear: "2024",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Sample.xlsx";
+      a.click();
+    } catch (err) {
+      alert("Failed to download sample");
+      console.error(err);
+    }
+  };
+
+
 
   // Fetch error logs on load
   const fetchLogs = async () => {
@@ -36,7 +101,13 @@ const AppealComittee = () => {
 
     try {
       setLoading(true);
-      const res = await appraisalAPI.appealCommittee.uploadFile({ file });
+      const res = await appraisalAPI.appealCommittee.uploadFile({
+        file,
+        // Use the exact params expected by the backend (as per working cURL)
+        sol: sol,
+        roleName:roleName,
+        empNo: empNo,
+      });
       alert("File uploaded successfully!");
       fetchLogs(); // reload table
     } catch (err) {
@@ -50,30 +121,31 @@ const AppealComittee = () => {
   // Download Data Table
   const downloadData = async () => {
     try {
-      const blob = await appraisalAPI.appealCommittee.downloadDataTable();
+      setDownloading(true);
+
+      const blob = await appraisalAPI.appealCommittee.downloadDataTable({
+        // Let axios handle URL encoding; pass plain text values
+        roleName: roleName,
+        regionCode: empNo, // or hardcode "36663" if that’s required
+        quarter: quarter,
+    financialYear: extractYear(financialYear)
+      });
+
       const url = window.URL.createObjectURL(new Blob([blob]));
       const a = document.createElement("a");
       a.href = url;
       a.download = "AppealCommitteeData.xlsx";
       a.click();
-    } catch (err) {
+    } catch (error) {
       alert("Failed to download data table");
+      console.error(error);
+    } finally {
+      setDownloading(false);
     }
   };
 
-  // Download Sample File
-  const downloadSample = async () => {
-    try {
-      const blob = await appraisalAPI.appealCommittee.downloadSample();
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "Sample.xlsx";
-      a.click();
-    } catch (err) {
-      alert("Failed to download sample");
-    }
-  };
+
+
 
   return (
     <div className="AppraiserContaniner">
@@ -128,13 +200,25 @@ const AppealComittee = () => {
 
             {/* DOWNLOAD BUTTONS */}
             <div className="d-flex gap-2">
-              <button className="btn btn-outline-primary text-button" onClick={downloadData}>
-                Download Data Table
-              </button>
+              <button
+  className="btn btn-outline-primary text-button"
+  onClick={downloadData}
+  disabled={downloading}
+>
+  {downloading ? (
+    <>
+      <span className="spinner-border spinner-border-sm me-2"></span>
+      Preparing file...
+    </>
+  ) : (
+    "Download Data Table"
+  )}
+</button>
 
-              <button className="btn btn-outline-primary primary-button" onClick={downloadSample}>
+
+              {/* <button className="btn btn-outline-primary primary-button" onClick={downloadSample}>
                 Download Sample
-              </button>
+              </button> */}
             </div>
           </div>
 
