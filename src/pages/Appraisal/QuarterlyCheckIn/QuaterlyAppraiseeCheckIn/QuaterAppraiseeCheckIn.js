@@ -128,7 +128,7 @@ function QuaterlyAppraiseeCheckIn() {
     const rows = monthlyMeasurableData[monthName] || [];
     return rows.map(row => ({
       ...row,                              // REQUIRED full object !!
-      MONTH: getMonthNumber(monthName)     // convert month name → number
+      //MONTH: getMonthNumber(monthName)     // convert month name → number
     }));
   });
 };
