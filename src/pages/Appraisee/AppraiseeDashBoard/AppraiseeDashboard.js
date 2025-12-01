@@ -61,7 +61,7 @@ export default function AppraiseeDashboard() {
     //TODO: CONFIRM WITH @ARSH
     roles: getUserProperty('roles', employeeDetails?.currentUser?.[0]?.ROLES || []),
     //TODO: CONFIRM WITH @ARSH
-    appraiser: getUserProperty('appraiser', employeeDetails?.currentUser?.[0]?.REPORTING_AUTHORITY_NAME || employeeDetails?.currentUser?.[0]?.APPRAISER || ''),
+    appraiser: getUserProperty('appraiser', employeeDetails?.currentUser?.[0]?.reporting_authority_ecno || employeeDetails?.currentUser?.[0]?.APPRAISER || ''),
   });
 
   // Show error toast when API fails
