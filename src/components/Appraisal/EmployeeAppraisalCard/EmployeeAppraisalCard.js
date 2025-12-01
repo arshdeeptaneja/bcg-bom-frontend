@@ -29,6 +29,8 @@ export default function EmployeeAppraisalCard({
   onViewSummary,
   onAddException,
   onAddAppeal,
+  isCheckInDisabled = false,
+  isAppealEnabled = false,
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
@@ -339,6 +341,7 @@ export default function EmployeeAppraisalCard({
               className="butns "
               data-bs-toggle="modal"
               data-bs-target={`#${`addCheckInModal-${employee.empNo}`}`}
+              disabled={isCheckInDisabled}
             >
               Add Check-In Summary
               <span className="ms-2">→</span>
@@ -349,7 +352,7 @@ export default function EmployeeAppraisalCard({
             </button>
           </div>
           <div className="button-row">
-          {userType === "self" && appraisalPeriod === "Quarterly" && (
+          {userType === "self" && appraisalPeriod === "Quarterly" && appraisalStatus?.toUpperCase() === 'COMPLETED' && onAddException && (
             <button
               type="button"
               className="btn-fade"
@@ -368,6 +371,7 @@ export default function EmployeeAppraisalCard({
               onClick={() => {
                 onAddAppeal && onAddAppeal()
               }}
+              disabled={!isAppealEnabled}
             >
               Add Appeal
               <span className="ms-2">→</span>
@@ -405,5 +409,6 @@ EmployeeAppraisalCard.propTypes = {
   onAddException: PropTypes.func,
   onAddAppeal: PropTypes.func,
   redResult: PropTypes.array,
-
+  isCheckInDisabled: PropTypes.bool,
+  isAppealEnabled: PropTypes.bool,
 };

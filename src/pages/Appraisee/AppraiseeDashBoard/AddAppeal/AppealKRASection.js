@@ -60,10 +60,10 @@ const AppealKRASection = ({
                 <>
                   <th style={{ width: '5%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Select</th>
                   <th style={{ width: '30%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>KRA</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Actual</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Target</th>
+                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Add Score</th>
+                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Total</th>
                   <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Max Score</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Score</th>
+                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Final</th>
                   <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Comments</th>
                 </>
               ) : (
@@ -114,7 +114,7 @@ const AppealKRASection = ({
                       <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Actual}</td>
                       <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Target}</td>
                       <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.MaxScore}</td>
-                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Score}</td>
+                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Actual}</td>
                     </>
                   ) : (
                     <>

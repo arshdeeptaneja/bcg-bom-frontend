@@ -14,12 +14,10 @@ import { BackButton } from '../../../../components/common';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   CheckInDescriptionSection,
-  NonMeasurableKra,
-  DevelopmentInputs,
 } from '../../../../components/Appraisal';
 import QuaterlyMeasurableKraTable from '../../../../components/QuaterTables/QuaterMeasurableKra';
 import QuaterNonMeasurable from '../../../../components/QuaterTables/QuaterNonMeasurable';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../../services/api';
 import { useAuth } from '../../../../contexts/AuthContext';
 import LoadingSpinner from '../../../../components/Spinner';
@@ -28,6 +26,7 @@ import { toast } from 'react-toastify';
 function QuaterlyAppraiseeCheckIn() {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Month conversion utility
  
@@ -46,16 +45,7 @@ function QuaterlyAppraiseeCheckIn() {
   const [months, setMonths] = useState(["April", "May", "June"]);
 
   // Get data from location state
-  const { financialYear, appraisalPeriod, quarter, dateRange, employee, intent, page_type } = location.state || {
-    financialYear: "2025",
-    appraisalPeriod: "Mid-Year",
-    quarter: "Q2",
-    url: "U-34545",
-    dateRange: "2025",
-    page_type: "self",
-    employee: { name: "John Doe", empNo: "36665", appraisalStatus: "pending", url: 'U-34545' },
-    intent: "Fill"
-  };
+  const { financialYear, appraisalPeriod, quarter, dateRange, employee, intent, page_type } = location.state;
 
   console.log("EMPLOYEE IS: ", employee)
   // Get employee number from auth context as fallback
@@ -112,6 +102,8 @@ function QuaterlyAppraiseeCheckIn() {
       appraisalAPI.submitQuarterlyAppraiseeCheckInReport(payload),
     onSuccess: (data) => {
       toast.success('Check-in submitted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['myAppraisalDashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['quarterlyCheckInReport'] });
       setIsSubmitting(false);
       // Navigate back or show success
       navigate(-1);
@@ -262,6 +254,27 @@ const buildPerformanceMeasurableComments = () => {
     }
   };
 
+  // Character limit for comment fields
+  const COMMENT_CHAR_LIMIT = 30;
+
+  // Handler for development input comments with character limit
+  const handleCommentChange = (questionIndex, value) => {
+    // Enforce 30 character limit
+    const limitedValue = value.slice(0, COMMENT_CHAR_LIMIT);
+    
+    setFormInputs(prev => {
+      // Map question index to the appropriate field
+      // Index 0 = highlights -> performancePeriodComment
+      // Index 1 = areas for improvement -> areasPerformanceComment
+      if (questionIndex === 0) {
+        return { ...prev, performancePeriodComment: limitedValue };
+      } else if (questionIndex === 1) {
+        return { ...prev, areasPerformanceComment: limitedValue };
+      }
+      return prev;
+    });
+  };
+
  const handleSave = async () => {
   try {
     setIsSubmitting(true);
@@ -309,6 +322,7 @@ const buildPerformanceMeasurableComments = () => {
     setIsSubmitting(true);
 
     // Build the payload matching backend expectations
+    // 
     const payload = {
       financialYear: parseInt(extractYear(financialYear)),
       quarter: quarter || '',
@@ -324,7 +338,7 @@ const buildPerformanceMeasurableComments = () => {
       nonMeasurableComment: formInputs.nonMeasurableComment,
       performanceNonMeasurableComment: formInputs.performanceNonMeasurableComment,
       performanceSemiMeasurableComment: formInputs.performanceSemiMeasurableComment,
-      performancePeriodComment: formInputs.performancePeriodComment,
+      performancePeriodComment: formInputs.performancePeriodComment, //highlights
       areasPerformanceComment: formInputs.areasPerformanceComment,
     };
 
@@ -480,20 +494,36 @@ const buildPerformanceMeasurableComments = () => {
 
 
           <div className="d-flex flex-column gap-3">
-            {developmentInputsQuestions.map((question, index) => (
-              <div key={question.question} className="d-flex flex-column gap-1">
-                {/* Question number and question text */}
-                <div className="d-flex flex-row gap-1">
-                  <span className="fw-bold">{index + 1}.</span>
-                  <span className="fw-bold">{question.question}</span>
-                  {question.required && <span className="text-danger">*</span>}
+            {developmentInputsQuestions.map((question, index) => {
+              // Map index to the correct formInputs field
+              const fieldValue = index === 0 
+                ? formInputs.performancePeriodComment 
+                : formInputs.areasPerformanceComment;
+              
+              return (
+                <div key={question.question} className="d-flex flex-column gap-1">
+                  {/* Question number and question text */}
+                  <div className="d-flex flex-row gap-1">
+                    <span className="fw-bold">{index + 1}.</span>
+                    <span className="fw-bold">{question.question}</span>
+                    {question.required && <span className="text-danger">*</span>}
+                  </div>
+
+                  {/* Textarea for free text response with 30 char limit */}
+                  <textarea 
+                    className="form-control" 
+                    placeholder="Enter your Response" 
+                    rows={3}
+                    maxLength={COMMENT_CHAR_LIMIT}
+                    value={fieldValue}
+                    onChange={(e) => handleCommentChange(index, e.target.value)}
+                  />
+                  <small className="text-muted text-end">
+                    {fieldValue.length}/{COMMENT_CHAR_LIMIT} characters
+                  </small>
                 </div>
-
-
-                {/* Textarea for free text response */}
-                <textarea className="form-control" placeholder="Enter your Response" rows={3} />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

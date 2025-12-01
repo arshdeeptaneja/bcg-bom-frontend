@@ -162,7 +162,7 @@ function AddAppeal() {
         </div>
       </div>
 
-      <div className="pageWrapper-content d-flex flex-column m-1 p-3">
+      <div className="pageWrapper-content d-flex flex-column p-3 gap-4">
         {/* Validation Errors Summary */}
         {validationErrors.length > 0 && (
           <div className="validation-summary">
@@ -194,22 +194,27 @@ function AddAppeal() {
         </div>
 
         {/* Final Score Summary Section */}
-        <div className="final-score-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
+        <div className="final-score-summary-table-section d-flex flex-column shadow-sm p-3">
           <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
           <FinalScoreSummaryTable kraListData={data.finalScoreSummary} />
         </div>
 
         {/* Discretionary KRAs Section */}
-        <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
+        <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm p-3">
           <h5 className="text-primary fw-bold mb-3">Discretionary KRAs - Select KRAs to Appeal</h5>
 
           {/* Measurable KRAs */}
           {Object.entries(data.measurableKras).map(([groupName, kras]) => (
             <div key={groupName} className="mb-4">
-              <h6 className="fw-bold mb-3">
-                <i className="bi bi-graph-up me-2"></i>
-                {groupName} - Measurable KRAs
-              </h6>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h6 className="fw-bold mb-0">
+                  <i className="bi bi-star me-2"></i>
+                  {groupName} - Non-Measurable KRAs
+                </h6>
+                <span className="fw-bold text-primary">
+                  Score: {data.totalNonMeasurableActual} / {data.totalNonMeasurableMax}
+                </span>
+              </div>
               <AppealKRASection
                 kras={kras}
                 selectedKras={formState.selectedKras}
@@ -241,7 +246,7 @@ function AddAppeal() {
             <div key={groupName} className="mb-4">
               <h6 className="fw-bold mb-3">
                 <i className="bi bi-star me-2"></i>
-                {groupName} - Non-Measurable KRAs
+                {groupName} - Non-Measurable KRAs ({data.totalNonMeasurableActual}/{data.totalNonMeasurableMax})
               </h6>
               <AppealKRASection
                 kras={kras}
@@ -270,7 +275,7 @@ function AddAppeal() {
         </div>
 
         {/* File Upload Section */}
-        <div className="file-upload-section d-flex flex-column shadow-sm m-1 p-3">
+        <div className="file-upload-section d-flex flex-column shadow-sm p-3">
           <h5 className="text-primary fw-bold mb-3">Supporting Documents</h5>
           <FileUploadSection
             files={formState.uploadedFiles}

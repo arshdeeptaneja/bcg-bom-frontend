@@ -10,21 +10,17 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import './AppraiseeCheckIn.css';
 import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
 import EmployeeModel from '../../../models/EmployeeModel';
-import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
 
 // Status mapping for display transformation
-const STATUS_MAPPING = {
-  'complete_reva': 'Pending at Acceptor',
+const STATUS_MAPPING = {  
   'complete_self': 'Pending at Appraiser',
   'complete_repa': 'Pending at Reviewer',
   'pending': 'Pending at Appraisee',
-  'submitted_appraisal': 'Completed',
-  'completed': 'Completed',
-  'complete_ac': 'Completed'
+  'complete': 'Completed',
 };
 
 // Helper function to get display status from backend status
@@ -112,9 +108,7 @@ export default function AppraiseeCheckIn() {
         primaryRole: cardData?.primary
       })
       : null;
-    console.log("RED RESULT:", redResult);
-    console.log("CARD DATA:", cardData);
-    console.log("EMPLOYEE MODEL:", employeeModel);
+    
 
   
 
@@ -202,8 +196,10 @@ console.log('results:', results);
               //   : ''}
               dateRange={cardDateRange}
               primaryRole={employeeModel.primaryRole || ''}
-              appraisalStatus={getDisplayStatus(employee.APPRAISAL_STATUS)}
+              appraisalStatus={getDisplayStatus(employee.status)}
               exceptionStatus={employee.APPEAL_STATUS}
+              isCheckInDisabled={employee.status?.toLowerCase() !== 'pending'}
+              isAppealEnabled={employee.status?.toLowerCase() === 'complete'}
               organization={employee.ORGANIZATION || ''}
               quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
               appraisalPeriod={appraisalPeriod}

@@ -634,6 +634,39 @@ getAppraiserCheckInDashboard: async ({
     }
   },
 
+  getReviewerAppraisal: async ({
+    empNo,
+    url,
+    zoneName,
+    roleType,
+    financialYear,
+    quarter,
+    pageType,
+    appraisalStatus,
+    intent,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'url', url);
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'pageType', pageType);
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
+      appendQueryParam(params, 'intent', intent);
+
+      const response = await apiClient.get(
+        `/appraisal/reviewer_appraisal?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
   // GET: Get Admin HR Dashboard data
   getHrDashboard: async ({ empNo, appraisalPeriod, financialYear }) => {
   const res = await axios.get(`/appraisal/admin/hr_dashboard`, {
@@ -881,6 +914,19 @@ getAppraiserCheckInDashboard: async ({
       return response.data;
     } catch (error) {
       console.error('getReporteeAppraisal error:', error);
+      throw error;
+    }
+  },
+
+  submitReviewerAppraisal: async (payload = {}) => {
+    try {
+      const response = await apiClient.post(
+        `${appraisalBaseUrl}/reviewer_appraisal/submit`,
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      console.error('submitReviewerAppraisal error:', error);
       throw error;
     }
   },

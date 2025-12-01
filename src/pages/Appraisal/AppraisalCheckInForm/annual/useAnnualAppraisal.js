@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../../services/api';
 import { toast } from 'react-toastify';
 import { transformAnnualAppraisalData } from '../appraisalTransformers';
@@ -17,6 +17,7 @@ import { useAuth } from '../../../../contexts/AuthContext';
  * - Development inputs extraction
  */
 export const useAnnualAppraisal = () => {
+  const queryClient = useQueryClient();
   const context = useAppraisalContext();
   const {
     navigate,
@@ -574,11 +575,13 @@ export const useAnnualAppraisal = () => {
   // Submit mutation (no save for annual)
   const submitMutation = useMutation({
     //TODO: direct submitAnnualSelfAppraisal and submit reportee appraisal by condition
-    mutationFn: (payload) => appraisalAPI.submitReporteeAppraisal(payload),
+    mutationFn: (payload) => appraisalAPI.submitReviewerAppraisal(payload),
     onSuccess: (response) => {
       console.log('[useAnnualAppraisal] Submit success:', response);
       toast.success('Annual appraisal submitted successfully');
       setIsDirty(false);
+      // Invalidate AppraiseeCheckIn dashboard to refresh status
+      queryClient.invalidateQueries({ queryKey: ['myAppraisalDashboard'] });
       //navigate(-1);
     },
     onError: (error) => {

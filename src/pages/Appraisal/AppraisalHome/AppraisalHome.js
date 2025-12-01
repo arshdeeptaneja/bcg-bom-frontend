@@ -244,7 +244,7 @@ export default function AppraisalHome() {
           }}
         />
         
-        {appraisalPeriod === 'Annually' && (
+        {appraisalPeriod === 'Annual' && (
         <KpiTab
           heading="Reviewer Mode"
           kpiData={[

@@ -39,6 +39,16 @@ export default function QuarterlyAppraisee() {
     return yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
   };
 
+  const getDisplayStatus = (status) => {
+    if (!status) return 'Pending at Appraisee';
+    const statusMap = {
+      'pending': 'Pending at Appraisee',
+      'complete_self': 'Pending at Appraiser',
+      'complete': 'Completed'
+    };
+    return statusMap[status] || status;
+  };
+
   // React Query to fetch my appraisal dashboard data
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['myAppraisalDashboard', financialYear, appraisalPeriod, quarter, empNo],
@@ -180,7 +190,7 @@ export default function QuarterlyAppraisee() {
             dateRange={cardDateRange}
             redResult={redResult}
             primaryRole={cardData?.MAIN_ROLE || cardData?.primary || 'Role 1'}
-            appraisalStatus={cardData?.appraisal_status || 'PENDING AT APPRAISEE'}
+            appraisalStatus={getDisplayStatus(cardData?.appraisal_status)}
             exceptionStatus={cardData.EXCEPTION_STATUS}
             organization={cardData?.organization || 'Dhanetha'}
             additionalRoles={additionalRoles}

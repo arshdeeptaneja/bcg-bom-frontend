@@ -22,9 +22,8 @@ const AnnualCheckIn = () => {
     formState,
     actions,
   } = useAnnualAppraisal();
-
   const { employee, dateRange, metadata } = context;
-  const { currentRole, isEditableBy, handleRoleChange } = roleState;
+  const { currentRole, isEditableBy } = roleState;
   const { 
     nonMeasurableScores, 
     developmentResponses, 
@@ -107,22 +106,6 @@ const AnnualCheckIn = () => {
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
             Annual Appraisal
           </h1>
-        </div>
-        <div className="d-flex flex-row align-items-center">
-          <label htmlFor="roleSelect" className="me-2 text-muted fw-bold">
-            Role:
-          </label>
-          <select
-            id="roleSelect"
-            value={currentRole}
-            onChange={handleRoleChange}
-            className="form-select form-select-sm"
-            style={{ width: '180px' }}
-          >
-            <option value="APPRAISEE">Appraisee (Self)</option>
-            <option value="APPRAISER">Appraiser (Level 1)</option>
-            <option value="REVIEWER">Reviewer (Final)</option>
-          </select>
         </div>
       </div>
       <div className="pageWrapper-content d-flex flex-column m-1 p-3">
