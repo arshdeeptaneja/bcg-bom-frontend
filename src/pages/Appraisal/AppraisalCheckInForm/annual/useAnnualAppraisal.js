@@ -4,6 +4,7 @@ import { appraisalAPI } from '../../../../services/api';
 import { toast } from 'react-toastify';
 import { transformAnnualAppraisalData } from '../appraisalTransformers';
 import { useAppraisalContext } from '../useAppraisalContext';
+import { useAuth } from '../../../../contexts/AuthContext';
 
 /**
  * Annual Appraisal Hook
@@ -34,6 +35,12 @@ export const useAnnualAppraisal = () => {
 
   // Role state management - Annual always starts as APPRAISEE
   const [currentRole, setCurrentRole] = useState('APPRAISEE');
+
+  const { getUserProperty } = useAuth();
+
+
+  const empNo = getUserProperty("empNo", "38965");
+
 
   const handleRoleChange = (e) => {
     setCurrentRole(e.target.value);
@@ -143,8 +150,8 @@ export const useAnnualAppraisal = () => {
         roleType: roleType || 'Administrative Officers',
         financialYear: normalizedFinancialYear,
         quarter: 'Q2', // Hardcoded for annual until backend fix
-        pageType: 'self',
-        appraisalStatus: 'pending',
+        pageType: 'repa',
+        appraisalStatus: 'complete_self',
       };
       console.log('[useAnnualAppraisal] API call params:', apiParams);
       return appraisalAPI.getEmployeeSelfAppraisal(apiParams);
@@ -499,7 +506,7 @@ export const useAnnualAppraisal = () => {
       // id: urlId from route state (this is the URL ID / assignment ID)
       id: urlId || null,
       empNo: employeeNumber,
-      ecNumber: employeeNumber,
+      ecNumber: empNo,
       financialYear: parseInt(normalizedFinancialYear, 10),
       
       // Learning metrics - from GET API if available, else 0
@@ -562,15 +569,17 @@ export const useAnnualAppraisal = () => {
       errors,
     };
   };
+  
 
   // Submit mutation (no save for annual)
   const submitMutation = useMutation({
-    mutationFn: (payload) => appraisalAPI.submitAnnualSelfAppraisal(payload),
+    //TODO: direct submitAnnualSelfAppraisal and submit reportee appraisal by condition
+    mutationFn: (payload) => appraisalAPI.submitReporteeAppraisal(payload),
     onSuccess: (response) => {
       console.log('[useAnnualAppraisal] Submit success:', response);
       toast.success('Annual appraisal submitted successfully');
       setIsDirty(false);
-      navigate(-1);
+      //navigate(-1);
     },
     onError: (error) => {
       console.error('[useAnnualAppraisal] Submit error:', error);

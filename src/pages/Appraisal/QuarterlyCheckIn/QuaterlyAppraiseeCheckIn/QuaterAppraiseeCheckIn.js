@@ -272,13 +272,13 @@ const buildPerformanceMeasurableComments = () => {
     const payload = {
       financialYear: parseInt(extractYear(financialYear)),
       quarter: quarter,
-      empNumber: empNo,
+      empNumber: employee?.empNo,
       urlId: employee?.url || "U-34545",
       kraData: kraDataPayload,
       submittype: page_type,
 
-      startDate: "2024-07-01 00:00:00.0",
-      endDate: "2024-09-30 00:00:00.0",
+      startDate: location.state?.dateRange?.split(' - ')[0]?.trim() || '2024-07-01 00:00:00.0',
+      endDate: location.state?.dateRange?.split(' - ')[1]?.trim() || '2024-09-30 00:00:00.0',
 
       reportingAuthority: employee?.appraiser || "",
       organizationName: employee?.branch || "",
@@ -312,7 +312,7 @@ const buildPerformanceMeasurableComments = () => {
     const payload = {
       financialYear: parseInt(extractYear(financialYear)),
       quarter: quarter || '',
-      empNumber: empNo || employee?.empNo || '',
+      empNumber: employee?.empNo,
       urlId: employee?.URL_ID || employee?.url || 'U-34545',
       kraData: measurableKraListData,
       submittype: page_type,

@@ -82,7 +82,7 @@ const buildAdditionalRoles = (r) => {
 
 const buildDateRange = (start, end) => {
   if (!start || !end) return "";
-  return `${start} → ${end}`;
+  return `${start} - ${end}`;
 };
 
 export default function AppraiserCheckInDashboard() {
@@ -420,22 +420,23 @@ export default function AppraiserCheckInDashboard() {
           </p>
         )}
 
+        {console.log("appraisal period: ", appraisalPeriod)}
         {filteredReportees.map((record, index) => {
           const employeeModel = new EmployeeModel({
             empNo: record?.EMP_ID,
             employeeName: record?.EMP_NAME,
             url: record?.URL_ID,
             appraisalStatus: record?.APPRAISAL_STATUS,
-            employeeScale: record?.SCALE,
+            employeeScale: appraisalPeriod === "Annual" ? record?.EMP_SCALE :record?.SCALE,
             additionalRoles: buildAdditionalRoles(record),
             branch: record?.ORGANIZATION,
-            appraiser: record?.REPORTING_AUTHORITY_NAME,
-            primaryRole: record?.MAIN_ROLE,
+            appraiser: authEmpNo,
+            primaryRole: appraisalPeriod === "Annual" ? record?.PRIMARY_ROLE : record?.MAIN_ROLE,
           });
 
           const dateRange = buildDateRange(
-            record?.STARTDATE,
-            record?.ENDDATE
+            appraisalPeriod === "Annual" ? record?.ROLE_START_DATE : record?.STARTDATE,
+            appraisalPeriod === "Annual" ? record?.ROLE_END_DATE : record?.ENDDATE
           );
 
           return (
@@ -443,7 +444,7 @@ export default function AppraiserCheckInDashboard() {
               key={index}
               employee={employeeModel}
               dateRange={dateRange}
-              primaryRole={record?.MAIN_ROLE}
+              primaryRole={ appraisalPeriod === "Annual" ? record?.PRIMARY_ROLE : record?.MAIN_ROLE}
               additionalRoles={buildAdditionalRoles(record)}
               organization={record?.ORGANIZATION}
               userType="appraiser"

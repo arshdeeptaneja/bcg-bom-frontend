@@ -134,7 +134,7 @@ export default function QuarterlyAppraisee() {
       branch: cardData?.organization,
       url: cardData?.url_id,
       roles: [cardData?.secondary, cardData?.tertiary,cardData?. ADDITIONAL_ROLE_3, cardData?.ADDITIONAL_ROLE_4 ],
-      appraiser: cardData?.reporting_authority_name || 'N/A',
+      appraiser: cardData?.reporting_authority_ecno || 'N/A',
       primaryRole: cardData?.primary
     })
     : null;

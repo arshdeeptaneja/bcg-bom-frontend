@@ -108,7 +108,7 @@ export default function AppraiseeCheckIn() {
         employeeScale: cardData?.scale || 'N/A',
         branch: cardData?.organization,
         roles: [cardData?.secondary, cardData?.tertiary,cardData?. ADDITIONAL_ROLE_3, cardData?.ADDITIONAL_ROLE_4 ],
-        appraiser: cardData?.reporting_authority_name || 'N/A',
+        appraiser: cardData?.reporting_authority_ecno || 'N/A',
         primaryRole: cardData?.primary
       })
       : null;
