@@ -8,19 +8,27 @@ import React, { useState } from 'react';
  * @param {Array} props.kras - Array of KRA objects
  * @param {Set} props.selectedKras - Set of selected KRA IDs
  * @param {Map} props.appealTexts - Map of KRA ID to appeal text
+ * @param {Map} props.actualValueEdits - Map of KRA ID to edited actual value
  * @param {Function} props.onKraSelect - Callback when KRA is selected/deselected
  * @param {Function} props.onAppealTextChange - Callback when appeal text changes
+ * @param {Function} props.onActualChange - Callback when actual value changes
  * @param {string} props.type - 'measurable' or 'non-measurable'
  * @param {string} props.groupName - Group name for the KRAs
+ * @param {number} props.totalActualScore - Total actual score for the section
+ * @param {number} props.totalMaxScore - Total max score for the section
  */
 const AppealKRASection = ({
   kras = [],
   selectedKras = new Set(),
   appealTexts = new Map(),
+  actualValueEdits = new Map(),
   onKraSelect,
   onAppealTextChange,
+  onActualChange,
   type = 'measurable',
-  groupName = ''
+  groupName = '',
+  totalActualScore = 0,
+  totalMaxScore = 0
 }) => {
   const [expandedComments, setExpandedComments] = useState(new Set());
 
@@ -39,13 +47,32 @@ const AppealKRASection = ({
   const isSelected = (kraId) => selectedKras.has(kraId);
   const getAppealText = (kraId) => appealTexts.get(kraId) || '';
   const isCommentExpanded = (kraId) => expandedComments.has(kraId);
+  const getActualValue = (kraId, originalActual) => {
+    if (actualValueEdits.has(kraId)) {
+      return actualValueEdits.get(kraId);
+    }
+    return originalActual || '';
+  };
 
   if (!kras || kras.length === 0) {
     return null;
   }
 
+  const sectionTitle = type === 'measurable' ? 'Measurable' : 'Non - Measurable';
+  const scoreLabel = type === 'measurable' 
+    ? 'Discretionary Measurable Score' 
+    : 'Discretionary Non - Measurable Score';
+
   return (
     <div className="appeal-kra-section mb-4">
+      {/* Section Header with Score */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h6 className="fw-bold mb-0">{sectionTitle}</h6>
+        <div className="text-muted">
+          {scoreLabel} <span className="fw-bold text-primary">{totalActualScore?.toFixed?.(1) || totalActualScore}/{totalMaxScore?.toFixed?.(1) || totalMaxScore}</span>
+        </div>
+      </div>
+
       {groupName && (
         <h5 className="fw-bold mb-3" style={{ color: 'var(--accent-color)' }}>
           {groupName}
@@ -58,21 +85,26 @@ const AppealKRASection = ({
             <tr>
               {type === 'measurable' ? (
                 <>
-                  <th style={{ width: '5%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Select</th>
+                  <th style={{ width: '5%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Select KRA</th>
                   <th style={{ width: '30%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>KRA</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Add Score</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Total</th>
+                  <th style={{ width: '15%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>
+                    Actual <i className="bi bi-info-circle ms-1 small"></i>
+                  </th>
+                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>
+                    Target <i className="bi bi-info-circle ms-1 small"></i>
+                  </th>
                   <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Max Score</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Final</th>
+                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Score</th>
                   <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Comments</th>
                 </>
               ) : (
                 <>
-                  <th style={{ width: '5%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Select</th>
-                  <th style={{ width: '40%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>KRA</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Score</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Max Score</th>
-                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Comments</th>
+                  <th style={{ width: '5%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Select KRA</th>
+                  <th style={{ width: '35%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>KRA</th>
+                  <th style={{ width: '15%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Add Score</th>
+                  <th style={{ width: '15%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Total Score</th>
+                  <th style={{ width: '15%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Final Score</th>
+                  <th style={{ width: '10%', padding: '12px 16px', border: '1px solid var(--accent-color)', fontWeight: 500 }}>Remark</th>
                 </>
               )}
             </tr>
@@ -111,15 +143,46 @@ const AppealKRASection = ({
                   </td>
                   {type === 'measurable' ? (
                     <>
-                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Actual}</td>
+                      {/* Actual column with label and editable input */}
+                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>
+                        <div className="d-flex flex-column align-items-center">
+                          <span className="small text-muted mb-1">{kra.Actual}</span>
+                          <input
+                            type="number"
+                            className="form-control form-control-sm text-center"
+                            style={{ maxWidth: '80px' }}
+                            value={getActualValue(kra.KraId, kra.Actual)}
+                            onChange={(e) => onActualChange && onActualChange(kra.KraId, e.target.value)}
+                            placeholder="Enter"
+                          />
+                        </div>
+                      </td>
                       <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Target}</td>
                       <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.MaxScore}</td>
-                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Actual}</td>
+                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Score}</td>
                     </>
                   ) : (
                     <>
+                      {/* Add Score column (API: Actual) with label and editable input */}
+                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>
+                        <div className="d-flex flex-column align-items-center">
+                          <span className="small text-muted mb-1">{kra.Actual}</span>
+                          <input
+                            type="number"
+                            className="form-control form-control-sm text-center"
+                            style={{ maxWidth: '80px' }}
+                            value={getActualValue(kra.KraId, kra.Actual)}
+                            onChange={(e) => onActualChange && onActualChange(kra.KraId, e.target.value)}
+                            placeholder="Enter"
+                            min="1"
+                            max="5"
+                          />
+                        </div>
+                      </td>
+                      {/* Total Score column (API: Target) */}
+                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Target}</td>
+                      {/* Final Score column (API: Score) */}
                       <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.Score}</td>
-                      <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>{kra.MaxScore}</td>
                     </>
                   )}
                   <td className="text-center" style={{ padding: '12px 16px', border: '1px solid #ddd', verticalAlign: 'middle' }}>
@@ -143,7 +206,7 @@ const AppealKRASection = ({
                 {/* Existing comment row */}
                 {isCommentExpanded(kra.KraId) && kra.CommentSelf1 && (
                   <tr>
-                    <td colSpan={type === 'measurable' ? 7 : 5} className="bg-light" style={{ padding: '12px 16px', border: '1px solid #ddd' }}>
+                    <td colSpan={type === 'measurable' ? 7 : 6} className="bg-light" style={{ padding: '12px 16px', border: '1px solid #ddd' }}>
                       <div className="p-2">
                         <div className="small text-muted mb-1">
                           <strong>Your previous comment:</strong>
@@ -157,7 +220,7 @@ const AppealKRASection = ({
                 {/* Appeal text input row - only shown when KRA is selected */}
                 {isSelected(kra.KraId) && (
                   <tr>
-                    <td colSpan={type === 'measurable' ? 7 : 5} className="p-3" style={{ backgroundColor: '#f8f9fa', padding: '12px 16px', border: '1px solid #ddd' }}>
+                    <td colSpan={type === 'measurable' ? 7 : 6} className="p-3" style={{ backgroundColor: '#f8f9fa', padding: '12px 16px', border: '1px solid #ddd' }}>
                       <label className="form-label fw-semibold small">
                         <i className="bi bi-pencil-square me-2"></i>
                         Appeal Justification *

@@ -143,7 +143,7 @@ export default function QuarterlyAppraisee() {
       employeeScale: cardData?.scale || 'N/A',
       branch: cardData?.organization,
       url: cardData?.url_id,
-      roles: [cardData?.secondary, cardData?.tertiary,cardData?. ADDITIONAL_ROLE_3, cardData?.ADDITIONAL_ROLE_4 ],
+      roles: [cardData?.secondary, cardData?.tertiary, cardData?.ADDITIONAL_ROLE_3, cardData?.ADDITIONAL_ROLE_4 ],
       appraiser: cardData?.reporting_authority_ecno || 'N/A',
       primaryRole: cardData?.primary
     })
@@ -197,6 +197,8 @@ export default function QuarterlyAppraisee() {
             quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
             appraisalPeriod={appraisalPeriod}
             scoreData={appraisalScoreDash}
+            isCheckInDisabled={cardData?.appraisal_status !== 'pending'}
+            isExceptionDisabled={cardData?.appraisal_status !== 'complete'}
             onAddCheckIn={() => {
               console.log("Add checkin is working")
               navigate('/quarterly/quaterly-appraisee-check-in', {

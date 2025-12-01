@@ -476,12 +476,15 @@ export const useAnnualAppraisalReview = () => {
   const validateForm = () => {
     const errors = [];
 
-    // Check if all KRAs have appraiser scores
+    // Check if all KRAs have appraiser scores and comments
     rawKraData.forEach((kra) => {
       const kraId = kra.AP_KRA_ID;
       const appraiserInput = appraiserScores[kraId];
       if (!appraiserInput?.score) {
         errors.push(`Please select an appraiser score for "${kra.KRA_DESC}"`);
+      }
+      if (!appraiserInput?.comment?.trim()) {
+        errors.push(`Please provide an appraiser comment for "${kra.KRA_DESC}"`);
       }
     });
 

@@ -36,6 +36,11 @@ export const useAddAppeal = () => {
   const [appealTexts, setAppealTexts] = useState(new Map());
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // New state for editable fields
+  const [actualValueEdits, setActualValueEdits] = useState(new Map());
+  const [finalScoreEdits, setFinalScoreEdits] = useState(new Map());
+  const [selectedCategories, setSelectedCategories] = useState(new Set());
 
   // Fetch appeal report data using actual API endpoint
   const { data: apiResponse, isLoading, isError, error } = useQuery({
@@ -259,6 +264,37 @@ export const useAddAppeal = () => {
     });
   }, []);
 
+  // Actual value change handler (for measurable and non-measurable KRAs)
+  const handleActualChange = useCallback((kraId, value) => {
+    setActualValueEdits(prev => {
+      const newMap = new Map(prev);
+      newMap.set(kraId, value);
+      return newMap;
+    });
+  }, []);
+
+  // Final score change handler (for Final Score Summary table)
+  const handleFinalScoreChange = useCallback((categoryName, value) => {
+    setFinalScoreEdits(prev => {
+      const newMap = new Map(prev);
+      newMap.set(categoryName, value);
+      return newMap;
+    });
+  }, []);
+
+  // Category selection handler (for Final Score Summary table)
+  const handleCategorySelection = useCallback((categoryName) => {
+    setSelectedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryName)) {
+        newSet.delete(categoryName);
+      } else {
+        newSet.add(categoryName);
+      }
+      return newSet;
+    });
+  }, []);
+
   // File upload handler
   const handleFileUpload = useCallback((files) => {
     const fileArray = Array.from(files);
@@ -394,11 +430,17 @@ export const useAddAppeal = () => {
     formState: {
       selectedKras,
       appealTexts,
-      uploadedFiles
+      uploadedFiles,
+      actualValueEdits,
+      finalScoreEdits,
+      selectedCategories
     },
     actions: {
       handleKraSelection,
       handleAppealTextChange,
+      handleActualChange,
+      handleFinalScoreChange,
+      handleCategorySelection,
       handleFileUpload,
       handleFileRemove,
       handleSubmit,

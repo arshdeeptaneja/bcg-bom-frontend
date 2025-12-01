@@ -1,15 +1,11 @@
 import React, { useState, useRef } from 'react';
 
-/**
- * FileUploadSection - Component for file upload with validation
- * Matches the green UI structure with blue theme
- */
 const FileUploadSection = ({
   files = [],
   onFileUpload,
   onFileRemove,
   maxSize = 5,
-  allowedTypes = ['.xls', '.xlf', '.xlsx', '.jpeg', '.jpg', '.png']
+  allowedTypes = ['.zip', '.pdf', '.jpeg', '.jpg', '.png']
 }) => {
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
@@ -31,7 +27,6 @@ const FileUploadSection = ({
   const validateFiles = (fileList) => {
     const fileArray = Array.from(fileList);
     
-    // Validate file types
     const invalidFiles = fileArray.filter(file => {
       const extension = '.' + file.name.split('.').pop().toLowerCase();
       return !allowedTypes.includes(extension);
@@ -41,7 +36,6 @@ const FileUploadSection = ({
       return `Invalid file type. Allowed: ${allowedTypes.join(', ')}`;
     }
 
-    // Validate total size
     const currentSize = getTotalSize();
     const newSize = fileArray.reduce((sum, file) => sum + file.size, 0);
     
@@ -52,10 +46,9 @@ const FileUploadSection = ({
     return null;
   };
 
-  const handleAddFileClick = () => {
+  const handleSelectFileClick = () => {
     fileInputRef.current?.click();
   };
-
 
   const handleFileChange = (e) => {
     const fileList = e.target.files;
@@ -82,32 +75,8 @@ const FileUploadSection = ({
     onFileRemove(index);
   };
 
-  const getFileIcon = (fileName) => {
-    const extension = fileName.split('.').pop().toLowerCase();
-    if (['jpeg', 'jpg', 'png'].includes(extension)) {
-      return 'bi-file-earmark-image';
-    } else if (['xls', 'xlf', 'xlsx'].includes(extension)) {
-      return 'bi-file-earmark-spreadsheet';
-    }
-    return 'bi-file-earmark';
-  };
-
   return (
-    <div className="file-upload-section-wrapper">
-      {/* Header Row */}
-      <div className="file-upload-header">
-        <div className="file-upload-title">
-          <i className="bi bi-paperclip me-2"></i>
-          Document Upload
-        </div>
-        <div className="file-upload-info">
-          <span className="text-muted small">
-            Formats: {allowedTypes.join(', ')} | Max: {maxSize}MB
-          </span>
-        </div>
-      </div>
-
-      {/* Hidden File Input */}
+    <div className="file-upload-simple">
       <input
         type="file"
         ref={fileInputRef}
@@ -117,56 +86,23 @@ const FileUploadSection = ({
         onChange={handleFileChange}
       />
 
-      {/* File Upload Table */}
-      <div className="file-upload-table-container">
-        <table className="file-upload-table">
-          <thead>
-            <tr>
-              <th style={{ width: '50px' }}>S.No</th>
-              <th>File Name</th>
-              <th style={{ width: '100px' }}>Size</th>
-              <th style={{ width: '100px' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {files.length === 0 ? (
-              <tr>
-                <td colSpan="4" className="text-center text-muted py-4">
-                  <i className="bi bi-cloud-upload fs-3 d-block mb-2"></i>
-                  No files uploaded yet. Click "Add File" to upload.
-                </td>
-              </tr>
-            ) : (
-              files.map((file, index) => (
-                <tr key={index}>
-                  <td className="text-center">{index + 1}</td>
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <i className={`bi ${getFileIcon(file.name)} me-2 text-primary`}></i>
-                      <span className="file-name-text">{file.name}</span>
-                    </div>
-                  </td>
-                  <td className="text-muted small">{formatFileSize(file.size)}</td>
-                  <td className="text-center">
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-danger btn-remove-file"
-                      onClick={() => handleRemove(index)}
-                      title="Remove file"
-                    >
-                      <i className="bi bi-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <button
+        type="button"
+        className="btn btn-select-file"
+        onClick={handleSelectFileClick}
+      >
+        Select a File
+      </button>
 
-      {/* Error Message */}
+      <p className="file-upload-format-info">
+        <strong>Allowable Formats for Upload:</strong> {allowedTypes.join(', ')}
+      </p>
+      <p className="file-upload-size-info">
+        <strong>Allowable Upload Size:</strong> {maxSize} MB
+      </p>
+
       {error && (
-        <div className="file-upload-error">
+        <div className="file-upload-error mt-2">
           <i className="bi bi-exclamation-triangle-fill me-2"></i>
           {error}
           <button 
@@ -178,28 +114,29 @@ const FileUploadSection = ({
         </div>
       )}
 
-      {/* Footer with Add File Button and Total Size */}
-      <div className="file-upload-footer">
-        <button
-          type="button"
-          className="btn btn-add-file"
-          onClick={handleAddFileClick}
-        >
-          <i className="bi bi-plus-circle me-2"></i>
-          Add File
-        </button>
-        
-        {files.length > 0 && (
-          <div className="file-upload-summary">
-            <span className="badge bg-primary">
-              {files.length} file(s)
-            </span>
-            <span className="text-muted small ms-2">
-              Total: {formatFileSize(getTotalSize())} / {maxSize}MB
-            </span>
-          </div>
-        )}
-      </div>
+      {files.length > 0 && (
+        <div className="selected-files-list mt-3">
+          <p className="mb-2"><strong>Selected Files ({files.length}):</strong></p>
+          <ul className="list-unstyled mb-0">
+            {files.map((file, index) => (
+              <li key={index} className="d-flex align-items-center justify-content-between py-1">
+                <span className="text-muted small">
+                  <i className="bi bi-file-earmark me-2"></i>
+                  {file.name} ({formatFileSize(file.size)})
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => handleRemove(index)}
+                  title="Remove file"
+                >
+                  <i className="bi bi-x"></i>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

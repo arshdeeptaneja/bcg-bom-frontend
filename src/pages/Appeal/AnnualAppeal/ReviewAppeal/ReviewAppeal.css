@@ -111,7 +111,7 @@
 
 
 /* ============================================
-   KRA Review Table - Green structure, Blue theme
+   KRA Review Table - Green theme (matching screenshots)
    ============================================ */
 .appeal-review-kra-section {
   margin-bottom: 1rem;
@@ -124,9 +124,9 @@
   border-collapse: collapse;
 }
 
-/* Table Header - Blue theme */
+/* Table Header - Green theme */
 .kra-review-table thead {
-  background-color: var(--accent-color, #0189d0);
+  background-color: #006837;
   color: white;
 }
 
@@ -134,8 +134,33 @@
   font-weight: 500;
   padding: 12px 8px;
   vertical-align: middle;
-  border: 1px solid var(--accent-color, #0189d0);
+  border: 1px solid #006837;
   text-align: center;
+}
+
+/* Green themed table class for reuse */
+.appeal-table-green {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.appeal-table-green thead {
+  background-color: #006837;
+  color: white;
+}
+
+.appeal-table-green thead th {
+  font-weight: 500;
+  padding: 12px 8px;
+  vertical-align: middle;
+  border: 1px solid #006837;
+  text-align: center;
+}
+
+.appeal-table-green tbody td {
+  padding: 0;
+  vertical-align: middle;
+  border: 1px solid #dee2e6;
 }
 
 .kra-review-table tbody td {
@@ -216,10 +241,48 @@
 }
 
 .appellate-input {
-  background-color: #e3f2fd !important;
-  border-color: var(--accent-color, #0189d0) !important;
-  color: var(--accent-color, #0189d0);
-  font-weight: 600;
+  background-color: #fff !important;
+  border: 1px solid #006837 !important;
+  color: #333;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+/* Role value input styling to match screenshots */
+.role-value-input {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 6px 10px;
+  text-align: center;
+  min-width: 60px;
+  background-color: #fff;
+}
+
+.role-value-input:read-only {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* Nested role rows styling */
+.role-label-cell {
+  padding: 8px 12px !important;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 500;
+  color: #333;
+  text-align: right;
+  background-color: #f8f9fa;
+}
+
+.role-value-cell {
+  padding: 8px 12px !important;
+  border-bottom: 1px solid #dee2e6;
+  text-align: center;
+}
+
+.role-label-cell:last-child,
+.role-value-cell:last-child {
+  border-bottom: none;
 }
 
 /* Score Cell */
@@ -455,4 +518,112 @@
 
 .score-values strong {
   color: var(--accent-color, #0189d0);
+}
+
+/* ============================================
+   Final Score Summary Table - Green theme with nested rows
+   ============================================ */
+.final-score-summary-appeal {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.final-score-summary-appeal thead {
+  background-color: #006837;
+  color: white;
+}
+
+.final-score-summary-appeal thead th {
+  font-weight: 500;
+  padding: 12px 8px;
+  vertical-align: middle;
+  border: 1px solid #006837;
+  text-align: center;
+}
+
+.final-score-summary-appeal tbody td {
+  border: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.final-score-summary-appeal .category-cell {
+  padding: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.final-score-summary-appeal .roles-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.final-score-summary-appeal .role-row-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.final-score-summary-appeal .role-row-item:last-child {
+  border-bottom: none;
+}
+
+.final-score-summary-appeal .role-label {
+  font-weight: 500;
+  color: #333;
+  min-width: 80px;
+}
+
+.final-score-summary-appeal .role-value {
+  flex: 1;
+  text-align: center;
+}
+
+.final-score-summary-appeal .editable-score-input {
+  border: 1px solid #006837;
+  border-radius: 4px;
+  padding: 6px 10px;
+  text-align: center;
+  width: 80px;
+  background-color: #fff;
+}
+
+.final-score-summary-appeal .action-cell {
+  padding: 8px;
+}
+
+.final-score-summary-appeal .action-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.final-score-summary-appeal .action-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.final-score-summary-appeal .action-option input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Score input in tables */
+.appeal-score-input {
+  border: 1px solid #006837;
+  border-radius: 4px;
+  padding: 6px 10px;
+  text-align: center;
+  width: 70px;
+  background-color: #fff;
+}
+
+.appeal-score-input:focus {
+  outline: none;
+  border-color: #004d29;
+  box-shadow: 0 0 0 2px rgba(0, 104, 55, 0.2);
 }

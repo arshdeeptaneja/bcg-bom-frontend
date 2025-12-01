@@ -12,7 +12,8 @@ export const useAppraisalContext = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const {getUserProperty} = useAuth();
-  const zoneName = getUserProperty('ZNNAME');
+  const zoneName = getUserProperty('ZNNAME', 'Central Zone') || "";
+  console.log('[useAppraisalContext] zoneName from auth context:', zoneName);
   // Parse query parameters
   const searchParams = new URLSearchParams(location.search);
   const queryParams = Object.fromEntries(searchParams.entries());

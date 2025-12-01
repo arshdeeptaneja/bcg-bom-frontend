@@ -95,6 +95,7 @@ function QuaterlyAppraiseeCheckIn() {
     areasPerformanceComment: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // Submit mutation for quarterly appraisee check-in
   const submitMutation = useMutation({
@@ -205,8 +206,8 @@ const buildPerformanceMeasurableComments = () => {
       }
 
       // Set non-measurable KRA data
-      if (responseData?.results_KRA_LIST?.non_measurable) {
-        setNonMeasurableKraListData(responseData.results_KRA_LIST.non_measurable);
+      if (responseData?.results_KRA_LIST?.['non measurable']) {
+        setNonMeasurableKraListData(responseData.results_KRA_LIST['non measurable']);
       } else if (responseData?.nonMeasurableKraList) {
         setNonMeasurableKraListData(responseData.nonMeasurableKraList);
       }
@@ -257,6 +258,19 @@ const buildPerformanceMeasurableComments = () => {
   // Character limit for comment fields
   const COMMENT_CHAR_LIMIT = 30;
 
+  // Validation for mandatory comments
+  const validateComments = () => {
+    if (!formInputs.performancePeriodComment.trim()) {
+      toast.error('Please fill in the highlights of your performance');
+      return false;
+    }
+    if (!formInputs.areasPerformanceComment.trim()) {
+      toast.error('Please fill in the areas for improvement');
+      return false;
+    }
+    return true;
+  };
+
   // Handler for development input comments with character limit
   const handleCommentChange = (questionIndex, value) => {
     // Enforce 30 character limit
@@ -276,6 +290,8 @@ const buildPerformanceMeasurableComments = () => {
   };
 
  const handleSave = async () => {
+  if (!validateComments()) return;
+  
   try {
     setIsSubmitting(true);
 
@@ -309,6 +325,7 @@ const buildPerformanceMeasurableComments = () => {
     await appraisalAPI.appraiseeSaveQuarterlyCheckIn(payload);
 
     toast.success("Draft Saved Successfully!");
+    setIsSaved(true);
   } catch (err) {
     console.error(err);
     toast.error("Failed to save!");
@@ -319,6 +336,8 @@ const buildPerformanceMeasurableComments = () => {
 
 
   const handleSubmit = () => {
+    if (!validateComments()) return;
+    
     setIsSubmitting(true);
 
     // Build the payload matching backend expectations
@@ -532,7 +551,7 @@ const buildPerformanceMeasurableComments = () => {
         <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSubmitting}>
           Save
         </button>
-        <button className="btns btn-primarys" onClick={handleSubmit} disabled={isSubmitting}>
+        <button className="btns btn-primarys" onClick={handleSubmit} disabled={!isSaved || isSubmitting}>
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>

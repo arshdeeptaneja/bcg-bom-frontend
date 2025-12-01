@@ -193,10 +193,25 @@ function AddAppeal() {
           </span>
         </div>
 
+        {/* Discretionary Score Header */}
+        <div className="d-flex justify-content-end mb-3">
+          <span className="text-muted me-2">Discretionary Score:</span>
+          <span className="fw-bold text-primary">
+            {data.totalNonMeasurableActual + data.totalMeasurableActual}/{data.totalNonMeasurableMax + data.totalMeasurableMax}
+          </span>
+        </div>
+
         {/* Final Score Summary Section */}
         <div className="final-score-summary-table-section d-flex flex-column shadow-sm p-3">
           <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
-          <FinalScoreSummaryTable kraListData={data.finalScoreSummary} />
+          <FinalScoreSummaryTable 
+            kraListData={data.finalScoreSummary}
+            selectedCategories={formState.selectedCategories}
+            onSelectionChange={actions.handleCategorySelection}
+            finalScoreEdits={formState.finalScoreEdits}
+            onFinalScoreChange={actions.handleFinalScoreChange}
+            isEditable={true}
+          />
         </div>
 
         {/* Discretionary KRAs Section */}
@@ -206,55 +221,49 @@ function AddAppeal() {
           {/* Measurable KRAs */}
           {Object.entries(data.measurableKras).map(([groupName, kras]) => (
             <div key={groupName} className="mb-4">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h6 className="fw-bold mb-0">
-                  <i className="bi bi-star me-2"></i>
-                  {groupName} - Non-Measurable KRAs
-                </h6>
-                <span className="fw-bold text-primary">
-                  Score: {data.totalNonMeasurableActual} / {data.totalNonMeasurableMax}
-                </span>
-              </div>
               <AppealKRASection
                 kras={kras}
                 selectedKras={formState.selectedKras}
                 appealTexts={formState.appealTexts}
+                actualValueEdits={formState.actualValueEdits}
                 onKraSelect={actions.handleKraSelection}
                 onAppealTextChange={actions.handleAppealTextChange}
+                onActualChange={actions.handleActualChange}
                 type="measurable"
+                groupName={groupName}
+                totalActualScore={data.totalMeasurableActual}
+                totalMaxScore={data.totalMeasurableMax}
               />
             </div>
           ))}
 
           {/* Score Scale Information for Non-Measurable KRAs */}
-          <div className="score-scale-info">
-            <h6>
-              <i className="bi bi-info-square me-2"></i>
-              Non-Measurable KRA Scoring Scale:
-            </h6>
-            <ul>
-              <li><strong>1 - Strongly Disagree:</strong> Shows very poor performance across the given dimensions</li>
-              <li><strong>2 - Disagree:</strong> Fell short of expectations & shows weak performance in few or more dimensions</li>
-              <li><strong>3 - Neutral:</strong> Expresses required level of proficiency on the dimension at the level</li>
-              <li><strong>4 - Agree:</strong> Performs well above expectations across the given dimensions</li>
-              <li><strong>5 - Strongly Agree:</strong> Over-delivers & shows high degree of proficiency in the dimensions</li>
-            </ul>
+          <div className="score-scale-info bg-light p-3 rounded border mb-4">
+            <p className="fw-bold mb-2">Please fill score in actual as per the scale below:</p>
+            <ol className="mb-0 ps-3">
+              <li><strong>Strongly disagree:</strong> shows very poor performance across the given dimensions</li>
+              <li><strong>Disagree:</strong> fell short of expectations & shows weak performance in few or more of the given dimensions</li>
+              <li><strong>Neutral:</strong> expresses required level of proficiency on the dimension at the level</li>
+              <li><strong>Agree:</strong> performs well above expectations across the given dimensions</li>
+              <li><strong>Strongly agree:</strong> over-delivers & shows high degree of proficiency in the given dimensions</li>
+            </ol>
           </div>
 
           {/* Non-Measurable KRAs */}
           {Object.entries(data.nonMeasurableKras).map(([groupName, kras]) => (
             <div key={groupName} className="mb-4">
-              <h6 className="fw-bold mb-3">
-                <i className="bi bi-star me-2"></i>
-                {groupName} - Non-Measurable KRAs ({data.totalNonMeasurableActual}/{data.totalNonMeasurableMax})
-              </h6>
               <AppealKRASection
                 kras={kras}
                 selectedKras={formState.selectedKras}
                 appealTexts={formState.appealTexts}
+                actualValueEdits={formState.actualValueEdits}
                 onKraSelect={actions.handleKraSelection}
                 onAppealTextChange={actions.handleAppealTextChange}
+                onActualChange={actions.handleActualChange}
                 type="non-measurable"
+                groupName={groupName}
+                totalActualScore={data.totalNonMeasurableActual}
+                totalMaxScore={data.totalNonMeasurableMax}
               />
             </div>
           ))}

@@ -586,27 +586,42 @@ export const useAnnualReview = () => {
   const validateForm = () => {
     const errors = [];
 
-    // Check all KRAs have reviewer scores
+    // Check all KRAs have reviewer scores and all comments
     rawKraData.forEach((kra) => {
       const kraId = kra.AP_KRA_ID;
       if (!reviewerScores[kraId]?.score) {
         errors.push(`Please select a score for "${kra.KRA_DESC}"`);
       }
+      if (!reviewerScores[kraId]?.comment?.trim()) {
+        errors.push(`Please provide a reviewer comment for "${kra.KRA_DESC}"`);
+      }
+      // Also validate appraisee comment
+      if (!appraiseeScores[kraId]?.comment?.trim()) {
+        errors.push(`Please provide an appraisee comment for "${kra.KRA_DESC}"`);
+      }
+      // Also validate appraiser comment
+      if (!appraiserScores[kraId]?.comment?.trim()) {
+        errors.push(`Please provide an appraiser comment for "${kra.KRA_DESC}"`);
+      }
     });
 
     // Check all required development questions are filled
     developmentInputs.reportingReviewAuthority?.forEach((q) => {
-      if (q.editableBy === 'REVIEWER_ACCEPTOR') {
-        const response = reviewerDevResponses[q.id];
-        if (!response?.trim()) {
-          errors.push(`Please provide a response for "${q.question.substring(0, 50)}..."`);
-        }
+      // Check reviewer response
+      const reviewerResponse = reviewerDevResponses[q.id];
+      if (!reviewerResponse?.trim()) {
+        errors.push(`Please provide a reviewing authority response for "${q.question.substring(0, 50)}..."`);
+      }
+      // Check reporting authority response
+      const repaResponse = repaDevResponses[q.id];
+      if (!repaResponse?.trim()) {
+        errors.push(`Please provide a reporting authority response for "${q.question.substring(0, 50)}..."`);
       }
     });
 
     // Check integrity option is selected (if applicable)
     developmentInputs.optionBased?.forEach((q) => {
-      if (q.key === 'integrity' && q.editableBy === 'REVIEWER_ACCEPTOR') {
+      if (q.key === 'integrity') {
         if (!reviewerOptionResponses.integrity) {
           errors.push('Please select an integrity assessment');
         }

@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 /**
  * Component for displaying and reviewing appeal KRAs
- * Table structure matches the green-themed reference with blue theming
+ * Table structure matches the green-themed reference UI
  */
 function AppealReviewKRASection({
   kras,
@@ -17,6 +17,8 @@ function AppealReviewKRASection({
   onCommentChange,
   type
 }) {
+  const [openCommentKra, setOpenCommentKra] = useState(null);
+
   if (!kras || kras.length === 0) {
     return (
       <div className="alert alert-info">
@@ -26,21 +28,23 @@ function AppealReviewKRASection({
     );
   }
 
+  const isMeasurable = type === 'measurable';
+
   return (
     <div className="appeal-review-kra-section">
       <div className="table-responsive">
         <table className="table table-bordered kra-review-table">
           <thead>
             <tr>
-              <th style={{ width: '80px' }}>Select KRA</th>
-              <th style={{ width: '180px' }}>KRA</th>
-              <th style={{ width: '100px' }}>Roles</th>
-              <th style={{ width: '100px' }}>Actual</th>
-              <th style={{ width: '80px' }}>Target</th>
-              <th style={{ width: '80px' }}>Max Score</th>
-              <th style={{ width: '100px' }}>Score</th>
-              <th style={{ width: '120px' }}>Comment</th>
-              <th style={{ width: '160px' }}>Action</th>
+              <th style={{ width: '60px' }}>Select KRA</th>
+              <th style={{ width: '200px' }}>KRA</th>
+              <th style={{ width: '90px' }}>Roles</th>
+              <th style={{ width: '100px' }}>{isMeasurable ? 'Actual' : 'Selected Score'}</th>
+              <th style={{ width: '80px' }}>{isMeasurable ? 'Target' : 'Target Score'}</th>
+              <th style={{ width: '80px' }}>{isMeasurable ? 'Max Score' : 'Final Score'}</th>
+              <th style={{ width: '90px' }}>Score</th>
+              <th style={{ width: '80px' }}>Comment</th>
+              <th style={{ width: '140px' }}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -60,90 +64,116 @@ function AppealReviewKRASection({
                       checked={isSelected}
                       onChange={() => onKraSelect(kraId)}
                       className="form-check-input kra-checkbox"
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
                   </td>
 
                   {/* KRA Name */}
-                  <td className="align-middle">
+                  <td className="align-middle" style={{ padding: '12px' }}>
                     <div className="kra-name">{kra.kraName}</div>
                     {kra.description && (
-                      <div className="kra-description">{kra.description}</div>
+                      <div className="kra-description" style={{ fontSize: '0.8rem', color: '#666', fontStyle: 'italic' }}>
+                        {kra.description}
+                      </div>
                     )}
-                    <div className="appeal-id">Appeal ID: {kra.appealId}</div>
                   </td>
 
-                  {/* Roles Column - 3 rows */}
-                  <td className="roles-cell">
-                    <div className="role-row">Actual</div>
-                    <div className="role-row">Appraisee</div>
-                    <div className="role-row">Appellate</div>
+                  {/* Roles Column - 3 stacked rows */}
+                  <td className="roles-cell" style={{ padding: 0 }}>
+                    <div className="role-label-cell">Actual</div>
+                    <div className="role-label-cell">Appraisee</div>
+                    <div className="role-label-cell" style={{ borderBottom: 'none' }}>Appellate</div>
                   </td>
 
-                  {/* Actual Values - 3 rows */}
-                  <td className="values-cell">
-                    <div className="value-row">
-                      <input type="text" className="form-control form-control-sm value-input" value={kra.actualOldValue || '-'} readOnly />
+                  {/* Actual/Selected Score Values - 3 rows */}
+                  <td className="values-cell" style={{ padding: 0 }}>
+                    <div className="role-value-cell">
+                      <span style={{ borderBottom: '1px solid #dee2e6', display: 'inline-block', minWidth: '50px', padding: '2px 8px' }}>
+                        {kra.actualOldValue || kra.actual || '-'}
+                      </span>
                     </div>
-                    <div className="value-row">
-                      <input type="text" className="form-control form-control-sm value-input" value={kra.actual || '-'} readOnly />
+                    <div className="role-value-cell">
+                      <span style={{ borderBottom: '1px solid #dee2e6', display: 'inline-block', minWidth: '50px', padding: '2px 8px' }}>
+                        {kra.actual || kra.appraiseeScore || '-'}
+                      </span>
                     </div>
-                    <div className="value-row">
-                      <input type="text" className="form-control form-control-sm value-input appellate-input" value={kra.actualNewValue || '-'} readOnly />
+                    <div className="role-value-cell" style={{ borderBottom: 'none' }}>
+                      <input 
+                        type="text" 
+                        className="appeal-score-input appellate-input" 
+                        value={kra.actualNewValue || kra.newScore || ''} 
+                        readOnly 
+                        style={{ width: '60px' }}
+                      />
                     </div>
                   </td>
 
                   {/* Target */}
                   <td className="text-center align-middle">
-                    <span>{kra.target || kra.targetOldValue || '-'}</span>
+                    <span>{kra.target || kra.targetOldValue || kra.maxScore || '-'}</span>
                   </td>
 
-                  {/* Max Score */}
+                  {/* Max Score / Final Score */}
                   <td className="text-center align-middle">
-                    <span>{kra.maxScore}</span>
+                    <span>{kra.maxScore || '-'}</span>
                   </td>
 
-                  {/* Score Column - with editable input */}
-                  <td className="score-cell">
-                    <div className="score-display">
-                      <span className="old-score">{kra.oldScore}</span>
+                  {/* Score Column - old score on top, editable below */}
+                  <td className="score-cell" style={{ padding: '8px' }}>
+                    <div style={{ marginBottom: '4px', color: '#666', fontSize: '0.85rem' }}>
+                      {kra.oldScore}
                     </div>
                     {isSelected && action === 'ACCEPT_AND_EDIT' ? (
-                      <div className="score-input-wrapper">
-                        <input
-                          type="number"
-                          className="form-control form-control-sm score-input"
-                          value={score}
-                          onChange={(e) => onScoreChange(kraId, e.target.value)}
-                          max={kra.maxScore}
-                          min="0"
-                          step="0.1"
-                          placeholder="0.0"
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        className="appeal-score-input"
+                        value={score}
+                        onChange={(e) => onScoreChange(kraId, e.target.value)}
+                        max={kra.maxScore}
+                        min="0"
+                        step="0.1"
+                        placeholder="0.0"
+                      />
                     ) : (
-                      <div className="score-display">
-                        <span className="new-score">{kra.newScore || '-'}</span>
-                      </div>
+                      <input
+                        type="text"
+                        className="appeal-score-input"
+                        value={kra.newScore || ''}
+                        readOnly
+                        style={{ backgroundColor: '#f8f9fa' }}
+                      />
                     )}
                   </td>
 
-                  {/* Comment */}
-                  <td className="comment-cell align-middle">
-                    {isSelected && action === 'REJECT' ? (
+                  {/* Comment Button */}
+                  <td className="text-center align-middle">
+                    <button
+                      type="button"
+                      className="btn btn-link p-0"
+                      onClick={() => setOpenCommentKra(openCommentKra === kraId ? null : kraId)}
+                      title={kra.appraiseeComment || 'No comment'}
+                      style={{ 
+                        backgroundColor: kra.appraiseeComment ? '#006837' : 'transparent',
+                        borderRadius: '4px',
+                        padding: '4px 8px'
+                      }}
+                    >
+                      <i className={`bi bi-chat-left-text-fill ${kra.appraiseeComment ? 'text-white' : 'text-muted'}`}></i>
+                    </button>
+                    {isSelected && action === 'REJECT' && (
                       <textarea
-                        className="form-control form-control-sm"
+                        className="form-control form-control-sm mt-2"
                         rows="2"
                         value={comment}
                         onChange={(e) => onCommentChange(kraId, e.target.value)}
                         placeholder="Reason..."
+                        style={{ fontSize: '0.75rem' }}
                       />
-                    ) : (
-                      <div className="comment-text">{kra.appraiseeComment || '-'}</div>
                     )}
                   </td>
 
                   {/* Action Radio Buttons */}
-                  <td className="action-cell align-middle">
+                  <td className="action-cell align-middle" style={{ padding: '8px' }}>
                     {isSelected ? (
                       <div className="action-options">
                         <label className="action-option">

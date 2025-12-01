@@ -6,6 +6,7 @@ import { CheckInDescriptionSection } from '../../../../components/Appraisal';
 import LoadingSpinner from '../../../../components/Spinner';
 import { useReviewAppeal } from './useReviewAppeal';
 import AppealReviewKRASection from './AppealReviewKRASection';
+import './ReviewAppeal.css';
 
 function ReviewAppeal() {
   const navigate = useNavigate();
@@ -142,30 +143,142 @@ function ReviewAppeal() {
               <i className="bi bi-bar-chart-fill me-2"></i>Final Score Summary
             </h5>
             <div className="table-responsive">
-              <table className="table table-bordered">
-                <thead className="table-light">
+              <table className="table final-score-summary-appeal">
+                <thead>
                   <tr>
-                    <th>Category</th>
-                    <th className="text-center">Max Score</th>
-                    <th className="text-center">Self Score</th>
-                    <th className="text-center">Reporting Authority</th>
-                    <th className="text-center">Reviewing Authority</th>
-                    <th className="text-center">Accepting Authority</th>
-                    <th className="text-center">Post Appeal Score</th>
+                    <th style={{ width: '60px' }}>Select</th>
+                    <th style={{ width: '180px' }}>Category</th>
+                    <th style={{ width: '90px' }}>Roles</th>
+                    <th style={{ width: '120px' }}>Actual</th>
+                    <th style={{ width: '100px' }}>Weightage</th>
+                    <th style={{ width: '100px' }}>Score</th>
+                    <th style={{ width: '140px' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.finalScoreSummary.map((row, idx) => (
-                    <tr key={idx} className={row.KraName === 'Total Score' ? 'fw-bold table-secondary' : ''}>
-                      <td>{row.KraName}</td>
-                      <td className="text-center">{row.MaxScore ?? '-'}</td>
-                      <td className="text-center">{row.SelfScore ?? '-'}</td>
-                      <td className="text-center">{row.ReportingAuthorityScore ?? '-'}</td>
-                      <td className="text-center">{row.ReviewingAuthorityScore ?? '-'}</td>
-                      <td className="text-center">{row.AcceptingAuthorityScore ?? '-'}</td>
-                      <td className="text-center">{row.PostAppealScore ?? '-'}</td>
-                    </tr>
-                  ))}
+                  {data.finalScoreSummary.map((row, idx) => {
+                    const categoryId = `summary-${row.KraName}-${idx}`;
+                    const isSelected = formState.selectedKras?.has(categoryId);
+                    const action = formState.kraActions?.get(categoryId);
+                    const score = formState.kraScores?.get(categoryId) || '';
+
+                    return (
+                      <tr key={idx} className={row.KraName === 'Total Score' ? 'fw-bold' : ''} style={{ backgroundColor: isSelected ? '#e3f2fd' : 'transparent' }}>
+                        {/* Select Checkbox */}
+                        <td className="text-center align-middle" style={{ padding: '12px' }}>
+                          {row.KraName !== 'Total Score' && (
+                            <input
+                              type="checkbox"
+                              className="form-check-input"
+                              checked={isSelected || false}
+                              onChange={() => actions.handleKraSelection(categoryId)}
+                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                          )}
+                        </td>
+
+                        {/* Category */}
+                        <td className="category-cell">{row.KraName}</td>
+
+                        {/* Roles - 3 stacked rows */}
+                        <td style={{ padding: 0 }}>
+                          <div className="role-label-cell">Actual</div>
+                          <div className="role-label-cell">Appraisee</div>
+                          <div className="role-label-cell" style={{ borderBottom: 'none' }}>Appellate</div>
+                        </td>
+
+                        {/* Actual Values aligned with roles */}
+                        <td style={{ padding: 0 }}>
+                          <div className="role-value-cell">
+                            <span style={{ borderBottom: '1px solid #dee2e6', display: 'inline-block', minWidth: '50px', padding: '2px 8px' }}>
+                              {row.ReportingAuthorityScore ?? '-'}
+                            </span>
+                          </div>
+                          <div className="role-value-cell">
+                            <span style={{ borderBottom: '1px solid #dee2e6', display: 'inline-block', minWidth: '50px', padding: '2px 8px' }}>
+                              {row.SelfScore ?? '-'}
+                            </span>
+                          </div>
+                          <div className="role-value-cell" style={{ borderBottom: 'none' }}>
+                            <input 
+                              type="text" 
+                              className="appeal-score-input appellate-input"
+                              value={row.PostAppealScore ?? ''} 
+                              readOnly 
+                              style={{ width: '60px' }}
+                            />
+                          </div>
+                        </td>
+
+                        {/* Weightage */}
+                        <td className="text-center align-middle">{row.MaxScore ?? '-'}</td>
+
+                        {/* Score - editable */}
+                        <td className="text-center align-middle" style={{ padding: '8px' }}>
+                          {isSelected && action === 'ACCEPT_AND_EDIT' ? (
+                            <input
+                              type="number"
+                              className="appeal-score-input"
+                              value={score}
+                              onChange={(e) => actions.handleScoreChange(categoryId, e.target.value)}
+                              max={row.MaxScore}
+                              min="0"
+                              step="0.1"
+                              placeholder="0.0"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              className="appeal-score-input"
+                              value={row.AcceptingAuthorityScore ?? row.ReviewingAuthorityScore ?? ''}
+                              readOnly
+                              style={{ backgroundColor: '#f8f9fa' }}
+                            />
+                          )}
+                        </td>
+
+                        {/* Action */}
+                        <td className="action-cell align-middle" style={{ padding: '8px' }}>
+                          {row.KraName !== 'Total Score' && isSelected ? (
+                            <div className="action-options">
+                              <label className="action-option">
+                                <input
+                                  type="radio"
+                                  name={`action-${categoryId}`}
+                                  value="ACCEPT_AS_IS"
+                                  checked={action === 'ACCEPT_AS_IS'}
+                                  onChange={(e) => actions.handleActionChange(categoryId, e.target.value)}
+                                />
+                                <span className="action-label">ACCEPT AS IT IS</span>
+                              </label>
+                              <label className="action-option">
+                                <input
+                                  type="radio"
+                                  name={`action-${categoryId}`}
+                                  value="ACCEPT_AND_EDIT"
+                                  checked={action === 'ACCEPT_AND_EDIT'}
+                                  onChange={(e) => actions.handleActionChange(categoryId, e.target.value)}
+                                />
+                                <span className="action-label">ACCEPT AND EDIT</span>
+                              </label>
+                              <label className="action-option">
+                                <input
+                                  type="radio"
+                                  name={`action-${categoryId}`}
+                                  value="REJECT"
+                                  checked={action === 'REJECT'}
+                                  onChange={(e) => actions.handleActionChange(categoryId, e.target.value)}
+                                />
+                                <span className="action-label">REJECT</span>
+                              </label>
+                            </div>
+                          ) : row.KraName !== 'Total Score' ? (
+                            <span className="select-prompt" style={{ color: '#999', fontSize: '0.8rem', fontStyle: 'italic' }}>Select to review</span>
+                          ) : null}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
