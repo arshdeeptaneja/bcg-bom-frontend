@@ -48,6 +48,7 @@ const AnnualCheckIn = () => {
       [kraId]: !prev[kraId],
     }));
   };
+  console.log('hey annual data:', data);
 
   // Use API data or fallback to empty/mock data
   const kraData = data?.finalScoreSummary || [];
