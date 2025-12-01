@@ -29,13 +29,15 @@ const AnnualAppraisalReview = () => {
   } = useAnnualAppraisalReview();
 
   const { employee, dateRange, metadata } = context;
-  const { appraiserScores, appraiserDevResponses, appraiserOptionResponses } = formState;
+  const { appraiserScores, appraiserDevResponses, appraiserOptionResponses, selfDevResponses, selfOptionResponses } = formState;
   const {
     handleSubmit,
     handleAppraiserScoreChange,
     handleAppraiserCommentChange,
     handleAppraiserDevInputChange,
     handleAppraiserOptionChange,
+    handleSelfDevInputChange,
+    handleSelfOptionChange,
     isSubmitting,
   } = actions;
 
@@ -285,21 +287,35 @@ const AnnualAppraisalReview = () => {
         {developmentInputs.overallDevelopment?.length > 0 && (
           <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
             <h5 className="text-primary fw-bold mb-3">Development Inputs - Overall Development</h5>
-            {developmentInputs.overallDevelopment.map((input, index) => (
-              <div className="mb-3" key={input.id}>
-                <label className="form-label fw-bold text-dark">
-                  {index + 1}. {input.question} <span className="text-danger">*</span>
-                </label>
-                <div className="p-3 bg-light rounded border">
-                  {input.selfResponse || <span className="text-muted">No response provided</span>}
-                  {input.selfResponse2 && (
-                    <div className="mt-2 pt-2 border-top">
-                      <strong>Additional:</strong> {input.selfResponse2}
+            {developmentInputs.overallDevelopment.map((input, index) => {
+              const selfInput = selfDevResponses[input.id] || {};
+              return (
+                <div className="mb-3" key={input.id}>
+                  <label className="form-label fw-bold text-dark">
+                    {index + 1}. {input.question} <span className="text-danger">*</span>
+                  </label>
+                  <textarea
+                    className="form-control mb-2"
+                    rows={3}
+                    placeholder="Enter Response"
+                    value={selfInput.response ?? input.selfResponse ?? ''}
+                    onChange={(e) => handleSelfDevInputChange(input.id, 'response', e.target.value)}
+                  />
+                  {(input.selfResponse2 || selfInput.response2) && (
+                    <div className="mt-2">
+                      <label className="form-label text-muted">Additional Response:</label>
+                      <textarea
+                        className="form-control"
+                        rows={2}
+                        placeholder="Enter Additional Response"
+                        value={selfInput.response2 ?? input.selfResponse2 ?? ''}
+                        onChange={(e) => handleSelfDevInputChange(input.id, 'response2', e.target.value)}
+                      />
                     </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -339,10 +355,14 @@ const AnnualAppraisalReview = () => {
           <div className="option-based-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
             <h5 className="text-primary fw-bold mb-3">Additional Information</h5>
             {developmentInputs.optionBased.map((input) => {
-              const isEditable = input.editableBy === 'APPRAISER_REVIEWER';
-              const currentValue = isEditable 
+              // Determine which state and handler to use based on the input key
+              const isAppraiserField = input.key === 'integrity';
+              const currentValue = isAppraiserField
                 ? appraiserOptionResponses[input.key]
-                : input.selfResponse?.toLowerCase();
+                : (selfOptionResponses[input.key] ?? input.selfResponse?.toLowerCase());
+              const handleChange = isAppraiserField
+                ? (value) => handleAppraiserOptionChange(input.key, value)
+                : (value) => handleSelfOptionChange(input.key, value);
 
               return (
                 <div className="mb-3" key={input.id}>
@@ -359,8 +379,7 @@ const AnnualAppraisalReview = () => {
                           id={`option-${input.id}-${option.value}`}
                           value={option.value}
                           checked={currentValue === option.value}
-                          onChange={() => isEditable && handleAppraiserOptionChange(input.key, option.value)}
-                          disabled={!isEditable}
+                          onChange={() => handleChange(option.value)}
                         />
                         <label
                           className="form-check-label"

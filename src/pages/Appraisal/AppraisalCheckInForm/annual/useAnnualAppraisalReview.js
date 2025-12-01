@@ -62,6 +62,14 @@ export const useAnnualAppraisalReview = () => {
     integrity: null, // 'option1' | 'option2' | 'option3'
   });
 
+  // Self development responses (for editing appraisee's overall development)
+  // Shape: { [questionId]: { response: string, response2: string } }
+  const [selfDevResponses, setSelfDevResponses] = useState({});
+
+  // Self option responses (for editing appraisee's yes/no questions)
+  // Shape: { healthProblems: 'yes'|'no', disciplinaryActions: 'yes'|'no' }
+  const [selfOptionResponses, setSelfOptionResponses] = useState({});
+
   // Section-level comments for performance areas (collated per section)
   const [sectionComments, setSectionComments] = useState({
     measurable: '',
@@ -292,6 +300,25 @@ export const useAnnualAppraisalReview = () => {
         }));
       }
     });
+
+    // Initialize self development responses (overall development)
+    const initialSelfDevResponses = {};
+    developmentInputs.overallDevelopment?.forEach((q) => {
+      initialSelfDevResponses[q.id] = {
+        response: q.selfResponse || '',
+        response2: q.selfResponse2 || '',
+      };
+    });
+    setSelfDevResponses(initialSelfDevResponses);
+
+    // Initialize self option responses (health, disciplinary)
+    const initialSelfOptionResponses = {};
+    developmentInputs.optionBased?.forEach((q) => {
+      if (q.key === 'healthProblems' || q.key === 'disciplinaryActions') {
+        initialSelfOptionResponses[q.key] = q.selfResponse?.toLowerCase() || null;
+      }
+    });
+    setSelfOptionResponses(initialSelfOptionResponses);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transformedData, developmentInputs]);
 
@@ -349,6 +376,27 @@ export const useAnnualAppraisalReview = () => {
     setSectionComments((prev) => ({
       ...prev,
       [section]: value,
+    }));
+    setIsDirty(true);
+  };
+
+  // Self development input change handler (for editing appraisee's overall development)
+  const handleSelfDevInputChange = (questionId, field, value) => {
+    setSelfDevResponses((prev) => ({
+      ...prev,
+      [questionId]: {
+        ...prev[questionId],
+        [field]: value,
+      },
+    }));
+    setIsDirty(true);
+  };
+
+  // Self option response change handler (for editing appraisee's yes/no questions)
+  const handleSelfOptionChange = (key, value) => {
+    setSelfOptionResponses((prev) => ({
+      ...prev,
+      [key]: value,
     }));
     setIsDirty(true);
   };
@@ -523,6 +571,8 @@ export const useAnnualAppraisalReview = () => {
       appraiserScores,
       appraiserDevResponses,
       appraiserOptionResponses,
+      selfDevResponses,
+      selfOptionResponses,
       sectionComments,
       isDirty,
     },
@@ -534,6 +584,8 @@ export const useAnnualAppraisalReview = () => {
       handleAppraiserCommentChange,
       handleAppraiserDevInputChange,
       handleAppraiserOptionChange,
+      handleSelfDevInputChange,
+      handleSelfOptionChange,
       handleSectionCommentChange,
       isSubmitting: submitMutation.isPending,
     },

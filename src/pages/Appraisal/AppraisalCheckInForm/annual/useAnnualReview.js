@@ -20,7 +20,7 @@ import { useAuth } from '../../../../contexts/AuthContext';
  */
 export const useAnnualReview = () => {
   const location = useLocation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Unused but kept for future navigation needs
   const {getUserProperty} = useAuth(); 
   const ecNumber = getUserProperty('empNo') || '';
   const [searchParams] = useSearchParams();
@@ -61,6 +61,31 @@ export const useAnnualReview = () => {
     integrity: null,
   });
 
+  // Appraisee scores and comments (for editing appraisee's KRA data)
+  // Shape: { [AP_KRA_ID]: { score: number, comment: string } }
+  const [appraiseeScores, setAppraiseeScores] = useState({});
+
+  // Appraiser scores and comments (for editing appraiser's KRA data)
+  // Shape: { [AP_KRA_ID]: { score: number, comment: string } }
+  const [appraiserScores, setAppraiserScores] = useState({});
+
+  // Self development responses (for editing appraisee's overall development)
+  // Shape: { [questionId]: { response: string, response2: string } }
+  const [selfDevResponses, setSelfDevResponses] = useState({});
+
+  // Reporting Authority development responses (for editing REPA responses)
+  // Shape: { [questionId]: string }
+  const [repaDevResponses, setRepaDevResponses] = useState({});
+
+  // Self option responses (for editing appraisee's yes/no questions)
+  // Shape: { healthProblems: 'yes'|'no', disciplinaryActions: 'yes'|'no' }
+  const [selfOptionResponses, setSelfOptionResponses] = useState({});
+
+  // Appraiser option responses (for editing appraiser's integrity response)
+  const [appraiserOptionResponses, setAppraiserOptionResponses] = useState({
+    integrity: null,
+  });
+
   const [isDirty, setIsDirty] = useState(false);
 
   // Raw API data for payload building
@@ -74,9 +99,9 @@ export const useAnnualReview = () => {
     elearningScore: 0,
   });
 
-  // Query key for acceptor appraisal data
+  // Query key for reviewer appraisal data
   const queryKey = [
-    'acceptorAppraisal',
+    'reviewerAppraisal',
     empNo,
     normalizedFinancialYear,
     quarter,
@@ -112,7 +137,7 @@ export const useAnnualReview = () => {
         appraisalStatus: null,
       };
       console.log('[useAnnualReview] API call params:', apiParams);
-      return appraisalAPI.getAcceptorAppraisal(apiParams);
+      return appraisalAPI.getReviewerAppraisal(apiParams);
     },
     enabled: isContextValid,
   });
@@ -265,6 +290,8 @@ export const useAnnualReview = () => {
 
     // Initialize reviewer scores from existing data
     const initialReviewerScores = {};
+    const initialAppraiseeScores = {};
+    const initialAppraiserScores = {};
     if (transformedData.nonMeasurableKras) {
       Object.values(transformedData.nonMeasurableKras).forEach((kraList) => {
         kraList.forEach((kra) => {
@@ -272,18 +299,31 @@ export const useAnnualReview = () => {
             score: kra.RevaActuals || kra.AcActuals || null,
             comment: kra.CommentReva || kra.CommentAc || '',
           };
+          initialAppraiseeScores[kra.KraId] = {
+            score: kra.Actual || kra.Score || null,
+            comment: kra.CommentSelf1 || '',
+          };
+          initialAppraiserScores[kra.KraId] = {
+            score: kra.RepaActuals || null,
+            comment: kra.CommentRepa || '',
+          };
         });
       });
     }
     setReviewerScores(initialReviewerScores);
+    setAppraiseeScores(initialAppraiseeScores);
+    setAppraiserScores(initialAppraiserScores);
 
     // Initialize reviewer development responses
     const initialDevResponses = {};
+    const initialRepaDevResponses = {};
     developmentInputs.reportingReviewAuthority?.forEach((q) => {
       const existingResponse = q.revaResponse || q.acResponse || '';
       initialDevResponses[q.id] = existingResponse;
+      initialRepaDevResponses[q.id] = q.repaResponse || '';
     });
     setReviewerDevResponses(initialDevResponses);
+    setRepaDevResponses(initialRepaDevResponses);
 
     // Initialize reviewer option responses
     developmentInputs.optionBased?.forEach((q) => {
@@ -293,8 +333,32 @@ export const useAnnualReview = () => {
           ...prev,
           integrity: existingResponse,
         }));
+        // Initialize appraiser's integrity response
+        setAppraiserOptionResponses((prev) => ({
+          ...prev,
+          integrity: q.repaResponse || null,
+        }));
       }
     });
+
+    // Initialize self development responses (overall development)
+    const initialSelfDevResponses = {};
+    developmentInputs.overallDevelopment?.forEach((q) => {
+      initialSelfDevResponses[q.id] = {
+        response: q.selfResponse || '',
+        response2: q.selfResponse2 || '',
+      };
+    });
+    setSelfDevResponses(initialSelfDevResponses);
+
+    // Initialize self option responses (health, disciplinary)
+    const initialSelfOptionResponses = {};
+    developmentInputs.optionBased?.forEach((q) => {
+      if (q.key === 'healthProblems' || q.key === 'disciplinaryActions') {
+        initialSelfOptionResponses[q.key] = q.selfResponse?.toLowerCase() || null;
+      }
+    });
+    setSelfOptionResponses(initialSelfOptionResponses);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transformedData]);
 
@@ -338,6 +402,93 @@ export const useAnnualReview = () => {
 
   const handleReviewerOptionChange = (key, value) => {
     setReviewerOptionResponses((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+    setIsDirty(true);
+  };
+
+  // Appraisee score change handler
+  const handleAppraiseeScoreChange = (kraId, score) => {
+    setAppraiseeScores((prev) => ({
+      ...prev,
+      [kraId]: {
+        ...prev[kraId],
+        score,
+      },
+    }));
+    setIsDirty(true);
+  };
+
+  // Appraisee comment change handler
+  const handleAppraiseeCommentChange = (kraId, comment) => {
+    setAppraiseeScores((prev) => ({
+      ...prev,
+      [kraId]: {
+        ...prev[kraId],
+        comment,
+      },
+    }));
+    setIsDirty(true);
+  };
+
+  // Appraiser score change handler
+  const handleAppraiserScoreChange = (kraId, score) => {
+    setAppraiserScores((prev) => ({
+      ...prev,
+      [kraId]: {
+        ...prev[kraId],
+        score,
+      },
+    }));
+    setIsDirty(true);
+  };
+
+  // Appraiser comment change handler
+  const handleAppraiserCommentChange = (kraId, comment) => {
+    setAppraiserScores((prev) => ({
+      ...prev,
+      [kraId]: {
+        ...prev[kraId],
+        comment,
+      },
+    }));
+    setIsDirty(true);
+  };
+
+  // Self development input change handler (for editing appraisee's overall development)
+  const handleSelfDevInputChange = (questionId, field, value) => {
+    setSelfDevResponses((prev) => ({
+      ...prev,
+      [questionId]: {
+        ...prev[questionId],
+        [field]: value,
+      },
+    }));
+    setIsDirty(true);
+  };
+
+  // Reporting Authority development input change handler
+  const handleRepaDevInputChange = (questionId, value) => {
+    setRepaDevResponses((prev) => ({
+      ...prev,
+      [questionId]: value,
+    }));
+    setIsDirty(true);
+  };
+
+  // Self option response change handler (for editing appraisee's yes/no questions)
+  const handleSelfOptionChange = (key, value) => {
+    setSelfOptionResponses((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+    setIsDirty(true);
+  };
+
+  // Appraiser option response change handler
+  const handleAppraiserOptionChange = (key, value) => {
+    setAppraiserOptionResponses((prev) => ({
       ...prev,
       [key]: value,
     }));
@@ -472,7 +623,7 @@ export const useAnnualReview = () => {
   const submitMutation = useMutation({
     mutationFn: (payload) => {
       console.log('[useAnnualReview] Submitting acceptor review:', payload);
-      return appraisalAPI.submitAcceptorAppraisal(payload);
+      return appraisalAPI.submitReviewerAppraisal(payload);
     },
     onSuccess: (response) => {
       console.log('[useAnnualReview] Submit success:', response);
@@ -538,6 +689,12 @@ export const useAnnualReview = () => {
       reviewerScores,
       reviewerDevResponses,
       reviewerOptionResponses,
+      appraiseeScores,
+      appraiserScores,
+      selfDevResponses,
+      repaDevResponses,
+      selfOptionResponses,
+      appraiserOptionResponses,
       isDirty,
     },
 
@@ -548,6 +705,14 @@ export const useAnnualReview = () => {
       handleReviewerCommentChange,
       handleReviewerDevInputChange,
       handleReviewerOptionChange,
+      handleAppraiseeScoreChange,
+      handleAppraiseeCommentChange,
+      handleAppraiserScoreChange,
+      handleAppraiserCommentChange,
+      handleSelfDevInputChange,
+      handleRepaDevInputChange,
+      handleSelfOptionChange,
+      handleAppraiserOptionChange,
       isSubmitting: submitMutation.isPending,
     },
   };

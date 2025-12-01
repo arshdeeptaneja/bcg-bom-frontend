@@ -33,13 +33,27 @@ const AnnualReview = () => {
   } = useAnnualReview();
 
   const { employee, dateRange, metadata } = context;
-  const { reviewerScores, reviewerDevResponses, reviewerOptionResponses } = formState;
+  const {
+    reviewerScores,
+    reviewerDevResponses,
+    reviewerOptionResponses,
+    appraiseeScores,
+    appraiserScores,
+    selfDevResponses,
+    repaDevResponses,
+    selfOptionResponses,
+  } = formState;
   const {
     handleSubmit,
     handleReviewerScoreChange,
     handleReviewerCommentChange,
     handleReviewerDevInputChange,
     handleReviewerOptionChange,
+    handleAppraiseeCommentChange,
+    handleAppraiserCommentChange,
+    handleSelfDevInputChange,
+    handleRepaDevInputChange,
+    handleSelfOptionChange,
     isSubmitting,
   } = actions;
 
@@ -244,16 +258,24 @@ const AnnualReview = () => {
                                     <label className="fw-semibold text-muted mb-2">
                                       Appraisee Comment:
                                     </label>
-                                    <div className="p-2 bg-white rounded border mb-3">
-                                      {kra.CommentSelf1 || <em className="text-muted">No comment provided</em>}
-                                    </div>
+                                    <textarea
+                                      className="form-control mb-3"
+                                      rows={3}
+                                      placeholder="Enter Appraisee Comment"
+                                      value={appraiseeScores[kraId]?.comment ?? kra.CommentSelf1 ?? ''}
+                                      onChange={(e) => handleAppraiseeCommentChange(kraId, e.target.value)}
+                                    />
 
                                     <label className="fw-semibold text-muted mb-2">
                                       Appraiser Comment:
                                     </label>
-                                    <div className="p-2 bg-white rounded border mb-3">
-                                      {kra.CommentRepa || <em className="text-muted">No comment provided</em>}
-                                    </div>
+                                    <textarea
+                                      className="form-control mb-3"
+                                      rows={3}
+                                      placeholder="Enter Appraiser Comment"
+                                      value={appraiserScores[kraId]?.comment ?? kra.CommentRepa ?? ''}
+                                      onChange={(e) => handleAppraiserCommentChange(kraId, e.target.value)}
+                                    />
 
                                     <label className="fw-semibold text-muted mb-2">
                                       Reviewer Comment:
@@ -284,21 +306,35 @@ const AnnualReview = () => {
         {developmentInputs.overallDevelopment?.length > 0 && (
           <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
             <h5 className="text-primary fw-bold mb-3">Development Inputs - Overall Development</h5>
-            {developmentInputs.overallDevelopment.map((input, index) => (
-              <div className="mb-3" key={input.id}>
-                <label className="form-label fw-bold text-dark">
-                  {index + 1}. {input.question}
-                </label>
-                <div className="p-3 bg-light rounded border">
-                  {input.selfResponse || <em className="text-muted">No response provided</em>}
-                  {input.selfResponse2 && (
-                    <div className="mt-2 pt-2 border-top">
-                      <strong>Additional:</strong> {input.selfResponse2}
+            {developmentInputs.overallDevelopment.map((input, index) => {
+              const selfInput = selfDevResponses[input.id] || {};
+              return (
+                <div className="mb-3" key={input.id}>
+                  <label className="form-label fw-bold text-dark">
+                    {index + 1}. {input.question}
+                  </label>
+                  <textarea
+                    className="form-control mb-2"
+                    rows={3}
+                    placeholder="Enter Response"
+                    value={selfInput.response ?? input.selfResponse ?? ''}
+                    onChange={(e) => handleSelfDevInputChange(input.id, 'response', e.target.value)}
+                  />
+                  {(input.selfResponse2 || selfInput.response2) && (
+                    <div className="mt-2">
+                      <label className="form-label text-muted">Additional Response:</label>
+                      <textarea
+                        className="form-control"
+                        rows={2}
+                        placeholder="Enter Additional Response"
+                        value={selfInput.response2 ?? input.selfResponse2 ?? ''}
+                        onChange={(e) => handleSelfDevInputChange(input.id, 'response2', e.target.value)}
+                      />
                     </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -325,24 +361,29 @@ const AnnualReview = () => {
                   {index + 1}. {input.question}
                 </label>
 
-                {/* Show previous responses */}
-                {input.repaResponse && (
-                  <div className="mb-2">
-                    <small className="text-muted">Reporting Authority Response:</small>
-                    <div className="p-2 bg-light rounded border">
-                      {input.repaResponse}
-                    </div>
-                  </div>
-                )}
+                {/* Editable field for Reporting Authority */}
+                <div className="mb-2">
+                  <small className="text-muted">Reporting Authority Response:</small>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    placeholder="Enter Reporting Authority Response"
+                    value={repaDevResponses[input.id] ?? input.repaResponse ?? ''}
+                    onChange={(e) => handleRepaDevInputChange(input.id, e.target.value)}
+                  />
+                </div>
 
                 {/* Editable field for reviewer/acceptor */}
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  placeholder="Enter Response"
-                  value={reviewerDevResponses[input.id] || ''}
-                  onChange={(e) => handleReviewerDevInputChange(input.id, e.target.value)}
-                />
+                <div className="mt-2">
+                  <small className="text-muted">Reviewing Authority Response:</small>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    placeholder="Enter Reviewing Authority Response"
+                    value={reviewerDevResponses[input.id] || ''}
+                    onChange={(e) => handleReviewerDevInputChange(input.id, e.target.value)}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -353,10 +394,19 @@ const AnnualReview = () => {
           <div className="option-based-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
             <h5 className="text-primary fw-bold mb-3">Additional Information</h5>
             {developmentInputs.optionBased.map((input) => {
-              const isEditable = input.editableBy === 'REVIEWER_ACCEPTOR';
-              const currentValue = isEditable
-                ? reviewerOptionResponses[input.key]
-                : input.selfResponse?.toLowerCase();
+              // Determine which state and handler to use based on the input key
+              let currentValue;
+              let handleChange;
+              
+              if (input.key === 'integrity') {
+                // For integrity, show reviewer's response (editable)
+                currentValue = reviewerOptionResponses[input.key];
+                handleChange = (value) => handleReviewerOptionChange(input.key, value);
+              } else {
+                // For healthProblems and disciplinaryActions, show self response (editable)
+                currentValue = selfOptionResponses[input.key] ?? input.selfResponse?.toLowerCase();
+                handleChange = (value) => handleSelfOptionChange(input.key, value);
+              }
 
               return (
                 <div className="mb-3" key={input.id}>
@@ -373,8 +423,7 @@ const AnnualReview = () => {
                           id={`option-${input.id}-${option.value}`}
                           value={option.value}
                           checked={currentValue === option.value}
-                          onChange={() => isEditable && handleReviewerOptionChange(input.key, option.value)}
-                          disabled={!isEditable}
+                          onChange={() => handleChange(option.value)}
                         />
                         <label
                           className="form-check-label"

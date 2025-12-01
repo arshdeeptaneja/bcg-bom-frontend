@@ -458,6 +458,14 @@ export const useAnnualAppraisal = () => {
     const kraData = rawKraData.map((originalKra) => {
       const kraId = originalKra.AP_KRA_ID;
       const userInput = nonMeasurableScores[kraId] || {};
+
+      const getScoreFieldName = () => {
+      if (currentRole === 'SELF') return 'SCORE';
+      if (currentRole === 'REPA') return 'REPA_SCORE';
+      if (currentRole === 'REVA') return 'REVA_SCORE';
+        [scoreFieldName]: userInput.score || originalKra.SCORE,
+
+    const scoreFieldName = getScoreFieldName();
       
       return {
         // Spread all original fields from GET response
