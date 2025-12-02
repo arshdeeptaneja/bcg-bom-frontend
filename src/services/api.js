@@ -1273,21 +1273,23 @@ getAppraiserCheckInDashboard: async ({
   approveAppealReview: async (payload = {}) => {
     try {
       // Mock implementation - simulate API call
-      console.log('Mock: Approving appeal review', payload);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      //console.log('Mock: Approving appeal review', payload);
+      //await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
 
-      return {
-        success: true,
-        message: 'Appeal review approved successfully',
-        ticketId: payload.custTicketId || 'APPEAL-' + Date.now()
-      };
+      // return {
+      //   success: true,
+      //   message: 'Appeal review approved successfully',
+      //   ticketId: payload.custTicketId || 'APPEAL-' + Date.now()
+      // };
 
       // Real implementation (uncomment when backend is ready):
-      // const response = await apiClient.post(
-      //   '/appraisal/appeal_report/review/approve',
-      //   payload
-      // );
-      // return response.data;
+      const response = await apiClient.post(
+        '/appraisal/appeal_commitee/submit',
+        payload
+      );
+
+      return response.data;
+
     } catch (error) {
       console.error('approveAppealReview error', error);
       throw error;
