@@ -12,30 +12,18 @@ import './AnnualCheckIn.css';
 
 const AnnualCheckIn = () => {
   // Use the annual-specific hook directly
-  const {
-    data,
-    developmentInputs,
-    isLoading,
-    isError,
-    context,
-    roleState,
-    formState,
-    actions,
-  } = useAnnualAppraisal();
+  const { data, developmentInputs, isLoading, isError, context, roleState, formState, actions } =
+    useAnnualAppraisal();
   const { employee, dateRange, metadata } = context;
   const { currentRole, isEditableBy } = roleState;
-  const { 
-    nonMeasurableScores, 
-    developmentResponses, 
-    optionResponses 
-  } = formState;
-  const { 
-    handleSubmit, 
+  const { nonMeasurableScores, developmentResponses, optionResponses } = formState;
+  const {
+    handleSubmit,
     handleNonMeasurableScoreChange,
     handleNonMeasurableCommentChange,
     handleDevelopmentInputChange,
     handleOptionChange,
-    isSubmitting 
+    isSubmitting,
   } = actions;
 
   // Track which KRA comment sections are open
@@ -87,9 +75,7 @@ const AnnualCheckIn = () => {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-              Annual Appraisal
-            </h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Annual Appraisal</h1>
           </div>
         </div>
         <LoadingSpinner />
@@ -103,9 +89,7 @@ const AnnualCheckIn = () => {
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-            Annual Appraisal
-          </h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Annual Appraisal</h1>
         </div>
       </div>
       <div className="pageWrapper-content d-flex flex-column m-1 p-3">
@@ -136,11 +120,10 @@ const AnnualCheckIn = () => {
             />
           </div>
         )}
-        {(measurableKraListData.length > 0 ||
-          Object.keys(nonMeasurableKraListData).length > 0) && (
+        {(measurableKraListData.length > 0 || Object.keys(nonMeasurableKraListData).length > 0) && (
           <div className="discretionary-kra-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
             <h5 className="text-primary fw-bold mb-3">Discretionary KRA</h5>
-            
+
             {/* Measurable KRAs */}
             {measurableKraListData.length > 0 && (
               <div className="discretionary-kra-list">
@@ -151,7 +134,7 @@ const AnnualCheckIn = () => {
                 />
               </div>
             )}
-            
+
             {/* Non-Measurable KRAs - Grouped by GROUP_NAME */}
             {Object.keys(nonMeasurableKraListData).length > 0 && (
               <div className="non-measurable-kra-section">
@@ -197,7 +180,8 @@ const AnnualCheckIn = () => {
                           const kraScore = nonMeasurableScores[kraId] || {};
                           const selectedScore = kraScore.score || null;
                           const isOpen = openComments[kraId] ?? false;
-                          const isAppraiseeEditable = isEditableBy.APPRAISEE && kra.IsEditable !== false;
+                          const isAppraiseeEditable =
+                            isEditableBy.APPRAISEE && kra.IsEditable !== false;
 
                           return (
                             <React.Fragment key={kraId}>
@@ -211,8 +195,8 @@ const AnnualCheckIn = () => {
                                       </span>
                                       <span className="text-danger">*</span>
                                       {kra.Tooltip && (
-                                        <i 
-                                          className="bi bi-info-circle text-primary" 
+                                        <i
+                                          className="bi bi-info-circle text-primary"
                                           title={kra.Tooltip}
                                         ></i>
                                       )}
@@ -259,9 +243,11 @@ const AnnualCheckIn = () => {
                                     onClick={() => toggleComment(kraId)}
                                     aria-label="Toggle comment"
                                   >
-                                    <i className={`bi bi-chat-left-text-fill ${
-                                      kraScore.comment ? 'text-success' : 'text-primary'
-                                    }`}></i>
+                                    <i
+                                      className={`bi bi-chat-left-text-fill ${
+                                        kraScore.comment ? 'text-success' : 'text-primary'
+                                      }`}
+                                    ></i>
                                   </button>
                                 </td>
                               </tr>
@@ -279,14 +265,19 @@ const AnnualCheckIn = () => {
                                         rows={3}
                                         placeholder="Enter Your Comment"
                                         value={kraScore.comment || ''}
-                                        onChange={(e) => 
-                                          handleNonMeasurableCommentChange(kraId, e.target.value, 'APPRAISEE')
+                                        onChange={(e) =>
+                                          handleNonMeasurableCommentChange(
+                                            kraId,
+                                            e.target.value,
+                                            'APPRAISEE'
+                                          )
                                         }
                                         disabled={!isAppraiseeEditable}
                                       />
-                                      
+
                                       {/* Show appraiser/reviewer comments if available */}
-                                      {(kraScore.appraiserComment || currentRole !== 'APPRAISEE') && (
+                                      {(kraScore.appraiserComment ||
+                                        currentRole !== 'APPRAISEE') && (
                                         <div className="mt-3">
                                           <label className="fw-semibold text-muted mb-2">
                                             Appraiser Comment:
@@ -297,8 +288,12 @@ const AnnualCheckIn = () => {
                                               rows={2}
                                               placeholder="Enter Appraiser Comment"
                                               value={kraScore.appraiserComment || ''}
-                                              onChange={(e) => 
-                                                handleNonMeasurableCommentChange(kraId, e.target.value, 'APPRAISER')
+                                              onChange={(e) =>
+                                                handleNonMeasurableCommentChange(
+                                                  kraId,
+                                                  e.target.value,
+                                                  'APPRAISER'
+                                                )
                                               }
                                             />
                                           ) : (
@@ -308,7 +303,7 @@ const AnnualCheckIn = () => {
                                           )}
                                         </div>
                                       )}
-                                      
+
                                       {(kraScore.reviewerComment || currentRole === 'REVIEWER') && (
                                         <div className="mt-3">
                                           <label className="fw-semibold text-muted mb-2">
@@ -320,8 +315,12 @@ const AnnualCheckIn = () => {
                                               rows={2}
                                               placeholder="Enter Reviewer Comment"
                                               value={kraScore.reviewerComment || ''}
-                                              onChange={(e) => 
-                                                handleNonMeasurableCommentChange(kraId, e.target.value, 'REVIEWER')
+                                              onChange={(e) =>
+                                                handleNonMeasurableCommentChange(
+                                                  kraId,
+                                                  e.target.value,
+                                                  'REVIEWER'
+                                                )
                                               }
                                             />
                                           ) : (
@@ -346,7 +345,7 @@ const AnnualCheckIn = () => {
             )}
           </div>
         )}
-        
+
         {/* Development Inputs Section - Overall Development (Appraisee) */}
         {developmentInputs.overallDevelopment?.length > 0 && (
           <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
@@ -361,7 +360,9 @@ const AnnualCheckIn = () => {
                   rows={3}
                   placeholder="Enter Your Response"
                   value={developmentResponses[input.id]?.response || ''}
-                  onChange={(e) => handleDevelopmentInputChange(input.id, e.target.value, 'response')}
+                  onChange={(e) =>
+                    handleDevelopmentInputChange(input.id, e.target.value, 'response')
+                  }
                   disabled={!isEditableBy.APPRAISEE}
                 />
               </div>
@@ -370,108 +371,120 @@ const AnnualCheckIn = () => {
         )}
 
         {/* Development Inputs Section - Reporting/Reviewing Authority */}
-        {developmentInputs.reportingReviewAuthority?.length > 0 && (
-          <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
-            <h5 className="text-primary fw-bold mb-3">
-              Remarks by Reporting Authority / Reviewing Authority
-            </h5>
-            <p className="text-muted small mb-3">
-              {metadata?.reportingAuthorityName && (
-                <span>Reporting Authority: <strong>{metadata.reportingAuthorityName}</strong></span>
-              )}
-              {metadata?.reviewingAuthorityName && (
-                <span className="ms-3">Reviewing Authority: <strong>{metadata.reviewingAuthorityName}</strong></span>
-              )}
-            </p>
-            {developmentInputs.reportingReviewAuthority.map((input, index) => (
-              <div className="mb-3" key={input.id}>
-                <label className="form-label fw-bold text-dark">
-                  {index + 1}. {input.question}
-                </label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  placeholder="Enter Response"
-                  value={developmentResponses[input.id]?.response || ''}
-                  onChange={(e) => handleDevelopmentInputChange(input.id, e.target.value, 'response')}
-                  disabled={!isEditableBy.APPRAISER && !isEditableBy.REVIEWER}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        {developmentInputs.reportingReviewAuthority?.length > 0 &&
+          // This section should not be shown if the appraiser and reviewer have edit access
+          (isEditableBy.APPRAISER || isEditableBy.REVIEWER) && (
+            <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
+              <h5 className="text-primary fw-bold mb-3">
+                Remarks by Reporting Authority / Reviewing Authority
+              </h5>
+              <p className="text-muted small mb-3">
+                {metadata?.reportingAuthorityName && (
+                  <span>
+                    Reporting Authority: <strong>{metadata.reportingAuthorityName}</strong>
+                  </span>
+                )}
+                {metadata?.reviewingAuthorityName && (
+                  <span className="ms-3">
+                    Reviewing Authority: <strong>{metadata.reviewingAuthorityName}</strong>
+                  </span>
+                )}
+              </p>
+              {developmentInputs.reportingReviewAuthority.map((input, index) => (
+                <div className="mb-3" key={input.id}>
+                  <label className="form-label fw-bold text-dark">
+                    {index + 1}. {input.question}
+                  </label>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    placeholder="Enter Response"
+                    value={developmentResponses[input.id]?.response || ''}
+                    onChange={(e) =>
+                      handleDevelopmentInputChange(input.id, e.target.value, 'response')
+                    }
+                    disabled={!isEditableBy.APPRAISER && !isEditableBy.REVIEWER}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
 
         {/* Option-Based Inputs Section */}
         {developmentInputs.optionBased?.length > 0 && (
           <div className="option-based-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
             <h5 className="text-primary fw-bold mb-3">Additional Information</h5>
-            {developmentInputs.optionBased.map((input) => (
-              <div className="mb-3" key={input.id}>
-                <label className="form-label fw-bold text-dark">
-                  {input.question}
-                </label>
-                <div className="d-flex flex-wrap gap-3">
-                  {input.options.map((option) => (
-                    <div className="form-check" key={option.value}>
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name={`option-${input.id}`}
-                        id={`option-${input.id}-${option.value}`}
-                        value={option.value}
-                        checked={optionResponses[input.key] === option.value}
-                        onChange={() => handleOptionChange(input.key, option.value)}
-                        disabled={
-                          (input.editableBy === 'APPRAISEE' && !isEditableBy.APPRAISEE) ||
-                          (input.editableBy === 'APPRAISER_REVIEWER' && !isEditableBy.APPRAISER && !isEditableBy.REVIEWER)
-                        }
+            {developmentInputs.optionBased.map((input) => {
+              const isQuestionDisabled =
+                (input.editableBy === 'APPRAISEE' && !isEditableBy.APPRAISEE) ||
+                (input.editableBy === 'APPRAISER_REVIEWER' &&
+                  !isEditableBy.APPRAISER &&
+                  !isEditableBy.REVIEWER);
+
+              if (isQuestionDisabled) return null;
+
+              return (
+                <div className="mb-3" key={input.id}>
+                  <label className="form-label fw-bold text-dark">{input.question}</label>
+                  <div className="d-flex flex-wrap gap-3">
+                    {input.options.map((option) => (
+                      <div className="form-check" key={option.value}>
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name={`option-${input.id}`}
+                          id={`option-${input.id}-${option.value}`}
+                          value={option.value}
+                          checked={optionResponses[input.key] === option.value}
+                          onChange={() => handleOptionChange(input.key, option.value)}
+                          disabled={isQuestionDisabled}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor={`option-${input.id}-${option.value}`}
+                        >
+                          {option.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Show details textarea for Yes/No questions when Yes is selected */}
+                  {input.key === 'healthProblems' && optionResponses.healthProblems === 'yes' && (
+                    <div className="mt-2">
+                      <textarea
+                        className="form-control"
+                        rows={2}
+                        placeholder="Please provide details"
+                        value={optionResponses.healthDetails || ''}
+                        onChange={(e) => handleOptionChange('healthDetails', e.target.value)}
+                        disabled={!isEditableBy.APPRAISEE}
                       />
-                      <label 
-                        className="form-check-label" 
-                        htmlFor={`option-${input.id}-${option.value}`}
-                      >
-                        {option.label}
-                      </label>
                     </div>
-                  ))}
+                  )}
+                  {input.key === 'disciplinaryActions' &&
+                    optionResponses.disciplinaryActions === 'yes' && (
+                      <div className="mt-2">
+                        <textarea
+                          className="form-control"
+                          rows={2}
+                          placeholder="Please provide details"
+                          value={optionResponses.disciplinaryDetails || ''}
+                          onChange={(e) =>
+                            handleOptionChange('disciplinaryDetails', e.target.value)
+                          }
+                          disabled={!isEditableBy.APPRAISEE}
+                        />
+                      </div>
+                    )}
                 </div>
-                
-                {/* Show details textarea for Yes/No questions when Yes is selected */}
-                {(input.key === 'healthProblems' && optionResponses.healthProblems === 'yes') && (
-                  <div className="mt-2">
-                    <textarea
-                      className="form-control"
-                      rows={2}
-                      placeholder="Please provide details"
-                      value={optionResponses.healthDetails || ''}
-                      onChange={(e) => handleOptionChange('healthDetails', e.target.value)}
-                      disabled={!isEditableBy.APPRAISEE}
-                    />
-                  </div>
-                )}
-                {(input.key === 'disciplinaryActions' && optionResponses.disciplinaryActions === 'yes') && (
-                  <div className="mt-2">
-                    <textarea
-                      className="form-control"
-                      rows={2}
-                      placeholder="Please provide details"
-                      value={optionResponses.disciplinaryDetails || ''}
-                      onChange={(e) => handleOptionChange('disciplinaryDetails', e.target.value)}
-                      disabled={!isEditableBy.APPRAISEE}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
-        <button
-          className="btn btn-primary"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
+        <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
