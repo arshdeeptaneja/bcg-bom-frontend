@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../../services/api';
+import { useAuth } from '../../../../contexts/AuthContext';
 
 /**
  * Custom hook for managing Appeal Review functionality
@@ -12,12 +13,16 @@ export const useReviewAppeal = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
+  const { getUserProperty } = useAuth();
+
+  const authEmpNo = getUserProperty("empNo", "38965");
   // Extract context from location state OR URL query params
   const context = useMemo(() => ({
     roleId: searchParams.get('roleId') || location.state?.roleId || '4',
     roleType: searchParams.get('roleType') || location.state?.roleType || 'Administrative Officer',
     empNo: searchParams.get('empNo') || location.state?.empNo || '38965',
     financialYear: searchParams.get('financialYear') || location.state?.financialYear || '2025',
+    custTicketId: searchParams.get("ticketId"),
     role: searchParams.get('role') || location.state?.role || 'APPRAISER', // APPRAISER or REVIEWER
   }), [location.state, searchParams]);
 
@@ -295,29 +300,45 @@ export const useReviewAppeal = () => {
     try {
       // Build payload
       const payload = {
-        roleId: context.roleId,
-        roleType: context.roleType,
-        empNo: context.empNo,
+        //id: context.roleId,
+        //roleType: context.roleType,
+        empNo: authEmpNo,
+        custTicketId: context.custTicketId,
+        //reportingAuthorityNo: context.
         financialYear: context.financialYear,
         reviewerRole: context.role,
         kraDecisions: Array.from(selectedKras).map(kraId => {
           const kraInfo = findKraById(kraId);
+          const kraObject = findKraById(kraId)?.kra;
+
+          console.log("kra object is: ", kraObject)
           const kra = kraInfo?.kra;
           const action = kraActions.get(kraId);
           const score = kraScores.get(kraId);
           const comment = kraComments.get(kraId);
+          const appeal_id = kraInfo?.appealId
 
           return {
             kraId: kraId,
             action: action,
             newScore: action === 'ACCEPT_AND_EDIT' ? parseFloat(score) : null,
             comment: comment || '',
-            oldScore: kra?.oldScore,
-            appealedScore: kra?.newScore,
+            //oldScore: kra?.oldScore,
+            //appealed_core: kra?.newScore,
+            appeal_id: appeal_id,
+            appraisee_score: kraObject?.appraiseeScore,
+            new_mpb: kraObject?.mpbNewValue,
+            new_target: kraObject?.targetNewValue,
+            new_actual: kraObject?.actualNewValue,
+            prev_target: kraObject?.targetOldValue,
+            prev_actual: kraObject?.actualOldValue,
+            old_target: kraObject?.targetOldValue,
+            old_actual: kraObject?.actualOldValue,
+            AP_KRA_ID: kraObject?.kraId,
             kraType: kra?.kraType
           };
         }),
-        overallComment: overallComment,
+        member3comment: overallComment,
         status: determineOverallStatus()
       };
 
