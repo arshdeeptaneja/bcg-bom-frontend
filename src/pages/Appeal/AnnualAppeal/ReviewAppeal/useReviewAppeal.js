@@ -342,6 +342,7 @@ export const useReviewAppeal = () => {
         status: determineOverallStatus()
       };
 
+      console.log('payload', payload)
       // Call API
       const response = await appraisalAPI.approveAppealReview(payload);
 

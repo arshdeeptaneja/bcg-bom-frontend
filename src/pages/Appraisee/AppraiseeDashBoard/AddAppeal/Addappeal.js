@@ -7,6 +7,7 @@ import { CheckInDescriptionSection, FinalScoreSummaryTable } from '../../../../c
 import { useAddAppeal } from './useAddAppeal';
 import AppealKRASection from './AppealKRASection';
 import FileUploadSection from './FileUploadSection';
+import './AddAppeal.css';
 
 function AddAppeal() {
   const navigate = useNavigate();

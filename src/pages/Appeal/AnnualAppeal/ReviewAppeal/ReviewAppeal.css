@@ -19,6 +19,19 @@
   margin: 0 auto;
 }
 
+/* Page Wrapper Spacing Overrides for Review Appeal */
+.pageWrapper .pageWrapper-content {
+  gap: 1.5rem !important;
+}
+
+.pageWrapper .pageWrapper-content > .card {
+  padding: 1.75rem !important;
+}
+
+.pageWrapper .pageWrapper-header {
+  margin-bottom: 1.5rem;
+}
+
 /* Loading State */
 .loading-overlay {
   display: flex;
@@ -49,6 +62,12 @@
   padding: 1rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
+}
+
+/* Alert Info Banner Spacing */
+.pageWrapper .alert-info {
+  padding: 14px 20px;
+  margin: 8px 0;
 }
 
 /* Section Styling */
@@ -124,9 +143,9 @@
   border-collapse: collapse;
 }
 
-/* Table Header - Green theme */
+/* Table Header - Blue theme */
 .kra-review-table thead {
-  background-color: #006837;
+  background-color: var(--accent-color, #0189d0);
   color: white;
 }
 
@@ -134,18 +153,18 @@
   font-weight: 500;
   padding: 12px 8px;
   vertical-align: middle;
-  border: 1px solid #006837;
+  border: 1px solid var(--accent-color, #0189d0);
   text-align: center;
 }
 
-/* Green themed table class for reuse */
+/* Blue themed table class for reuse */
 .appeal-table-green {
   border-collapse: collapse;
   width: 100%;
 }
 
 .appeal-table-green thead {
-  background-color: #006837;
+  background-color: var(--accent-color, #0189d0);
   color: white;
 }
 
@@ -153,7 +172,7 @@
   font-weight: 500;
   padding: 12px 8px;
   vertical-align: middle;
-  border: 1px solid #006837;
+  border: 1px solid var(--accent-color, #0189d0);
   text-align: center;
 }
 
@@ -242,7 +261,7 @@
 
 .appellate-input {
   background-color: #fff !important;
-  border: 1px solid #006837 !important;
+  border: 1px solid var(--accent-color, #0189d0) !important;
   color: #333;
   font-weight: 500;
   border-radius: 4px;
@@ -530,7 +549,7 @@
 }
 
 .final-score-summary-appeal thead {
-  background-color: #006837;
+  background-color: var(--accent-color, #0189d0);
   color: white;
 }
 
@@ -538,7 +557,7 @@
   font-weight: 500;
   padding: 12px 8px;
   vertical-align: middle;
-  border: 1px solid #006837;
+  border: 1px solid var(--accent-color, #0189d0);
   text-align: center;
 }
 
@@ -581,7 +600,7 @@
 }
 
 .final-score-summary-appeal .editable-score-input {
-  border: 1px solid #006837;
+  border: 1px solid var(--accent-color, #0189d0);
   border-radius: 4px;
   padding: 6px 10px;
   text-align: center;
@@ -614,7 +633,7 @@
 
 /* Score input in tables */
 .appeal-score-input {
-  border: 1px solid #006837;
+  border: 1px solid var(--accent-color, #0189d0);
   border-radius: 4px;
   padding: 6px 10px;
   text-align: center;
@@ -624,6 +643,177 @@
 
 .appeal-score-input:focus {
   outline: none;
-  border-color: #004d29;
-  box-shadow: 0 0 0 2px rgba(0, 104, 55, 0.2);
+  border-color: #0056b3;
+  box-shadow: 0 0 0 2px rgba(1, 137, 208, 0.2);
+}
+
+/* Comment popup styling */
+.comment-popup {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  min-width: 250px;
+  max-width: 350px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.comment-popup::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #dee2e6;
+}
+
+.comment-popup::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid white;
+}
+
+.comment-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.comment-popup-title {
+  font-weight: 600;
+  color: var(--accent-color, #0189d0);
+  font-size: 0.85rem;
+}
+
+.comment-popup-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+}
+
+.comment-popup-body {
+  font-size: 0.85rem;
+  color: #333;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.comment-cell-wrapper {
+  position: relative;
+}
+
+/* ============================================
+   Appeal Comment Section - Below Table (Inline)
+   ============================================ */
+.appeal-comment-section {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 20px 24px;
+  margin-top: -1px;
+}
+
+.self-comment-display {
+  margin-bottom: 20px;
+}
+
+.comment-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.required-asterisk {
+  color: #dc3545;
+  margin-left: 2px;
+}
+
+.comment-text-readonly {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 12px;
+  color: #666;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+  min-height: 40px;
+}
+
+.appellate-comment-input {
+  margin-top: 16px;
+}
+
+.appellate-textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-size: 0.875rem;
+  border: 1px solid #ced4da;
+}
+
+.appellate-textarea:focus {
+  border-color: var(--accent-color, #0189d0);
+  box-shadow: 0 0 0 2px rgba(1, 137, 208, 0.15);
+}
+
+.textarea-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.min-char-hint {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.char-counter {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.validation-error {
+  color: #dc3545;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+/* Inline Comment Section - Appears as a row below each KRA */
+.appeal-comment-section-inline {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  padding: 20px 24px;
+  margin: 0;
+}
+
+.comment-row {
+  background-color: #f8f9fa;
+}
+
+.comment-row td {
+  background-color: #f8f9fa;
 }

@@ -15,6 +15,88 @@ import { useAuth } from '../../../../contexts/AuthContext';
  * - Submit-only functionality (no save draft)
  * - Role-based editability
  * - Development inputs extraction
+ * 
+ * ============================================================================
+ * API → UI KEY MAPPING REFERENCE
+ * ============================================================================
+ * 
+ * 1. NON-MEASURABLE KRAs (from: result_kra_list_discretionary_non_measurable_child)
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    API Key              → UI State Key              → Where to Change
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    AP_KRA_ID            → kraId (object key)        → nonMeasurableScores state
+ *    KRA_DESC             → KRA name/title            → transformAnnualAppraisalData()
+ *    SCORE / ACTUAL       → score                     → nonMeasurableScores[kraId].score
+ *    COMMENT_SELF_1       → comment                   → nonMeasurableScores[kraId].comment
+ *    COMMENT_REPA         → appraiserComment          → nonMeasurableScores[kraId].appraiserComment
+ *    COMMENT_REVA         → reviewerComment           → nonMeasurableScores[kraId].reviewerComment
+ *    REPA_ACTUALS         → appraiserScore            → nonMeasurableScores[kraId].appraiserScore
+ *    REVA_ACTUALS         → reviewerScore             → nonMeasurableScores[kraId].reviewerScore
+ * 
+ *    To modify: Update handleNonMeasurableScoreChange() or handleNonMeasurableCommentChange()
+ * 
+ * 2. DEVELOPMENT INPUTS / QUESTIONS (from: result_questions.development_inputs)
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    API Key              → UI State Key              → Category
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    ID                   → questionId (object key)   → developmentResponses state
+ *    QUESTION             → question text             → Display only
+ *    SELF_RESPONSE        → response                  → developmentResponses[id].response
+ *    SELF_RESPONSE_2      → response2                 → developmentResponses[id].response2
+ *    REPA_RESPONSE        → (appraiser response)      → Read-only for appraisee
+ *    REVA_RESPONSE        → (reviewer response)       → Read-only for appraisee
+ * 
+ *    Categories:
+ *    - overall_development (IDs 1-9)        → Editable by APPRAISEE
+ *    - reporting_review_authority (IDs 12-18) → Editable by APPRAISER/REVIEWER
+ *    - integrity (ID 19)                    → Option-based, APPRAISER/REVIEWER
+ *    - health_problems (ID 10)              → Yes/No, APPRAISEE
+ *    - disciplinary_actions (ID 11)         → Yes/No, APPRAISEE
+ * 
+ *    To modify: Update handleDevelopmentInputChange() or developmentInputs useMemo
+ * 
+ * 3. OPTION-BASED RESPONSES
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    API Key              → UI State Key              → Values
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    integrity            → optionResponses.integrity → 'option1' | 'option2' | 'option3'
+ *    health_problems      → optionResponses.healthProblems → 'yes' | 'no'
+ *    disciplinary_actions → optionResponses.disciplinaryActions → 'yes' | 'no'
+ * 
+ *    To modify: Update handleOptionChange() or optionResponses state
+ * 
+ * 4. LEARNING METRICS (from: root level of API response)
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    API Key                  → UI State Key
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    continuous_learning_present → learningMetrics.continuousLearningPresent
+ *    mandatory_courses           → learningMetrics.mandatoryCourses
+ *    learning_courses            → learningMetrics.learningCourses
+ *    speed_circular              → learningMetrics.speedCircular
+ *    elearning_score             → learningMetrics.elearningScore
+ * 
+ *    To modify: Update the useEffect that sets learningMetrics
+ * 
+ * 5. SUBMIT PAYLOAD MAPPING (buildAnnualSubmitPayload function)
+ *    ─────────────────────────────────────────────────────────────────────────
+ *    The submit payload spreads original API fields and updates with user input.
+ *    Key transformations:
+ *    - nonMeasurableScores[kraId].score   → kraData[].SCORE, kraData[].ACTUAL
+ *    - nonMeasurableScores[kraId].comment → kraData[].FIRSTCOMMENT, COMMENT_SELF_1
+ *    - developmentResponses[id].response  → questions[].SELF_RESPONSE
+ *    - developmentResponses[id].response2 → questions[].SELF_RESPONSE_2
+ * 
+ * ============================================================================
+ * QUICK REFERENCE: Where to make changes
+ * ============================================================================
+ * 
+ * - Change how API data is parsed:     → transformAnnualAppraisalData() in appraisalTransformers.js
+ * - Change form field handlers:        → handleNonMeasurable*, handleDevelopmentInputChange, handleOptionChange
+ * - Change submit payload structure:   → buildAnnualSubmitPayload() function below
+ * - Add new fields from API:           → Add to useEffect that processes apiResponse
+ * - Change validation rules:           → validateAnnualForm() function below
+ * 
+ * ============================================================================
  */
 export const useAnnualAppraisal = () => {
   const queryClient = useQueryClient();

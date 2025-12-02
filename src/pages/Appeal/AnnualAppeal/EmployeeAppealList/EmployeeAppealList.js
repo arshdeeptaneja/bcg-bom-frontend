@@ -8,6 +8,7 @@
  * a table displaying appeal
  */
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BackButton } from "../../../../components/common";
 import { FaInfoCircle } from "react-icons/fa";
@@ -30,6 +31,8 @@ const EmployeeAppealList = () => {
     const { getEmployeeDetails, getUserProperty } = useAuth();
     const employeeDetails = getEmployeeDetails();
     const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
+    
+    const navigate = useNavigate();
 
     // Extract year from financial year format (e.g., "FY 2025-26" -> "2025" or "2025" -> "2025")
     const extractYear = (fy) => {
@@ -138,9 +141,10 @@ const EmployeeAppealList = () => {
                           item.POST_APPEAL ||
                           item.postAppeal ||
                           '',
+                // Preserve raw status for conditional button rendering
                 appealStatus:
-                    item.FINAL_APPEAL_STATUS ||
                     item.STATUS ||
+                    item.FINAL_APPEAL_STATUS ||
                     item.appeal_status ||
                     item.APPEAL_STATUS ||
                     item.appealStatus ||
@@ -244,6 +248,63 @@ const EmployeeAppealList = () => {
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
+
+    /**
+     * Handle "View Appeal" button click (for appeal_approved status)
+     */
+    const handleViewAppeal = (row) => {
+        navigate('/appeal/review', {
+            state: {
+                ticketId: row.ticketId,
+                empNo: row.empNumber,
+                empName: row.empName,
+                primaryRole: row.primaryRole,
+                branch: row.branch,
+                financialYear: financialYearForAPI,
+                quarter: filters.quarter,
+                appealStatus: row.appealStatus,
+                preAppeal: row.preAppeal,
+                postAppeal: row.postAppeal,
+                viewOnly: true, // View mode for approved appeals
+            },
+        });
+    };
+
+    /**
+     * Handle "Review Appeal" button click (for pending status)
+     */
+    const handleReviewAppeal = (row) => {
+        navigate('/appeal/review', {
+            state: {
+                ticketId: row.ticketId,
+                empNo: row.empNumber,
+                empName: row.empName,
+                primaryRole: row.primaryRole,
+                branch: row.branch,
+                financialYear: financialYearForAPI,
+                quarter: filters.quarter,
+                appealStatus: row.appealStatus,
+                preAppeal: row.preAppeal,
+                postAppeal: row.postAppeal,
+                viewOnly: false, // Review mode for pending appeals
+            },
+        });
+    };
+
+    /**
+     * Handle "View Appraisal" button click
+     */
+    const handleViewAppraisal = (row) => {
+        // Navigate to appraisal view (adjust route as needed)
+        navigate('/appraisal/view', {
+            state: {
+                empNo: row.empNumber,
+                empName: row.empName,
+                financialYear: financialYearForAPI,
+                quarter: filters.quarter,
+            },
+        });
+    };
 
     const handleReset = () => {
         setFilters({ moduleName: "", financialYear: "", quarter: "", scale: "" });
@@ -388,7 +449,12 @@ const EmployeeAppealList = () => {
                     </div>
                       
                 </div>
-                <AppealTable data={Data} />
+                <AppealTable
+                    data={Data}
+                    onViewAppeal={handleViewAppeal}
+                    onReviewAppeal={handleReviewAppeal}
+                    onViewAppraisal={handleViewAppraisal}
+                />
 
               
               {/* pagination */}

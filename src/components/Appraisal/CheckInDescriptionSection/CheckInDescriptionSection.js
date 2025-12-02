@@ -3,26 +3,7 @@ import './CheckInDescriptionSection.css';
 
 export default function CheckInDescriptionSection({ employee, dateRange, showDownloadButton = false, onDownload }) {
   return (
-    <div className="check-in-description-section position-relative">
-
-      {/* ✅ Download Button Positioned Top-Right (Only When Enabled) */}
-      {showDownloadButton && (
-        <div className="position-absolute top-0 end-0">
-          <button
-            className="btn"
-            style={{
-              backgroundColor: "var(--accent-color)",
-              color: "#fff",
-              borderRadius: "20px",
-              padding: "6px 18px",
-              fontSize: "14px"
-            }}
-            onClick={onDownload}
-          >
-            Download Attachment
-          </button>
-        </div>
-      )}
+    <div className="check-in-description-section" style={{padding: '16px'}}>
 
       <div className="row">
         {/* Column 1 */}
@@ -88,7 +69,7 @@ export default function CheckInDescriptionSection({ employee, dateRange, showDow
         </div>
 
         {/* Column 3 */}
-        <div className="col-md-3">
+        <div className="col-md-2">
           <div className="d-flex align-items-start gap-3">
             <div
               className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
@@ -116,8 +97,8 @@ export default function CheckInDescriptionSection({ employee, dateRange, showDow
           </div>
         </div>
 
-        {/* Column 4 */}
-        <div className="col-md-3">
+        {/* Column 4 - Appraiser */}
+        <div className="col-md-2">
           <div className="d-flex align-items-start gap-3">
             <div
               className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
@@ -134,13 +115,25 @@ export default function CheckInDescriptionSection({ employee, dateRange, showDow
           </div>
         </div>
 
-        {/* column5 */}
-<div>
-  
-</div>
-
-
-
+        {/* Column 5 - Download Button */}
+        {showDownloadButton && (
+          <div className="col-md-2 d-flex align-items-start justify-content-end">
+            <button
+              className="btn"
+              style={{
+                backgroundColor: "var(--accent-color)",
+                color: "#fff",
+                borderRadius: "20px",
+                padding: "8px 20px",
+                fontSize: "14px",
+                whiteSpace: "nowrap"
+              }}
+              onClick={onDownload}
+            >
+              Download Attachment
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="additional-roles-timeline mt-5">

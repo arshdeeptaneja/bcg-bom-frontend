@@ -111,7 +111,7 @@
 }
 
 .btn-select-file {
-  background-color: #28a745;
+  background-color: var(--accent-color, #0189d0);
   color: white;
   border: none;
   padding: 0.625rem 1.5rem;
@@ -121,10 +121,10 @@
 }
 
 .btn-select-file:hover {
-  background-color: #218838;
+  background-color: #017ba8;
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 2px 8px rgba(1, 137, 208, 0.3);
 }
 
 .file-upload-format-info,

@@ -116,6 +116,7 @@ const AppraisalDashboard = () => {
       key: 'show_appeal_resolution_tile',
       heading: 'Appeal Resolution',
       body: 'Click here for Appeal Resolution',
+      url: '/appeal-resolutions/annual-appeal/employee-appeal-list',
     },
     {
       key: 'appealcommitteezone',

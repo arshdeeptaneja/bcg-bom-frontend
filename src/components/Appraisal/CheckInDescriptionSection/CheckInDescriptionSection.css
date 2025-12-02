@@ -1,3 +1,21 @@
+.check-in-description-section {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 28px 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.check-in-description-section .row {
+    padding-top: 16px;
+}
+
+.check-in-description-section .col-md-3 {
+    padding-right: 24px;
+}
+
 .additional-roles-timeline {
     width: 50%;
+    margin-top: 24px !important;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
 }
