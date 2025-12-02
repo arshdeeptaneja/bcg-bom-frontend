@@ -157,7 +157,7 @@ const AppealComittee = () => {
           <span className="breadcrumb-separator">/</span>
           <span className="breadcrumb-link">Appraisal HR Dashboard</span>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-active">Appeal Committee</span>
+          <span className="breadcrumb-active">Update Appellate Authority details in bulk</span>
         </div>
 
         <div className="breadcrumb-info d-flex align-items-center">
@@ -173,8 +173,7 @@ const AppealComittee = () => {
         <div className="pageWrapper-header">
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-            Appeal Committee
-          </h1>
+          Update Appellate Authority details in bulk          </h1>
         </div>
 
         {/* Upload + Buttons */}
@@ -216,9 +215,9 @@ const AppealComittee = () => {
 </button>
 
 
-              {/* <button className="btn btn-outline-primary primary-button" onClick={downloadSample}>
+              <button className="btn btn-outline-primary primary-button" onClick={downloadSample}>
                 Download Sample
-              </button> */}
+              </button>
             </div>
           </div>
 

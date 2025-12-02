@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import './HrDashboard.css';
+import { useSearchParams } from "react-router-dom";
 import { KpiTab } from '../../../components/common';
 import { BackButton } from '../../../components/common';
 import UtilitiesSection from './PanelUtilities/Utilities';
@@ -42,6 +43,9 @@ const HrDashboard = () => {
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
   const navigate = useNavigate();
+      const [searchParams] = useSearchParams();
+      const quarter = searchParams.get("quarter");               // Q1
+//const financialYear = searchParams.get("financialYear");
 
   // Derive backend appraisalPeriod in the format expected by the API (e.g. 2024Q1)
   const backendYear = financialYear.replace('FY ', '').split('-')[0];
@@ -61,7 +65,7 @@ const HrDashboard = () => {
       try {
         return await appraisalAPI.getHrDashboard({
           empNo,
-          appraisalPeriod:appraisalPeriod,
+          appraisalPeriod:appraisalPeriod == "Quarterly" ?quarter: 'annual',
           financialYear: backendYear,
         });
       } catch (error) {

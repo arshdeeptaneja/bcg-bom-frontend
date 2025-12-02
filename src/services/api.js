@@ -1419,8 +1419,6 @@ insertAnnualRoles: async () => {
     empNo,
     appraisalPeriod,
     quarter,
-    zoneName,
-    regionName,
     financialYear,
   }) => {
     try {
@@ -1429,8 +1427,6 @@ insertAnnualRoles: async () => {
       appendQueryParam(params, 'empNo', empNo);
       appendQueryParam(params, 'appraisalPeriod', appraisalPeriod);
       appendQueryParam(params, 'quarter', quarter);
-      appendQueryParam(params, 'zoneName', zoneName);
-      appendQueryParam(params, 'regionName', regionName);
       appendQueryParam(params, 'financialYear', financialYear);
 
       const response = await apiClient.get(

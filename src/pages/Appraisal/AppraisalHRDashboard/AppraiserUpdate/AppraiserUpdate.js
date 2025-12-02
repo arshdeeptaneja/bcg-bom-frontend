@@ -48,14 +48,27 @@ const AppraiserUpdate = () => {
     return match ? match[1] : new Date().getFullYear().toString();
   };
 
+  // Format ISO-like dates (e.g. "2023-06-29T18:30:00.000+00:00") to "yyyy-mm-dd"
+  const formatDate = (value) => {
+    if (!value) return "";
+    try {
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toISOString().slice(0, 10);
+    } catch {
+      return "";
+    }
+  };
+
   // Get query params from URL
   const [searchParams] = useSearchParams();
   const quarter = searchParams.get("quarter"); // Q1, Q2, Q3, Q4
   const financialYear = searchParams.get("financialYear");
 
-  // Determine appraisal period value: use quarter from URL if Quarterly, else "annual"
-  const appraisalPeriodValue = appraisalPeriod === "Quarterly" 
-    ? selectedQuarter.toLowerCase() 
+  // Determine appraisal period value for API: "quarterly" or "annual"
+  // (quarter itself is sent separately via selectedQuarter)
+  const appraisalPeriodValue = appraisalPeriod === "Quarterly"
+    ? "quarterly"
     : "annual";
 
   // React Query: Search HR Repa/Reva by EC Number
@@ -72,9 +85,7 @@ const AppraiserUpdate = () => {
       empNo,
       appraisalPeriodValue,
       selectedQuarter,
-      zoneName,
-      regionName,
-      extractYear(financialYear),
+     extractYear(financialYear),
     ],
     queryFn: async () => {
       const res = await appraisalAPI.searchHRRepaRevaByEC({
@@ -82,11 +93,43 @@ const AppraiserUpdate = () => {
         empNo: empNo,
         appraisalPeriod: appraisalPeriodValue, // "q1", "q2", etc. or "annual"
         quarter: appraisalPeriod === "Quarterly" ? selectedQuarter : null,
-        zoneName:"North", //zoneName,
-        regionName:"Mumbai", //regionName,
         financialYear: extractYear(financialYear),
       });
-      return res || [];
+
+      // API response shape (from curl):
+      // {
+      //   filter_result: { ... },
+      //   results: {
+      //     DATA_OUT: [ { ...row... } ]
+      //   }
+      // }
+
+      const rawRows = Array.isArray(res?.results?.DATA_OUT)
+        ? res.results.DATA_OUT
+        : [];
+
+      // Map backend fields into the table row shape used in tbody
+      const mapped = rawRows.map((item) => ({
+        assignmentId: item.ASSIGNMENT_ID || item.assignmentId || "",
+        urlId: item.URL_ID || item.urlId || "",
+        ecNumber: item.EMP_ID || item.empNo || "",
+        employeeName: item.EMP_NAME || item.empName || "",
+        mainRole: item.PRIMARY_ROLE || "",
+        solId: item.LOCATION_ID || item.SOL_ID || "",
+        repaEmpNumber: item.VALIDATOR_NUMBER || "",
+        zone: item.ZNNAME || item.REGNM || "",
+        action: item.APPRAISAL_STATUS || "",
+        additionalRole1: item.SECONDARY_ROLE || "",
+        additionalRole2: item.TERTIARY_ROLE || "",
+        startDate: formatDate(item.ROLE_START_DATE),
+        endDate: formatDate(item.ROLE_END_DATE),
+        repaName: item.VALIDATOR_NAME || "",
+        branch: item.BRNAME || item.ORGANIZATION_NAME || "",
+        // keep raw reference if needed for future logic
+        raw: item,
+      }));
+
+      return mapped;
     },
     enabled: shouldSearch && !!ecNumber.trim() && !!empNo && !!appraisalPeriodValue,
     retry: false,
@@ -222,7 +265,11 @@ const AppraiserUpdate = () => {
                   placeholder="Enter EC Number"
                   aria-label="Enter EC Number"
                   value={ecNumber}
-                  onChange={(e) => setEcNumber(e.target.value)}
+                  onChange={(e) => {
+                    setEcNumber(e.target.value);
+                    // Avoid auto-search while typing; require Search button click
+                    setShouldSearch(false);
+                  }}
                 />
               </div>
 
@@ -297,7 +344,7 @@ const AppraiserUpdate = () => {
             </div>
           </div>
 
-          <div className="col-12 col-md-2">
+          {/* <div className="col-12 col-md-2">
             <div className="mb-2">
               <button 
                 className="btn-reset d-flex" 
@@ -308,7 +355,7 @@ const AppraiserUpdate = () => {
                 {updateMutation.isPending ? "Updating..." : "Update"}
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Error message */}
@@ -341,6 +388,8 @@ const AppraiserUpdate = () => {
                   <th>End Date</th>
                   <th>Repa Name</th>
                   <th>Branch</th>
+                  <th>Update</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -362,6 +411,14 @@ const AppraiserUpdate = () => {
                       <td>{item.endDate}</td>
                       <td>{item.repaName}</td>
                       <td>{item.branch}</td>
+                      <td>
+                      <button 
+                className="btn-reset d-flex" 
+                onClick={handleUpdate}
+                disabled={tableData.length === 0 || updateMutation.isPending}
+              >
+                {updateMutation.isPending ? "Updating..." : "Update"}
+              </button>                      </td>
                     </tr>
                   ))
                 ) : (

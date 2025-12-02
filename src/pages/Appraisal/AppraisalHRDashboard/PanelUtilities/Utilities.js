@@ -23,7 +23,7 @@ const UtilitiesSection = ({ financialYear, quarter }) => {
       path: `/appraisal/hr-dashboard/appraisal-update?financialYear=${financialYear}&quarter=${quarter}`,
     },
     {
-      name: "Appeal Committee",
+      name: "Update Appellate Authority details in bulk",
       path: `/appraisal/hr-dashboard/appeal-comittee?financialYear=${financialYear}&quarter=${quarter}`,
     },
     {

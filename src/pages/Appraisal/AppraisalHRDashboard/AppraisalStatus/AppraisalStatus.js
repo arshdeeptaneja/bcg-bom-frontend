@@ -22,6 +22,19 @@ const AppraiserStatus = () => {
   const [rowStatus, setRowStatus] = useState({}); // Local selected status per row (by urlId)
   const queryClient = useQueryClient();
 
+  // Format date strings like "2024-06-29T18:30:00.000+00:00" -> "2024-06-30"
+  const formatDate = (value) => {
+    if (!value) return "";
+    try {
+      const d = new Date(value);
+      // Handle invalid date
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toISOString().slice(0, 10);
+    } catch {
+      return "";
+    }
+  };
+
   // Extract year from financial year string (e.g., "FY 2024" -> "2024")
   const extractYear = (fy) => {
     const match = fy.match(/FY (\d{4})/);
@@ -45,8 +58,9 @@ const AppraiserStatus = () => {
   const quarter = searchParams.get("quarter"); // Q1, Q2, Q3, Q4
   const financialYear = searchParams.get("financialYear"); 
 
-  // Determine appraisal period value: use quarter from URL if Quarterly, else "Annual"
-  const appraisalPeriodValue = appraisalPeriod === "Quarterly" ? quarter : "Annual";
+  // Determine appraisal period value to send in API:
+  // use the selectedQuarter from UI when Quarterly, else "Annual"
+  const appraisalPeriodValue = appraisalPeriod === "Quarterly" ? selectedQuarter : "Annual";
 
   // React Query: Search HR status records
   const {
@@ -64,8 +78,54 @@ const AppraiserStatus = () => {
         empNo: empNo,
         searchEmpNo: ecNumber,
       });
-      return res || [];
+
+      // API response shape:
+      // {
+      //   results: [
+      //     {
+      //       VARFY: 2025,
+      //       ROLE_END_DATE: "...",
+      //       APPRAISAL_STATUS: "NA",
+      //       PRIMARY_ROLE: "...",
+      //       ORGANIZATION_NAME: "...",
+      //       EMP_NAME: "...",
+      //       EMP_ID: "36663",
+      //       URL_ID: "S-29364",
+      //       LOCATION_ID: 903400,
+      //       BRNAME: "...",
+      //       ZNNAME: "Central Zone",
+      //       ...
+      //     }
+      //   ]
+      // }
+
+      const rawRows = Array.isArray(res?.results) ? res.results : [];
+
+      // Map backend fields into the shape used by the table body
+      const mapped = rawRows.map((item) => ({
+        urlId: item.URL_ID || item.urlId || item.UrlId || "",
+        ecNumber: item.EMP_ID || item.empNo || item.EC_NUMBER || "",
+        employeeName: item.EMP_NAME || item.empName || "",
+        solId: item.LOCATION_ID || item.SOL_ID || "",
+        zone: item.ZNNAME || item.REGNM || "",
+        appraisalstatus: item.APPRAISAL_STATUS || item.appraisalStatus || "",
+        score:
+          item.TOTAL_MEASURABLE_PERFORMANCE_SCORE ??
+          item.MEASURABLE_PERFORMANCE_SCORE ??
+          "",
+        // Format dates to "yyyy-mm-dd"
+        startDate: formatDate(item.ROLE_START_DATE),
+        endDate: formatDate(item.ROLE_END_DATE),
+        reason: item.REMARKS || item.reason || "",
+        // Keep original fields if needed later (e.g., for payload)
+        raw: item,
+        roleCode: item.ROLE_CODE || item.ROLECODE || "",
+      }));
+
+      return mapped;
     },
+    // Only run automatically when user has initiated a search;
+    // prevents calls while typing before Search is clicked.
     enabled: shouldSearch && !!ecNumber.trim() && !!appraisalPeriodValue,
     retry: false,
   });
@@ -204,7 +264,11 @@ const AppraiserStatus = () => {
                   className="form-control ec-input"
                   placeholder="Enter EC Number"
                   value={ecNumber}
-                  onChange={(e) => setEcNumber(e.target.value)}
+                  onChange={(e) => {
+                    setEcNumber(e.target.value);
+                    // Avoid triggering search while typing; require Search button click
+                    setShouldSearch(false);
+                  }}
                 />
 
               </div>
