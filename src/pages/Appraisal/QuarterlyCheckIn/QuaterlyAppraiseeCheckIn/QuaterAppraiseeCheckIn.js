@@ -45,7 +45,7 @@ function QuaterlyAppraiseeCheckIn() {
   const [months, setMonths] = useState(["April", "May", "June"]);
 
   // Get data from location state
-  const { financialYear, appraisalPeriod, quarter, dateRange, employee, intent, page_type } = location.state;
+  const { financialYear, appraisalPeriod, quarter, dateRange, employee, intent, page_type, roleType } = location.state;
 
   console.log("EMPLOYEE IS: ", employee)
   // Get employee number from auth context as fallback
@@ -396,7 +396,17 @@ const buildPerformanceMeasurableComments = () => {
       <div className="pageWrapper">
         <div className="pageWrapper-header">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
+            {
+              roleType === "appraiser" ? (
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                  Add Appraiser Check-In
+                </h1>
+              ) : (
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                  Add Appraisee Check-In
+                </h1>
+              )
+            }
         </div>
         <div className="text-center mt-5">
           <p className="text-danger fw-semibold">Missing required parameters: Financial Year, Appraisal Period, or Quarter</p>
@@ -411,7 +421,17 @@ const buildPerformanceMeasurableComments = () => {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
+            {
+              roleType === "appraiser" ? (
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                  Add Appraiser Check-In
+                </h1>
+              ) : (
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                  Add Appraisee Check-In
+                </h1>
+              )
+            }
           </div>
         </div>
         <LoadingSpinner />
@@ -425,7 +445,17 @@ const buildPerformanceMeasurableComments = () => {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
+            {
+              roleType === "appraiser" ? (
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                  Add Appraiser Check-In
+                </h1>
+              ) : (
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                  Add Appraisee Check-In
+                </h1>
+              )
+            }
           </div>
         </div>
         <div className="text-center mt-5">
@@ -441,7 +471,17 @@ const buildPerformanceMeasurableComments = () => {
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Add Appraisee Check-In</h1>
+          {
+              roleType === "appraiser" ? (
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                  Add Appraiser Check-In
+                </h1>
+              ) : (
+                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                  Add Appraisee Check-In
+                </h1>
+              )
+            }
         </div>
       </div>
 
