@@ -97,7 +97,7 @@ export default function QuaterlyMeasurableKraTable({ data = [], activeMonth }) {
 
       {/* Table */}
       <div className="table-responsive">
-        <table className="table table-bordered measurable-table">
+        <table className="table measurable-table table-accent">
           <thead className="table-header">
             <tr>
               <th style={{ width: "35%" }}>KRA</th>

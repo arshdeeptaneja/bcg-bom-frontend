@@ -263,11 +263,16 @@ export default function AppraiserCheckInDashboard() {
             Appraiser Check-In Dashboard
           </h1>
         </div>
-
-        <h4 className="text-muted fw-bold mb-0">
-          {quarter}, {financialYear} Quarterly Check-In
-        </h4>
-      </div>
+        {appraisalPeriod === "Annual" ? (
+            <h4 className="text-muted fw-bold mb-0">
+              {quarter}, {financialYear} Annual Check-In
+            </h4>
+          ) :            
+            <h4 className="text-muted fw-bold mb-0">
+               {quarter}, {financialYear} Quarterly Check-In
+            </h4>
+        }
+        </div>
 
       {/* ---------------- FILTER BAR ---------------- */}
       <div className="row g-3 mb-4 appraiser-filter-bar">

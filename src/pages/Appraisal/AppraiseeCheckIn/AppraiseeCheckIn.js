@@ -217,6 +217,7 @@ console.log('results:', results);
                   navigate(`/appraisal/check-in-form?${queryParams}`, {
                     state: {
                       employee: employeeModel,
+                      dateRange: cardDateRange
                     },
                   });
                 } else {
