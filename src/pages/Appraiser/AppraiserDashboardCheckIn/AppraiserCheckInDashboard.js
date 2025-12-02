@@ -388,7 +388,7 @@ export default function AppraiserCheckInDashboard() {
             empNo: record?.EMP_ID,
             employeeName: record?.EMP_NAME,
             url: record?.URL_ID,
-            appraisalStatus: record?.APPRAISAL_STATUS,
+            appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
             employeeScale: appraisalPeriod === 'Annual' ? record?.EMP_SCALE : record?.SCALE,
             additionalRoles: buildAdditionalRoles(record),
             branch: record?.ORGANIZATION,
@@ -410,10 +410,12 @@ export default function AppraiserCheckInDashboard() {
               additionalRoles={buildAdditionalRoles(record)}
               organization={record?.ORGANIZATION}
               userType="appraiser"
-              appraisalStatus={getDisplayStatus(record?.APPRAISAL_STATUS)}
+              appraisalStatus={getDisplayStatus(record?.APPRAISAL_STATUS || record?.STATUS)}
               exceptionStatus={record?.EXCEPTION_STATUS || 'NOT CREATED'}
               scoreData={scoreTable}
-              isCheckInDisabled={record?.APPRAISAL_STATUS !== 'complete_self'}
+              isCheckInDisabled={
+                record?.APPRAISAL_STATUS !== 'complete_self' && record?.STATUS !== 'complete_self'
+              }
               onAddCheckIn={() =>
                 navigate('/quarterly/quaterly-appraisee-check-in', {
                   state: {
@@ -428,7 +430,7 @@ export default function AppraiserCheckInDashboard() {
                     roleType: 'appraiser',
                     pageType: 'review',
                     intent: 'Review',
-                    appraisalStatus: record?.APPRAISAL_STATUS,
+                    appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
                   },
                 })
               }
