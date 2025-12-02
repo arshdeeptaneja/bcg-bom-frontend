@@ -6,31 +6,31 @@
  * component renders a dashboard for an appraiser to check in on their reportees' appraisals for a
  * specific financial year, appraisal period, and quarter.
  */
-import { useState, useMemo } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
-import { BackButton } from "../../../components/common";
-import "./AppraiserCheckInDashboard.css";
+import { BackButton } from '../../../components/common';
+import './AppraiserCheckInDashboard.css';
 
-import EmployeeAppraisalCard from "../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard";
-import EmployeeModel from "../../../models/EmployeeModel";
-import { appraisalAPI } from "../../../services/api";
-import { useAuth } from "../../../contexts/AuthContext";
-import LoadingSpinner from "../../../components/Spinner";
+import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
+import EmployeeModel from '../../../models/EmployeeModel';
+import { appraisalAPI } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+import LoadingSpinner from '../../../components/Spinner';
 
 const STATUS_MAPPING = {
-  complete_reva: "Pending at Acceptor",
-  complete_self: "Pending at Appraiser",
-  complete_repa: "Pending at Reviewer",
-  pending: "Pending at Appraisee",
-  submitted_appraisal: "Completed",
-  completed: "Completed",
-  complete_ac: "Completed",
+  complete_reva: 'Pending at Acceptor',
+  complete_self: 'Pending at Appraiser',
+  complete_repa: 'Pending at Reviewer',
+  pending: 'Pending at Appraisee',
+  submitted_appraisal: 'Completed',
+  completed: 'Completed',
+  complete_ac: 'Completed',
 };
 
 const getDisplayStatus = (backendStatus) => {
-  if (!backendStatus) return "Pending";
+  if (!backendStatus) return 'Pending';
   const normalized = String(backendStatus).toLowerCase();
   return STATUS_MAPPING[normalized] || backendStatus;
 };
@@ -39,7 +39,7 @@ const pickNumericValue = (source, keys = []) => {
   if (!source) return NaN;
   for (const key of keys) {
     const raw = source[key];
-    if (raw === undefined || raw === null || raw === "") continue;
+    if (raw === undefined || raw === null || raw === '') continue;
     const parsed = Number(raw);
     if (!Number.isNaN(parsed)) {
       return parsed;
@@ -52,12 +52,7 @@ const computeAverageFromScoreTable = (scoreEntries) => {
   if (!Array.isArray(scoreEntries) || scoreEntries.length === 0) return 0;
 
   const total = scoreEntries.reduce((sum, entry) => {
-    const value = Number(
-      entry?.PERCENTAGE_SCORE ??
-      entry?.percentageScore ??
-      entry?.SCORE ??
-      0
-    );
+    const value = Number(entry?.PERCENTAGE_SCORE ?? entry?.percentageScore ?? entry?.SCORE ?? 0);
     return sum + (Number.isNaN(value) ? 0 : value);
   }, 0);
 
@@ -71,17 +66,13 @@ const extractYear = (fyLabel) => {
 };
 
 const buildAdditionalRoles = (r) => {
-  return [
-    r?.ADDITIONAL_ROLE_2,
-    r?.ADDITIONAL_ROLE_3,
-    r?.ADDITIONAL_ROLE_4,
-  ]
+  return [r?.ADDITIONAL_ROLE_2, r?.ADDITIONAL_ROLE_3, r?.ADDITIONAL_ROLE_4]
     .filter(Boolean)
     .map((x) => String(x));
 };
 
 const buildDateRange = (start, end) => {
-  if (!start || !end) return "";
+  if (!start || !end) return '';
   return `${start} - ${end}`;
 };
 
@@ -89,27 +80,24 @@ export default function AppraiserCheckInDashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const financialYear = searchParams.get("financialYear");
-  const appraisalPeriod = searchParams.get("appraisalPeriod");
-  const quarter = searchParams.get("quarter");
+  const financialYear = searchParams.get('financialYear');
+  const appraisalPeriod = searchParams.get('appraisalPeriod');
+  const quarter = searchParams.get('quarter');
 
   const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
 
-  const authEmpNo = getUserProperty(
-    "empNo",
-    employeeDetails?.currentUser?.[0]?.EMP_ID || ""
-  );
+  const authEmpNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
 
-  const isQuarterlyFlow = appraisalPeriod?.toLowerCase() === "quarterly";
+  const isQuarterlyFlow = appraisalPeriod?.toLowerCase() === 'quarterly';
 
   // -------------------- FILTER STATE -------------------------
   const [filters, setFilters] = useState({
-    empNo: "",
-    empName: "",
-    primaryRole: "",
-    appraiser: "",
-    status: "",
+    empNo: '',
+    empName: '',
+    primaryRole: '',
+    appraiser: '',
+    status: '',
   });
 
   const {
@@ -122,12 +110,7 @@ export default function AppraiserCheckInDashboard() {
 
   // -------------------- API CALL -------------------------
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: [
-      "appraiserCheckInDashboard",
-      financialYear,
-      quarter,
-      authEmpNo,
-    ],
+    queryKey: ['appraiserCheckInDashboard', financialYear, quarter, authEmpNo],
 
     queryFn: () =>
       appraisalAPI.getAppraiserCheckInDashboard({
@@ -135,7 +118,7 @@ export default function AppraiserCheckInDashboard() {
         //empNo: "38096",
         financialYear: extractYear(financialYear),
         quarter,
-        appraisalPeriod: appraisalPeriod === "Quarterly" ? "quarter" : "annual",
+        appraisalPeriod: appraisalPeriod === 'Quarterly' ? 'quarter' : 'annual',
       }),
 
     enabled: Boolean(authEmpNo && financialYear && quarter),
@@ -151,10 +134,7 @@ export default function AppraiserCheckInDashboard() {
   const filteredReportees = useMemo(() => {
     return reportees.filter((record) => {
       // Filter by Employee Number
-      if (
-        filterEmpId &&
-        !String(record?.EMP_ID).includes(filterEmpId)
-      ) {
+      if (filterEmpId && !String(record?.EMP_ID).includes(filterEmpId)) {
         return false;
       }
 
@@ -167,28 +147,20 @@ export default function AppraiserCheckInDashboard() {
       }
 
       // Filter by Primary Role
-      if (
-        filterRole &&
-        String(record?.MAIN_ROLE).toLowerCase() !==
-          filterRole.toLowerCase()
-      ) {
+      if (filterRole && String(record?.MAIN_ROLE).toLowerCase() !== filterRole.toLowerCase()) {
         return false;
       }
 
       // Filter by Appraiser (Reporting Authority)
       if (
         filterAppraiser &&
-        String(record?.REPORTING_AUTHORITY_NAME).toLowerCase() !==
-          filterAppraiser.toLowerCase()
+        String(record?.REPORTING_AUTHORITY_NAME).toLowerCase() !== filterAppraiser.toLowerCase()
       ) {
         return false;
       }
 
       // Filter by Status
-      if (
-        filterStatus &&
-        getDisplayStatus(record?.APPRAISAL_STATUS) !== filterStatus
-      ) {
+      if (filterStatus && getDisplayStatus(record?.APPRAISAL_STATUS) !== filterStatus) {
         return false;
       }
 
@@ -204,11 +176,11 @@ export default function AppraiserCheckInDashboard() {
 
   const handleReset = () => {
     setFilters({
-      empNo: "",
-      empName: "",
-      primaryRole: "",
-      appraiser: "",
-      status: "",
+      empNo: '',
+      empName: '',
+      primaryRole: '',
+      appraiser: '',
+      status: '',
     });
   };
 
@@ -268,27 +240,22 @@ export default function AppraiserCheckInDashboard() {
   if (isError)
     return (
       <div className="pageWrapper">
-        <p className="text-center text-danger fw-bold mt-5">
-          Failed to load reportee data
-        </p>
+        <p className="text-center text-danger fw-bold mt-5">Failed to load reportee data</p>
         <p className="text-center text-muted">{error?.message}</p>
       </div>
     );
 
-    if(data.text){
-      return (
-        <div className="pageWrapper">
-          <div className="text-center mt-5 text-danger fw-bold">
-            {data.text}
-          </div>
-        </div>
-      );
-    }
+  if (data.text) {
+    return (
+      <div className="pageWrapper">
+        <div className="text-center mt-5 text-danger fw-bold">{data.text}</div>
+      </div>
+    );
+  }
 
   // -------------------- UI -------------------------
   return (
     <div className="pageWrapper">
-
       <div className="pageWrapper-header d-flex justify-content-between align-items-center">
         <div className="headline d-flex align-items-center">
           <BackButton />
@@ -304,7 +271,6 @@ export default function AppraiserCheckInDashboard() {
 
       {/* ---------------- FILTER BAR ---------------- */}
       <div className="row g-3 mb-4 appraiser-filter-bar">
-
         <div className="col-md-2">
           <label className="form-label fw-semibold">EMPLOYEE NUMBER</label>
           <select
@@ -395,7 +361,6 @@ export default function AppraiserCheckInDashboard() {
             Reset <i className="bi bi-arrow-repeat ms-1"></i>
           </button>
         </div>
-
       </div>
 
       {/* ---------------- SUMMARY CARD ---------------- */}
@@ -413,30 +378,27 @@ export default function AppraiserCheckInDashboard() {
 
       {/* ---------------- EMPLOYEE CARDS ---------------- */}
       <div className="employee-appraisal-cards mt-4">
-
         {filteredReportees.length === 0 && (
-          <p className="text-center text-muted fw-bold mt-5">
-            No reportees found.
-          </p>
+          <p className="text-center text-muted fw-bold mt-5">No reportees found.</p>
         )}
 
-        {console.log("appraisal period: ", appraisalPeriod)}
+        {console.log('appraisal period: ', appraisalPeriod)}
         {filteredReportees.map((record, index) => {
           const employeeModel = new EmployeeModel({
             empNo: record?.EMP_ID,
             employeeName: record?.EMP_NAME,
             url: record?.URL_ID,
             appraisalStatus: record?.APPRAISAL_STATUS,
-            employeeScale: appraisalPeriod === "Annual" ? record?.EMP_SCALE :record?.SCALE,
+            employeeScale: appraisalPeriod === 'Annual' ? record?.EMP_SCALE : record?.SCALE,
             additionalRoles: buildAdditionalRoles(record),
             branch: record?.ORGANIZATION,
             appraiser: authEmpNo,
-            primaryRole: appraisalPeriod === "Annual" ? record?.PRIMARY_ROLE : record?.MAIN_ROLE,
+            primaryRole: appraisalPeriod === 'Annual' ? record?.PRIMARY_ROLE : record?.MAIN_ROLE,
           });
 
           const dateRange = buildDateRange(
-            appraisalPeriod === "Annual" ? record?.ROLE_START_DATE : record?.STARTDATE,
-            appraisalPeriod === "Annual" ? record?.ROLE_END_DATE : record?.ENDDATE
+            appraisalPeriod === 'Annual' ? record?.ROLE_START_DATE : record?.STARTDATE,
+            appraisalPeriod === 'Annual' ? record?.ROLE_END_DATE : record?.ENDDATE
           );
 
           return (
@@ -444,35 +406,34 @@ export default function AppraiserCheckInDashboard() {
               key={index}
               employee={employeeModel}
               dateRange={dateRange}
-              primaryRole={ appraisalPeriod === "Annual" ? record?.PRIMARY_ROLE : record?.MAIN_ROLE}
+              primaryRole={appraisalPeriod === 'Annual' ? record?.PRIMARY_ROLE : record?.MAIN_ROLE}
               additionalRoles={buildAdditionalRoles(record)}
               organization={record?.ORGANIZATION}
               userType="appraiser"
-              appraisalStatus={getDisplayStatus(
-                record?.APPRAISAL_STATUS
-              )}
-              exceptionStatus={record?.EXCEPTION_STATUS || "NOT CREATED"}
+              appraisalStatus={getDisplayStatus(record?.APPRAISAL_STATUS)}
+              exceptionStatus={record?.EXCEPTION_STATUS || 'NOT CREATED'}
               scoreData={scoreTable}
+              isCheckInDisabled={record?.APPRAISAL_STATUS !== 'complete_self'}
               onAddCheckIn={() =>
-                navigate("/quarterly/quaterly-appraisee-check-in", {
+                navigate('/quarterly/quaterly-appraisee-check-in', {
                   state: {
                     financialYear,
                     appraisalPeriod,
                     quarter,
-                    page_type: "repa",
+                    page_type: 'repa',
                     dateRange,
                     employee: employeeModel,
                     organizationName: record?.ORGANIZATION,
                     urlId: record?.URL_ID,
-                    roleType: "appraiser",
-                    pageType: "review",
-                    intent: "Review",
+                    roleType: 'appraiser',
+                    pageType: 'review',
+                    intent: 'Review',
                     appraisalStatus: record?.APPRAISAL_STATUS,
                   },
                 })
               }
-              onViewSummary={() => { }}
-              onAddException={() => { }}
+              onViewSummary={() => {}}
+              onAddException={() => {}}
             />
           );
         })}
