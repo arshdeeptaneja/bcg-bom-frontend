@@ -422,7 +422,7 @@ export default function AppraiserCheckInDashboard() {
                 record?.APPRAISAL_STATUS !== 'complete_self' && record?.STATUS !== 'complete_self'
               }
               onAddCheckIn={() =>
-                navigate('/quarterly/quaterly-appraisee-check-in', {
+                navigate('/appraisal/annual/appraiser-review', {
                   state: {
                     financialYear,
                     appraisalPeriod,
