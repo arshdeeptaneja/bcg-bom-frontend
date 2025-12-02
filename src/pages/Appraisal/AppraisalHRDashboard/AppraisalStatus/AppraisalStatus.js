@@ -19,6 +19,7 @@ const AppraiserStatus = () => {
   const [selectedQuarter, setSelectedQuarter] = useState('Q1'); // Q1, Q2, Q3, Q4
   const [ecNumber, setEcNumber] = useState(""); // Employee EC number for search
   const [shouldSearch, setShouldSearch] = useState(false); // Controls when to trigger search query
+  const [rowStatus, setRowStatus] = useState({}); // Local selected status per row (by urlId)
   const queryClient = useQueryClient();
 
   // Extract year from financial year string (e.g., "FY 2024" -> "2024")
@@ -92,27 +93,18 @@ const AppraiserStatus = () => {
   };
 
 
-  // React Query mutation: Update appraisal status
+  // React Query mutation: Update appraisal status (can send multiple rows in one payload)
   const statusUpdateMutation = useMutation({
-    mutationFn: async ({ item, newStatus }) => {
-      const roleName = getUserProperty("roleType") || getUserProperty("ROLE_TYPE");
-      const sol = getUserProperty("sol") || getUserProperty("LOCATION");
-      const empNo = getUserProperty("empNo");
+    mutationFn: async ({ statusUpdates }) => {
       const empName = getUserProperty("name");
-      const numericFY = "2025"; // TODO: Use extractYear(financialYear)
+      const numericFY = Number(extractYear(financialYear));
 
       const payload = {
-        statusUpdates: [
-          {
-            urlid: item.urlId,
-            rolecode: item.roleCode || "",
-            status: newStatus,
-            comment: item.reason || ""
-          }
-        ],
+        statusUpdates,
         roleName: roleName,
         solId: sol,
-        appraisalPeriod: appraisalPeriod === "Annual" ? "annual" : selectedQuarter.toLowerCase(),
+        // Match backend expectations: "annual" or "quarterly"
+        appraisalPeriod: appraisalPeriod === "Annual" ? "annual" : "quarterly",
         quarter: appraisalPeriod === "Annual" ? null : selectedQuarter,
         financialYear: Number(numericFY),
         empNo: empNo,
@@ -124,6 +116,7 @@ const AppraiserStatus = () => {
     onSuccess: () => {
       toast.success("Status updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["hrStatusSearch"] }); // Refresh search results
+      setRowStatus({}); // clear local selections
     },
     onError: (error) => {
       console.error("Status update error:", error);
@@ -131,17 +124,40 @@ const AppraiserStatus = () => {
     },
   });
 
-  // Handle status change with confirmation
-  const handleStatusChange = async (item, newStatus) => {
-    if (!newStatus) return;
+  // Track dropdown selection per row (but don't call API yet)
+  const handleStatusSelectChange = (item, newStatus) => {
+    setRowStatus((prev) => ({
+      ...prev,
+      [item.urlId]: newStatus,
+    }));
+  };
+
+  // Trigger update API for all rows that have a selected status
+  const handleBulkUpdate = () => {
+    const statusUpdates = (tableData || [])
+      .map((item) => {
+        const selectedStatus = rowStatus[item.urlId];
+        if (!selectedStatus) return null;
+        return {
+          urlid: item.urlId,
+          rolecode: item.roleCode || "",
+          status: (selectedStatus || "").toLowerCase(),
+          comment: item.reason || "",
+        };
+      })
+      .filter(Boolean);
+
+    if (!statusUpdates.length) {
+      toast.error("Please select a status for at least one row before updating.");
+      return;
+    }
 
     const confirmUpdate = window.confirm(
-      `Are you sure you want to update status to "${newStatus}"?`
+      `Are you sure you want to update status for ${statusUpdates.length} record(s)?`
     );
-
     if (!confirmUpdate) return;
 
-    statusUpdateMutation.mutate({ item, newStatus });
+    statusUpdateMutation.mutate({ statusUpdates });
   };
 
 
@@ -268,8 +284,13 @@ const AppraiserStatus = () => {
           <div className="col-12 col-md-2">
 
               <div className="mb-2">
-                <button className="btn-reset d-flex" style={{justifyContent:'left'}} >
-                  Update
+                <button
+                  className="btn-reset d-flex"
+                  style={{ justifyContent: 'left' }}
+                  onClick={handleBulkUpdate}
+                  disabled={statusUpdateMutation.isPending}
+                >
+                  {statusUpdateMutation.isPending ? "Updating..." : "Update"}
                 </button>
               </div>
               </div>
@@ -325,9 +346,8 @@ const AppraiserStatus = () => {
                       <td>
                         <select
                           className="form-select custom-select"
-                          value={item.action}
-                        onChange={(e) => handleStatusChange(item, e.target.value)}
-
+                          value={rowStatus[item.urlId] || ""}
+                          onChange={(e) => handleStatusSelectChange(item, e.target.value)}
                         >
                           <option value="">-Select-</option>
                           <option value="Approved">Approved</option>

@@ -34,10 +34,6 @@ h2 {
   border-radius: var(--border-radius);
 }
 
-.table-header {
-  background-color: var(--accent-color);
-  color: var(--bs-primary);
-}
 
 .table-header th,
 .table-header td {

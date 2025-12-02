@@ -61,36 +61,160 @@ const EmployeeAppealList = () => {
     const [Data, setData] = useState([]);
 
     useEffect(() => {
-        if (data) {
-            const responseData = data?.data || data;
-            
-            // Map API response to table data structure
-            if (responseData?.result && Array.isArray(responseData.result)) {
-                const mappedData = responseData.result.map((item) => ({
-                    ticketId: item.ticket_id || item.TICKET_ID || item.ticketId || '',
-                    empNumber: item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
-                    empName: item.emp_name || item.EMP_NAME || item.employeeName || item.employee_name || '',
-                    primaryRole: item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
-                    branch: item.branch || item.BRANCH || item.branch_name || item.BRANCH_NAME || '',
-                    preAppeal: item.pre_appeal || item.PRE_APPEAL || item.preAppeal || '',
-                    postAppeal: item.post_appeal || item.POST_APPEAL || item.postAppeal || '',
-                    appealStatus: item.appeal_status || item.APPEAL_STATUS || item.appealStatus || 'Pending',
-                }));
-                setData(mappedData);
-            } else if (Array.isArray(responseData)) {
-                // Handle case where response is directly an array
-                const mappedData = responseData.map((item) => ({
-                    ticketId: item.ticket_id || item.TICKET_ID || item.ticketId || '',
-                    empNumber: item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
-                    empName: item.emp_name || item.EMP_NAME || item.employeeName || item.employee_name || '',
-                    primaryRole: item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
-                    branch: item.branch || item.BRANCH || item.branch_name || item.BRANCH_NAME || '',
-                    preAppeal: item.pre_appeal || item.PRE_APPEAL || item.preAppeal || '',
-                    postAppeal: item.post_appeal || item.POST_APPEAL || item.postAppeal || '',
-                    appealStatus: item.appeal_status || item.APPEAL_STATUS || item.appealStatus || 'Pending',
-                }));
-                setData(mappedData);
-            }
+        if (!data) return;
+
+        // Some axios calls wrap in .data, support both
+        const responseData = data?.data || data;
+
+        // New API structure:
+        // {
+        //   filter_data: { ... },
+        //   results: {
+        //     data_out: [...],
+        //     count_out: [...],
+        //     COMMITEE_LIST_OUT: [...]
+        //   }
+        // }
+
+        const dataOut = responseData?.results?.data_out;
+
+        if (Array.isArray(dataOut)) {
+            const mappedData = dataOut.map((item) => ({
+                ticketId:
+                    item.CUST_TICKET_ID ||
+                    item.TICKET_ID ||
+                    item.ticket_id ||
+                    item.ticketId ||
+                    '',
+                empNumber:
+                    item.EC_NUMBER ||
+                    item.EMP_NUMBER ||
+                    item.emp_number ||
+                    item.empNo ||
+                    '',
+                empName:
+                    item.EMP_NAME ||
+                    item.emp_name ||
+                    item.employeeName ||
+                    item.employee_name ||
+                    '',
+                primaryRole:
+                    item.PRIMARY_ROLE ||
+                    item.primary_role ||
+                    item.role ||
+                    item.ROLE ||
+                    '',
+                branch:
+                    item.BRNAME ||
+                    item.branch ||
+                    item.BRANCH ||
+                    item.branch_name ||
+                    item.BRANCH_NAME ||
+                    item.ORG_NAME ||
+                    '',
+                // Use score + grade where available, fallback to grade only
+                preAppeal:
+                    item.TOTAL_SCORE != null && item.FINAL_GRADE
+                        ? `${item.TOTAL_SCORE} (${item.FINAL_GRADE})`
+                        : item.FINAL_GRADE ||
+                          item.pre_appeal ||
+                          item.PRE_APPEAL ||
+                          item.preAppeal ||
+                          '',
+                postAppeal:
+                    item.TOTAL_FINAL_SCORE != null && item.POST_APPEAL_FINAL_GRADE
+                        ? `${item.TOTAL_FINAL_SCORE} (${item.POST_APPEAL_FINAL_GRADE})`
+                        : item.POST_APPEAL_FINAL_GRADE ||
+                          item.post_appeal ||
+                          item.POST_APPEAL ||
+                          item.postAppeal ||
+                          '',
+                appealStatus:
+                    item.FINAL_APPEAL_STATUS ||
+                    item.STATUS ||
+                    item.appeal_status ||
+                    item.APPEAL_STATUS ||
+                    item.appealStatus ||
+                    'Pending',
+            }));
+
+            setData(mappedData);
+            return;
+        }
+
+        // Fallbacks for older shapes if needed
+        if (responseData?.result && Array.isArray(responseData.result)) {
+            const mappedData = responseData.result.map((item) => ({
+                ticketId: item.ticket_id || item.TICKET_ID || item.ticketId || '',
+                empNumber:
+                    item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
+                empName:
+                    item.emp_name ||
+                    item.EMP_NAME ||
+                    item.employeeName ||
+                    item.employee_name ||
+                    '',
+                primaryRole:
+                    item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
+                branch:
+                    item.branch ||
+                    item.BRANCH ||
+                    item.branch_name ||
+                    item.BRANCH_NAME ||
+                    '',
+                preAppeal:
+                    item.pre_appeal ||
+                    item.PRE_APPEAL ||
+                    item.preAppeal ||
+                    '',
+                postAppeal:
+                    item.post_appeal ||
+                    item.POST_APPEAL ||
+                    item.postAppeal ||
+                    '',
+                appealStatus:
+                    item.appeal_status ||
+                    item.APPEAL_STATUS ||
+                    item.appealStatus ||
+                    'Pending',
+            }));
+            setData(mappedData);
+        } else if (Array.isArray(responseData)) {
+            const mappedData = responseData.map((item) => ({
+                ticketId: item.ticket_id || item.TICKET_ID || item.ticketId || '',
+                empNumber:
+                    item.emp_number || item.EMP_NUMBER || item.empNo || item.EMP_ID || '',
+                empName:
+                    item.emp_name ||
+                    item.EMP_NAME ||
+                    item.employeeName ||
+                    item.employee_name ||
+                    '',
+                primaryRole:
+                    item.primary_role || item.PRIMARY_ROLE || item.role || item.ROLE || '',
+                branch:
+                    item.branch ||
+                    item.BRANCH ||
+                    item.branch_name ||
+                    item.BRANCH_NAME ||
+                    '',
+                preAppeal:
+                    item.pre_appeal ||
+                    item.PRE_APPEAL ||
+                    item.preAppeal ||
+                    '',
+                postAppeal:
+                    item.post_appeal ||
+                    item.POST_APPEAL ||
+                    item.postAppeal ||
+                    '',
+                appealStatus:
+                    item.appeal_status ||
+                    item.APPEAL_STATUS ||
+                    item.appealStatus ||
+                    'Pending',
+            }));
+            setData(mappedData);
         }
     }, [data]);
 
@@ -205,6 +329,8 @@ const EmployeeAppealList = () => {
                             }
                         >
                             <option>-Select-</option>
+                            <option>2024</option>
+
                             <option>2025</option>
                             <option>2026</option>
                         </select>

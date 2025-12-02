@@ -93,9 +93,9 @@ const UtilitiesSection = ({ financialYear, quarter }) => {
       setShowConfirmModal(false); // Close confirmation modal
       if (data?.type === "success") {
         toast.success(data?.message || "Annual roles inserted successfully!");
-      } else {
+    } else {
         toast.error(data?.message || "Failed to insert Annual Roles!");
-      }
+    }
     },
     onError: (error) => {
       console.error("Insert Annual Roles Error:", error);
@@ -115,7 +115,7 @@ const UtilitiesSection = ({ financialYear, quarter }) => {
 
   const handleCancelInsert = () => {
     setShowConfirmModal(false);
-  };
+};
 
   const handleClick = (utility) => {
     if (utility.name === "Insert Annual Roles") {

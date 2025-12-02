@@ -16,12 +16,12 @@ import { toast } from "react-toastify";
 
 const ReportingReviewBulk = () => {
   const queryClient = useQueryClient();
-  const { getEmployeeDetails, getUserProperty } = useAuth();
-  const [selectedFile, setSelectedFile] = useState(null);
+    const { getEmployeeDetails, getUserProperty } = useAuth();
+    const [selectedFile, setSelectedFile] = useState(null);
 
-  // Get employee number from auth context
-  const employeeDetails = getEmployeeDetails();
-  const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
+      // Get employee number from auth context
+    const employeeDetails = getEmployeeDetails();
+    const empNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
   const sol = getUserProperty('LOCATION', employeeDetails?.currentUser?.[0]?.LOCATION || employeeDetails?.currentUser?.[0]?.solid || '');
   const roleNameRaw = getUserProperty('ROLE_NAME', employeeDetails?.currentUser?.[0]?.ROLE_NAME || '');
   // Decode URL-encoded roleName (e.g., "Administrative+Officers" -> "Administrative Officers")
@@ -59,13 +59,13 @@ const financialYear = searchParams.get("financialYear");
     mutationFn: async ({ file }) => {
       return await appraisalAPI.reportingAuthorityAndReviewAnnualUpload({
         file: file,
-        sol: sol,
-        roleName: roleName,
-        empNo: empNo,
-      });
+            sol: sol,
+            roleName: roleName,
+            empNo: empNo,
+          });
     },
     onSuccess: () => {
-      toast.success("Upload successful!");
+          toast.success("Upload successful!");
       queryClient.invalidateQueries({ queryKey: ["reportingAuthorityAndReviewAnnualErrorLogs"] }); // Refresh error logs
       setSelectedFile(null); // Clear selected file after successful upload
     },
@@ -101,25 +101,25 @@ const financialYear = searchParams.get("financialYear");
   // React Query mutation: Download sample file
   const downloadSampleMutation = useMutation({
     mutationFn: async () => {
-      const blob = await appraisalAPI.reportingAuthorityReviewingAuthorityBulkDownloadSample({
-        roleName: roleName,
-        regionCode: sol,
-        quarter: quarter,
-        financialYear: extractYear(financialYear),
-      });
+          const blob = await appraisalAPI.reportingAuthorityReviewingAuthorityBulkDownloadSample({
+            roleName: roleName,   
+            regionCode: sol,  
+            quarter: quarter,         
+            financialYear: extractYear(financialYear),
+          });
       return blob;
     },
     onSuccess: (blob) => {
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `reporting_authority_bulk_sample_${Date.now()}.xlsx`
-      );
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+          const url = window.URL.createObjectURL(new Blob([blob]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute(
+            "download",
+            `reporting_authority_bulk_sample_${Date.now()}.xlsx`
+          );
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       toast.success("Sample file downloaded successfully!");
     },
@@ -132,25 +132,25 @@ const financialYear = searchParams.get("financialYear");
   // React Query mutation: Download data table
   const downloadDataTableMutation = useMutation({
     mutationFn: async () => {
-      const blob = await appraisalAPI.reportingAuthorityAndReviewAnnualDownloadDataTable({
-        roleName: roleName,
-        regionCode: sol,
-        quarter: "Q1",
-        financialYear: extractYear(financialYear),
-      });
+          const blob = await appraisalAPI.reportingAuthorityAndReviewAnnualDownloadDataTable({
+            roleName: roleName,
+            regionCode: sol,
+            quarter: "Q1",
+            financialYear: extractYear(financialYear),
+          });
       return blob;
     },
     onSuccess: (blob) => {
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `reporting_authority_bulk_data_table_${Date.now()}.xlsx`
-      );
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+          const url = window.URL.createObjectURL(new Blob([blob]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute(
+            "download",
+            `reporting_authority_bulk_data_table_${Date.now()}.xlsx`
+          );
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       toast.success("Data table downloaded successfully!");
     },
@@ -163,29 +163,29 @@ const financialYear = searchParams.get("financialYear");
 
 
   // React Query: Fetch error logs
-  const {
-    data: errorLogs,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+    const {
+        data: errorLogs,
+        isLoading,
+        isError,
+        error,
+      } = useQuery({
     queryKey: ["reportingAuthorityAndReviewAnnualErrorLogs", extractYear(financialYear)],
-    queryFn: () =>
-      appraisalAPI.reportingAuthorityAndReviewAnnualErrorLogs({
-        financialYear: extractYear(financialYear),
-      }),
-    enabled: !!financialYear,
+        queryFn: () =>
+          appraisalAPI.reportingAuthorityAndReviewAnnualErrorLogs({
+            financialYear: extractYear(financialYear),
+          }),
+        enabled: !!financialYear,
     retry: false,
-  });
+      });
 
-  // Show toast if API fails
-  useEffect(() => {
-    if (isError) {
-      toast.error(
-        `Failed to fetch error logs: ${error?.message || "Unknown error"}`
-      );
-    }
-  }, [isError, error]);
+    // Show toast if API fails
+    useEffect(() => {
+        if (isError) {
+        toast.error(
+            `Failed to fetch error logs: ${error?.message || "Unknown error"}`
+        );
+        }
+    }, [isError, error]);
 
   // Extract table data from error logs response
   const tableData = errorLogs?.files || errorLogs?.list_data || (Array.isArray(errorLogs) ? errorLogs : []);
@@ -337,18 +337,18 @@ const financialYear = searchParams.get("financialYear");
                                 tableData.map((row, index) => (
                                     <tr key={row.id || index}>
                                         <td className="text-center">{index + 1}</td>
-                                        <td className="file-name">{row.fileName}</td>
-                                        <td>{row.date}</td>
-                                        <td className={row.status === "SUCCESS" ? "status-success" : "status-failed"}>
-                                            {row.status}
-                                        </td>
-                                        <td>{row.records}</td>
-                                        <td>{row.uploadedBy}</td>
-                                        <td className="download-cell">
-                                            <FaDownload className="download-icon" />
-                                        </td>
-                                    </tr>
-                                ))}
+                                    <td className="file-name">{row.fileName}</td>
+                                    <td>{row.date}</td>
+                                    <td className={row.status === "SUCCESS" ? "status-success" : "status-failed"}>
+                                        {row.status}
+                                    </td>
+                                    <td>{row.records}</td>
+                                    <td>{row.uploadedBy}</td>
+                                    <td className="download-cell">
+                                        <FaDownload className="download-icon" />
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>

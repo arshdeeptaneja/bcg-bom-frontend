@@ -10,11 +10,19 @@ import { useNavigate } from 'react-router-dom';
 import LogsAndAutoAnnuals from './LogsAndAutoAnnuals/LogsAndAutoAnnual ';
 import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
+import { toast } from 'react-toastify';
+import { useAuth } from '../../../contexts/AuthContext';
 
 
 
 const HrDashboard = () => {
-const employee = JSON.parse(localStorage.getItem("adminData"));
+  const { getEmployeeDetails, getUserProperty } = useAuth();
+  const employeeDetails = getEmployeeDetails();
+  // Use same empNo derivation pattern as ReportingReviewBulk for consistency
+  const empNo = getUserProperty(
+    'empNo',
+    employeeDetails?.currentUser?.[0]?.EMP_ID || ''
+  );
 
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
@@ -34,28 +42,41 @@ const employee = JSON.parse(localStorage.getItem("adminData"));
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
   const navigate = useNavigate();
-  
 
- const { data: hrData, isLoading, isError } = useQuery({
-  queryKey: [
-    'hrDashboard',
-    employee?.empNo,
-    appraisalPeriod,
-    selectedQuarter,
-    financialYear
-  ],
-  queryFn: () =>
-    appraisalAPI.getHrDashboard({
-      empNo: employee?.empNo,
-      appraisalPeriod: appraisalPeriod.toLowerCase(),
-      financialYear: financialYear.replace("FY ", "").split("-")[0],
-    }),
-  enabled: !!employee?.empNo && !!financialYear && !!appraisalPeriod,
-});
+  // Derive backend appraisalPeriod in the format expected by the API (e.g. 2024Q1)
+  const backendYear = financialYear.replace('FY ', '').split('-')[0];
+  const backendAppraisalPeriod =
+    appraisalPeriod === 'Quarterly'
+      ? `${backendYear}${selectedQuarter}` // e.g. 2024Q1
+      : backendYear; // e.g. 2024 for annual – adjust if backend needs a different format
 
+  const { data: hrData, isLoading, isError } = useQuery({
+    queryKey: [
+      'hrDashboard',
+      empNo,
+      appraisalPeriod,
+      financialYear,
+    ],
+    queryFn: async () => {
+      try {
+        return await appraisalAPI.getHrDashboard({
+          empNo,
+          appraisalPeriod:appraisalPeriod,
+          financialYear: backendYear,
+        });
+      } catch (error) {
+        const backendMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          'Failed to load HR dashboard data.';
+        toast.error(backendMessage);
+        throw error;
+      }
+    },
+    enabled: !!empNo && !!backendYear && !!appraisalPeriod,
+  });
 
-
-  
 
   return (
     <div className="pageWrapper">

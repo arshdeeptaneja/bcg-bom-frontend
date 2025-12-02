@@ -596,14 +596,28 @@ if (filterStatus) params.append("STATUS", filterStatus);
 
   // GET: Get Admin HR Dashboard data
   getHrDashboard: async ({ empNo, appraisalPeriod, financialYear }) => {
-  const res = await axios.get(`/appraisal/admin/hr_dashboard`, {
-    params: {
+    try {
+      const params = new URLSearchParams({
       empNo,
       appraisalPeriod,
       financialYear,
-    },
   });
-  return res.data;
+
+      // Use the shared appraisal API client so the request actually goes to 8084
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_dashboard?${params.toString()}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching HR dashboard:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url,
+      });
+      throw error;
+    }
 },
   appraisalStatusChange: async ({ empNo, appraisalPeriod, searchEmpNo, financialYear }) => {
     try {
@@ -1234,20 +1248,38 @@ searchHRStatusUpdate: async ({
 
 
 
-  //Appraisal Status Change Utility--Update Status
-  updateHRStatus: async ({ assignmentId, newStatus }) => {
+  // Appraisal Status Change Utility -- Update Status
+  // Expects full payload as per backend cURL, e.g.:
+  // {
+  //   "statusUpdates": [{ "urlid": "...", "rolecode": "...", "status": "approved", "comment": "..." }],
+  //   "roleName": "HR Admin",
+  //   "solId": "12345",
+  //   "appraisalPeriod": "annual" | "quarterly",
+  //   "quarter": "Q1" | null,
+  //   "financialYear": 2024,
+  //   "empNo": "EMP001",
+  //   "empName": "John Doe"
+  // }
+  updateHRStatus: async (payload) => {
     try {
       const response = await apiClient.post(
-        `/admin/hr_status_update_utility/update_status`,
+        `${appraisalBaseUrl}/admin/hr_status_update_utility/update_status`,
+        payload,
         {
-          assignmentId,
-          newStatus,
+          headers: {
+            'Content-Type': 'application/json',
+          },
         }
       );
 
       return response.data;
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error updating status:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url,
+      });
       throw error;
     }
   },

@@ -168,29 +168,29 @@ const handleSearch = () => {
   });
 
   const handleInsertSubmit = () => {
-    if (
-      !filters.moduleName ||
-      !filters.financialYear ||
-      !filters.quarter ||
-      !filters.scale ||
-      !filters.activeDate ||
-      !filters.inActiveDate
-    ) {
+  if (
+    !filters.moduleName ||
+    !filters.financialYear ||
+    !filters.quarter ||
+    !filters.scale ||
+    !filters.activeDate ||
+    !filters.inActiveDate
+  ) {
       toast.error("Please fill all fields");
-      return;
-    }
+    return;
+  }
 
-    const payload = {
-      moduleName: filters.moduleName.toLowerCase(), // Backend expects lowercase
-      selectedYear: filters.financialYear,
-      selectedQuater: filters.quarter,
-      selectedScale: filters.scale,
-      activeDate: filters.activeDate,
-      inActiveDate: filters.inActiveDate,
+  const payload = {
+    moduleName: filters.moduleName.toLowerCase(), // Backend expects lowercase
+    selectedYear: filters.financialYear,
+    selectedQuater: filters.quarter,
+    selectedScale: filters.scale,
+    activeDate: filters.activeDate,
+    inActiveDate: filters.inActiveDate,
       employeeNumber: String(empNo || "65327"), // Use empNo from auth context
-    };
+  };
 
-    console.log("FINAL PAYLOAD SENT =>", payload);
+  console.log("FINAL PAYLOAD SENT =>", payload);
     insertMutation.mutate(payload);
   };
 
@@ -200,9 +200,9 @@ const handleSearch = () => {
   const updateMutation = useMutation({
     mutationFn: async (payload) => {
       return await appraisalAPI.moduleActiveInactiveDateUpdate({
-        intent: "UPDATE",
-        payload,
-      });
+      intent: "UPDATE",
+      payload,
+    });
     },
     onSuccess: (data) => {
       console.log("UPDATE RESPONSE:", data);
@@ -288,9 +288,9 @@ const handleDelete = (row) => {
 
     const listToUse = filteredData.length > 0 ? filteredData : results;
 
-    const totalPages = Math.ceil(listToUse.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
+const totalPages = Math.ceil(listToUse.length / itemsPerPage);
+const startIndex = (currentPage - 1) * itemsPerPage;
+const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
 
 
 

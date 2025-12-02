@@ -201,7 +201,7 @@ const AppealComittee = () => {
             {/* DOWNLOAD BUTTONS */}
             <div className="d-flex gap-2">
               <button
-  className="btn btn-outline-primary text-button"
+  className=" btn primary-button text-button"
   onClick={downloadData}
   disabled={downloading}
 >
