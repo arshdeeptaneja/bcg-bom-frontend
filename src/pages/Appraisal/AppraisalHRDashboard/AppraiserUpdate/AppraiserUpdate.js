@@ -19,6 +19,12 @@ const AppraiserUpdate = () => {
   const [selectedQuarter, setSelectedQuarter] = useState('Q1'); // Q1, Q2, Q3, Q4
   const [ecNumber, setEcNumber] = useState(""); // Employee EC number for search
   const [shouldSearch, setShouldSearch] = useState(false); // Controls when to trigger search query
+  const [showUpdateModal, setShowUpdateModal] = useState(false); // Controls update modal visibility
+  const [selectedRow, setSelectedRow] = useState(null); // Selected row for update
+  const [updateForm, setUpdateForm] = useState({
+    RA_Ecno: "", // Reporting Authority EC Number
+    RE_Ecno: "", // Reviewing Authority EC Number
+  });
   const queryClient = useQueryClient();
 
   // Get user data from auth context
@@ -162,7 +168,18 @@ const AppraiserUpdate = () => {
     },
     onSuccess: (data) => {
       console.log("Update success:", data);
-      toast.success("Update successful!");
+      
+      // Show success popup with response message
+      const successMessage = data?.message || "Employee updated successfully";
+      toast.success(successMessage, {
+        autoClose: 5000,
+      });
+      
+      // Close modal and reset form
+      setShowUpdateModal(false);
+      setSelectedRow(null);
+      setUpdateForm({ RA_Ecno: "", RE_Ecno: "" });
+      
       // Refetch search results after successful update
       if (shouldSearch) {
         refetchSearch();
@@ -175,46 +192,68 @@ const AppraiserUpdate = () => {
     },
   });
 
-  // Handle update - update all rows in tableData
-  const handleUpdate = () => {
-    if (!tableData || tableData.length === 0) {
-      toast.error("No data to update");
+  // Handle update button click - open modal for selected row
+  const handleUpdate = (row) => {
+    if (!row) {
+      toast.error("No row selected");
       return;
     }
 
-    if (!ecNumber || !empNo || !solId || !roleName) {
+    if (!empNo || !solId || !roleName) {
       toast.error("Missing required user information");
       return;
     }
 
-    // Update each row in the table
-    const updatePromises = tableData.map((row) => {
-      const updatePayload = {
-        ecno: row.ecNumber || ecNumber,
-        urlId: row.urlId || row.assignmentId || "",
-        RA_Ecno: row.repaEmpNumber || row.RA_Ecno || "",
-        RE_Ecno: row.RE_Ecno || "",
-        AC_Ecno: row.AC_Ecno || "",
-        financialYear: Number(extractYear(financialYear)),
-        appraisalPeriod: appraisalPeriodValue === "annual" ? "annual" : "quarterly",
-        quarter: appraisalPeriod === "Quarterly" ? selectedQuarter : "Q1",
-        empNo: String(empNo),
-        selfEmpNo: String(empNo),
-        solId: String(solId),
-        roleName: roleName,
-      };
-
-      return updateMutation.mutateAsync(updatePayload);
+    // Set selected row and pre-fill form with existing values
+    setSelectedRow(row);
+    setUpdateForm({
+      RA_Ecno: row.repaEmpNumber || "",
+      RE_Ecno: "", // Leave empty for user to fill
     });
+    setShowUpdateModal(true);
+  };
 
-    // Execute all updates
-    Promise.all(updatePromises)
-      .then(() => {
-        toast.success(`Successfully updated ${tableData.length} record(s)`);
-      })
-      .catch((error) => {
-        console.error("Batch update error:", error);
-      });
+  // Handle modal close
+  const handleCloseModal = () => {
+    setShowUpdateModal(false);
+    setSelectedRow(null);
+    setUpdateForm({ RA_Ecno: "", RE_Ecno: "" });
+  };
+
+  // Handle form submit
+  const handleSubmitUpdate = () => {
+    if (!selectedRow) {
+      toast.error("No row selected");
+      return;
+    }
+
+    if (!updateForm.RA_Ecno || !updateForm.RE_Ecno) {
+      toast.error("Please fill in both Reporting Name and Reviewing Name");
+      return;
+    }
+
+    if (!empNo || !solId || !roleName) {
+      toast.error("Missing required user information");
+      return;
+    }
+
+    const employeeEcNo = selectedRow.ecNumber || ecNumber;
+    const updatePayload = {
+      ecno: employeeEcNo,
+      urlId: selectedRow.urlId || "",
+      RA_Ecno: String(updateForm.RA_Ecno),
+      RE_Ecno: String(updateForm.RE_Ecno),
+      AC_Ecno: "", // Not in curl, but API might expect it
+      financialYear: Number(extractYear(financialYear)),
+      appraisalPeriod: appraisalPeriodValue,
+      quarter: appraisalPeriod === "Quarterly" ? selectedQuarter : null,
+      empNo: String(employeeEcNo), // Same as ecno (employee being updated)
+      selfEmpNo: String(empNo), // Current logged-in user's empNo
+      solId: String(selectedRow.solId || solId),
+      roleName: roleName,
+    };
+
+    updateMutation.mutate(updatePayload);
   };
 
   return (
@@ -412,13 +451,14 @@ const AppraiserUpdate = () => {
                       <td>{item.repaName}</td>
                       <td>{item.branch}</td>
                       <td>
-                      <button 
-                className="btn-reset d-flex" 
-                onClick={handleUpdate}
-                disabled={tableData.length === 0 || updateMutation.isPending}
-              >
-                {updateMutation.isPending ? "Updating..." : "Update"}
-              </button>                      </td>
+                        <button 
+                          className="btn-reset d-flex" 
+                          onClick={() => handleUpdate(item)}
+                          disabled={updateMutation.isPending}
+                        >
+                          {updateMutation.isPending ? "Updating..." : "Update"}
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
@@ -436,6 +476,124 @@ const AppraiserUpdate = () => {
 
         </div>
       </div>
+
+      {/* Update Modal */}
+      {showUpdateModal && selectedRow && (
+        <div
+          className="modal fade show d-block"
+          style={{
+            background: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(2px)",
+            zIndex: 1050,
+          }}
+          onClick={handleCloseModal}
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content" style={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)" }}>
+              <div className="modal-header" style={{ borderBottom: "1px solid #e9ecef", padding: "20px 24px" }}>
+                <h5 className="modal-title fw-semibold" style={{ color: "#475670", fontSize: "1.25rem" }}>
+                  Update Reporting & Reviewing Authority
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCloseModal}
+                  disabled={updateMutation.isPending}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body" style={{ padding: "24px" }}>
+                <div className="mb-3">
+                  <label htmlFor="raEcno" className="form-label fw-medium" style={{ color: "#475670", marginBottom: "8px" }}>
+                    Reporting Name (EC Number)
+                  </label>
+                  <input
+                    type="text"
+                    id="raEcno"
+                    className="form-control"
+                    placeholder="Enter Reporting Authority EC Number"
+                    value={updateForm.RA_Ecno}
+                    onChange={(e) => setUpdateForm({ ...updateForm, RA_Ecno: e.target.value })}
+                    disabled={updateMutation.isPending}
+                    style={{
+                      borderRadius: "6px",
+                      padding: "10px 12px",
+                      border: "1px solid #dee2e6",
+                    }}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="reEcno" className="form-label fw-medium" style={{ color: "#475670", marginBottom: "8px" }}>
+                    Reviewing Name (EC Number)
+                  </label>
+                  <input
+                    type="text"
+                    id="reEcno"
+                    className="form-control"
+                    placeholder="Enter Reviewing Authority EC Number"
+                    value={updateForm.RE_Ecno}
+                    onChange={(e) => setUpdateForm({ ...updateForm, RE_Ecno: e.target.value })}
+                    disabled={updateMutation.isPending}
+                    style={{
+                      borderRadius: "6px",
+                      padding: "10px 12px",
+                      border: "1px solid #dee2e6",
+                    }}
+                  />
+                </div>
+                <div className="text-muted" style={{ fontSize: "0.875rem" }}>
+                  <strong>Employee:</strong> {selectedRow.employeeName} ({selectedRow.ecNumber})
+                </div>
+              </div>
+              <div className="modal-footer" style={{ borderTop: "1px solid #e9ecef", padding: "16px 24px", gap: "12px" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCloseModal}
+                  disabled={updateMutation.isPending}
+                  style={{
+                    borderRadius: "6px",
+                    padding: "8px 20px",
+                    fontWeight: "500",
+                    border: "1px solid #dee2e6",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSubmitUpdate}
+                  disabled={updateMutation.isPending}
+                  style={{
+                    borderRadius: "6px",
+                    padding: "8px 20px",
+                    fontWeight: "500",
+                    backgroundColor: "#0389d0",
+                    border: "none",
+                  }}
+                >
+                  {updateMutation.isPending ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Updating...
+                    </>
+                  ) : (
+                    "Submit"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

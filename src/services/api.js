@@ -93,6 +93,51 @@ const addRefreshTokenInterceptor = (client) => {
   );
 };
 
+// Request interceptor to add Authorization header (shared by both clients)
+const addAuthInterceptor = (client) => {
+  client.interceptors.request.use(
+    (config) => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      } else {
+        console.warn("No access token found in localStorage");
+      }
+      
+      // For FormData requests, ensure Content-Type is not set (browser will set it with boundary)
+      if (config.data instanceof FormData) {
+        // Remove Content-Type header completely - browser will set it with boundary
+        delete config.headers['Content-Type'];
+        delete config.headers['content-type'];
+        // Ensure we're not overriding it in the config
+        if (config.headers && config.headers['Content-Type']) {
+          delete config.headers['Content-Type'];
+        }
+      }
+      
+      // Debug logging for upload requests
+      if (config.url && config.url.includes('/upload')) {
+        console.log("Upload request config:", {
+          url: config.url,
+          method: config.method,
+          hasAuth: !!config.headers.Authorization,
+          authHeader: config.headers.Authorization ? `${config.headers.Authorization.substring(0, 20)}...` : 'missing',
+          isFormData: config.data instanceof FormData,
+          contentType: config.headers['Content-Type'],
+        });
+      }
+      
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+};
+
+addAuthInterceptor(authClient);
+addAuthInterceptor(appraisalClient);
+
 addRefreshTokenInterceptor(authClient);
 addRefreshTokenInterceptor(appraisalClient);
 
@@ -1463,10 +1508,10 @@ insertAnnualRoles: async () => {
         urlId: String(urlId),
         RA_Ecno: String(RA_Ecno),
         RE_Ecno: String(RE_Ecno),
-        AC_Ecno: String(AC_Ecno),
+        AC_Ecno: String(AC_Ecno || ""),
         financialYear: Number(financialYear),
         appraisalPeriod: String(appraisalPeriod),
-        quarter: String(quarter),
+        quarter: quarter === null || quarter === undefined ? null : String(quarter),
         empNo: String(empNo),
         selfEmpNo: String(selfEmpNo),
         solId: String(solId),
@@ -1567,18 +1612,12 @@ downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
   // Validator Update APIs
   validatorUpdate: {
     // Upload Excel File
-    uploadFile: async ({ file, sol, roleName, empNo }) => {
+    uploadFile: async ({ file, empNo }) => {
       const formData = new FormData();
       formData.append("file", file, file?.name);
 
-      // Ensure roleName is decoded (replace + with space) before encoding
-      const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
-
-      // Build query string manually to match cURL format exactly (using %20 for spaces)
-      // Axios params encodes spaces as +, but backend expects %20
+      // Build query string manually to match cURL format (only empNo)
       const queryParams = [];
-      if (sol) queryParams.push(`sol=${encodeURIComponent(String(sol))}`);
-      if (decodedRoleName) queryParams.push(`roleName=${encodeURIComponent(decodedRoleName)}`); // Encodes space as %20
       if (empNo) queryParams.push(`empNo=${encodeURIComponent(String(empNo))}`);
 
       const queryString = queryParams.join('&');
@@ -1587,21 +1626,43 @@ downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
       // Debug logging
       console.log("Validator upload API - Full URL:", fullUrl);
       console.log("Validator upload API - Parameters:", { 
-        sol, 
-        roleName, 
-        decodedRoleName, 
         empNo,
         file: { name: file?.name, size: file?.size, type: file?.type }
       });
-      console.log("Validator upload API - Expected cURL format: sol=36663&roleName=HR%20Admin&empNo=65327");
+      
+      // Check if token exists
+      const accessToken = localStorage.getItem('accessToken');
+      console.log("Access token exists:", !!accessToken);
+      if (!accessToken) {
+        console.error("No access token found! User may need to log in again.");
+      }
 
-      const response = await apiClient.post(
-        fullUrl,
-        formData
-        // Don't set Content-Type header - let browser set it with boundary
-      );
+      try {
+        // Don't pass headers object - let the interceptor handle Authorization
+        // and let browser set Content-Type automatically for FormData
+        const response = await apiClient.post(
+          fullUrl,
+          formData
+        );
 
-      return response.data;
+        return response.data;
+      } catch (error) {
+        // Log detailed error information
+        console.error("Validator upload error details:", {
+          status: error?.response?.status,
+          statusText: error?.response?.statusText,
+          data: error?.response?.data,
+          message: error?.message,
+          config: {
+            url: error?.config?.url,
+            method: error?.config?.method,
+            headers: error?.config?.headers,
+            dataType: error?.config?.data?.constructor?.name,
+            isFormData: error?.config?.data instanceof FormData,
+          }
+        });
+        throw error;
+      }
     },
 
     // Get error logs
@@ -1648,6 +1709,42 @@ downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
         return response.data;
       } catch (error) {
         console.error("Error downloading validator data table:", error);
+        throw error;
+      }
+    },
+
+    // Download sample file
+    downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
+      try {
+        // Ensure roleName is decoded (replace + with space) before encoding
+        const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
+
+        // Build query string manually to match cURL format exactly (using %20 for spaces)
+        const queryParams = [];
+        if (decodedRoleName) queryParams.push(`roleName=${encodeURIComponent(decodedRoleName)}`);
+        if (regionCode) queryParams.push(`regionCode=${encodeURIComponent(String(regionCode))}`);
+        if (quarter) queryParams.push(`quarter=${encodeURIComponent(quarter)}`);
+        if (financialYear) queryParams.push(`financialYear=${encodeURIComponent(String(financialYear))}`);
+
+        const queryString = queryParams.join('&');
+        const fullUrl = `/appraisal/admin/hr_update_validator/download_sample?${queryString}`;
+
+        console.log("Download sample API - Full URL:", fullUrl);
+        console.log("Download sample API - Parameters:", {
+          roleName,
+          decodedRoleName,
+          regionCode,
+          quarter,
+          financialYear,
+        });
+
+        const response = await apiClient.get(fullUrl, {
+          responseType: "blob",
+        });
+
+        return response.data;
+      } catch (error) {
+        console.error("Error downloading validator sample:", error);
         throw error;
       }
     },

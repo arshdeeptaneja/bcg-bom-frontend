@@ -19,6 +19,7 @@ import LoadingSpinner from "../../../../components/Spinner";
 const ValidatorUpdateUtility = () => {
   const queryClient = useQueryClient();
   const [file, setFile] = useState(null);
+  const [uploadResults, setUploadResults] = useState(null); // Store upload response results
 
   const { getUserProperty } = useAuth();
 
@@ -59,34 +60,66 @@ const ValidatorUpdateUtility = () => {
       if (file.size === 0) {
         throw new Error("File is empty");
       }
+      
+      // Validate file type
+      const validExtensions = ['.xlsx', '.xls'];
+      const fileName = file.name || '';
+      const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+      if (!validExtensions.includes(fileExtension)) {
+        throw new Error("Invalid file type. Please upload an Excel file (.xlsx or .xls)");
+      }
 
-      // Ensure roleName is properly decoded before sending
-      const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
+      // Check authentication token
+      const accessToken = localStorage.getItem('accessToken');
+      console.log("Validator upload - Token check:", {
+        hasToken: !!accessToken,
+        tokenLength: accessToken?.length || 0,
+        tokenPreview: accessToken ? `${accessToken.substring(0, 20)}...` : 'none'
+      });
 
       console.log("Validator upload payload:", { 
-        file: { name: file.name, size: file.size, type: file.type },
-        sol, 
-        roleName: decodedRoleName, 
-        roleNameRaw: roleName,
+        file: { 
+          name: file.name, 
+          size: file.size, 
+          type: file.type,
+          lastModified: file.lastModified,
+          isFile: file instanceof File,
+          isBlob: file instanceof Blob,
+        },
         empNo 
       });
 
       // Validate required parameters
-      if (!sol || !empNo || !decodedRoleName) {
-        console.error("Missing required parameters:", { sol, empNo, decodedRoleName });
-        throw new Error("Missing required parameters: sol, empNo, or roleName");
+      if (!empNo) {
+        console.error("Missing required parameter: empNo");
+        throw new Error("Missing required parameter: empNo");
+      }
+      
+      if (!accessToken) {
+        console.error("No access token found in localStorage. User may need to log in again.");
+        toast.error("Authentication token missing. Please log in again.");
+        throw new Error("No access token found");
       }
 
       return await appraisalAPI.validatorUpdate.uploadFile({
         file,
-        sol: sol,
-        roleName: decodedRoleName,
         empNo: empNo,
       });
     },
     onSuccess: async (data) => {
       console.log("Validator upload success:", data);
-      toast.success("File uploaded successfully!");
+      
+      // Store upload results to display in table
+      if (data?.results?.INVALID_ENTRY) {
+        setUploadResults(data.results.INVALID_ENTRY);
+      }
+      
+      // Show success message with details
+      const message = data?.message || "File uploaded successfully!";
+      const successCount = data?.successCount || 0;
+      const totalCount = data?.totalCount || 0;
+      toast.success(`${message} (${successCount}/${totalCount} records)`);
+      
       setFile(null); // Clear selected file after successful upload
       
       // Refetch error logs after successful upload
@@ -100,8 +133,48 @@ const ValidatorUpdateUtility = () => {
     },
     onError: (error) => {
       console.error("Validator upload error:", error);
-      const errorMessage = error?.response?.data?.message || error?.message || "Upload failed!";
+      console.error("Error details:", {
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
+        headers: error?.response?.headers,
+        config: {
+          url: error?.config?.url,
+          method: error?.config?.method,
+          hasAuth: !!error?.config?.headers?.Authorization,
+          contentType: error?.config?.headers?.['Content-Type'],
+          isFormData: error?.config?.data instanceof FormData,
+        }
+      });
+      
+      let errorMessage = "Upload failed!";
+      if (error?.response?.status === 400) {
+        // 400 Bad Request - usually means request format is wrong
+        errorMessage = error?.response?.data?.message || 
+                      error?.response?.data?.error || 
+                      error?.response?.data?.detail ||
+                      "Bad request. Please check the file format and try again.";
+        console.error("400 Bad Request - Possible causes:");
+        console.error("1. File format is incorrect (must be .xlsx)");
+        console.error("2. File is empty or corrupted");
+        console.error("3. Request format doesn't match backend expectations");
+        console.error("4. Missing required parameters");
+        console.error("Response data:", error?.response?.data);
+      } else if (error?.response?.status === 403) {
+        errorMessage = error?.response?.data?.message || 
+                      error?.response?.data?.error || 
+                      "Access forbidden. Please check your permissions or contact administrator.";
+        console.error("403 Forbidden - Possible causes:");
+        console.error("1. Token is missing or expired");
+        console.error("2. User role doesn't have permission for this endpoint");
+        console.error("3. Backend authorization check failed");
+        console.error("Response data:", error?.response?.data);
+      } else {
+        errorMessage = error?.response?.data?.message || error?.message || "Upload failed!";
+      }
+      
       toast.error(errorMessage);
+      setUploadResults(null); // Clear results on error
     },
   });
 
@@ -123,6 +196,38 @@ const ValidatorUpdateUtility = () => {
     }
     uploadMutation.mutate({ file });
   };
+
+  // React Query mutation: Download sample file
+  const downloadSampleMutation = useMutation({
+    mutationFn: async () => {
+      const blob = await appraisalAPI.validatorUpdate.downloadSample({
+        roleName: roleName,
+        regionCode: sol,
+        quarter: quarter || "Q1",
+        financialYear: extractYear(financialYear),
+      });
+      return blob;
+    },
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `validator_update_sample_${Date.now()}.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("Sample file downloaded successfully!");
+    },
+    onError: (error) => {
+      console.error("Download sample error:", error);
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to download sample file!";
+      toast.error(errorMessage);
+    },
+  });
 
   // React Query mutation: Download data table
   const downloadDataTableMutation = useMutation({
@@ -154,6 +259,11 @@ const ValidatorUpdateUtility = () => {
       toast.error("Failed to download data table!");
     },
   });
+
+  // Handle download sample button click
+  const handleDownloadSample = () => {
+    downloadSampleMutation.mutate();
+  };
 
   // React Query: Fetch error logs
   const {
@@ -190,7 +300,9 @@ const ValidatorUpdateUtility = () => {
   }, [isError, error]);
 
   // Extract table data from error logs response - handle multiple response structures
-  const tableData = errorLogs?.files 
+  // Priority: upload results > error logs
+  const tableData = uploadResults 
+    || errorLogs?.files 
     || errorLogs?.list_data 
     || errorLogs?.data
     || (Array.isArray(errorLogs) ? errorLogs : []);
@@ -274,6 +386,21 @@ const ValidatorUpdateUtility = () => {
             <div className="d-flex gap-2">
               <button 
                 className="btn btn-primary d-flex align-items-center gap-2" 
+                onClick={handleDownloadSample}
+                disabled={downloadSampleMutation.isPending}
+              >
+                {downloadSampleMutation.isPending ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Downloading...
+                  </>
+                ) : (
+                  "Download Sample"
+                )}
+              </button>
+              
+              <button 
+                className="btn btn-primary d-flex align-items-center gap-2" 
                 onClick={() => downloadDataTableMutation.mutate()}
                 disabled={downloadDataTableMutation.isPending}
               >
@@ -286,6 +413,7 @@ const ValidatorUpdateUtility = () => {
                   "Download Data Table"
                 )}
               </button>
+
             </div>
           </div>
 
@@ -297,60 +425,77 @@ const ValidatorUpdateUtility = () => {
   <thead className="table-header">
     <tr>
       <th className="text-center">Sr. No.</th>
-      <th className="text-start">Files Name</th>
-      <th className="text-center">Date</th>
+      <th className="text-center">Validator Number</th>
+      <th className="text-center">Employee ID</th>
+      <th className="text-center">URL ID</th>
       <th className="text-center">Status</th>
-      <th className="text-center">No. Of Records Inserted</th>
-      <th className="text-center">Uploaded By</th>
-      <th className="text-center">Download File</th>
+      <th className="text-center">Financial Year</th>
+      <th className="text-center">Quarter</th>
+      <th className="text-center">Created Date</th>
+      <th className="text-center">Error Message</th>
+      <th className="text-center">Is Validated</th>
     </tr>
   </thead>
 
   <tbody>
-    {/* Loading state */}
-    {isLoading && (
+    {/* Loading state for error logs (not for upload) */}
+    {isLoading && !uploadResults && (
       <tr>
-        <td colSpan="7" className="text-center text-muted py-3">
+        <td colSpan="10" className="text-center text-muted py-3">
           <strong>Loading error logs...</strong>
         </td>
       </tr>
     )}
 
     {/* Error state */}
-    {!isLoading && isError && (
+    {!isLoading && isError && !uploadResults && (
       <tr>
-        <td colSpan="7" className="text-center text-danger py-3">
+        <td colSpan="10" className="text-center text-danger py-3">
           <strong>Error loading logs: {error?.message || "Unknown error"}</strong>
         </td>
       </tr>
     )}
 
-    {/* No logs found case */}
-    {!isLoading && !isError && (!tableData || tableData.length === 0) && (
+    {/* No data found case */}
+    {!isLoading && !isError && !uploadResults && (!tableData || tableData.length === 0) && (
       <tr>
-        <td colSpan="7" className="text-center text-muted py-3">
-          <strong>No logs found</strong>
+        <td colSpan="10" className="text-center text-muted py-3">
+          <strong>No data found. Upload a file to see results.</strong>
         </td>
       </tr>
     )}
 
-    {/* Show logs when available */}
-    {!isLoading && !isError && tableData && tableData.length > 0 &&
-      tableData.map((row, index) => (
-        <tr key={row.id || row.fileName || index}>
-          <td className="text-center">{index + 1}</td>
-          <td className="text-start file-name">{row.fileName || row.file_name || '-'}</td>
-          <td className="text-center">{row.date || row.uploadDate || row.createdAt || '-'}</td>
-          <td className={row.status === "SUCCESS" ? "status-success text-center" : "status-failed text-center"}>
-            {row.status || '-'}
-          </td>
-          <td className="text-center">{row.records || row.recordsInserted || row.records_inserted || '-'}</td>
-          <td className="text-center">{row.uploadedBy || row.uploaded_by || row.uploadedBy || '-'}</td>
-          <td className="text-center">
-            <FaDownload className="download-icon" />
-          </td>
-        </tr>
-      ))}
+    {/* Show upload results or error logs when available */}
+    {tableData && tableData.length > 0 &&
+      tableData.map((row, index) => {
+        // Handle upload response structure (INVALID_ENTRY)
+        const validatorNum = row.VALIDATOR_NUM || row.validatorNum || row.validator_num || '-';
+        const empId = row.EMP_ID || row.empId || row.emp_id || '-';
+        const urlId = row.URL_ID || row.urlId || row.url_id || '-';
+        const status = row.STATUS || row.status || '-';
+        const fy = row.FY || row.fy || row.financialYear || '-';
+        const quarter = row.QUARTER || row.quarter || '-';
+        const createdDate = row.CREATED_DATE || row.createdDate || row.created_date || '-';
+        const errorMessage = row.ERROR_MESSAGE || row.errorMessage || row.error_message || '-';
+        const isValidated = row.IS_VALIDATED || row.isValidated || row.is_validated || '-';
+
+        return (
+          <tr key={row.URL_ID || row.urlId || row.id || index}>
+            <td className="text-center">{index + 1}</td>
+            <td className="text-center">{validatorNum}</td>
+            <td className="text-center">{empId}</td>
+            <td className="text-center">{urlId}</td>
+            <td className={status === "success" || status === "SUCCESS" ? "status-success text-center" : "status-failed text-center"}>
+              {status}
+            </td>
+            <td className="text-center">{fy}</td>
+            <td className="text-center">{quarter}</td>
+            <td className="text-center">{createdDate}</td>
+            <td className="text-center">{errorMessage !== '-' && errorMessage ? errorMessage : '-'}</td>
+            <td className="text-center">{isValidated}</td>
+          </tr>
+        );
+      })}
   </tbody>
 </table>
 

@@ -388,6 +388,7 @@ const AppraiserStatus = () => {
                   <th>End Date</th>
                   <th>Select Status</th>
                   <th>Reason</th>
+                  <th>Update</th>
                 </tr>
               </thead>
               <tbody>
@@ -421,6 +422,16 @@ const AppraiserStatus = () => {
                       </td>
 
                       <td>{item.reason}</td>
+
+                      <td>
+                      <button 
+                className="btn-reset d-flex" 
+                onClick={handleBulkUpdate}
+                disabled={tableData.length === 0 || statusUpdateMutation.isPending}
+              >
+                {statusUpdateMutation.isPending ? "Updating..." : "Update"}
+              </button>                      </td>
+
                     </tr>
                   ))
                 ) : (
