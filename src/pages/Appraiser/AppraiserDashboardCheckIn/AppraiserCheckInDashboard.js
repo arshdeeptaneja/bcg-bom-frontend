@@ -349,8 +349,8 @@ export default function AppraiserCheckInDashboard() {
           >
             <option value="">-Select-</option>
             {filterData.STATUS_ARRAY?.map((x) => (
-              <option key={x} value={x}>
-                {x}
+              <option key={getDisplayStatus(x)} value={getDisplayStatus(x)}>
+                {getDisplayStatus(x)}
               </option>
             ))}
           </select>
