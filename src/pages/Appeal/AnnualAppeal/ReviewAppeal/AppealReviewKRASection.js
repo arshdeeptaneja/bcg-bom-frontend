@@ -48,8 +48,8 @@ function AppealReviewKRASection({
               <th style={{ width: '90px' }}>Roles</th>
               <th style={{ width: '100px' }}>{isMeasurable ? 'Actual' : 'Selected Score'}</th>
               <th style={{ width: '80px' }}>{isMeasurable ? 'Target' : 'Target Score'}</th>
-              <th style={{ width: '80px' }}>{isMeasurable ? 'Max Score' : 'Final Score'}</th>
-              <th style={{ width: '90px' }}>Score</th>
+              {/*<th style={{ width: '80px' }}>{isMeasurable ? 'Max Score' : 'Final Score'}</th>*/}
+              <th style={{ width: '90px' }}>Final Score</th>
               <th style={{ width: '80px' }}>Comment</th>
               <th style={{ width: '140px' }}>Action</th>
             </tr>
@@ -123,9 +123,9 @@ function AppealReviewKRASection({
                     </td>
 
                     {/* Max Score / Final Score */}
-                    <td className="text-center align-middle">
+                    {/* <td className="text-center align-middle">
                       <span>{kra.maxScore || '-'}</span>
-                    </td>
+                    </td> */}
 
                     {/* Score Column - old score on top, editable below */}
                     <td className="score-cell" style={{ padding: '8px' }}>
@@ -215,7 +215,7 @@ function AppealReviewKRASection({
                   {/* Inline Comment Section Row - Appears below each KRA when expanded */}
                   {isCommentExpanded && (
                     <tr className="comment-row">
-                      <td colSpan="9" style={{ padding: 0, border: 'none' }}>
+                      <td colSpan="8" style={{ padding: 0, border: 'none' }}>
                         <div className="appeal-comment-section-inline">
                           {/* Self Comment - Read Only */}
                           <div className="self-comment-display">
