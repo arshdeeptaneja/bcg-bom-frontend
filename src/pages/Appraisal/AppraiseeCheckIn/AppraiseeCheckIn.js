@@ -220,6 +220,11 @@ export default function AppraiseeCheckIn() {
                     state: {
                       employee: employeeModel,
                       dateRange: cardDateRange,
+                      financialYear,
+                      appraisalPeriod,
+                      quarter,
+
+                      pageType: 'self',
                     },
                   });
                 } else {
