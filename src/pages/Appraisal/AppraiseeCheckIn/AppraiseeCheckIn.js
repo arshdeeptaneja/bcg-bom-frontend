@@ -202,7 +202,7 @@ export default function AppraiseeCheckIn() {
               exceptionStatus={employee.APPEAL_STATUS}
               isCheckInDisabled={employee.status?.toLowerCase() !== 'pending'}
               isAppealEnabled={employee.status?.toLowerCase() === 'complete'}
-              organization={employee.ORGANIZATION || ''}
+              organization={employee.organization || ''}
               quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
               appraisalPeriod={appraisalPeriod}
               scoreData={scoreData}
