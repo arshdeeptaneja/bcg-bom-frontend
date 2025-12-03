@@ -118,8 +118,8 @@ const EmployeeAppealList = () => {
         duration: item.duration,
         // Preserve raw status for conditional button rendering
         appealStatus:
-          item.STATUS ||
           item.FINAL_APPEAL_STATUS ||
+          item.STATUS ||
           item.appeal_status ||
           item.APPEAL_STATUS ||
           item.appealStatus ||
