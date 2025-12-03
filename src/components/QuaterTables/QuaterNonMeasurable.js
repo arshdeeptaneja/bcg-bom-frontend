@@ -13,18 +13,16 @@ export default function QuaterNonMeasurable({
   totalActualScore = 0,
   totalMaxScore = 0,
   kraListData = {},
-  role = "",
+  role = '',
   isEditableBy = () => false,
 }) {
-
   const hasKras =
-    kraListData &&
-    typeof kraListData === "object" &&
-    Object.keys(kraListData).length > 0;
+    kraListData && typeof kraListData === 'object' && Object.keys(kraListData).length > 0;
+
+  console.log('KRA List Data =>', kraListData);
 
   return (
     <div className="d-flex flex-column gap-4">
-
       {/* Section Headline */}
       <div className="table-headline d-flex flex-row justify-content-between">
         <h5 className="fw-bold">Non - Measurable</h5>
@@ -41,10 +39,10 @@ export default function QuaterNonMeasurable({
       <div
         className="p-3 fw-bold text-white"
         style={{
-          backgroundColor: "var(--accent-color)",
-          display: "grid",
-          gridTemplateColumns: "40% 15% 15% 15% 15%",
-          borderRadius: "4px",
+          backgroundColor: 'var(--accent-color)',
+          display: 'grid',
+          gridTemplateColumns: '40% 15% 15% 15% 15%',
+          borderRadius: '4px',
         }}
       >
         <div>Non-Measurable KRA</div>
@@ -59,9 +57,9 @@ export default function QuaterNonMeasurable({
         <div
           className="py-4 px-3 text-muted"
           style={{
-            border: "1px solid #e1e1e1",
-            borderTop: "none",
-            background: "#fff",
+            border: '1px solid #e1e1e1',
+            borderTop: 'none',
+            background: '#fff',
           }}
         >
           Not applicable.
@@ -76,24 +74,21 @@ export default function QuaterNonMeasurable({
               <tbody>
                 {list.map((kra, idx) => (
                   <tr key={idx}>
-                    <td style={{ width: "40%" }}>
-                      <div className="fw-semibold text-dark">{kra.KraName}</div>
-                      <div className="text-primary small">
-                        {kra.KraDescription}
-                      </div>
+                    <td style={{ width: '40%' }}>
+                      <div className="text-dark">{kra.kra_desc}</div>
+                      <div className="text-primary small">{''}</div>
                     </td>
 
-                    <td className="text-center">{kra.actual || "-"}</td>
-                    <td className="text-center">{kra.total || "-"}</td>
-                    <td className="text-center">{kra.max || "-"}</td>
-                    <td className="text-center">{kra.category || "-"}</td>
+                    <td className="text-center">{kra.actual_score || '-'}</td>
+                    <td className="text-center">{kra.score || '-'}</td>
+                    <td className="text-center">{kra.maxscore || '-'}</td>
+                    <td className="text-center">{section || '-'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ))}
-
     </div>
   );
 }

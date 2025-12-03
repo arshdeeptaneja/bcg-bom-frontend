@@ -12,9 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import { BackButton } from '../../../../components/common';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  CheckInDescriptionSection,
-} from '../../../../components/Appraisal';
+import { CheckInDescriptionSection } from '../../../../components/Appraisal';
 import QuaterlyMeasurableKraTable from '../../../../components/QuaterTables/QuaterMeasurableKra';
 import QuaterNonMeasurable from '../../../../components/QuaterTables/QuaterNonMeasurable';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -29,31 +27,48 @@ function QuaterlyAppraiseeCheckIn() {
   const queryClient = useQueryClient();
 
   // Month conversion utility
- 
+
   const getMonthNumber = (num) => {
-  const arr = [
-   '', 'January', 'February', 'March',
-    'April', 'May', 'June',
-    'July', 'August', 'September',
-    'October', 'November', 'December'
-  ];
-  return arr[num] || '';
+    const arr = [
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return arr[num] || '';
   };
 
-
-  const [activeMonth, setActiveMonth] = useState("April");
-  const [months, setMonths] = useState(["April", "May", "June"]);
+  const [activeMonth, setActiveMonth] = useState('April');
+  const [months, setMonths] = useState(['April', 'May', 'June']);
 
   // Get data from location state
-  const { financialYear, appraisalPeriod, quarter, dateRange, employee, intent, page_type, roleType } = location.state;
+  const {
+    financialYear,
+    appraisalPeriod,
+    quarter,
+    dateRange,
+    employee,
+    intent,
+    page_type,
+    roleType,
+  } = location.state;
 
-  console.log("EMPLOYEE IS: ", employee)
+  console.log('EMPLOYEE IS: ', employee);
   // Get employee number from auth context as fallback
   const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
   const empNoFromAuth = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
-  const empNo = empNoFromAuth || employee?.empNo || employee?.id || employee?.EMP_ID ;
-  const role = getUserProperty("ROLE_NAME", "Administrative Officers")
+  const empNo = empNoFromAuth || employee?.empNo || employee?.id || employee?.EMP_ID;
+  const role = getUserProperty('ROLE_NAME', 'Administrative Officers');
 
   // Extract year from financial year format
   const extractYear = (fy) => {
@@ -84,7 +99,7 @@ function QuaterlyAppraiseeCheckIn() {
   const [developmentInputsData, setDevelopmentInputsData] = useState([]);
   const [monthlyScores, setMonthlyScores] = useState({});
   const [monthlyMeasurableData, setMonthlyMeasurableData] = useState({});
-  
+
   // Form inputs for comments
   const [formInputs, setFormInputs] = useState({
     performanceMeasurableComment: ['', '', ''],
@@ -99,8 +114,7 @@ function QuaterlyAppraiseeCheckIn() {
 
   // Submit mutation for quarterly appraisee check-in
   const submitMutation = useMutation({
-    mutationFn: (payload) =>
-      appraisalAPI.submitQuarterlyAppraiseeCheckInReport(payload),
+    mutationFn: (payload) => appraisalAPI.submitQuarterlyAppraiseeCheckInReport(payload),
     onSuccess: (data) => {
       toast.success('Check-in submitted successfully!');
       queryClient.invalidateQueries({ queryKey: ['myAppraisalDashboard'] });
@@ -117,31 +131,38 @@ function QuaterlyAppraiseeCheckIn() {
   });
 
   const buildKraDataPayload = () => {
-  return months.flatMap(monthName => {
-    const rows = monthlyMeasurableData[monthName] || [];
-    return rows.map(row => ({
-      ...row,                              // REQUIRED full object !!
-      //MONTH: getMonthNumber(monthName)     // convert month name → number
-    }));
-  });
-};
+    return months.flatMap((monthName) => {
+      const rows = monthlyMeasurableData[monthName] || [];
+      return rows.map((row) => ({
+        ...row, // REQUIRED full object !!
+        //MONTH: getMonthNumber(monthName)     // convert month name → number
+      }));
+    });
+  };
 
-const buildPerformanceMeasurableComments = () => {
-  return months.map((m) => {
-    const index = getMonthNumber(m) - 1;
-    return formInputs.performanceMeasurableComment[index] || "";
-  });
-};
+  const buildPerformanceMeasurableComments = () => {
+    return months.map((m) => {
+      const index = getMonthNumber(m) - 1;
+      return formInputs.performanceMeasurableComment[index] || '';
+    });
+  };
 
   // React Query to fetch quarterly check-in report data
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['quarterlyCheckInReport', financialYear, appraisalPeriod, quarter, empNo, currentRole],
+    queryKey: [
+      'quarterlyCheckInReport',
+      financialYear,
+      appraisalPeriod,
+      quarter,
+      empNo,
+      currentRole,
+    ],
     queryFn: () =>
       appraisalAPI.getQuarterlyCheckInReport({
         empNo: empNo,
         // url: employee?.url || employee?.URL_ID || '',
         //url: employee.url,
-        url: "U-34545", //TODO: Change this
+        url: 'U-34545', //TODO: Change this
         //roleType: currentRole || role || 'APPRAISEE',
         roleType: role,
         financialYear: parseInt(extractYear(financialYear)),
@@ -169,11 +190,13 @@ const buildPerformanceMeasurableComments = () => {
 
       if (measurableList.length > 0) {
         // Get unique months from the data
-        const monthNumbers = [...new Set(measurableList.map(item => item.MONTH))].sort((a, b) => a - b);
+        const monthNumbers = [...new Set(measurableList.map((item) => item.MONTH))].sort(
+          (a, b) => a - b
+        );
 
         if (monthNumbers.length > 0) {
           // Convert month numbers to month names
-          const monthNames = monthNumbers.map(num => getMonthNumber(num));
+          const monthNames = monthNumbers.map((num) => getMonthNumber(num));
           setMonths(monthNames);
           setActiveMonth(monthNames[0]);
 
@@ -181,7 +204,7 @@ const buildPerformanceMeasurableComments = () => {
           const kraByMonth = {};
           monthNumbers.forEach((monthNum, idx) => {
             const monthName = monthNames[idx];
-            kraByMonth[monthName] = measurableList.filter(item => item.MONTH === monthNum);
+            kraByMonth[monthName] = measurableList.filter((item) => item.MONTH === monthNum);
           });
           setMonthlyMeasurableData(kraByMonth);
 
@@ -189,14 +212,20 @@ const buildPerformanceMeasurableComments = () => {
           const scores = {};
           monthNumbers.forEach((monthNum, idx) => {
             const monthName = monthNames[idx];
-            const monthData = measurableList.filter(item => item.MONTH === monthNum);
+            const monthData = measurableList.filter((item) => item.MONTH === monthNum);
 
-            const totalActual = monthData.reduce((sum, item) => sum + (parseFloat(item.actual_score) || 0), 0);
-            const totalMax = monthData.reduce((sum, item) => sum + (parseFloat(item.maxscore) || 0), 0);
+            const totalActual = monthData.reduce(
+              (sum, item) => sum + (parseFloat(item.actual_score) || 0),
+              0
+            );
+            const totalMax = monthData.reduce(
+              (sum, item) => sum + (parseFloat(item.maxscore) || 0),
+              0
+            );
 
             scores[monthName] = {
               actual: totalActual,
-              max: totalMax
+              max: totalMax,
             };
           });
           setMonthlyScores(scores);
@@ -208,8 +237,6 @@ const buildPerformanceMeasurableComments = () => {
       // Set non-measurable KRA data
       if (responseData?.results_KRA_LIST?.['non measurable']) {
         setNonMeasurableKraListData(responseData.results_KRA_LIST['non measurable']);
-      } else if (responseData?.nonMeasurableKraList) {
-        setNonMeasurableKraListData(responseData.nonMeasurableKraList);
       }
 
       // Set development inputs from API response questions
@@ -226,7 +253,7 @@ const buildPerformanceMeasurableComments = () => {
           required: true,
         });
       }
-      
+
       if (questionsArray.length > 0) {
         setDevelopmentInputsData(questionsArray);
       } else if (responseData?.developmentInputs) {
@@ -275,8 +302,8 @@ const buildPerformanceMeasurableComments = () => {
   const handleCommentChange = (questionIndex, value) => {
     // Enforce 30 character limit
     const limitedValue = value.slice(0, COMMENT_CHAR_LIMIT);
-    
-    setFormInputs(prev => {
+
+    setFormInputs((prev) => {
       // Map question index to the appropriate field
       // Index 0 = highlights -> performancePeriodComment
       // Index 1 = areas for improvement -> areasPerformanceComment
@@ -289,59 +316,58 @@ const buildPerformanceMeasurableComments = () => {
     });
   };
 
- const handleSave = async () => {
-  if (!validateComments()) return;
-  
-  try {
-    setIsSubmitting(true);
+  const handleSave = async () => {
+    if (!validateComments()) return;
 
-    const kraDataPayload = buildKraDataPayload();
-    const measurableCommentsPayload = buildPerformanceMeasurableComments();
+    try {
+      setIsSubmitting(true);
 
-    const payload = {
-      financialYear: parseInt(extractYear(financialYear)),
-      quarter: quarter,
-      empNumber: employee?.empNo,
-      urlId: employee?.url || "U-34545",
-      kraData: kraDataPayload,
-      submittype: page_type,
+      const kraDataPayload = buildKraDataPayload();
+      const measurableCommentsPayload = buildPerformanceMeasurableComments();
 
-      startDate: location.state?.dateRange?.split(' - ')[0]?.trim() || '2024-07-01 00:00:00.0',
-      endDate: location.state?.dateRange?.split(' - ')[1]?.trim() || '2024-09-30 00:00:00.0',
+      const payload = {
+        financialYear: parseInt(extractYear(financialYear)),
+        quarter: quarter,
+        empNumber: employee?.empNo,
+        urlId: employee?.url || 'U-34545',
+        kraData: kraDataPayload,
+        submittype: page_type,
 
-      reportingAuthority: employee?.appraiser || "",
-      organizationName: employee?.branch || "",
+        startDate: location.state?.dateRange?.split(' - ')[0]?.trim() || '2024-07-01 00:00:00.0',
+        endDate: location.state?.dateRange?.split(' - ')[1]?.trim() || '2024-09-30 00:00:00.0',
 
-      performanceMeasurableComment: measurableCommentsPayload,
-      nonMeasurableComment: formInputs.nonMeasurableComment,
-      performanceNonMeasurableComment: formInputs.performanceNonMeasurableComment,
-      performanceSemiMeasurableComment: formInputs.performanceSemiMeasurableComment,
-      performancePeriodComment: formInputs.performancePeriodComment,
-      areasPerformanceComment: formInputs.areasPerformanceComment
-    };
+        reportingAuthority: employee?.appraiser || '',
+        organizationName: employee?.branch || '',
 
-    console.log("SAVE PAYLOAD =>", payload);
+        performanceMeasurableComment: measurableCommentsPayload,
+        nonMeasurableComment: formInputs.nonMeasurableComment,
+        performanceNonMeasurableComment: formInputs.performanceNonMeasurableComment,
+        performanceSemiMeasurableComment: formInputs.performanceSemiMeasurableComment,
+        performancePeriodComment: formInputs.performancePeriodComment,
+        areasPerformanceComment: formInputs.areasPerformanceComment,
+      };
 
-    await appraisalAPI.appraiseeSaveQuarterlyCheckIn(payload);
+      console.log('SAVE PAYLOAD =>', payload);
 
-    toast.success("Draft Saved Successfully!");
-    setIsSaved(true);
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to save!");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      await appraisalAPI.appraiseeSaveQuarterlyCheckIn(payload);
 
+      toast.success('Draft Saved Successfully!');
+      setIsSaved(true);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save!');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSubmit = () => {
     if (!validateComments()) return;
-    
+
     setIsSubmitting(true);
 
     // Build the payload matching backend expectations
-    // 
+    //
     const payload = {
       financialYear: parseInt(extractYear(financialYear)),
       quarter: quarter || '',
@@ -368,7 +394,7 @@ const buildPerformanceMeasurableComments = () => {
   };
 
   // Calculate monthly scores data for the table
-  const monthsData = months.map(month => {
+  const monthsData = months.map((month) => {
     const monthData = monthlyScores[month] || {};
     return {
       month,
@@ -376,40 +402,44 @@ const buildPerformanceMeasurableComments = () => {
       max: monthData.max || 0,
     };
   });
-  const averageActual = monthsData.length > 0
-    ? monthsData.reduce((sum, m) => sum + m.actual, 0) / monthsData.length
-    : 0;
-  const averageMax = monthsData.length > 0
-    ? monthsData.reduce((sum, m) => sum + m.max, 0) / monthsData.length
-    : 0;
+  const averageActual =
+    monthsData.length > 0
+      ? monthsData.reduce((sum, m) => sum + m.actual, 0) / monthsData.length
+      : 0;
+  const averageMax =
+    monthsData.length > 0 ? monthsData.reduce((sum, m) => sum + m.max, 0) / monthsData.length : 0;
 
   // Development inputs questions - now mapped from API response
-  const developmentInputsQuestions = developmentInputsData.length > 0
-    ? developmentInputsData
-    : [
-      { question: 'Please mention the highlights of your performance on this KRA', required: true },
-      { question: 'Please mention the areas for improvement on this KRA', required: true },
-    ];
+  const developmentInputsQuestions =
+    developmentInputsData.length > 0
+      ? developmentInputsData
+      : [
+          {
+            question: 'Please mention the highlights of your performance on this KRA',
+            required: true,
+          },
+          { question: 'Please mention the areas for improvement on this KRA', required: true },
+        ];
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return (
       <div className="pageWrapper">
         <div className="pageWrapper-header">
           <BackButton />
-            {
-              roleType === "appraiser" ? (
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-                  Add Appraiser Check-In
-                </h1>
-              ) : (
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-                  Add Appraisee Check-In
-                </h1>
-              )
-            }
+          {roleType === 'appraiser' ? (
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+              Add Appraiser Check-In
+            </h1>
+          ) : (
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+              Add Appraisee Check-In
+            </h1>
+          )}
         </div>
         <div className="text-center mt-5">
-          <p className="text-danger fw-semibold">Missing required parameters: Financial Year, Appraisal Period, or Quarter</p>
+          <p className="text-danger fw-semibold">
+            Missing required parameters: Financial Year, Appraisal Period, or Quarter
+          </p>
         </div>
       </div>
     );
@@ -421,17 +451,15 @@ const buildPerformanceMeasurableComments = () => {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            {
-              roleType === "appraiser" ? (
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-                  Add Appraiser Check-In
-                </h1>
-              ) : (
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-                  Add Appraisee Check-In
-                </h1>
-              )
-            }
+            {roleType === 'appraiser' ? (
+              <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                Add Appraiser Check-In
+              </h1>
+            ) : (
+              <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                Add Appraisee Check-In
+              </h1>
+            )}
           </div>
         </div>
         <LoadingSpinner />
@@ -445,17 +473,15 @@ const buildPerformanceMeasurableComments = () => {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            {
-              roleType === "appraiser" ? (
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-                  Add Appraiser Check-In
-                </h1>
-              ) : (
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-                  Add Appraisee Check-In
-                </h1>
-              )
-            }
+            {roleType === 'appraiser' ? (
+              <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                Add Appraiser Check-In
+              </h1>
+            ) : (
+              <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+                Add Appraisee Check-In
+              </h1>
+            )}
           </div>
         </div>
         <div className="text-center mt-5">
@@ -471,17 +497,15 @@ const buildPerformanceMeasurableComments = () => {
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
-          {
-              roleType === "appraiser" ? (
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-                  Add Appraiser Check-In
-                </h1>
-              ) : (
-                <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-                  Add Appraisee Check-In
-                </h1>
-              )
-            }
+          {roleType === 'appraiser' ? (
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+              Add Appraiser Check-In
+            </h1>
+          ) : (
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+              Add Appraisee Check-In
+            </h1>
+          )}
         </div>
       </div>
 
@@ -499,9 +523,9 @@ const buildPerformanceMeasurableComments = () => {
           <table className="table-accent">
             <thead>
               <tr>
-                <th style={{ width: "55%" }}>Month</th>
-                <th style={{ width: "25%" }}>Actual</th>
-                <th style={{ width: "25%" }}>Max</th>
+                <th style={{ width: '55%' }}>Month</th>
+                <th style={{ width: '25%' }}>Actual</th>
+                <th style={{ width: '25%' }}>Max</th>
               </tr>
             </thead>
             <tbody>
@@ -513,7 +537,9 @@ const buildPerformanceMeasurableComments = () => {
                 </tr>
               ))}
               <tr>
-                <td><b>Average</b></td>
+                <td>
+                  <b>Average</b>
+                </td>
                 <td>{averageActual.toFixed(1)}</td>
                 <td>{averageMax.toFixed(1)}</td>
               </tr>
@@ -525,7 +551,7 @@ const buildPerformanceMeasurableComments = () => {
           {months.map((m) => (
             <li className="nav-items" key={m}>
               <button
-                className={`nav-link ${activeMonth === m ? "active" : ""}`}
+                className={`nav-link ${activeMonth === m ? 'active' : ''}`}
                 onClick={() => setActiveMonth(m)}
               >
                 {m}
@@ -539,8 +565,12 @@ const buildPerformanceMeasurableComments = () => {
             data={monthlyMeasurableData[activeMonth] || []}
             activeMonth={activeMonth}
           />
-          <QuaterNonMeasurable 
-            kraListData={nonMeasurableKraListData && nonMeasurableKraListData.length > 0 ? { "General": nonMeasurableKraListData } : {}}
+          <QuaterNonMeasurable
+            kraListData={
+              nonMeasurableKraListData && nonMeasurableKraListData.length > 0
+                ? { General: nonMeasurableKraListData }
+                : {}
+            }
             totalActualScore={0}
             totalMaxScore={0}
             role={currentRole}
@@ -551,14 +581,14 @@ const buildPerformanceMeasurableComments = () => {
         <div className="development-inputs-section d-flex flex-column gap-3 shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Development Inputs</h5>
 
-
           <div className="d-flex flex-column gap-3">
             {developmentInputsQuestions.map((question, index) => {
               // Map index to the correct formInputs field
-              const fieldValue = index === 0 
-                ? formInputs.performancePeriodComment 
-                : formInputs.areasPerformanceComment;
-              
+              const fieldValue =
+                index === 0
+                  ? formInputs.performancePeriodComment
+                  : formInputs.areasPerformanceComment;
+
               return (
                 <div key={question.question} className="d-flex flex-column gap-1">
                   {/* Question number and question text */}
@@ -569,9 +599,9 @@ const buildPerformanceMeasurableComments = () => {
                   </div>
 
                   {/* Textarea for free text response with 30 char limit */}
-                  <textarea 
-                    className="form-control" 
-                    placeholder="Enter your Response" 
+                  <textarea
+                    className="form-control"
+                    placeholder="Enter your Response"
                     rows={3}
                     maxLength={COMMENT_CHAR_LIMIT}
                     value={fieldValue}
@@ -591,7 +621,11 @@ const buildPerformanceMeasurableComments = () => {
         <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSubmitting}>
           Save
         </button>
-        <button className="btns btn-primarys" onClick={handleSubmit} disabled={!isSaved || isSubmitting}>
+        <button
+          className="btns btn-primarys"
+          onClick={handleSubmit}
+          disabled={!isSaved || isSubmitting}
+        >
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>

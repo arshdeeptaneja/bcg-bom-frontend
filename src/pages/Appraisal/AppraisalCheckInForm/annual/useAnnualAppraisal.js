@@ -8,18 +8,18 @@ import { useAuth } from '../../../../contexts/AuthContext';
 
 /**
  * Annual Appraisal Hook
- * 
+ *
  * Handles all annual-specific logic including:
  * - Data fetching via getEmployeeSelfAppraisal
  * - Flat KRA arrays (no month grouping)
  * - Submit-only functionality (no save draft)
  * - Role-based editability
  * - Development inputs extraction
- * 
+ *
  * ============================================================================
  * API → UI KEY MAPPING REFERENCE
  * ============================================================================
- * 
+ *
  * 1. NON-MEASURABLE KRAs (from: result_kra_list_discretionary_non_measurable_child)
  *    ─────────────────────────────────────────────────────────────────────────
  *    API Key              → UI State Key              → Where to Change
@@ -32,9 +32,9 @@ import { useAuth } from '../../../../contexts/AuthContext';
  *    COMMENT_REVA         → reviewerComment           → nonMeasurableScores[kraId].reviewerComment
  *    REPA_ACTUALS         → appraiserScore            → nonMeasurableScores[kraId].appraiserScore
  *    REVA_ACTUALS         → reviewerScore             → nonMeasurableScores[kraId].reviewerScore
- * 
+ *
  *    To modify: Update handleNonMeasurableScoreChange() or handleNonMeasurableCommentChange()
- * 
+ *
  * 2. DEVELOPMENT INPUTS / QUESTIONS (from: result_questions.development_inputs)
  *    ─────────────────────────────────────────────────────────────────────────
  *    API Key              → UI State Key              → Category
@@ -45,16 +45,16 @@ import { useAuth } from '../../../../contexts/AuthContext';
  *    SELF_RESPONSE_2      → response2                 → developmentResponses[id].response2
  *    REPA_RESPONSE        → (appraiser response)      → Read-only for appraisee
  *    REVA_RESPONSE        → (reviewer response)       → Read-only for appraisee
- * 
+ *
  *    Categories:
  *    - overall_development (IDs 1-9)        → Editable by APPRAISEE
  *    - reporting_review_authority (IDs 12-18) → Editable by APPRAISER/REVIEWER
  *    - integrity (ID 19)                    → Option-based, APPRAISER/REVIEWER
  *    - health_problems (ID 10)              → Yes/No, APPRAISEE
  *    - disciplinary_actions (ID 11)         → Yes/No, APPRAISEE
- * 
+ *
  *    To modify: Update handleDevelopmentInputChange() or developmentInputs useMemo
- * 
+ *
  * 3. OPTION-BASED RESPONSES
  *    ─────────────────────────────────────────────────────────────────────────
  *    API Key              → UI State Key              → Values
@@ -62,9 +62,9 @@ import { useAuth } from '../../../../contexts/AuthContext';
  *    integrity            → optionResponses.integrity → 'option1' | 'option2' | 'option3'
  *    health_problems      → optionResponses.healthProblems → 'yes' | 'no'
  *    disciplinary_actions → optionResponses.disciplinaryActions → 'yes' | 'no'
- * 
+ *
  *    To modify: Update handleOptionChange() or optionResponses state
- * 
+ *
  * 4. LEARNING METRICS (from: root level of API response)
  *    ─────────────────────────────────────────────────────────────────────────
  *    API Key                  → UI State Key
@@ -74,9 +74,9 @@ import { useAuth } from '../../../../contexts/AuthContext';
  *    learning_courses            → learningMetrics.learningCourses
  *    speed_circular              → learningMetrics.speedCircular
  *    elearning_score             → learningMetrics.elearningScore
- * 
+ *
  *    To modify: Update the useEffect that sets learningMetrics
- * 
+ *
  * 5. SUBMIT PAYLOAD MAPPING (buildAnnualSubmitPayload function)
  *    ─────────────────────────────────────────────────────────────────────────
  *    The submit payload spreads original API fields and updates with user input.
@@ -85,17 +85,17 @@ import { useAuth } from '../../../../contexts/AuthContext';
  *    - nonMeasurableScores[kraId].comment → kraData[].FIRSTCOMMENT, COMMENT_SELF_1
  *    - developmentResponses[id].response  → questions[].SELF_RESPONSE
  *    - developmentResponses[id].response2 → questions[].SELF_RESPONSE_2
- * 
+ *
  * ============================================================================
  * QUICK REFERENCE: Where to make changes
  * ============================================================================
- * 
+ *
  * - Change how API data is parsed:     → transformAnnualAppraisalData() in appraisalTransformers.js
  * - Change form field handlers:        → handleNonMeasurable*, handleDevelopmentInputChange, handleOptionChange
  * - Change submit payload structure:   → buildAnnualSubmitPayload() function below
  * - Add new fields from API:           → Add to useEffect that processes apiResponse
  * - Change validation rules:           → validateAnnualForm() function below
- * 
+ *
  * ============================================================================
  */
 export const useAnnualAppraisal = () => {
@@ -121,9 +121,9 @@ export const useAnnualAppraisal = () => {
 
   const { getUserProperty } = useAuth();
 
+  console.log('ROLETYPE IS: ', roleType);
 
-  const empNo = getUserProperty("empNo", "38965");
-
+  const empNo = getUserProperty('empNo', '38965');
 
   const handleRoleChange = (e) => {
     setCurrentRole(e.target.value);
@@ -206,7 +206,7 @@ export const useAnnualAppraisal = () => {
   if (!zoneName) missingParams.push('zoneName');
   if (!roleType) missingParams.push('roleType');
   if (!normalizedFinancialYear) missingParams.push('normalizedFinancialYear');
-  
+
   if (missingParams.length > 0) {
     console.warn('[useAnnualAppraisal] ⚠️ Missing parameters:', missingParams.join(', '));
   }
@@ -214,7 +214,7 @@ export const useAnnualAppraisal = () => {
   // Fetch annual appraisal data
   // Note: quarter is hardcoded to 'Q2' as a backend workaround for annual appraisals
   const isQueryEnabled = isContextValid && appraisalPeriod?.toLowerCase() === 'annual';
-  
+
   console.log('[useAnnualAppraisal] useQuery enabled params:', {
     isContextValid,
     appraisalPeriod,
@@ -223,7 +223,11 @@ export const useAnnualAppraisal = () => {
     isQueryEnabled,
   });
 
-  const { data: apiResponse, isLoading, isError } = useQuery({
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey,
     queryFn: () => {
       const apiParams = {
@@ -279,10 +283,11 @@ export const useAnnualAppraisal = () => {
 
   // Extract development inputs from API response - structured by category and role
   const developmentInputs = useMemo(() => {
-    if (!apiResponse) return { overallDevelopment: [], reportingReviewAuthority: [], optionBased: [] };
-    
+    if (!apiResponse)
+      return { overallDevelopment: [], reportingReviewAuthority: [], optionBased: [] };
+
     const resultQuestions = apiResponse.result_questions?.development_inputs || {};
-    
+
     // Overall Development questions (for appraisee - IDs 1-9)
     const overallDevelopment = (resultQuestions.overall_development || []).map((q) => ({
       id: q.ID,
@@ -299,22 +304,24 @@ export const useAnnualAppraisal = () => {
     }));
 
     // Reporting/Review Authority questions (for appraiser/reviewer - IDs 12-18)
-    const reportingReviewAuthority = (resultQuestions.reporting_review_authority || []).map((q) => ({
-      id: q.ID,
-      question: q.QUESTION,
-      category: q.CATEGORY,
-      subCategory: q.SUB_CATEGORY,
-      selfResponse: q.SELF_RESPONSE || '',
-      repaResponse: q.REPA_RESPONSE || '',
-      revaResponse: q.REVA_RESPONSE || '',
-      acResponse: q.AC_RESPONSE || '',
-      responseId: q.RESPONSE_ID,
-      editableBy: 'APPRAISER_REVIEWER',
-    }));
+    const reportingReviewAuthority = (resultQuestions.reporting_review_authority || []).map(
+      (q) => ({
+        id: q.ID,
+        question: q.QUESTION,
+        category: q.CATEGORY,
+        subCategory: q.SUB_CATEGORY,
+        selfResponse: q.SELF_RESPONSE || '',
+        repaResponse: q.REPA_RESPONSE || '',
+        revaResponse: q.REVA_RESPONSE || '',
+        acResponse: q.AC_RESPONSE || '',
+        responseId: q.RESPONSE_ID,
+        editableBy: 'APPRAISER_REVIEWER',
+      })
+    );
 
     // Option-based inputs (integrity, health, disciplinary)
     const optionBased = [];
-    
+
     // Integrity (ID 19) - 3 options
     const integrityQuestions = resultQuestions.integrity || [];
     integrityQuestions.forEach((q) => {
@@ -486,9 +493,13 @@ export const useAnnualAppraisal = () => {
 
   // Non-measurable KRA comment change handler (per-KRA for future API integration)
   const handleNonMeasurableCommentChange = (kraId, comment, role = 'APPRAISEE') => {
-    const commentKey = role === 'APPRAISEE' ? 'comment' :
-      role === 'APPRAISER' ? 'appraiserComment' : 'reviewerComment';
-    
+    const commentKey =
+      role === 'APPRAISEE'
+        ? 'comment'
+        : role === 'APPRAISER'
+        ? 'appraiserComment'
+        : 'reviewerComment';
+
     setNonMeasurableScores((prev) => ({
       ...prev,
       [kraId]: {
@@ -532,7 +543,7 @@ export const useAnnualAppraisal = () => {
   /**
    * Build annual submit payload matching the API contract.
    * Spreads original KRA fields from GET response and updates with user input.
-   * 
+   *
    * API Endpoint: POST /appraisal/employee_self_appraisal/submit
    */
   const buildAnnualSubmitPayload = () => {
@@ -540,7 +551,7 @@ export const useAnnualAppraisal = () => {
     const kraData = rawKraData.map((originalKra) => {
       const kraId = originalKra.AP_KRA_ID;
       const userInput = nonMeasurableScores[kraId] || {};
-      
+
       return {
         // Spread all original fields from GET response
         ...originalKra,
@@ -562,7 +573,7 @@ export const useAnnualAppraisal = () => {
     const questions = rawQuestionsData.map((originalQuestion) => {
       const questionId = originalQuestion.ID;
       const userInput = developmentResponses[questionId] || {};
-      
+
       return {
         // Spread all original fields from GET response
         QUESTION_ID: originalQuestion.ID,
@@ -576,7 +587,7 @@ export const useAnnualAppraisal = () => {
         // Update with user input
         SELF_RESPONSE: userInput.response || originalQuestion.SELF_RESPONSE || null,
         SELF_RESPONSE_2: userInput.response2 || originalQuestion.SELF_RESPONSE_2 || null,
-        SELF_RESPONSE_OPTIONS: userInput.response ||  originalQuestion.SELF_RESPONSE_OPTIONS || null,
+        SELF_RESPONSE_OPTIONS: userInput.response || originalQuestion.SELF_RESPONSE_OPTIONS || null,
         REPA_RESPONSE: originalQuestion.REPA_RESPONSE || null,
         REVA_RESPONSE: originalQuestion.REVA_RESPONSE || null,
         AC_RESPONSE: originalQuestion.AC_RESPONSE || null,
@@ -591,31 +602,31 @@ export const useAnnualAppraisal = () => {
       empNo: employeeNumber,
       ecNumber: empNo,
       financialYear: parseInt(normalizedFinancialYear, 10),
-      
+
       // Learning metrics - from GET API if available, else 0
       continuousLearningPresent: learningMetrics.continuousLearningPresent,
       mandatoryCourses: learningMetrics.mandatoryCourses,
       learningCourses: learningMetrics.learningCourses,
       speedCircular: learningMetrics.speedCircular,
       elearningScore: learningMetrics.elearningScore,
-      
+
       // KRA data with user scores and comments
       kraData,
-      
+
       // Derived from unique KRA_DESC values
       functions,
-      
+
       // feedbackInput - keeping as empty array (not sure about this)
       feedbackInput: [],
-      
+
       // Questions/Development inputs
       questions,
-      
+
       // Performance comments
       performanceMeasurableComment: formData.appraiseeComments || '',
       performanceNonMeasurableComment: formData.appraiserComments || '',
       performanceSemiMeasurableComment: formData.reviewerComments || '',
-      
+
       // Flags
       warningFlag: false,
       warningComment: '',
@@ -652,7 +663,6 @@ export const useAnnualAppraisal = () => {
       errors,
     };
   };
-  
 
   // Submit mutation (no save for annual)
   const submitMutation = useMutation({
@@ -668,7 +678,10 @@ export const useAnnualAppraisal = () => {
     },
     onError: (error) => {
       console.error('[useAnnualAppraisal] Submit error:', error);
-      const errorMessage = error.response?.data?.MSG || error.message || 'Failed to submit annual appraisal. Please try again.';
+      const errorMessage =
+        error.response?.data?.MSG ||
+        error.message ||
+        'Failed to submit annual appraisal. Please try again.';
       toast.error(errorMessage);
     },
   });
@@ -676,7 +689,7 @@ export const useAnnualAppraisal = () => {
   const handleSubmit = () => {
     // Validate form before submission
     const { isValid, errors } = validateAnnualForm();
-    
+
     if (!isValid) {
       // Show first 3 errors max to avoid overwhelming the user
       const displayErrors = errors.slice(0, 3);

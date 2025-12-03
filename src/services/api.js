@@ -475,6 +475,27 @@ export const appraisalAPI = {
     }
   },
 
+  // GET: Get reviewer check-in dashboard data
+  getReviewerCheckInDashboard: async ({ empNo, financialYear }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo,
+        financialYear,
+      });
+
+      let response;
+
+      response = await apiClient.get(`appraisal/review_appraisal/dashboard?${params.toString()}`);
+
+      console.log('response: ', response);
+
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
   // GET: Get quarterly check-in report data
   getQuarterlyCheckInReport: async ({
     empNo,

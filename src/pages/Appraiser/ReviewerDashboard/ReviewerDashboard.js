@@ -1,217 +1,386 @@
-import React, { useMemo, useState } from 'react';
-import { BackButton } from '../../../components/common';
+/**
+ * The `ReviewerDashboard` function in JavaScript is a React component that displays a
+ * dashboard for reviewers to check in on their assigned appraisals, including filtering options and
+ * summary information.
+ * @returns The code is exporting a React functional component named `ReviewerDashboard`. This
+ * component renders a dashboard for a reviewer to check in on their assigned appraisals for a
+ * specific financial year, appraisal period, and quarter.
+ */
+import { useState, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+
+import { BackButton } from '../../../components/common';
 import './ReviewerDashboard.css';
 
-// TODO: Replace with reviewer dashboard API response when endpoint is available.
-const mockAssignments = [
-  {
-    empNo: '36663',
-    employeeName: 'Demo User',
-    primaryRole: 'Branch Manager',
-    branch: 'Mumbai Main',
-    appraisalStatus: 'Pending at Reviewer',
-    exceptionStatus: 'N/A',
-    urlId: 'URL-36663',
-    dateRange: '01 Apr 2024 - 31 Mar 2025',
-  },
-];
+import EmployeeAppraisalCard from '../../../components/Appraisal/EmployeeAppraisalCard/EmployeeAppraisalCard';
+import EmployeeModel from '../../../models/EmployeeModel';
+import { appraisalAPI } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
+import LoadingSpinner from '../../../components/Spinner';
 
-const buildDateRange = (fyLabel, quarter) => {
-  if (!fyLabel) return '';
-  const match = `${fyLabel}`.match(/FY\s(\d{4})/);
-  if (!match) return '';
-  const startYear = Number(match[1]);
-  switch (quarter) {
-    case 'Q1':
-      return `01 Apr ${startYear} - 30 Jun ${startYear}`;
-    case 'Q2':
-      return `01 Jul ${startYear} - 30 Sep ${startYear}`;
-    case 'Q3':
-      return `01 Oct ${startYear} - 31 Dec ${startYear}`;
-    case 'Q4':
-      return `01 Jan ${startYear + 1} - 31 Mar ${startYear + 1}`;
-    default:
-      return `01 Apr ${startYear} - 31 Mar ${startYear + 1}`;
-  }
+const STATUS_MAPPING = {
+  complete_reva: 'Pending at Acceptor',
+  complete_self: 'Pending at Appraiser',
+  complete_repa: 'Pending at Reviewer',
+  pending: 'Pending at Appraisee',
+  submitted_appraisal: 'Completed',
+  completed: 'Completed',
+  complete_ac: 'Completed',
 };
 
-function ReviewerDashboard() {
-  const [filters, setFilters] = useState({ employee: '', role: '', branch: '', status: '' });
-  const [searchParams] = useSearchParams();
+const getDisplayStatus = (backendStatus) => {
+  if (!backendStatus) return 'Pending';
+  const normalized = String(backendStatus).toLowerCase();
+  return STATUS_MAPPING[normalized] || backendStatus;
+};
+
+const extractYear = (fyLabel) => {
+  if (!fyLabel) return new Date().getFullYear().toString();
+  const match = fyLabel.match(/FY\s+(\d{4})/i);
+  return match ? match[1] : fyLabel;
+};
+
+const buildAdditionalRoles = (r) => {
+  return [r?.ADDITIONAL_ROLE_2, r?.ADDITIONAL_ROLE_3, r?.ADDITIONAL_ROLE_4]
+    .filter(Boolean)
+    .map((x) => String(x));
+};
+
+const buildDateRange = (start, end) => {
+  if (!start || !end) return '';
+  return `${start} - ${end}`;
+};
+
+export default function ReviewerDashboard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const financialYear = searchParams.get('financialYear');
+  const appraisalPeriod = searchParams.get('appraisalPeriod');
+  const quarter = searchParams.get('quarter');
+
   const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
-  const loggedInEmpNo = getUserProperty('empNo', employeeDetails?.currentUser?.EMP_ID || '');
 
-  const financialYear = searchParams.get('financialYear') || 'FY 2024-25';
-  const appraisalPeriod = searchParams.get('appraisalPeriod') || 'Annual';
-  const quarter = searchParams.get('quarter') || '';
+  const authEmpNo = getUserProperty('empNo', employeeDetails?.currentUser?.[0]?.EMP_ID || '');
 
-  const assignments = useMemo(() => {
-    const dataset = mockAssignments.map((item) => ({
-      ...item,
-      dateRange: item.dateRange || buildDateRange(financialYear, quarter),
-    }));
+  // -------------------- FILTER STATE -------------------------
+  const [filters, setFilters] = useState({
+    empNo: '',
+    empName: '',
+    primaryRole: '',
+    branch: '',
+    status: '',
+  });
 
-    return dataset.filter((item) => {
-      const matchesEmployee = filters.employee
-        ? item.employeeName?.toLowerCase().includes(filters.employee.toLowerCase()) ||
-          item.empNo?.toLowerCase().includes(filters.employee.toLowerCase())
-        : true;
-      const matchesRole = filters.role
-        ? item.primaryRole?.toLowerCase().includes(filters.role.toLowerCase())
-        : true;
-      const matchesBranch = filters.branch
-        ? item.branch?.toLowerCase().includes(filters.branch.toLowerCase())
-        : true;
-      const matchesStatus = filters.status
-        ? item.appraisalStatus?.toLowerCase().includes(filters.status.toLowerCase())
-        : true;
+  const {
+    empNo: filterEmpId,
+    empName: filterName,
+    primaryRole: filterRole,
+    branch: filterBranch,
+    status: filterStatus,
+  } = filters;
 
-      return matchesEmployee && matchesRole && matchesBranch && matchesStatus;
+  // -------------------- API CALL -------------------------
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['reviewerCheckInDashboard', financialYear, quarter, authEmpNo],
+
+    queryFn: () =>
+      appraisalAPI.getReviewerCheckInDashboard({
+        empNo: authEmpNo,
+        financialYear: extractYear(financialYear),
+      }),
+
+    enabled: Boolean(authEmpNo && financialYear && quarter),
+  });
+
+  // -------------------- RESPONSE DATA -------------------------
+  const scoreTable = data?.appraisal_score_dash || [];
+  const filterData = data?.filter_data || {};
+
+  // -------------------- CLIENT-SIDE FILTERING -------------------------
+  const filteredReportees = useMemo(() => {
+    const reportees = data?.results || [];
+    return reportees.filter((record) => {
+      // Filter by Employee Number
+      if (filterEmpId && !String(record?.EMP_ID).includes(filterEmpId)) {
+        return false;
+      }
+
+      // Filter by Employee Name
+      if (
+        filterName &&
+        !String(record?.EMP_NAME).toLowerCase().includes(filterName.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Filter by Primary Role
+      if (filterRole && String(record?.MAIN_ROLE).toLowerCase() !== filterRole.toLowerCase()) {
+        return false;
+      }
+
+      // Filter by Branch
+      if (
+        filterBranch &&
+        !String(record?.ORGANIZATION || record?.ORGANISATION)
+          .toLowerCase()
+          .includes(filterBranch.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Filter by Status
+      if (filterStatus && getDisplayStatus(record?.APPRAISAL_STATUS) !== filterStatus) {
+        return false;
+      }
+
+      return true;
     });
-  }, [filters, financialYear, quarter]);
+  }, [data?.results, filterEmpId, filterName, filterRole, filterBranch, filterStatus]);
 
-  const handleFilterChange = (event) => {
-    const { name, value } = event.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
+  // -------------------- FILTER HANDLERS -------------------------
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((old) => ({ ...old, [name]: value }));
   };
 
-  const handleClear = () => {
-    setFilters({ employee: '', role: '', branch: '', status: '' });
-  };
-
-  const handleReview = (assignment) => {
-    navigate('/appraiser/reviewer-mode', {
-      state: {
-        financialYear,
-        appraisalPeriod,
-        quarter,
-        dateRange: assignment.dateRange,
-        role: 'REVIEWER',
-        employee: {
-          empNo: assignment.empNo,
-          employeeName: assignment.employeeName,
-          branch: assignment.branch,
-          primaryRole: assignment.primaryRole,
-          appraiser: assignment.appraiser,
-          reviewer: loggedInEmpNo,
-        },
-        url: assignment.urlId,
-        appraisalStatus: assignment.appraisalStatus,
-      },
+  const handleReset = () => {
+    setFilters({
+      empNo: '',
+      empName: '',
+      primaryRole: '',
+      branch: '',
+      status: '',
     });
   };
 
+  // -------------------- LOADING / ERROR -------------------------
+  if (!financialYear || !appraisalPeriod || !quarter) {
+    return (
+      <div className="pageWrapper">
+        <div className="text-center mt-5 text-danger fw-bold">
+          Missing financial year, appraisal period, or quarter
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading)
+    return (
+      <div className="pageWrapper">
+        <LoadingSpinner />
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="pageWrapper">
+        <p className="text-center text-danger fw-bold mt-5">Failed to load reportee data</p>
+        <p className="text-center text-muted">{error?.message}</p>
+      </div>
+    );
+
+  if (data?.text) {
+    return (
+      <div className="pageWrapper">
+        <div className="text-center mt-5 text-danger fw-bold">{data.text}</div>
+      </div>
+    );
+  }
+
+  // -------------------- UI -------------------------
   return (
-    <div className="pageWrapper reviewer-dashboard">
-      <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
-        <div className="headline d-flex flex-row align-items-center">
+    <div className="pageWrapper">
+      <div className="pageWrapper-header d-flex justify-content-between align-items-center">
+        <div className="headline d-flex align-items-center">
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Reviewer Dashboard</h1>
         </div>
-        <h5 className="text-muted fw-bold mb-0">
-          {appraisalPeriod === 'Quarterly' && quarter ? `${quarter}, ` : ''}
-          {financialYear} {appraisalPeriod} Appraisals
-        </h5>
+        {appraisalPeriod === 'Annual' ? (
+          <h4 className="text-muted fw-bold mb-0">{financialYear} Annual Check-In</h4>
+        ) : (
+          <h4 className="text-muted fw-bold mb-0">
+            {quarter}, {financialYear} Quarterly Check-In
+          </h4>
+        )}
       </div>
 
-      <div className="filters-card shadow-sm p-3 mb-4">
-        <div className="row g-3">
-          <div className="col-md-3">
-            <label className="form-label fw-semibold text-primary">Employee</label>
-            <input
-              type="text"
-              className="form-control"
-              name="employee"
-              value={filters.employee}
-              onChange={handleFilterChange}
-              placeholder="Search by name / number"
-            />
-          </div>
-          <div className="col-md-3">
-            <label className="form-label fw-semibold text-primary">Primary Role</label>
-            <input
-              type="text"
-              className="form-control"
-              name="role"
-              value={filters.role}
-              onChange={handleFilterChange}
-              placeholder="Role"
-            />
-          </div>
-          <div className="col-md-3">
-            <label className="form-label fw-semibold text-primary">Branch</label>
-            <input
-              type="text"
-              className="form-control"
-              name="branch"
-              value={filters.branch}
-              onChange={handleFilterChange}
-              placeholder="Branch"
-            />
-          </div>
-          <div className="col-md-3">
-            <label className="form-label fw-semibold text-primary">Status</label>
-            <input
-              type="text"
-              className="form-control"
-              name="status"
-              value={filters.status}
-              onChange={handleFilterChange}
-              placeholder="Pending / Completed"
-            />
-          </div>
+      {/* ---------------- FILTER BAR ---------------- */}
+      <div className="row g-3 mb-4 appraiser-filter-bar">
+        <div className="col-md-2">
+          <label className="form-label fw-semibold">EMPLOYEE NUMBER</label>
+          <select
+            name="empNo"
+            className="form-select"
+            onChange={handleFilterChange}
+            value={filters.empNo}
+          >
+            <option value="">-Select-</option>
+            {filterData.EC_NUMBER_ARRAY?.map((x) => (
+              <option key={x} value={x}>
+                {x}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="d-flex justify-content-end gap-2 mt-3">
-          <button className="btn btn-outline-primary" onClick={handleClear}>
-            Clear Filters
+
+        <div className="col-md-2">
+          <label className="form-label fw-semibold">EMPLOYEE NAME</label>
+          <select
+            name="empName"
+            className="form-select"
+            onChange={handleFilterChange}
+            value={filters.empName}
+          >
+            <option value="">-Select-</option>
+            {filterData.EMP_NAME_ARRAY?.map((x) => (
+              <option key={x} value={x}>
+                {x}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="col-md-2">
+          <label className="form-label fw-semibold">PRIMARY ROLE</label>
+          <select
+            name="primaryRole"
+            className="form-select"
+            onChange={handleFilterChange}
+            value={filters.primaryRole}
+          >
+            <option value="">-Select-</option>
+            {filterData.PRIMARY_ROLE_ARRAY?.map((x) => (
+              <option key={x} value={x}>
+                {x}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="col-md-2">
+          <label className="form-label fw-semibold">BRANCH</label>
+          <select
+            name="branch"
+            className="form-select"
+            onChange={handleFilterChange}
+            value={filters.branch}
+          >
+            <option value="">-Select-</option>
+            {filterData.BRANCH_ARRAY?.map((x) => (
+              <option key={x} value={x}>
+                {x}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="col-md-2">
+          <label className="form-label fw-semibold">STATUS</label>
+          <select
+            name="status"
+            className="form-select"
+            onChange={handleFilterChange}
+            value={filters.status}
+          >
+            <option value="">-Select-</option>
+            {filterData.STATUS_ARRAY?.map((x) => (
+              <option key={getDisplayStatus(x)} value={getDisplayStatus(x)}>
+                {getDisplayStatus(x)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="col-md-2 d-flex align-items-end">
+          <button className="btn primary-button w-100" onClick={handleReset}>
+            Reset <i className="bi bi-arrow-repeat ms-1"></i>
           </button>
         </div>
       </div>
 
-      <div className="table-responsive shadow-sm">
-        <table className="table align-middle reviewer-table">
-          <thead className="table-primary">
-            <tr>
-              <th>Employee No</th>
-              <th>Employee Name</th>
-              <th>Primary Role</th>
-              <th>Branch</th>
-              <th>Appraisal Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assignments.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="text-center text-muted py-4">
-                  No assignments found for the selected filters.
-                </td>
-              </tr>
-            ) : (
-              assignments.map((assignment) => (
-                <tr key={assignment.empNo}>
-                  <td>{assignment.empNo}</td>
-                  <td>{assignment.employeeName}</td>
-                  <td>{assignment.primaryRole}</td>
-                  <td>{assignment.branch}</td>
-                  <td>{assignment.appraisalStatus}</td>
-                  <td>
-                    <button className="btn btn-primary" onClick={() => handleReview(assignment)}>
-                      Review Appraisal
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      {/* ---------------- EMPLOYEE CARDS ---------------- */}
+      <div className="employee-appraisal-cards mt-4">
+        {filteredReportees.length === 0 && (
+          <p className="text-center text-muted fw-bold mt-5">No reportees found.</p>
+        )}
+
+        {filteredReportees.map((record, index) => {
+          const employeeModel = new EmployeeModel({
+            empNo: record?.EMP_ID,
+            employeeName: record?.EMP_NAME,
+            url: record?.URL_ID,
+            appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+            employeeScale: appraisalPeriod === 'Annual' ? record?.EMP_SCALE : record?.SCALE,
+            additionalRoles: buildAdditionalRoles(record),
+            branch: record?.ORGANIZATION || record?.ORGANISATION,
+            appraiser: record?.REPORTING_AUTHORITY_NO || authEmpNo,
+            primaryRole: appraisalPeriod === 'Annual' ? record?.PRIMARY_ROLE : record?.MAIN_ROLE,
+          });
+
+          const dateRange = buildDateRange(
+            appraisalPeriod === 'Annual' ? record?.ROLE_START_DATE : record?.STARTDATE,
+            appraisalPeriod === 'Annual' ? record?.ROLE_END_DATE : record?.ENDDATE
+          );
+
+          return (
+            <EmployeeAppraisalCard
+              key={index}
+              employee={employeeModel}
+              dateRange={dateRange}
+              primaryRole={appraisalPeriod === 'Annual' ? record?.PRIMARY_ROLE : record?.MAIN_ROLE}
+              additionalRoles={buildAdditionalRoles(record)}
+              organization={record?.ORGANIZATION || record?.ORGANISATION}
+              userType="reviewer"
+              appraisalStatus={getDisplayStatus(record?.APPRAISAL_STATUS || record?.STATUS)}
+              exceptionStatus={record?.EXCEPTION_STATUS || 'NOT CREATED'}
+              scoreData={scoreTable}
+              isCheckInDisabled={
+                record?.APPRAISAL_STATUS !== 'complete_repa' && record?.STATUS !== 'complete_repa'
+              }
+              onAddCheckIn={() =>
+                appraisalPeriod === 'Annual'
+                  ? navigate('/appraisal/annual/reviewer-review', {
+                      state: {
+                        financialYear,
+                        appraisalPeriod,
+                        quarter,
+                        page_type: 'reva',
+                        dateRange,
+                        employee: employeeModel,
+                        organizationName: record?.ORGANIZATION,
+                        urlId: record?.ID,
+                        roleType: 'reviewer',
+                        pageType: 'review',
+                        intent: 'Review',
+                        appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                      },
+                    })
+                  : navigate('/quarterly/quaterly-reviewer-check-in', {
+                      state: {
+                        financialYear,
+                        appraisalPeriod,
+                        quarter,
+                        page_type: 'reva',
+                        dateRange,
+                        employee: employeeModel,
+                        organizationName: record?.ORGANIZATION,
+                        urlId: record?.URL_ID,
+                        roleType: 'reviewer',
+                        pageType: 'review',
+                        intent: 'Review',
+                        appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                      },
+                    })
+              }
+              onViewSummary={() => {}}
+              onAddException={() => {}}
+            />
+          );
+        })}
       </div>
     </div>
   );
 }
-
-export default ReviewerDashboard;
