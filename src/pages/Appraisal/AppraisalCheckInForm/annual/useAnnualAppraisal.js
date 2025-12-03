@@ -559,21 +559,21 @@ export const useAnnualAppraisal = () => {
       const kraId = originalKra.AP_KRA_ID;
       const userInput = nonMeasurableScores[kraId] || {};
 
-      const scoreKey = 'SCORE';
+      let scoreKey = 'SCORE';
       if (pageType === 'repa') {
         scoreKey = 'REPA_SCORE';
       } else if (pageType === 'reva') {
         scoreKey = 'REVA_SCORE';
       }
 
-      const actualKey = 'ACTUAL';
+      let actualKey = 'ACTUAL';
       if (pageType === 'repa') {
         actualKey = 'REPA_ACTUAL';
       } else if (pageType === 'reva') {
         actualKey = 'REVA_ACTUAL';
       }
 
-      const commentKey = 'COMMENT_SELF_1';
+      let commentKey = 'COMMENT_SELF_1';
       if (pageType === 'repa') {
         commentKey = 'COMMENT_REPA';
       } else if (pageType === 'reva') {

@@ -673,7 +673,7 @@ export const appraisalAPI = {
       appendQueryParam(params, 'appraisalStatus', appraisalStatus);
       appendQueryParam(params, 'intent', intent);
 
-      const response = await apiClient.get(`/appraisal/acceptor_appraisal?${params.toString()}`);
+      const response = await apiClient.get(`/appraisal/reviewer_appraisal?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.log('error', error);
@@ -920,7 +920,7 @@ export const appraisalAPI = {
   submitReviewerAppraisal: async (payload = {}) => {
     try {
       const response = await apiClient.post(
-        `${appraisalBaseUrl}/acceptor_appraisal/submit`,
+        `${appraisalBaseUrl}/reviewer_appraisal/submit`,
         payload
       );
       return response.data;
