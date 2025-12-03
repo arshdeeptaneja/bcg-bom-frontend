@@ -11,22 +11,20 @@ import {
   CheckInDescriptionSection,
   MeasurableKra,
   NonMeasurableKra,
-  
 } from '../../../components/Appraisal';
 import DevelopmentInput from './DevelopmentInput/DevelopementInput';
 import RemarkTable from './Remark/Remark';
 import { toast } from 'react-toastify';
 
-
 const demoRows = [
-  { question: "Training required, if any", response: "Review of Performance KRAs" },
-  { question: "Integrity remarks", response: "Officer integrity satisfactory" },
-  { question: "General behavior remarks", response: "Good behavior & cooperation" },
-  { question: "Communication skills", response: "Strong communication" },
-  { question: "Team handling capability", response: "Handles team well" },
-  { question: "Leadership feedback", response: "Shows leadership potential" },
-  { question: "Work commitment remarks", response: "Highly committed" },
-  { question: "Improvement areas", response: "Needs minor improvement in time mgmt" },
+  { question: 'Training required, if any', response: 'Review of Performance KRAs' },
+  { question: 'Integrity remarks', response: 'Officer integrity satisfactory' },
+  { question: 'General behavior remarks', response: 'Good behavior & cooperation' },
+  { question: 'Communication skills', response: 'Strong communication' },
+  { question: 'Team handling capability', response: 'Handles team well' },
+  { question: 'Leadership feedback', response: 'Shows leadership potential' },
+  { question: 'Work commitment remarks', response: 'Highly committed' },
+  { question: 'Improvement areas', response: 'Needs minor improvement in time mgmt' },
 ];
 
 const STATUS_MAPPING = {
@@ -159,16 +157,20 @@ function AppraiserAddAppraisal() {
   const reporteeRows = Array.isArray(reporteeDashboard?.result)
     ? reporteeDashboard.result
     : Array.isArray(reporteeDashboard?.data)
-      ? reporteeDashboard.data
-      : Array.isArray(reporteeDashboard)
-        ? reporteeDashboard
-        : [];
+    ? reporteeDashboard.data
+    : Array.isArray(reporteeDashboard)
+    ? reporteeDashboard
+    : [];
   const reporteeCards = reporteeRows.map((row) => buildCardPayload(row, effectiveQuarter));
 
   // Show error toast when API fails
   useEffect(() => {
     if (isDashboardError) {
-      toast.error(`Failed to fetch reportee appraisal dashboard data: ${dashboardError?.message || 'Unknown error'}`);
+      toast.error(
+        `Failed to fetch reportee appraisal dashboard data: ${
+          dashboardError?.message || 'Unknown error'
+        }`
+      );
     }
   }, [isDashboardError, dashboardError]);
 
@@ -249,11 +251,7 @@ function AppraiserAddAppraisal() {
 
   const renderReporteeList = () => {
     if (reporteeCards.length === 0) {
-      return (
-        <div className="alert alert-info">
-          No reportees found for the selected period.
-        </div>
-      );
+      return <div className="alert alert-info">No reportees found for the selected period.</div>;
     }
 
     return reporteeCards.map((cardPayload, index) => (
@@ -285,7 +283,9 @@ function AppraiserAddAppraisal() {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser :Add Appraisal</h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+              Appraiser :Add Appraisal
+            </h1>
           </div>
         </div>
         <LoadingSpinner />
@@ -300,7 +300,9 @@ function AppraiserAddAppraisal() {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser :Add Appraisal</h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+              Appraiser :Add Appraisal
+            </h1>
           </div>
         </div>
         <div className="text-center mt-5">
@@ -317,7 +319,9 @@ function AppraiserAddAppraisal() {
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Appraiser :Add Appraisal</h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
+            Appraiser :Add Appraisal
+          </h1>
         </div>
         <h5 className="text-muted fw-bold mb-0 ms-3">
           {`${isQuarterly ? `${quarterParam}, ` : ''}${financialYearParam} ${appraisalPeriodParam}`}
@@ -337,7 +341,7 @@ function AppraiserAddAppraisal() {
             <div className="note mt-5 mb-5">
               <span className="text-muted">Note: </span>
               <span className="text-muted">
-                Please raise an exception if actual or target values are incorrect.
+                Please raise an appeal if actual or target values are incorrect.
               </span>
             </div>
 

@@ -10,7 +10,7 @@ import './AnnualCheckIn.css';
 
 /**
  * Annual Appraisal Review Component (Appraiser/Reviewer)
- * 
+ *
  * Displays appraisee's self-appraisal data (read-only) with editable fields for:
  * - Appraiser scores (1-5) for each Non-Measurable KRA
  * - Appraiser comments for each KRA
@@ -18,18 +18,17 @@ import './AnnualCheckIn.css';
  * - Integrity assessment
  */
 const AnnualAppraisalReview = () => {
-  const {
-    data,
-    developmentInputs,
-    isLoading,
-    isError,
-    context,
-    formState,
-    actions,
-  } = useAnnualAppraisalReview();
+  const { data, developmentInputs, isLoading, isError, context, formState, actions } =
+    useAnnualAppraisalReview();
 
   const { employee, dateRange, metadata } = context;
-  const { appraiserScores, appraiserDevResponses, appraiserOptionResponses, selfDevResponses, selfOptionResponses } = formState;
+  const {
+    appraiserScores,
+    appraiserDevResponses,
+    appraiserOptionResponses,
+    selfDevResponses,
+    selfOptionResponses,
+  } = formState;
   const {
     handleSubmit,
     handleAppraiserScoreChange,
@@ -88,9 +87,7 @@ const AnnualAppraisalReview = () => {
         <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
           <div className="headline d-flex flex-row justify-content-between align-items-center">
             <BackButton />
-            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-              Annual Appraisal
-            </h1>
+            <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Annual Appraisal</h1>
           </div>
         </div>
         <LoadingSpinner />
@@ -104,9 +101,7 @@ const AnnualAppraisalReview = () => {
       <div className="pageWrapper-header d-flex flex-row justify-content-between align-items-center">
         <div className="headline d-flex flex-row justify-content-between align-items-center">
           <BackButton />
-          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">
-            Annual Appraisal
-          </h1>
+          <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Annual Appraisal</h1>
         </div>
       </div>
 
@@ -117,7 +112,7 @@ const AnnualAppraisalReview = () => {
         <div className="note mt-5 mb-5">
           <span className="text-muted">Note: </span>
           <span className="text-muted">
-            Please raise an exception if actual or target values are incorrect.
+            Please raise an appeal if actual or target values are incorrect.
           </span>
         </div>
 
@@ -189,8 +184,8 @@ const AnnualAppraisalReview = () => {
                                     </span>
                                     <span className="text-danger">*</span>
                                     {kra.Tooltip && (
-                                      <i 
-                                        className="bi bi-info-circle text-primary" 
+                                      <i
+                                        className="bi bi-info-circle text-primary"
                                         title={kra.Tooltip}
                                       ></i>
                                     )}
@@ -236,9 +231,11 @@ const AnnualAppraisalReview = () => {
                                   onClick={() => toggleComment(kraId)}
                                   aria-label="Toggle comment"
                                 >
-                                  <i className={`bi bi-chat-left-text-fill ${
-                                    appraiserInput.comment ? 'text-success' : 'text-primary'
-                                  }`}></i>
+                                  <i
+                                    className={`bi bi-chat-left-text-fill ${
+                                      appraiserInput.comment ? 'text-success' : 'text-primary'
+                                    }`}
+                                  ></i>
                                 </button>
                               </td>
                             </tr>
@@ -252,9 +249,11 @@ const AnnualAppraisalReview = () => {
                                       Appraisee Comment:
                                     </label>
                                     <div className="p-2 bg-white rounded border mb-3">
-                                      {kra.CommentSelf1 || <span className="text-muted">No comment provided</span>}
+                                      {kra.CommentSelf1 || (
+                                        <span className="text-muted">No comment provided</span>
+                                      )}
                                     </div>
-                                    
+
                                     <div className="mt-3">
                                       <label className="fw-semibold text-muted mb-2">
                                         Appraiser Comment:
@@ -264,7 +263,9 @@ const AnnualAppraisalReview = () => {
                                         rows={3}
                                         placeholder="Enter Appraiser Comment"
                                         value={appraiserInput.comment || ''}
-                                        onChange={(e) => handleAppraiserCommentChange(kraId, e.target.value)}
+                                        onChange={(e) =>
+                                          handleAppraiserCommentChange(kraId, e.target.value)
+                                        }
                                       />
                                     </div>
                                   </div>
@@ -278,7 +279,6 @@ const AnnualAppraisalReview = () => {
                   </table>
                 </div>
               ))}
-
             </div>
           </div>
         )}
@@ -309,7 +309,9 @@ const AnnualAppraisalReview = () => {
                         rows={2}
                         placeholder="Enter Additional Response"
                         value={selfInput.response2 ?? input.selfResponse2 ?? ''}
-                        onChange={(e) => handleSelfDevInputChange(input.id, 'response2', e.target.value)}
+                        onChange={(e) =>
+                          handleSelfDevInputChange(input.id, 'response2', e.target.value)
+                        }
                       />
                     </div>
                   )}
@@ -327,10 +329,14 @@ const AnnualAppraisalReview = () => {
             </h5>
             <p className="text-muted small mb-3">
               {metadata?.reportingAuthorityName && (
-                <span>Reporting Authority: <strong>{metadata.reportingAuthorityName}</strong></span>
+                <span>
+                  Reporting Authority: <strong>{metadata.reportingAuthorityName}</strong>
+                </span>
               )}
               {metadata?.reviewingAuthorityName && (
-                <span className="ms-3">Reviewing Authority: <strong>{metadata.reviewingAuthorityName}</strong></span>
+                <span className="ms-3">
+                  Reviewing Authority: <strong>{metadata.reviewingAuthorityName}</strong>
+                </span>
               )}
             </p>
             {developmentInputs.reportingReviewAuthority.map((input, index) => (
@@ -359,16 +365,14 @@ const AnnualAppraisalReview = () => {
               const isAppraiserField = input.key === 'integrity';
               const currentValue = isAppraiserField
                 ? appraiserOptionResponses[input.key]
-                : (selfOptionResponses[input.key] ?? input.selfResponse?.toLowerCase());
+                : selfOptionResponses[input.key] ?? input.selfResponse?.toLowerCase();
               const handleChange = isAppraiserField
                 ? (value) => handleAppraiserOptionChange(input.key, value)
                 : (value) => handleSelfOptionChange(input.key, value);
 
               return (
                 <div className="mb-3" key={input.id}>
-                  <label className="form-label fw-bold text-dark">
-                    {input.question}
-                  </label>
+                  <label className="form-label fw-bold text-dark">{input.question}</label>
                   <div className="d-flex flex-wrap gap-3">
                     {input.options.map((option) => (
                       <div className="form-check" key={option.value}>
@@ -399,7 +403,7 @@ const AnnualAppraisalReview = () => {
 
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button
-          type='submit'
+          type="submit"
           className="btn btn-primary"
           onClick={handleSubmit}
           disabled={isSubmitting}

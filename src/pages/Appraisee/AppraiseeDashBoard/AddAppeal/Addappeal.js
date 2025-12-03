@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { BackButton } from '../../../../components/common';
 import LoadingSpinner from '../../../../components/Spinner';
-import { CheckInDescriptionSection, FinalScoreSummaryTable } from '../../../../components/Appraisal';
+import {
+  CheckInDescriptionSection,
+  FinalScoreSummaryTable,
+} from '../../../../components/Appraisal';
 import { useAddAppeal } from './useAddAppeal';
 import AppealKRASection from './AppealKRASection';
 import FileUploadSection from './FileUploadSection';
@@ -13,16 +16,7 @@ function AddAppeal() {
   const navigate = useNavigate();
 
   // Use custom hook for all data and logic
-  const {
-    data,
-    context,
-    formState,
-    actions,
-    isValid,
-    isLoading,
-    isError,
-    error
-  } = useAddAppeal();
+  const { data, context, formState, actions, isValid, isLoading, isError, error } = useAddAppeal();
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [appealId, setAppealId] = useState('');
@@ -32,7 +26,7 @@ function AddAppeal() {
   const handleFileUpload = (files) => {
     try {
       actions.handleFileUpload(files);
-      setValidationErrors(prev => prev.filter(e => !e.includes('file')));
+      setValidationErrors((prev) => prev.filter((e) => !e.includes('file')));
     } catch (err) {
       toast.error(err.message);
     }
@@ -71,9 +65,10 @@ function AddAppeal() {
     try {
       setValidationErrors([]);
       const response = await actions.handleSubmit();
-      
+
       // Extract appeal ID from response
-      const responseAppealId = response?.data?.appealId || response?.appealId || `APPEAL-${Date.now()}`;
+      const responseAppealId =
+        response?.data?.appealId || response?.appealId || `APPEAL-${Date.now()}`;
       setAppealId(responseAppealId);
       setShowSuccessModal(true);
       toast.success('Appeal submitted successfully!');
@@ -119,7 +114,9 @@ function AddAppeal() {
               <i className="bi bi-exclamation-triangle-fill me-2"></i>
               Error Loading Data
             </h5>
-            <p className="mb-0">{error?.message || 'Failed to load appraisal data. Please try again.'}</p>
+            <p className="mb-0">
+              {error?.message || 'Failed to load appraisal data. Please try again.'}
+            </p>
             <hr />
             <button className="btn btn-outline-danger" onClick={() => window.location.reload()}>
               <i className="bi bi-arrow-clockwise me-2"></i>
@@ -141,7 +138,9 @@ function AddAppeal() {
               <i className="bi bi-info-circle-fill me-2"></i>
               Missing Information
             </h5>
-            <p className="mb-0">Required information is missing. Please navigate from the dashboard.</p>
+            <p className="mb-0">
+              Required information is missing. Please navigate from the dashboard.
+            </p>
             <hr />
             <button className="btn btn-outline-warning" onClick={() => navigate(-1)}>
               <i className="bi bi-arrow-left me-2"></i>
@@ -180,17 +179,14 @@ function AddAppeal() {
         )}
 
         {/* Employee Information Section */}
-        <CheckInDescriptionSection 
-          employee={context.employee} 
-          dateRange={context.dateRange} 
-        />
+        <CheckInDescriptionSection employee={context.employee} dateRange={context.dateRange} />
 
         {/* Note Section */}
         <div className="note mt-5 mb-5">
           <span className="text-muted fw-bold">Note: </span>
           <span className="text-muted">
-            Please raise an exception if actual or target values are incorrect. 
-            This appeal form is for appealing against the scores assigned by your appraiser.
+            Please raise an appeal if actual or target values are incorrect. This appeal form is for
+            appealing against the scores assigned by your appraiser.
           </span>
         </div>
 
@@ -198,14 +194,15 @@ function AddAppeal() {
         <div className="d-flex justify-content-end mb-3">
           <span className="text-muted me-2">Discretionary Score:</span>
           <span className="fw-bold text-primary">
-            {data.totalNonMeasurableActual + data.totalMeasurableActual}/{data.totalNonMeasurableMax + data.totalMeasurableMax}
+            {data.totalNonMeasurableActual + data.totalMeasurableActual}/
+            {data.totalNonMeasurableMax + data.totalMeasurableMax}
           </span>
         </div>
 
         {/* Final Score Summary Section */}
         <div className="final-score-summary-table-section d-flex flex-column shadow-sm p-3">
           <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
-          <FinalScoreSummaryTable 
+          <FinalScoreSummaryTable
             kraListData={data.finalScoreSummary}
             selectedCategories={formState.selectedCategories}
             onSelectionChange={actions.handleCategorySelection}
@@ -242,11 +239,25 @@ function AddAppeal() {
           <div className="score-scale-info bg-light p-3 rounded border mb-4">
             <p className="fw-bold mb-2">Please fill score in actual as per the scale below:</p>
             <ol className="mb-0 ps-3">
-              <li><strong>Strongly disagree:</strong> shows very poor performance across the given dimensions</li>
-              <li><strong>Disagree:</strong> fell short of expectations & shows weak performance in few or more of the given dimensions</li>
-              <li><strong>Neutral:</strong> expresses required level of proficiency on the dimension at the level</li>
-              <li><strong>Agree:</strong> performs well above expectations across the given dimensions</li>
-              <li><strong>Strongly agree:</strong> over-delivers & shows high degree of proficiency in the given dimensions</li>
+              <li>
+                <strong>Strongly disagree:</strong> shows very poor performance across the given
+                dimensions
+              </li>
+              <li>
+                <strong>Disagree:</strong> fell short of expectations & shows weak performance in
+                few or more of the given dimensions
+              </li>
+              <li>
+                <strong>Neutral:</strong> expresses required level of proficiency on the dimension
+                at the level
+              </li>
+              <li>
+                <strong>Agree:</strong> performs well above expectations across the given dimensions
+              </li>
+              <li>
+                <strong>Strongly agree:</strong> over-delivers & shows high degree of proficiency in
+                the given dimensions
+              </li>
             </ol>
           </div>
 
@@ -293,36 +304,39 @@ function AddAppeal() {
             onFileRemove={actions.handleFileRemove}
           />
         </div>
-
       </div>
 
-        {/* Submit Button */}
-        <div className="save-and-submit-button-section d-flex flex-column align-items-end gap-2 m-3">
-          <button
-            className="btn btn-primary"
-            onClick={handleSubmit}
-            disabled={!isValid || actions.isSubmitting}
-            title={!isValid ? 'Please select at least one KRA and provide justification' : ''}
-          >
-            {actions.isSubmitting ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Submitting Appeal...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-send-fill me-2"></i>
-                Submit Appeal
-              </>
-            )}
-          </button>
-          {!isValid && formState.selectedKras.size === 0 && (
-            <div className="text-muted small">
-              <i className="bi bi-info-circle me-1"></i>
-              Please select at least one KRA to enable submission
-            </div>
+      {/* Submit Button */}
+      <div className="save-and-submit-button-section d-flex flex-column align-items-end gap-2 m-3">
+        <button
+          className="btn btn-primary"
+          onClick={handleSubmit}
+          disabled={!isValid || actions.isSubmitting}
+          title={!isValid ? 'Please select at least one KRA and provide justification' : ''}
+        >
+          {actions.isSubmitting ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Submitting Appeal...
+            </>
+          ) : (
+            <>
+              <i className="bi bi-send-fill me-2"></i>
+              Submit Appeal
+            </>
           )}
-        </div>
+        </button>
+        {!isValid && formState.selectedKras.size === 0 && (
+          <div className="text-muted small">
+            <i className="bi bi-info-circle me-1"></i>
+            Please select at least one KRA to enable submission
+          </div>
+        )}
+      </div>
 
       {/* Success Modal */}
       {showSuccessModal && (
@@ -334,12 +348,10 @@ function AddAppeal() {
             <h4 className="fw-bold" style={{ color: 'var(--accent-color)' }}>
               Appeal Submitted Successfully!
             </h4>
-            <div className="appeal-id-display">
-              Appeal ID: #{appealId}
-            </div>
+            <div className="appeal-id-display">Appeal ID: #{appealId}</div>
             <p className="text-muted">
-              Your appeal has been registered and will be reviewed by the appeal committee.
-              You will be notified once the review is complete.
+              Your appeal has been registered and will be reviewed by the appeal committee. You will
+              be notified once the review is complete.
             </p>
             <hr />
             <p className="text-muted small mb-4">

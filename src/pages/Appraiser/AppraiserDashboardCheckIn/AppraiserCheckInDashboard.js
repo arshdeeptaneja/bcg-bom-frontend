@@ -263,16 +263,14 @@ export default function AppraiserCheckInDashboard() {
             Appraiser Check-In Dashboard
           </h1>
         </div>
-        {appraisalPeriod === "Annual" ? (
-            <h4 className="text-muted fw-bold mb-0">
-              {quarter}, {financialYear} Annual Check-In
-            </h4>
-          ) :            
-            <h4 className="text-muted fw-bold mb-0">
-               {quarter}, {financialYear} Quarterly Check-In
-            </h4>
-        }
-        </div>
+        {appraisalPeriod === 'Annual' ? (
+          <h4 className="text-muted fw-bold mb-0">{financialYear} Annual Check-In</h4>
+        ) : (
+          <h4 className="text-muted fw-bold mb-0">
+            {quarter}, {financialYear} Quarterly Check-In
+          </h4>
+        )}
+      </div>
 
       {/* ---------------- FILTER BAR ---------------- */}
       <div className="row g-3 mb-4 appraiser-filter-bar">
@@ -422,22 +420,39 @@ export default function AppraiserCheckInDashboard() {
                 record?.APPRAISAL_STATUS !== 'complete_self' && record?.STATUS !== 'complete_self'
               }
               onAddCheckIn={() =>
-                navigate('/appraisal/annual/appraiser-review', {
-                  state: {
-                    financialYear,
-                    appraisalPeriod,
-                    quarter,
-                    page_type: 'repa',
-                    dateRange,
-                    employee: employeeModel,
-                    organizationName: record?.ORGANIZATION,
-                    urlId: record?.URL_ID,
-                    roleType: 'appraiser',
-                    pageType: 'review',
-                    intent: 'Review',
-                    appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
-                  },
-                })
+                appraisalPeriod === 'Annual'
+                  ? navigate('/appraisal/annual/appraiser-review', {
+                      state: {
+                        financialYear,
+                        appraisalPeriod,
+                        quarter,
+                        page_type: 'repa',
+                        dateRange,
+                        employee: employeeModel,
+                        organizationName: record?.ORGANIZATION,
+                        urlId: record?.ID,
+                        roleType: 'appraiser',
+                        pageType: 'review',
+                        intent: 'Review',
+                        appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                      },
+                    })
+                  : navigate('/quarterly/quaterly-appraisee-check-in', {
+                      state: {
+                        financialYear,
+                        appraisalPeriod,
+                        quarter,
+                        page_type: 'repa',
+                        dateRange,
+                        employee: employeeModel,
+                        organizationName: record?.ORGANIZATION,
+                        urlId: record?.URL_ID,
+                        roleType: 'appraiser',
+                        pageType: 'review',
+                        intent: 'Review',
+                        appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                      },
+                    })
               }
               onViewSummary={() => {}}
               onAddException={() => {}}

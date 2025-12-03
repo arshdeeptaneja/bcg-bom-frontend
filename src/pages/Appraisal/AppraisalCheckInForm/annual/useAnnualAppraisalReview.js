@@ -8,13 +8,13 @@ import { useAuth } from '../../../../contexts/AuthContext';
 
 /**
  * Annual Appraisal Review Hook (Appraiser/Reviewer)
- * 
+ *
  * Handles appraiser/reviewer flow for annual appraisals including:
  * - Data fetching via getReporteeAppraisal
  * - Appraiser scores and comments for each KRA
  * - Development input responses for Reporting Authority (IDs 12-18)
  * - Submit-only functionality (no save draft)
- * 
+ *
  * Supports both location.state and URL search params:
  * /appraisal/annual/appraiser-review?empNo=38965&financialYear=FY%202024-25&quarter=Q2&url=4&zoneName=Zone&roleType=Administrative%20Officers
  */
@@ -22,22 +22,27 @@ export const useAnnualAppraisalReview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const {getUserProperty} = useAuth();
-  const  ecNumber = getUserProperty("empNo"); 
+  const { getUserProperty } = useAuth();
+  const ecNumber = getUserProperty('empNo');
+  const empNoFromAuth = getUserProperty('empNo', '');
+  const empNo = empNoFromAuth || employee?.empNo || employee?.id || employee?.EMP_ID;
+  const zoneName = getUserProperty('ZNNAME', '');
 
   // Extract params from location.state first, fallback to URL search params
-  const stateParams = location.state || {};
   const {
-    empNo = searchParams.get('empNo') || '',
-    financialYear = searchParams.get('financialYear') || '',
-    quarter = searchParams.get('quarter') || 'Q2',
-    url = searchParams.get('url') || '',
-    zoneName = searchParams.get('zoneName') || '',
-    roleType = searchParams.get('roleType') || 'Administrative Officers',
-    employee: employeeFromState,
-    appraisalPeriod = searchParams.get('appraisalPeriod') || 'Annual',
-    dateRange: dateRangeFromState,
-  } = stateParams;
+    financialYear,
+    appraisalPeriod,
+    quarter,
+    dateRange,
+    employee,
+    intent,
+    page_type,
+    roleType,
+    urlId,
+  } = location.state;
+  const url = urlId;
+  const dateRangeFromState = dateRange;
+  const employeeFromState = employee;
 
   // Normalize financial year (e.g., "FY 2024-25" -> "2024")
   const normalizedFinancialYear = useMemo(() => {
@@ -48,6 +53,7 @@ export const useAnnualAppraisalReview = () => {
 
   // Context validation
   const isContextValid = Boolean(empNo && normalizedFinancialYear && url);
+  console.log('isContextValid: ', isContextValid);
 
   // Appraiser scores and comments state
   // Shape: { [AP_KRA_ID]: { score: number, comment: string } }
@@ -91,13 +97,7 @@ export const useAnnualAppraisalReview = () => {
   });
 
   // Query key for reportee appraisal data
-  const queryKey = [
-    'reporteeAppraisal',
-    empNo,
-    normalizedFinancialYear,
-    quarter,
-    url,
-  ];
+  const queryKey = ['reporteeAppraisal', empNo, normalizedFinancialYear, quarter, url];
 
   // Debug logging
   console.log('[useAnnualAppraisalReview] Context values:', {
@@ -112,7 +112,11 @@ export const useAnnualAppraisalReview = () => {
   });
 
   // Fetch reportee appraisal data
-  const { data: apiResponse, isLoading, isError } = useQuery({
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey,
     queryFn: () => {
       const apiParams = {
@@ -166,10 +170,11 @@ export const useAnnualAppraisalReview = () => {
 
   // Extract development inputs - structured for appraiser/reviewer
   const developmentInputs = useMemo(() => {
-    if (!apiResponse) return { overallDevelopment: [], reportingReviewAuthority: [], optionBased: [] };
-    
+    if (!apiResponse)
+      return { overallDevelopment: [], reportingReviewAuthority: [], optionBased: [] };
+
     const resultQuestions = apiResponse.result_questions?.development_inputs || {};
-    
+
     // Overall Development questions (appraisee responses - read-only)
     const overallDevelopment = (resultQuestions.overall_development || []).map((q) => ({
       id: q.ID,
@@ -185,22 +190,24 @@ export const useAnnualAppraisalReview = () => {
     }));
 
     // Reporting/Review Authority questions (IDs 12-18 - editable by appraiser)
-    const reportingReviewAuthority = (resultQuestions.reporting_review_authority || []).map((q) => ({
-      id: q.ID,
-      question: q.QUESTION,
-      category: q.CATEGORY,
-      subCategory: q.SUB_CATEGORY,
-      selfResponse: q.SELF_RESPONSE || '',
-      repaResponse: q.REPA_RESPONSE || '',
-      revaResponse: q.REVA_RESPONSE || '',
-      acResponse: q.AC_RESPONSE || '',
-      responseId: q.RESPONSE_ID,
-      editableBy: 'APPRAISER_REVIEWER',
-    }));
+    const reportingReviewAuthority = (resultQuestions.reporting_review_authority || []).map(
+      (q) => ({
+        id: q.ID,
+        question: q.QUESTION,
+        category: q.CATEGORY,
+        subCategory: q.SUB_CATEGORY,
+        selfResponse: q.SELF_RESPONSE || '',
+        repaResponse: q.REPA_RESPONSE || '',
+        revaResponse: q.REVA_RESPONSE || '',
+        acResponse: q.AC_RESPONSE || '',
+        responseId: q.RESPONSE_ID,
+        editableBy: 'APPRAISER_REVIEWER',
+      })
+    );
 
     // Option-based inputs (integrity)
     const optionBased = [];
-    
+
     // Integrity (ID 19) - 3 options
     const integrityQuestions = resultQuestions.integrity || [];
     integrityQuestions.forEach((q) => {
@@ -409,7 +416,7 @@ export const useAnnualAppraisalReview = () => {
     const kraData = rawKraData.map((originalKra) => {
       const kraId = originalKra.AP_KRA_ID;
       const appraiserInput = appraiserScores[kraId] || {};
-      
+
       return {
         ...originalKra,
         REPA_ACTUALS: appraiserInput.score || originalKra.REPA_ACTUALS,
@@ -422,7 +429,7 @@ export const useAnnualAppraisalReview = () => {
     const questions = rawQuestionsData.map((originalQuestion) => {
       const questionId = originalQuestion.ID;
       const appraiserInput = appraiserDevResponses[questionId];
-      
+
       return {
         QUESTION_ID: originalQuestion.ID,
         CATEGORY: originalQuestion.CATEGORY,
@@ -434,7 +441,8 @@ export const useAnnualAppraisalReview = () => {
         RESPONSE_ID: originalQuestion.RESPONSE_ID || null,
         SELF_RESPONSE: originalQuestion.SELF_RESPONSE || null,
         SELF_RESPONSE_2: originalQuestion.SELF_RESPONSE_2 || null,
-        REPA_RESPONSE: appraiserInput !== undefined ? appraiserInput : originalQuestion.REPA_RESPONSE || null,
+        REPA_RESPONSE:
+          appraiserInput !== undefined ? appraiserInput : originalQuestion.REPA_RESPONSE || null,
         REVA_RESPONSE: originalQuestion.REVA_RESPONSE || null,
         AC_RESPONSE: originalQuestion.AC_RESPONSE || null,
         OPTIONS_REPA: originalQuestion.OPTIONS_REPA || null,
@@ -447,23 +455,23 @@ export const useAnnualAppraisalReview = () => {
       empNo,
       ecNumber: ecNumber,
       financialYear: parseInt(normalizedFinancialYear, 10),
-      
+
       continuousLearningPresent: learningMetrics.continuousLearningPresent,
       mandatoryCourses: learningMetrics.mandatoryCourses,
       learningCourses: learningMetrics.learningCourses,
       speedCircular: learningMetrics.speedCircular,
       elearningScore: learningMetrics.elearningScore,
-      
+
       kraData,
       functions: [...new Set(kraData.map((kra) => kra.KRA_DESC).filter(Boolean))],
       feedbackInput: [],
       questions,
-      
+
       // Performance section comments (collated per section)
       performanceMeasurableComment: sectionComments.measurable || '',
       performanceNonMeasurableComment: sectionComments.nonMeasurable || '',
       performanceSemiMeasurableComment: sectionComments.semiMeasurable || '',
-      
+
       warningFlag: false,
       warningComment: '',
       varianceFlag: false,
@@ -515,7 +523,10 @@ export const useAnnualAppraisalReview = () => {
     },
     onError: (error) => {
       console.error('[useAnnualAppraisalReview] Submit error:', error);
-      const errorMessage = error.response?.data?.MSG || error.message || 'Failed to submit appraisal. Please try again.';
+      const errorMessage =
+        error.response?.data?.MSG ||
+        error.message ||
+        'Failed to submit appraisal. Please try again.';
       toast.error(errorMessage);
     },
   });
@@ -561,11 +572,12 @@ export const useAnnualAppraisalReview = () => {
       quarter,
       appraisalPeriod,
       // Ensure dateRange is a string, not an object
-      dateRange: typeof dateRangeFromState === 'string' 
-        ? dateRangeFromState 
-        : (dateRangeFromState?.startDate && dateRangeFromState?.endDate 
-            ? `${dateRangeFromState.startDate} - ${dateRangeFromState.endDate}` 
-            : ''),
+      dateRange:
+        typeof dateRangeFromState === 'string'
+          ? dateRangeFromState
+          : dateRangeFromState?.startDate && dateRangeFromState?.endDate
+          ? `${dateRangeFromState.startDate} - ${dateRangeFromState.endDate}`
+          : '',
       metadata: transformedData?.metadata || {},
     },
 

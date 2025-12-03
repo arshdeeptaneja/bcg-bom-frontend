@@ -103,7 +103,7 @@ const AnnualCheckIn = () => {
         <div className="note mt-5 mb-5">
           <span className="text-muted">Note: </span>
           <span className="text-muted">
-            Please raise an exception if actual or target values are incorrect.
+            Please raise an appeal if actual or target values are incorrect.
           </span>
         </div>
         <div className="final-score-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
