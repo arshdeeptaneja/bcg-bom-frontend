@@ -15,34 +15,57 @@ export const useReviewAppeal = () => {
 
   const { getUserProperty } = useAuth();
 
-  const authEmpNo = getUserProperty("empNo", "38965");
+  const authEmpNo = getUserProperty('empNo', '38965');
   // Extract context from location state OR URL query params
-  const context = useMemo(() => ({
-    roleId: searchParams.get('roleId') || location.state?.roleId || '4',
-    roleType: searchParams.get('roleType') || location.state?.roleType || 'Administrative Officer',
-    empNo: searchParams.get('empNo') || location.state?.empNo || '38965',
-    financialYear: searchParams.get('financialYear') || location.state?.financialYear || '2025',
-    custTicketId: searchParams.get("ticketId"),
-    role: searchParams.get('role') || location.state?.role || 'APPRAISER', // APPRAISER or REVIEWER
-  }), [location.state, searchParams]);
+  const context = useMemo(
+    () => ({
+      roleId: location.state?.roleId || searchParams.get('roleId') || '4',
+      roleType:
+        searchParams.get('roleType') || location.state?.roleType || 'Administrative Officer',
+      empNo: searchParams.get('empNo') || location.state?.empNo || '38965',
+      empName: location.state?.empName || searchParams.get('empName') || '',
+      duration: location.state?.duration || searchParams.get('duration') || '',
+      branch: location.state?.branch || searchParams.get('branch') || '',
+      primaryRole: location.state?.primaryRole || searchParams.get('primaryRole') || '',
+      financialYear: searchParams.get('financialYear') || location.state?.financialYear || '2025',
+      custTicketId: location.state?.ticketId || searchParams.get('custTicketId') || '',
+      appraiser: location.state?.appraiser || searchParams.get('appraiser') || '',
+      role: searchParams.get('role') || location.state?.role || 'APPRAISER', // APPRAISER or REVIEWER
+    }),
+    [location.state, searchParams]
+  );
 
   // Form state management
   const [selectedKras, setSelectedKras] = useState(new Set());
   const [kraActions, setKraActions] = useState(new Map());
   const [kraScores, setKraScores] = useState(new Map());
   const [kraComments, setKraComments] = useState(new Map());
+  const [postAppealScores, setPostAppealScores] = useState(new Map());
+  const [selectedScores, setSelectedScores] = useState(new Map());
   const [overallComment, setOverallComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch appeal review data using actual API endpoint
-  const { data: apiResponse, isLoading, isError, error } = useQuery({
-    queryKey: ['appealReview', context.roleId, context.roleType, context.empNo, context.financialYear],
-    queryFn: () => appraisalAPI.getAppealCommitteeReviewData({
-      roleId: context.roleId,
-      roleType: context.roleType,
-      empNo: context.empNo,
-      financialYear: context.financialYear
-    }),
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: [
+      'appealReview',
+      context.roleId,
+      context.roleType,
+      context.empNo,
+      context.financialYear,
+    ],
+    queryFn: () =>
+      appraisalAPI.getAppealCommitteeReviewData({
+        roleId: context.roleId,
+        roleType: context.roleType,
+        empNo: context.empNo,
+        financialYear: context.financialYear,
+      }),
     enabled: !!(context.roleId && context.roleType && context.empNo && context.financialYear),
   });
 
@@ -60,99 +83,113 @@ export const useReviewAppeal = () => {
         reportingAuthorityNo: '',
         reviewingAuthorityNo: '',
         acceptingAuthorityNo: '',
-        rawData: null
+        rawData: null,
       };
     }
 
     const rawData = apiResponse;
 
     // Transform final score summary from annual_score_data
-    const finalScoreSummary = (rawData.final_summary_result?.annual_score_data || []).map(item => ({
-      KraName: item.CATEGORY || '',
-      MaxScore: item.MAX_SCORE || 0,
-      SelfScore: item.SELF_SCORE || 0,
-      ReportingAuthorityScore: item.BY_REPORTING_AUTHORITY || 0,
-      ReviewingAuthorityScore: item.BY_REVIEVING_AUTHORITY || 0,
-      AcceptingAuthorityScore: item.BY_ACCEPTING_AUTHORITY || 0,
-      PostAppealScore: item.POST_APPEAL_SCORE || 0
-    }));
+    const finalScoreSummary = (rawData.final_summary_result?.annual_score_data || []).map(
+      (item) => ({
+        KraName: item.CATEGORY || '',
+        MaxScore: item.MAX_SCORE || 0,
+        SelfScore: item.SELF_SCORE || 0,
+        ReportingAuthorityScore: item.BY_REPORTING_AUTHORITY || 0,
+        ReviewingAuthorityScore: item.BY_REVIEVING_AUTHORITY || 0,
+        AcceptingAuthorityScore: item.BY_ACCEPTING_AUTHORITY || 0,
+        PostAppealScore: item.POST_APPEAL_SCORE || 0,
+      })
+    );
 
     // Transform measurable KRAs - use APPEAL_ID as unique identifier
     const measurableKrasList = rawData.result_kra_list_discretionary_measurable_child || [];
-    const measurableKras = Array.isArray(measurableKrasList) ? measurableKrasList.map((kra, index) => ({
-      kraId: kra.AP_KRA_ID,
-      appealId: kra.APPEAL_ID || `m-${index}`, // Use APPEAL_ID as unique key
-      kraName: kra.KRA_DESC || '',
-      kraType: kra.KRA_TYPE || 'discretionary_measurable',
-      description: kra.KRA_METRIC || '',
-      actual: kra.AC_ACTUALS || kra.ACTUAL,
-      target: kra.AC_TARGET || kra.TARGET,
-      maxScore: kra.MAX_SCORE || 0,
-      oldScore: kra.SCORE_OLD_VALUE || 0,
-      newScore: kra.SCORE_NEW_VALUE || 0,
-      actualOldValue: kra.ACTUAL_OLD_VALUE,
-      actualNewValue: kra.ACTUAL_NEW_VALUE,
-      targetOldValue: kra.TARGET_OLD_VALUE,
-      targetNewValue: kra.TARGET_NEW_VALUE,
-      appraiseeComment: kra.COMMENTS || '',
-      appraiseeScore: kra.SELF_SCORE,
-      appraiserScore: kra.REPA_SCORE,
-      reviewerScore: kra.REVA_SCORE,
-      status: kra.STATUS || '',
-      mpbOldValue: kra.MPB_OLD_VALUE,
-      mpbNewValue: kra.MPB_NEW_VALUE
-    })) : [];
+    const measurableKras = Array.isArray(measurableKrasList)
+      ? measurableKrasList.map((kra, index) => ({
+          kraId: kra.AP_KRA_ID,
+          appealId: kra.APPEAL_ID || `m-${index}`, // Use APPEAL_ID as unique key
+          kraName: kra.KRA_DESC || '',
+          kraType: kra.KRA_TYPE || 'discretionary_measurable',
+          description: kra.KRA_METRIC || '',
+          actual: kra.AC_ACTUALS || kra.ACTUAL,
+          target: kra.AC_TARGET || kra.TARGET,
+          maxScore: kra.MAX_SCORE || 0,
+          oldScore: kra.SCORE_OLD_VALUE || 0,
+          newScore: kra.SCORE_NEW_VALUE || 0,
+          actualOldValue: kra.ACTUAL_OLD_VALUE,
+          actualNewValue: kra.ACTUAL_NEW_VALUE,
+          targetOldValue: kra.TARGET_OLD_VALUE,
+          targetNewValue: kra.TARGET_NEW_VALUE,
+          appraiseeComment: kra.COMMENTS || '',
+          appraiseeScore: kra.SELF_SCORE,
+          appraiserScore: kra.REPA_SCORE,
+          reviewerScore: kra.REVA_SCORE,
+          status: kra.STATUS || '',
+          mpbOldValue: kra.MPB_OLD_VALUE,
+          mpbNewValue: kra.MPB_NEW_VALUE,
+        }))
+      : [];
 
     // Transform non-measurable KRAs - use APPEAL_ID as unique identifier
     const nonMeasurableKrasList = rawData.result_kra_list_discretionary_non_measurable_child || [];
-    const nonMeasurableKras = Array.isArray(nonMeasurableKrasList) ? nonMeasurableKrasList.map((kra, index) => ({
-      kraId: kra.AP_KRA_ID,
-      appealId: kra.APPEAL_ID || `nm-${index}`, // Use APPEAL_ID as unique key
-      kraName: kra.KRA_DESC || '',
-      kraType: kra.KRA_TYPE || 'discretionary_non_measurable',
-      description: kra.KRA_METRIC || '',
-      actual: kra.AC_ACTUALS || kra.ACTUAL,
-      target: kra.AC_TARGET || kra.TARGET,
-      maxScore: kra.MAX_SCORE || 0,
-      oldScore: kra.SCORE_OLD_VALUE || 0,
-      newScore: kra.SCORE_NEW_VALUE || 0,
-      actualOldValue: kra.ACTUAL_OLD_VALUE,
-      actualNewValue: kra.ACTUAL_NEW_VALUE,
-      targetOldValue: kra.TARGET_OLD_VALUE,
-      targetNewValue: kra.TARGET_NEW_VALUE,
-      appraiseeComment: kra.COMMENTS || '',
-      appraiseeScore: kra.SELF_SCORE,
-      appraiserScore: kra.REPA_SCORE,
-      reviewerScore: kra.REVA_SCORE,
-      status: kra.STATUS || '',
-      mpbOldValue: kra.MPB_OLD_VALUE,
-      mpbNewValue: kra.MPB_NEW_VALUE
-    })) : [];
+    const nonMeasurableKras = Array.isArray(nonMeasurableKrasList)
+      ? nonMeasurableKrasList.map((kra, index) => ({
+          kraId: kra.AP_KRA_ID,
+          appealId: kra.APPEAL_ID || `nm-${index}`, // Use APPEAL_ID as unique key
+          kraName: kra.KRA_DESC || '',
+          kraType: kra.KRA_TYPE || 'discretionary_non_measurable',
+          description: kra.KRA_METRIC || '',
+          actual: kra.AC_ACTUALS || kra.ACTUAL,
+          target: kra.AC_TARGET || kra.TARGET,
+          maxScore: kra.MAX_SCORE || 0,
+          oldScore: kra.SCORE_OLD_VALUE || 0,
+          newScore: kra.SCORE_NEW_VALUE || 0,
+          actualOldValue: kra.ACTUAL_OLD_VALUE,
+          actualNewValue: kra.ACTUAL_NEW_VALUE,
+          targetOldValue: kra.TARGET_OLD_VALUE,
+          targetNewValue: kra.TARGET_NEW_VALUE,
+          appraiseeComment: kra.COMMENTS || '',
+          appraiseeScore: kra.SELF_SCORE,
+          appraiserScore: kra.REPA_SCORE,
+          reviewerScore: kra.REVA_SCORE,
+          status: kra.STATUS || '',
+          mpbOldValue: kra.MPB_OLD_VALUE,
+          mpbNewValue: kra.MPB_NEW_VALUE,
+        }))
+      : [];
 
     // Calculate discretionary scores
-    const discretionaryOldTotal = [...measurableKras, ...nonMeasurableKras].reduce((sum, kra) => sum + (parseFloat(kra.oldScore) || 0), 0);
-    const discretionaryNewTotal = [...measurableKras, ...nonMeasurableKras].reduce((sum, kra) => sum + (parseFloat(kra.newScore) || 0), 0);
-    const discretionaryMaxTotal = rawData.discretionary_maxscore_total ||
-                                   rawData.discretionary_non_measurable_maxscore_total || 0;
+    const discretionaryOldTotal = [...measurableKras, ...nonMeasurableKras].reduce(
+      (sum, kra) => sum + (parseFloat(kra.oldScore) || 0),
+      0
+    );
+    const discretionaryNewTotal = [...measurableKras, ...nonMeasurableKras].reduce(
+      (sum, kra) => sum + (parseFloat(kra.newScore) || 0),
+      0
+    );
+    const discretionaryMaxTotal =
+      rawData.discretionary_maxscore_total ||
+      rawData.discretionary_non_measurable_maxscore_total ||
+      0;
 
     return {
       employee: {
         empNo: context.empNo,
-        employeeName: rawData.emp_name || '',
-        branch: rawData.organisation || '',
-        primaryRole: rawData.primary || '',
-        appraiser: rawData.REPORTING_AUTHORITY_NAME || '',
+        employeeName: context.empName || '',
+        branch: context.branch || '',
+        primaryRole: context.primaryRole || '',
+        appraiser: context.appraiser || '',
         appraiserNo: rawData.REPORTING_AUTHORITY_NO || '',
         reviewer: rawData.REVIEWING_AUTHORITY_NAME || '',
         reviewerNo: rawData.REVIEWING_AUTHORITY_NO || '',
         acceptor: rawData.ACCEPTING_AUTHORITY_NAME || '',
-        acceptorNo: rawData.ACCEPTING_AUTHORITY_NO || ''
+        acceptorNo: rawData.ACCEPTING_AUTHORITY_NO || '',
       },
-      dateRange: rawData.startdate && rawData.enddate ? `${rawData.startdate} - ${rawData.enddate}` : '',
+      dateRange: context.duration || '',
       discretionaryScore: {
         oldScore: discretionaryOldTotal.toFixed(1),
         newScore: discretionaryNewTotal.toFixed(1),
-        maxScore: discretionaryMaxTotal
+        maxScore: discretionaryMaxTotal,
       },
       finalScoreSummary,
       measurableKras,
@@ -163,28 +200,38 @@ export const useReviewAppeal = () => {
       acceptingAuthorityNo: rawData.ACCEPTING_AUTHORITY_NO || '',
       totalKraCount: rawData.total_kra_count || 0,
       appealStatus: rawData.appeal_status || '',
-      rawData
+      rawData,
     };
   }, [apiResponse, context.empNo]);
 
   // KRA selection handler
   const handleKraSelection = useCallback((kraId) => {
-    setSelectedKras(prev => {
+    setSelectedKras((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(kraId)) {
         newSet.delete(kraId);
         // Clear related state when deselected
-        setKraActions(prev => {
+        setKraActions((prev) => {
           const newMap = new Map(prev);
           newMap.delete(kraId);
           return newMap;
         });
-        setKraScores(prev => {
+        setKraScores((prev) => {
           const newMap = new Map(prev);
           newMap.delete(kraId);
           return newMap;
         });
-        setKraComments(prev => {
+        setKraComments((prev) => {
+          const newMap = new Map(prev);
+          newMap.delete(kraId);
+          return newMap;
+        });
+        setPostAppealScores((prev) => {
+          const newMap = new Map(prev);
+          newMap.delete(kraId);
+          return newMap;
+        });
+        setSelectedScores((prev) => {
           const newMap = new Map(prev);
           newMap.delete(kraId);
           return newMap;
@@ -198,7 +245,7 @@ export const useReviewAppeal = () => {
 
   // Action change handler
   const handleActionChange = useCallback((kraId, action) => {
-    setKraActions(prev => {
+    setKraActions((prev) => {
       const newMap = new Map(prev);
       newMap.set(kraId, action);
       return newMap;
@@ -206,7 +253,7 @@ export const useReviewAppeal = () => {
 
     // Clear score when action is not ACCEPT_AND_EDIT
     if (action !== 'ACCEPT_AND_EDIT') {
-      setKraScores(prev => {
+      setKraScores((prev) => {
         const newMap = new Map(prev);
         newMap.delete(kraId);
         return newMap;
@@ -216,18 +263,35 @@ export const useReviewAppeal = () => {
 
   // Score change handler
   const handleScoreChange = useCallback((kraId, score) => {
-    setKraScores(prev => {
+    setKraScores((prev) => {
       const newMap = new Map(prev);
       newMap.set(kraId, score);
       return newMap;
     });
   }, []);
 
+  // Selected score change handler (for actual/target values in measurable KRAs)
+  const handleSelectedScoreChange = useCallback((kraId, score) => {
+    setSelectedScores((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(kraId, score);
+      return newMap;
+    });
+  }, []);
   // Comment change handler
   const handleCommentChange = useCallback((kraId, comment) => {
-    setKraComments(prev => {
+    setKraComments((prev) => {
       const newMap = new Map(prev);
       newMap.set(kraId, comment);
+      return newMap;
+    });
+  }, []);
+
+  // Post appeal score change handler
+  const handlePostAppealScoreChange = useCallback((kraId, score) => {
+    setPostAppealScores((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(kraId, score);
       return newMap;
     });
   }, []);
@@ -238,15 +302,18 @@ export const useReviewAppeal = () => {
   }, []);
 
   // Helper function to find KRA by appealId (unique identifier)
-  const findKraById = useCallback((appealId) => {
-    const measurable = data.measurableKras.find(k => k.appealId === appealId);
-    if (measurable) return { kra: measurable, type: 'measurable' };
+  const findKraById = useCallback(
+    (appealId) => {
+      const measurable = data.measurableKras.find((k) => k.appealId === appealId);
+      if (measurable) return { kra: measurable, type: 'measurable' };
 
-    const nonMeasurable = data.nonMeasurableKras.find(k => k.appealId === appealId);
-    if (nonMeasurable) return { kra: nonMeasurable, type: 'non-measurable' };
+      const nonMeasurable = data.nonMeasurableKras.find((k) => k.appealId === appealId);
+      if (nonMeasurable) return { kra: nonMeasurable, type: 'non-measurable' };
 
-    return null;
-  }, [data]);
+      return null;
+    },
+    [data]
+  );
 
   // Validation logic
   const isValid = useMemo(() => {
@@ -278,17 +345,6 @@ export const useReviewAppeal = () => {
     return true;
   }, [selectedKras, kraActions, kraScores, kraComments, overallComment, findKraById]);
 
-  // Determine overall status based on actions
-  const determineOverallStatus = useCallback(() => {
-    const actions = Array.from(selectedKras).map(id => kraActions.get(id));
-    const allAccepted = actions.every(a => a === 'ACCEPT_AS_IS' || a === 'ACCEPT_AND_EDIT');
-    const allRejected = actions.every(a => a === 'REJECT');
-
-    if (allAccepted) return 'APPROVED';
-    if (allRejected) return 'REJECTED';
-    return 'PARTIALLY_APPROVED';
-  }, [selectedKras, kraActions]);
-
   // Submit handler
   const handleSubmit = useCallback(async () => {
     if (!isValid) {
@@ -298,51 +354,62 @@ export const useReviewAppeal = () => {
     setIsSubmitting(true);
 
     try {
+      // Map action values to API format
+      const mapAction = (action) => {
+        if (action === 'ACCEPT_AS_IS') return 'appeal_accepted_with_nochange';
+        if (action === 'ACCEPT_AND_EDIT') return 'accept';
+        if (action === 'REJECT') return 'reject';
+        return action;
+      };
+
+      // Helper function to convert value to string, defaulting to "0" if blank
+      const toStringOrDefaultZero = (value) => {
+        const str = String(value || '');
+        return str.trim() === '' ? '0' : str;
+      };
+
       // Build payload
       const payload = {
-        //id: context.roleId,
-        //roleType: context.roleType,
-        empNo: authEmpNo,
         custTicketId: context.custTicketId,
-        //reportingAuthorityNo: context.
-        financialYear: context.financialYear,
-        reviewerRole: context.role,
-        kraDecisions: Array.from(selectedKras).map(kraId => {
+        financialYear: parseInt(context.financialYear, 10),
+        empNo: authEmpNo,
+        kraData: Array.from(selectedKras).map((kraId) => {
           const kraInfo = findKraById(kraId);
-          const kraObject = findKraById(kraId)?.kra;
+          const kraObject = kraInfo?.kra;
 
-          console.log("kra object is: ", kraObject)
-          const kra = kraInfo?.kra;
           const action = kraActions.get(kraId);
           const score = kraScores.get(kraId);
           const comment = kraComments.get(kraId);
-          const appeal_id = kraInfo?.appealId
+          const selectedScore = selectedScores.get(kraId);
+          const appeal_id = kraInfo?.appealId || kraObject?.appealId;
+
+          // Use selected score for new_actual if available, otherwise use kraObject value
+          const newActualValue =
+            selectedScore || kraObject?.actualNewValue || kraObject?.actual || '';
 
           return {
-            kraId: kraId,
-            action: action,
-            newScore: action === 'ACCEPT_AND_EDIT' ? parseFloat(score) : null,
-            comment: comment || '',
-            //oldScore: kra?.oldScore,
-            //appealed_core: kra?.newScore,
-            appeal_id: appeal_id,
-            appraisee_score: kraObject?.appraiseeScore,
-            new_mpb: kraObject?.mpbNewValue,
-            new_target: kraObject?.targetNewValue,
-            new_actual: kraObject?.actualNewValue,
-            prev_target: kraObject?.targetOldValue,
-            prev_actual: kraObject?.actualOldValue,
-            old_target: kraObject?.targetOldValue,
-            old_actual: kraObject?.actualOldValue,
-            AP_KRA_ID: kraObject?.kraId,
-            kraType: kra?.kraType
+            target: {
+              action: mapAction(action),
+              appraisee_score: toStringOrDefaultZero(kraObject?.appraiseeScore),
+              new_mpb: toStringOrDefaultZero(kraObject?.mpbNewValue),
+              appeal_id: String(appeal_id || ''),
+              comment: comment || '',
+              kra_type: kraObject?.kraType || '',
+              new_score: action === 'ACCEPT_AND_EDIT' ? toStringOrDefaultZero(score) : '0',
+              new_target: toStringOrDefaultZero(kraObject?.targetNewValue || kraObject?.target),
+              new_actual: toStringOrDefaultZero(newActualValue),
+              prev_target: toStringOrDefaultZero(kraObject?.targetOldValue || kraObject?.target),
+              prev_actual: toStringOrDefaultZero(kraObject?.actualOldValue || kraObject?.actual),
+              old_target: toStringOrDefaultZero(kraObject?.targetOldValue || kraObject?.target),
+              old_actual: toStringOrDefaultZero(kraObject?.actualOldValue || kraObject?.actual),
+              AP_KRA_ID: String(kraObject?.kraId || ''),
+            },
           };
         }),
-        member3comment: overallComment,
-        status: determineOverallStatus()
+        member3Comment: overallComment,
       };
 
-      console.log('payload', payload)
+      console.log('payload', payload);
       // Call API
       const response = await appraisalAPI.approveAppealReview(payload);
 
@@ -358,10 +425,11 @@ export const useReviewAppeal = () => {
     kraActions,
     kraScores,
     kraComments,
+    selectedScores,
     overallComment,
     context,
+    authEmpNo,
     findKraById,
-    determineOverallStatus
   ]);
 
   return {
@@ -372,20 +440,24 @@ export const useReviewAppeal = () => {
       kraActions,
       kraScores,
       kraComments,
-      overallComment
+      postAppealScores,
+      selectedScores,
+      overallComment,
     },
     actions: {
       handleKraSelection,
       handleActionChange,
       handleScoreChange,
+      handleSelectedScoreChange,
       handleCommentChange,
+      handlePostAppealScoreChange,
       handleOverallCommentChange,
       handleSubmit,
-      isSubmitting
+      isSubmitting,
     },
     isValid,
     isLoading,
     isError,
-    error
+    error,
   };
 };

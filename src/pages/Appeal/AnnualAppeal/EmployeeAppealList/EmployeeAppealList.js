@@ -98,6 +98,7 @@ const EmployeeAppealList = () => {
 
     if (Array.isArray(dataOut)) {
       const mappedData = dataOut.map((item) => ({
+        roleId: item.URL_ID || item.roleId || '',
         ticketId: item.CUST_TICKET_ID || item.TICKET_ID || item.ticket_id || item.ticketId || '',
         empNumber: item.EC_NUMBER || item.EMP_NUMBER || item.emp_number || item.empNo || '',
         empName: item.EMP_NAME || item.emp_name || item.employeeName || item.employee_name || '',
@@ -110,9 +111,11 @@ const EmployeeAppealList = () => {
           item.BRANCH_NAME ||
           item.ORG_NAME ||
           '',
+        appraiser: item.REP_NAME,
         // Use score + grade where available, fallback to grade only
         preAppeal: `${item.TOTAL_SCORE}/${item.TOTAL_MAX_SCORE}`,
         postAppeal: `${item.POST_APPEAL_FINAL_GRADE || 0}/${item.TOTAL_MAX_SCORE}`,
+        duration: item.duration,
         // Preserve raw status for conditional button rendering
         appealStatus:
           item.STATUS ||
@@ -177,9 +180,12 @@ const EmployeeAppealList = () => {
   const handleViewAppeal = (row) => {
     navigate('/appeal/review', {
       state: {
+        roleId: row.roleId,
         ticketId: row.ticketId,
+        duration: row.duration,
         empNo: row.empNumber,
         empName: row.empName,
+        appraiser: row.appraiser,
         primaryRole: row.primaryRole,
         branch: row.branch,
         financialYear: financialYearForAPI,
@@ -198,9 +204,12 @@ const EmployeeAppealList = () => {
   const handleReviewAppeal = (row) => {
     navigate('/appeal/review', {
       state: {
+        roleId: row.roleId,
         ticketId: row.ticketId,
+        duration: row.duration,
         empNo: row.empNumber,
         empName: row.empName,
+        appraiser: row.appraiser,
         primaryRole: row.primaryRole,
         branch: row.branch,
         financialYear: financialYearForAPI,

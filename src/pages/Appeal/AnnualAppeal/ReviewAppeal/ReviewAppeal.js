@@ -11,16 +11,8 @@ import './ReviewAppeal.css';
 function ReviewAppeal() {
   const navigate = useNavigate();
 
-  const {
-    data,
-    context,
-    formState,
-    actions,
-    isValid,
-    isLoading,
-    isError,
-    error
-  } = useReviewAppeal();
+  const { data, context, formState, actions, isValid, isLoading, isError, error } =
+    useReviewAppeal();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -64,7 +56,8 @@ function ReviewAppeal() {
     [data, context.empNo]
   );
 
-  const roleLabel = context.role === 'REVIEWER' ? 'Reviewing Authority' : 'Reporting Authority (Appraiser)';
+  const roleLabel =
+    context.role === 'REVIEWER' ? 'Reviewing Authority' : 'Reporting Authority (Appraiser)';
 
   // Loading state
   if (isLoading) {
@@ -74,7 +67,10 @@ function ReviewAppeal() {
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Review Appeal</h1>
         </div>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '40vh' }}>
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{ minHeight: '40vh' }}
+        >
           <LoadingSpinner />
         </div>
       </div>
@@ -97,7 +93,9 @@ function ReviewAppeal() {
               <i className="bi bi-exclamation-triangle-fill me-2"></i>
               Error Loading Data
             </h5>
-            <p className="mb-0">{error?.message || 'Failed to load appeal data. Please try again.'}</p>
+            <p className="mb-0">
+              {error?.message || 'Failed to load appeal data. Please try again.'}
+            </p>
             <hr />
             <button className="btn btn-outline-danger" onClick={() => window.location.reload()}>
               <i className="bi bi-arrow-clockwise me-2"></i>Retry
@@ -116,16 +114,14 @@ function ReviewAppeal() {
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Review Appeal</h1>
         </div>
-        <h5 className="text-muted fw-bold mb-0">
-          FY {context.financialYear} · Annual Appraisal
-        </h5>
+        <h5 className="text-muted fw-bold mb-0">FY {context.financialYear} · Annual Appraisal</h5>
       </div>
 
       <div className="pageWrapper-content d-flex flex-column gap-3">
         {/* Employee Information - CheckInDescriptionSection */}
-        <CheckInDescriptionSection 
-          employee={descriptionEmployee} 
-          dateRange={data.dateRange || ''} 
+        <CheckInDescriptionSection
+          employee={descriptionEmployee}
+          dateRange={data.dateRange || ''}
           showDownloadButton={!!data.fileUrl}
           onDownload={() => window.open(data.fileUrl, '_blank')}
         />
@@ -161,9 +157,15 @@ function ReviewAppeal() {
                     const isSelected = formState.selectedKras?.has(categoryId);
                     const action = formState.kraActions?.get(categoryId);
                     const score = formState.kraScores?.get(categoryId) || '';
+                    const postAppealScore =
+                      formState.postAppealScores?.get(categoryId) ?? row.PostAppealScore ?? '';
 
                     return (
-                      <tr key={idx} className={row.KraName === 'Total Score' ? 'fw-bold' : ''} style={{ backgroundColor: isSelected ? '#e3f2fd' : 'transparent' }}>
+                      <tr
+                        key={idx}
+                        className={row.KraName === 'Total Score' ? 'fw-bold' : ''}
+                        style={{ backgroundColor: isSelected ? '#e3f2fd' : 'transparent' }}
+                      >
                         {/* Select Checkbox */}
                         <td className="text-center align-middle" style={{ padding: '12px' }}>
                           {row.KraName !== 'Total Score' && (
@@ -184,28 +186,50 @@ function ReviewAppeal() {
                         <td style={{ padding: 0 }}>
                           <div className="role-label-cell">Actual</div>
                           <div className="role-label-cell">Appraisee</div>
-                          <div className="role-label-cell" style={{ borderBottom: 'none' }}>Appellate</div>
+                          <div className="role-label-cell" style={{ borderBottom: 'none' }}>
+                            Appellate
+                          </div>
                         </td>
 
                         {/* Actual Values aligned with roles */}
                         <td style={{ padding: 0 }}>
                           <div className="role-value-cell">
-                            <span style={{ borderBottom: '1px solid #dee2e6', display: 'inline-block', minWidth: '50px', padding: '2px 8px' }}>
+                            <span
+                              style={{
+                                borderBottom: '1px solid #dee2e6',
+                                display: 'inline-block',
+                                minWidth: '50px',
+                                padding: '2px 8px',
+                              }}
+                            >
                               {row.ReportingAuthorityScore ?? '-'}
                             </span>
                           </div>
                           <div className="role-value-cell">
-                            <span style={{ borderBottom: '1px solid #dee2e6', display: 'inline-block', minWidth: '50px', padding: '2px 8px' }}>
+                            <span
+                              style={{
+                                borderBottom: '1px solid #dee2e6',
+                                display: 'inline-block',
+                                minWidth: '50px',
+                                padding: '2px 8px',
+                              }}
+                            >
                               {row.SelfScore ?? '-'}
                             </span>
                           </div>
                           <div className="role-value-cell" style={{ borderBottom: 'none' }}>
-                            <input 
-                              type="text" 
+                            <input
+                              type="text"
                               className="appeal-score-input appellate-input"
-                              value={row.PostAppealScore ?? ''} 
-                              readOnly 
+                              value={postAppealScore}
+                              onChange={(e) =>
+                                actions.handlePostAppealScoreChange(categoryId, e.target.value)
+                              }
+                              readOnly={!(isSelected && action === 'ACCEPT_AND_EDIT')}
                               style={{ width: '60px' }}
+                              min="0"
+                              step="0.1"
+                              placeholder="0.0"
                             />
                           </div>
                         </td>
@@ -220,8 +244,9 @@ function ReviewAppeal() {
                               type="number"
                               className="appeal-score-input"
                               value={score}
-                              onChange={(e) => actions.handleScoreChange(categoryId, e.target.value)}
-                              max={row.MaxScore}
+                              onChange={(e) =>
+                                actions.handleScoreChange(categoryId, e.target.value)
+                              }
                               min="0"
                               step="0.1"
                               placeholder="0.0"
@@ -230,7 +255,9 @@ function ReviewAppeal() {
                             <input
                               type="text"
                               className="appeal-score-input"
-                              value={row.AcceptingAuthorityScore ?? row.ReviewingAuthorityScore ?? ''}
+                              value={
+                                row.AcceptingAuthorityScore ?? row.ReviewingAuthorityScore ?? ''
+                              }
                               readOnly
                               style={{ backgroundColor: '#f8f9fa' }}
                             />
@@ -247,7 +274,9 @@ function ReviewAppeal() {
                                   name={`action-${categoryId}`}
                                   value="ACCEPT_AS_IS"
                                   checked={action === 'ACCEPT_AS_IS'}
-                                  onChange={(e) => actions.handleActionChange(categoryId, e.target.value)}
+                                  onChange={(e) =>
+                                    actions.handleActionChange(categoryId, e.target.value)
+                                  }
                                 />
                                 <span className="action-label">ACCEPT AS IT IS</span>
                               </label>
@@ -257,7 +286,9 @@ function ReviewAppeal() {
                                   name={`action-${categoryId}`}
                                   value="ACCEPT_AND_EDIT"
                                   checked={action === 'ACCEPT_AND_EDIT'}
-                                  onChange={(e) => actions.handleActionChange(categoryId, e.target.value)}
+                                  onChange={(e) =>
+                                    actions.handleActionChange(categoryId, e.target.value)
+                                  }
                                 />
                                 <span className="action-label">ACCEPT AND EDIT</span>
                               </label>
@@ -267,13 +298,20 @@ function ReviewAppeal() {
                                   name={`action-${categoryId}`}
                                   value="REJECT"
                                   checked={action === 'REJECT'}
-                                  onChange={(e) => actions.handleActionChange(categoryId, e.target.value)}
+                                  onChange={(e) =>
+                                    actions.handleActionChange(categoryId, e.target.value)
+                                  }
                                 />
                                 <span className="action-label">REJECT</span>
                               </label>
                             </div>
                           ) : row.KraName !== 'Total Score' ? (
-                            <span className="select-prompt" style={{ color: '#999', fontSize: '0.8rem', fontStyle: 'italic' }}>Select to review</span>
+                            <span
+                              className="select-prompt"
+                              style={{ color: '#999', fontSize: '0.8rem', fontStyle: 'italic' }}
+                            >
+                              Select to review
+                            </span>
                           ) : null}
                         </td>
                       </tr>
@@ -298,9 +336,11 @@ function ReviewAppeal() {
               kraActions={formState.kraActions}
               kraScores={formState.kraScores}
               kraComments={formState.kraComments}
+              selectedScores={formState.selectedScores}
               onKraSelect={actions.handleKraSelection}
               onActionChange={actions.handleActionChange}
               onScoreChange={actions.handleScoreChange}
+              onSelectedScoreChange={actions.handleSelectedScoreChange}
               onCommentChange={actions.handleCommentChange}
               type="non-measurable"
             />
@@ -320,9 +360,11 @@ function ReviewAppeal() {
               kraActions={formState.kraActions}
               kraScores={formState.kraScores}
               kraComments={formState.kraComments}
+              selectedScores={formState.selectedScores}
               onKraSelect={actions.handleKraSelection}
               onActionChange={actions.handleActionChange}
               onScoreChange={actions.handleScoreChange}
+              onSelectedScoreChange={actions.handleSelectedScoreChange}
               onCommentChange={actions.handleCommentChange}
               type="measurable"
             />
@@ -330,13 +372,13 @@ function ReviewAppeal() {
         )}
 
         {/* No KRAs Message */}
-        {(!data.nonMeasurableKras || data.nonMeasurableKras.length === 0) && 
-         (!data.measurableKras || data.measurableKras.length === 0) && (
-          <div className="alert alert-info mb-0">
-            <i className="bi bi-info-circle me-2"></i>
-            No KRAs available for review.
-          </div>
-        )}
+        {(!data.nonMeasurableKras || data.nonMeasurableKras.length === 0) &&
+          (!data.measurableKras || data.measurableKras.length === 0) && (
+            <div className="alert alert-info mb-0">
+              <i className="bi bi-info-circle me-2"></i>
+              No KRAs available for review.
+            </div>
+          )}
 
         {/* Selection Summary */}
         {formState.selectedKras.size > 0 && (
@@ -404,7 +446,11 @@ function ReviewAppeal() {
                   <i className="bi bi-question-circle text-warning me-2"></i>
                   Confirm Submission
                 </h5>
-                <button type="button" className="btn-close" onClick={() => setShowConfirmModal(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowConfirmModal(false)}
+                ></button>
               </div>
               <div className="modal-body">
                 <p>Are you sure you want to submit this appeal review?</p>
@@ -431,7 +477,10 @@ function ReviewAppeal() {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content text-center p-4">
               <div className="mb-3">
-                <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '4rem' }}></i>
+                <i
+                  className="bi bi-check-circle-fill text-success"
+                  style={{ fontSize: '4rem' }}
+                ></i>
               </div>
               <h4 className="text-primary mb-3">Review Submitted Successfully!</h4>
               {responseData?.ticketId && (

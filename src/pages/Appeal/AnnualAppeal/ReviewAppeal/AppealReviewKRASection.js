@@ -11,11 +11,13 @@ function AppealReviewKRASection({
   kraActions,
   kraScores,
   kraComments,
+  selectedScores,
   onKraSelect,
   onActionChange,
   onScoreChange,
+  onSelectedScoreChange,
   onCommentChange,
-  type
+  type,
 }) {
   const [expandedCommentKra, setExpandedCommentKra] = useState(null);
 
@@ -60,6 +62,8 @@ function AppealReviewKRASection({
               const isSelected = selectedKras.has(kraId);
               const action = kraActions.get(kraId);
               const score = kraScores.get(kraId) || '';
+              const selectedScore =
+                selectedScores?.get(kraId) ?? kra.actualNewValue ?? kra.newScore ?? '';
               const comment = kraComments.get(kraId) || '';
               const isCommentExpanded = expandedCommentKra === kraId;
 
@@ -81,7 +85,10 @@ function AppealReviewKRASection({
                     <td className="align-middle" style={{ padding: '12px' }}>
                       <div className="kra-name">{kra.kraName}</div>
                       {kra.description && (
-                        <div className="kra-description" style={{ fontSize: '0.8rem', color: '#666', fontStyle: 'italic' }}>
+                        <div
+                          className="kra-description"
+                          style={{ fontSize: '0.8rem', color: '#666', fontStyle: 'italic' }}
+                        >
                           {kra.description}
                         </div>
                       )}
@@ -91,27 +98,48 @@ function AppealReviewKRASection({
                     <td className="roles-cell" style={{ padding: 0 }}>
                       <div className="role-label-cell">Actual</div>
                       <div className="role-label-cell">Appraisee</div>
-                      <div className="role-label-cell" style={{ borderBottom: 'none' }}>Appellate</div>
+                      <div className="role-label-cell" style={{ borderBottom: 'none' }}>
+                        Appellate
+                      </div>
                     </td>
 
                     {/* Actual/Selected Score Values - 3 rows */}
                     <td className="values-cell" style={{ padding: 0 }}>
                       <div className="role-value-cell">
-                        <span style={{ borderBottom: '1px solid #dee2e6', display: 'inline-block', minWidth: '50px', padding: '2px 8px' }}>
+                        <span
+                          style={{
+                            borderBottom: '1px solid #dee2e6',
+                            display: 'inline-block',
+                            minWidth: '50px',
+                            padding: '2px 8px',
+                          }}
+                        >
                           {kra.actualOldValue || kra.actual || '-'}
                         </span>
                       </div>
                       <div className="role-value-cell">
-                        <span style={{ borderBottom: '1px solid #dee2e6', display: 'inline-block', minWidth: '50px', padding: '2px 8px' }}>
+                        <span
+                          style={{
+                            borderBottom: '1px solid #dee2e6',
+                            display: 'inline-block',
+                            minWidth: '50px',
+                            padding: '2px 8px',
+                          }}
+                        >
                           {kra.actual || kra.appraiseeScore || '-'}
                         </span>
                       </div>
                       <div className="role-value-cell" style={{ borderBottom: 'none' }}>
-                        <input 
-                          type="text" 
-                          className="appeal-score-input appellate-input" 
-                          value={kra.actualNewValue || kra.newScore || ''} 
-                          readOnly 
+                        <input
+                          type="text"
+                          className="appeal-score-input appellate-input"
+                          value={selectedScore}
+                          onChange={(e) => onSelectedScoreChange?.(kraId, e.target.value)}
+                          readOnly={!(isSelected && action === 'ACCEPT_AND_EDIT')}
+                          max={kra.maxScore}
+                          min="0"
+                          step="0.1"
+                          placeholder="0.0"
                           style={{ width: '60px' }}
                         />
                       </div>
@@ -161,13 +189,20 @@ function AppealReviewKRASection({
                         className="btn btn-link p-0"
                         onClick={() => setExpandedCommentKra(isCommentExpanded ? null : kraId)}
                         title="View/Add Comment"
-                        style={{ 
-                          backgroundColor: (kra.appraiseeComment || comment) ? 'var(--accent-color, #0189d0)' : 'transparent',
+                        style={{
+                          backgroundColor:
+                            kra.appraiseeComment || comment
+                              ? 'var(--accent-color, #0189d0)'
+                              : 'transparent',
                           borderRadius: '4px',
-                          padding: '4px 8px'
+                          padding: '4px 8px',
                         }}
                       >
-                        <i className={`bi bi-chat-left-text-fill ${(kra.appraiseeComment || comment) ? 'text-white' : 'text-muted'}`}></i>
+                        <i
+                          className={`bi bi-chat-left-text-fill ${
+                            kra.appraiseeComment || comment ? 'text-white' : 'text-muted'
+                          }`}
+                        ></i>
                       </button>
                     </td>
 
@@ -228,7 +263,8 @@ function AppealReviewKRASection({
                           {/* Appellate Authority Comment - Editable */}
                           <div className="appellate-comment-input">
                             <label className="comment-label">
-                              Appellate Authority Comment:<span className="required-asterisk">*</span>
+                              Appellate Authority Comment:
+                              <span className="required-asterisk">*</span>
                             </label>
                             <textarea
                               className="form-control appellate-textarea"
@@ -269,11 +305,13 @@ AppealReviewKRASection.propTypes = {
   kraActions: PropTypes.instanceOf(Map).isRequired,
   kraScores: PropTypes.instanceOf(Map).isRequired,
   kraComments: PropTypes.instanceOf(Map).isRequired,
+  selectedScores: PropTypes.instanceOf(Map),
   onKraSelect: PropTypes.func.isRequired,
   onActionChange: PropTypes.func.isRequired,
   onScoreChange: PropTypes.func.isRequired,
+  onSelectedScoreChange: PropTypes.func,
   onCommentChange: PropTypes.func.isRequired,
-  type: PropTypes.oneOf(['measurable', 'non-measurable']).isRequired
+  type: PropTypes.oneOf(['measurable', 'non-measurable']).isRequired,
 };
 
 export default AppealReviewKRASection;

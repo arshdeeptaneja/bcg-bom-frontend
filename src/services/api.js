@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Base API configuration
-const AUTH_BASE_URL = 'http://localhost:8090';  // Auth & Identity APIs
-const APPRAISAL_BASE_URL = 'http://localhost:8084';  // Appraisal APIs
+const AUTH_BASE_URL = 'http://localhost:8090'; // Auth & Identity APIs
+const APPRAISAL_BASE_URL = 'http://localhost:8084'; // Appraisal APIs
 
 const appendQueryParam = (searchParams, key, value) => {
   if (value === undefined || value === null) {
@@ -355,8 +355,6 @@ export const appraisalAPI = {
     }
   },
 
-
-
   // GET: Get exception validator dashboard data
   getExceptionValidatorDashboard: async ({ fy, quarter, exceptionPeriod, empNo }) => {
     try {
@@ -412,8 +410,7 @@ export const appraisalAPI = {
   // GET: Get appraisal home dashboard data
   getAppraisalHomeDashboard: async ({ empNo, role, appraisalPeriod, financialYear, quarter }) => {
     try {
-
-      console.log("role in api is: ", role)
+      console.log('role in api is: ', role);
       const params = new URLSearchParams({
         empNo: empNo,
         role: role,
@@ -432,63 +429,62 @@ export const appraisalAPI = {
   },
 
   // GET: Get appraiser check-in dashboard data
-getAppraiserCheckInDashboard: async ({
-  empNo,
-  financialYear,
-  quarter,
-  appraisalPeriod,
-  filterEmpId,
-  filterName,
-  filterRole,
-  filterAppraiser,
-  filterStatus,
-}) => {
-  try {
-    const params = new URLSearchParams({
-      empNo,
-      financialYear,
-      quarter,
-      appraisalPeriod,
-    });
+  getAppraiserCheckInDashboard: async ({
+    empNo,
+    financialYear,
+    quarter,
+    appraisalPeriod,
+    filterEmpId,
+    filterName,
+    filterRole,
+    filterAppraiser,
+    filterStatus,
+  }) => {
+    try {
+      const params = new URLSearchParams({
+        empNo,
+        financialYear,
+        quarter,
+        appraisalPeriod,
+      });
 
-    // Apply filters if selected
-    if (filterEmpId) params.append("ecNumber", filterEmpId);
-    if (filterName) params.append("employeeName", filterName);
-    if (filterRole) params.append("primaryRole", filterRole);
-    if (filterAppraiser) params.append("appraiser", filterAppraiser);
-    if (filterStatus) params.append("status", filterStatus);
+      // Apply filters if selected
+      if (filterEmpId) params.append('ecNumber', filterEmpId);
+      if (filterName) params.append('employeeName', filterName);
+      if (filterRole) params.append('primaryRole', filterRole);
+      if (filterAppraiser) params.append('appraiser', filterAppraiser);
+      if (filterStatus) params.append('status', filterStatus);
 
-    let response;
-    if(appraisalPeriod === "quarter"){
-       response = await apiClient.get(
-        `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
-      );
-    }else{
-      response = await apiClient.get(
-        `/appraisal/reportee_appraisal/dashboard?${params.toString()}`
-      );
+      let response;
+      if (appraisalPeriod === 'quarter') {
+        response = await apiClient.get(
+          `/appraisal/quarterly_reportee_appraisal/dashboard?${params.toString()}`
+        );
+      } else {
+        response = await apiClient.get(
+          `/appraisal/reportee_appraisal/dashboard?${params.toString()}`
+        );
+      }
+
+      console.log('response: ', response);
+
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
     }
-
-    console.log("response: ", response)
-
-    return response.data;
-  } catch (error) {
-    console.log("error", error);
-    throw error;
-  }
-},
-
+  },
 
   // GET: Get quarterly check-in report data
-  getQuarterlyCheckInReport: async ({ 
-    empNo, 
-    url, 
-    roleType, 
-    financialYear, 
-    quarter, 
-    pageType, 
-    appraisalStatus, 
-    intent = 'Fill' 
+  getQuarterlyCheckInReport: async ({
+    empNo,
+    url,
+    roleType,
+    financialYear,
+    quarter,
+    pageType,
+    appraisalStatus,
+    intent = 'Fill',
   }) => {
     try {
       const params = new URLSearchParams({
@@ -513,42 +509,41 @@ getAppraiserCheckInDashboard: async ({
 
   //GET: get quarterly check-in report data Apppraiser
 
- getQuarterlyAppraiserCheckInReport: async ({
-  empNo,
-  url,
-  roleType,
-  financialYear,
-  quarter,
-  pageType,
-  appraisalStatus,
-  intent = "Fill",
-}) => {
-  try {
-    const params = new URLSearchParams();
+  getQuarterlyAppraiserCheckInReport: async ({
+    empNo,
+    url,
+    roleType,
+    financialYear,
+    quarter,
+    pageType,
+    appraisalStatus,
+    intent = 'Fill',
+  }) => {
+    try {
+      const params = new URLSearchParams();
 
-    // Only append if value exists
-    if (empNo) params.append("empNo", empNo);
-    if (url) params.append("url", url);
-    if (roleType) params.append("roleType", roleType);
-    if (financialYear) params.append("financialYear", financialYear);
-    if (quarter) params.append("quarter", quarter);
-    if (pageType) params.append("pageType", pageType);
-    if (appraisalStatus) params.append("appraisalStatus", appraisalStatus);
+      // Only append if value exists
+      if (empNo) params.append('empNo', empNo);
+      if (url) params.append('url', url);
+      if (roleType) params.append('roleType', roleType);
+      if (financialYear) params.append('financialYear', financialYear);
+      if (quarter) params.append('quarter', quarter);
+      if (pageType) params.append('pageType', pageType);
+      if (appraisalStatus) params.append('appraisalStatus', appraisalStatus);
 
-    // Always required
-    params.append("intent", intent);
+      // Always required
+      params.append('intent', intent);
 
-    const response = await apiClient.get(
-      `${appraisalBaseUrl}/quarterly_check_in_report?${params.toString()}`
-    );
+      const response = await apiClient.get(
+        `${appraisalBaseUrl}/quarterly_check_in_report?${params.toString()}`
+      );
 
-    return response.data;
-  } catch (error) {
-    console.error("Error in getQuarterlyAppraiserCheckInReport:", error);
-    throw error;
-  }
-},
-
+      return response.data;
+    } catch (error) {
+      console.error('Error in getQuarterlyAppraiserCheckInReport:', error);
+      throw error;
+    }
+  },
 
   // POST: Submit quarterly exception report with file attachment
 
@@ -657,9 +652,7 @@ getAppraiserCheckInDashboard: async ({
       appendQueryParam(params, 'appraisalStatus', appraisalStatus);
       appendQueryParam(params, 'intent', intent);
 
-      const response = await apiClient.get(
-        `/appraisal/reviewer_appraisal?${params.toString()}`
-      );
+      const response = await apiClient.get(`/appraisal/reviewer_appraisal?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.log('error', error);
@@ -669,22 +662,22 @@ getAppraiserCheckInDashboard: async ({
 
   // GET: Get Admin HR Dashboard data
   getHrDashboard: async ({ empNo, appraisalPeriod, financialYear }) => {
-  const res = await axios.get(`/appraisal/admin/hr_dashboard`, {
-    params: {
-      empNo,
-      appraisalPeriod,
-      financialYear,
-    },
-  });
-  return res.data;
-},
+    const res = await axios.get(`/appraisal/admin/hr_dashboard`, {
+      params: {
+        empNo,
+        appraisalPeriod,
+        financialYear,
+      },
+    });
+    return res.data;
+  },
   appraisalStatusChange: async ({ empNo, appraisalPeriod, searchEmpNo, financialYear }) => {
     try {
       const params = new URLSearchParams({
         empNo,
         appraisalPeriod,
         financialYear,
-        searchEmpNo
+        searchEmpNo,
       });
 
       const response = await apiClient.get(
@@ -693,7 +686,7 @@ getAppraiserCheckInDashboard: async ({
 
       return response.data;
     } catch (error) {
-      console.error("Error searching appraisal status:", error);
+      console.error('Error searching appraisal status:', error);
       throw error;
     }
   },
@@ -722,9 +715,7 @@ getAppraiserCheckInDashboard: async ({
       appendQueryParam(params, 'quarter', quarter);
       appendQueryParam(params, 'appraisalStatus', appraisalStatus);
 
-      const response = await apiClient.get(
-        `/appraisal/acceptor_appraisal?${params.toString()}`
-      );
+      const response = await apiClient.get(`/appraisal/acceptor_appraisal?${params.toString()}`);
 
       return response.data;
     } catch (error) {
@@ -734,17 +725,26 @@ getAppraiserCheckInDashboard: async ({
   },
 
   // Reporting and reviewing authority update by emp number
-  appraisalUpdate: async ({ empNo, roleName, appraisalPeriod, quarter, empName, financialYear, sol, statusUpdates }) => {
+  appraisalUpdate: async ({
+    empNo,
+    roleName,
+    appraisalPeriod,
+    quarter,
+    empName,
+    financialYear,
+    sol,
+    statusUpdates,
+  }) => {
     try {
       const body = {
         empNo,
         roleName,
-        appraisalPeriod,   // Quarterly or Annual
+        appraisalPeriod, // Quarterly or Annual
         financialYear,
         quarter,
         empName,
         sol,
-        statusUpdates
+        statusUpdates,
       };
 
       const response = await apiClient.post(
@@ -754,7 +754,7 @@ getAppraiserCheckInDashboard: async ({
 
       return response.data;
     } catch (error) {
-      console.error("Error searching appraisal status:", error);
+      console.error('Error searching appraisal status:', error);
       throw error;
     }
   },
@@ -795,10 +795,7 @@ getAppraiserCheckInDashboard: async ({
 
   saveQuarterlyCheckInReport: async (payload = {}) => {
     try {
-      const response = await apiClient.post(
-        '/appraisal/quarterly_check_in_report/save',
-        payload
-      );
+      const response = await apiClient.post('/appraisal/quarterly_check_in_report/save', payload);
       return response.data;
     } catch (error) {
       console.error('saveQuarterlyCheckInReport error', error);
@@ -806,13 +803,10 @@ getAppraiserCheckInDashboard: async ({
     }
   },
 
- //post : Appraiser check in submit
+  //post : Appraiser check in submit
   submitQuarterlyAppraiserCheckInReport: async (payload = {}) => {
     try {
-      const response = await apiClient.post(
-        '/appraisal/quarterly_check_in_report/submit',
-        payload
-      );
+      const response = await apiClient.post('/appraisal/quarterly_check_in_report/submit', payload);
       return response.data;
     } catch (error) {
       console.error('submitQuarterlyCheckInReport error', error);
@@ -823,10 +817,7 @@ getAppraiserCheckInDashboard: async ({
   // POST: Submit annual self appraisal with JSON body
   submitAnnualSelfAppraisal: async (payload = {}) => {
     try {
-      const response = await apiClient.post(
-        '/appraisal/employee_self_appraisal/submit',
-        payload
-      );
+      const response = await apiClient.post('/appraisal/employee_self_appraisal/submit', payload);
       return response.data;
     } catch (error) {
       console.error('submitAnnualSelfAppraisal error', error);
@@ -836,10 +827,8 @@ getAppraiserCheckInDashboard: async ({
 
   //post :Appraiser check-in save
   appraiserSaveQuarterlyCheckIn: async (payload = {}) => {
-    try{ const response= await apiClient.post(
-        '/appraisal/quarterly_check_in_report/save',
-        payload
-      );
+    try {
+      const response = await apiClient.post('/appraisal/quarterly_check_in_report/save', payload);
       return response.data;
     } catch (error) {
       console.error('appraiserSaveQuarterlyCheckIn error', error);
@@ -847,14 +836,10 @@ getAppraiserCheckInDashboard: async ({
     }
   },
 
-
-//post : Appraisee check in submit
-    submitQuarterlyAppraiseeCheckInReport: async (payload = {}) => {
+  //post : Appraisee check in submit
+  submitQuarterlyAppraiseeCheckInReport: async (payload = {}) => {
     try {
-      const response = await apiClient.post(
-        '/appraisal/quarterly_check_in_report/submit',
-        payload
-      );
+      const response = await apiClient.post('/appraisal/quarterly_check_in_report/submit', payload);
       return response.data;
     } catch (error) {
       console.error('submitQuarterlyAppraiseeCheckInReport error', error);
@@ -862,13 +847,10 @@ getAppraiserCheckInDashboard: async ({
     }
   },
 
-  //post Appraisee Check in save 
+  //post Appraisee Check in save
   appraiseeSaveQuarterlyCheckIn: async (payload = {}) => {
     try {
-      const response = await apiClient.post(
-        'appraisal/quarterly_check_in_report/save',
-        payload
-      );
+      const response = await apiClient.post('appraisal/quarterly_check_in_report/save', payload);
       return response.data;
     } catch (error) {
       console.error('appraiseeSaveQuarterlyCheckIn error', error);
@@ -876,23 +858,19 @@ getAppraiserCheckInDashboard: async ({
     }
   },
 
-
-
   // GET: Get reportee appraisal dashboard data
   getReporteeAppraisalDashboard: async ({ empNo, financialYear, quarter }) => {
     try {
       const params = new URLSearchParams({
         empNo,
         financialYear,
-        quarter
+        quarter,
       });
       // TODO: Verify this endpoint. It was lost in a merge conflict.
-      const response = await apiClient.get(
-        `/appraisal/reportee/dashboard?${params.toString()}`
-      );
+      const response = await apiClient.get(`/appraisal/reportee/dashboard?${params.toString()}`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching reportee appraisal dashboard:", error);
+      console.error('Error fetching reportee appraisal dashboard:', error);
       throw error;
     }
   },
@@ -946,14 +924,7 @@ getAppraiserCheckInDashboard: async ({
   },
 
   // GET: Fetch acceptor (reviewer) appraisal view-only payload
-  getAcceptorAppraisalView: async ({
-    empNo,
-    url,
-    zoneName,
-    roleType,
-    financialYear,
-    quarter,
-  }) => {
+  getAcceptorAppraisalView: async ({ empNo, url, zoneName, roleType, financialYear, quarter }) => {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'empNo', empNo);
@@ -992,7 +963,7 @@ getAppraiserCheckInDashboard: async ({
 
       return response.data;
     } catch (error) {
-      console.error("Error fetching reporting authority bulk list:", error);
+      console.error('Error fetching reporting authority bulk list:', error);
       throw error;
     }
   },
@@ -1020,7 +991,6 @@ getAppraiserCheckInDashboard: async ({
     }
   },
 
-  
   // GET: Get quarterly exception report data
   getQuarterlyExceptionReport: async ({ urlId, financialYear, quarter }) => {
     try {
@@ -1039,25 +1009,17 @@ getAppraiserCheckInDashboard: async ({
     }
   },
 
-
-
-
-
-
-
   // GET: Get appeal report data for appraisee to view KRAs and submit appeal
   getAppealReport: async ({ roleId, roleType }) => {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'roleId', roleId);
       appendQueryParam(params, 'roleType', roleType);
-      
-      const response = await apiClient.get(
-        `/appraisal/appeal_report?${params.toString()}`
-      );
+
+      const response = await apiClient.get(`/appraisal/appeal_report?${params.toString()}`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching appeal report:", error);
+      console.error('Error fetching appeal report:', error);
       throw error;
     }
   },
@@ -1072,19 +1034,19 @@ getAppraiserCheckInDashboard: async ({
       });
 
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
 
       const response = await apiClient.post(
         `/appraisal/admin/hr_update_quarterly_repa_reva_surl/upload?${params.toString()}`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { 'Content-Type': 'multipart/form-data' },
         }
       );
 
       return response.data;
     } catch (error) {
-      console.error("Error uploading Reporting Authority Bulk file:", error);
+      console.error('Error uploading Reporting Authority Bulk file:', error);
       throw error;
     }
   },
@@ -1133,28 +1095,23 @@ getAppraiserCheckInDashboard: async ({
     }
   },
 
-    // GET: Fetch validator view of exception for review
-    getExceptionQuarterlyValidator: async ({
-      fy,
-      quarter,
-      empNo,
-    }) => {
-      try {
-        const params = new URLSearchParams();
-        appendQueryParam(params, 'fy', fy);
-        appendQueryParam(params, 'quarter', quarter);
-        appendQueryParam(params, 'empNo', empNo);
-  
-        const response = await apiClient.get(
-          `/appraisal/exception_quarterly_validator?${params.toString()}`
-        );
-        return response.data;
-      } catch (error) {
-        console.error('getExceptionQuarterlyValidator error', error);
-        throw error;
-      }
-    },
+  // GET: Fetch validator view of exception for review
+  getExceptionQuarterlyValidator: async ({ fy, quarter, empNo }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'fy', fy);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'empNo', empNo);
 
+      const response = await apiClient.get(
+        `/appraisal/exception_quarterly_validator?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('getExceptionQuarterlyValidator error', error);
+      throw error;
+    }
+  },
 
   // GET: Fetch validator view of exception for review
   getExceptionQuarterlyValidatorReview: async ({
@@ -1209,17 +1166,13 @@ getAppraiserCheckInDashboard: async ({
       const formData = new FormData();
       formData.append('payload', JSON.stringify(payload));
       if (attachment) {
-      formData.append('attachment', attachment);
+        formData.append('attachment', attachment);
       }
-      const response = await apiClient.post(
-        '/appraisal/appeal_report/submit',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const response = await apiClient.post('/appraisal/appeal_report/submit', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('submitAppealReport error', error);
@@ -1235,9 +1188,7 @@ getAppraiserCheckInDashboard: async ({
       appendQueryParam(params, 'roleType', roleType);
       appendQueryParam(params, 'empNo', empNo);
       appendQueryParam(params, 'financialYear', financialYear);
-      const response = await apiClient.get(
-        `/appraisal/appeal_report/review?${params.toString()}`
-      );
+      const response = await apiClient.get(`/appraisal/appeal_report/review?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('getAppealCommitteeReviewData error', error);
@@ -1264,7 +1215,7 @@ getAppraiserCheckInDashboard: async ({
       );
       return response.data;
     } catch (error) {
-      console.error("Error fetching appeal committee data:", error);
+      console.error('Error fetching appeal committee data:', error);
       throw error;
     }
   },
@@ -1283,13 +1234,9 @@ getAppraiserCheckInDashboard: async ({
       // };
 
       // Real implementation (uncomment when backend is ready):
-      const response = await apiClient.post(
-        '/appraisal/appeal_commitee/submit',
-        payload
-      );
+      const response = await apiClient.post('/appraisal/appeal_committee/submit', payload);
 
       return response.data;
-
     } catch (error) {
       console.error('approveAppealReview error', error);
       throw error;
@@ -1314,13 +1261,13 @@ getAppraiserCheckInDashboard: async ({
       const response = await apiClient.get(
         `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_sample?${params.toString()}`,
         {
-          responseType: "blob",
+          responseType: 'blob',
         }
       );
 
       return response.data; // XLSX blob
     } catch (error) {
-      console.error("Error downloading sample file:", error);
+      console.error('Error downloading sample file:', error);
       throw error;
     }
   },
@@ -1343,13 +1290,13 @@ getAppraiserCheckInDashboard: async ({
       const response = await apiClient.get(
         `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_data_table?${params.toString()}`,
         {
-          responseType: "blob",
+          responseType: 'blob',
         }
       );
 
       return response.data;
     } catch (error) {
-      console.error("Error downloading sample file:", error);
+      console.error('Error downloading sample file:', error);
       throw error;
     }
   },
@@ -1367,7 +1314,7 @@ getAppraiserCheckInDashboard: async ({
 
       return response.data; // JSON logs
     } catch (error) {
-      console.error("Error fetching reporting authority error logs:", error);
+      console.error('Error fetching reporting authority error logs:', error);
       throw error;
     }
   },
@@ -1385,7 +1332,7 @@ getAppraiserCheckInDashboard: async ({
 
       return response.data; // JSON error logs list
     } catch (error) {
-      console.error("Error fetching annual reporting authority error logs:", error);
+      console.error('Error fetching annual reporting authority error logs:', error);
       throw error;
     }
   },
@@ -1406,13 +1353,13 @@ getAppraiserCheckInDashboard: async ({
       const response = await apiClient.get(
         `/appraisal/admin/hr_update_annual_repa_reva_surl/download_data_table?${params.toString()}`,
         {
-          responseType: "blob", // XLSX file
+          responseType: 'blob', // XLSX file
         }
       );
 
       return response.data; // Return blob
     } catch (error) {
-      console.error("Error downloading annual data table:", error);
+      console.error('Error downloading annual data table:', error);
       throw error;
     }
   },
@@ -1427,19 +1374,19 @@ getAppraiserCheckInDashboard: async ({
       });
 
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
 
       const response = await apiClient.post(
         `/appraisal/admin/hr_update_annual_repa_reva_surl/upload?${params.toString()}`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { 'Content-Type': 'multipart/form-data' },
         }
       );
 
       return response.data;
     } catch (error) {
-      console.error("Error uploading Reporting Authority Bulk file:", error);
+      console.error('Error uploading Reporting Authority Bulk file:', error);
       throw error;
     }
   },
@@ -1447,7 +1394,10 @@ getAppraiserCheckInDashboard: async ({
   // Download sample Excel for Reporting Authority and Reviewing Authority update in bulk
 
   reportingAuthorityReviewingAuthorityBulkDownloadSample: async ({
-    roleName, regionCode, quarter, financialYear,
+    roleName,
+    regionCode,
+    quarter,
+    financialYear,
   }) => {
     try {
       const params = new URLSearchParams({
@@ -1460,13 +1410,13 @@ getAppraiserCheckInDashboard: async ({
       const response = await apiClient.get(
         `/appraisal/admin/hr_update_annual_repa_reva_surl/download_sample?${params.toString()}`,
         {
-          responseType: "blob",
+          responseType: 'blob',
         }
       );
 
       return response.data; // XLSX blob
     } catch (error) {
-      console.error("Error downloading sample file:", error);
+      console.error('Error downloading sample file:', error);
       throw error;
     }
   },
@@ -1475,35 +1425,29 @@ getAppraiserCheckInDashboard: async ({
   searchHRStatusUpdate: async ({ empNo }) => {
     try {
       const params = new URLSearchParams({
-        empNo: empNo || ""
+        empNo: empNo || '',
       });
 
-      const response = await apiClient.get(
-        `/admin/hr_status_update_utility?${params.toString()}`
-      );
+      const response = await apiClient.get(`/admin/hr_status_update_utility?${params.toString()}`);
 
       return response.data;
     } catch (error) {
-      console.error("HR Status Search Error:", error);
+      console.error('HR Status Search Error:', error);
       throw error;
     }
   },
 
-
   //Appraisal Status Change Utility--Update Status
   updateHRStatus: async ({ assignmentId, newStatus }) => {
     try {
-      const response = await apiClient.post(
-        `/admin/hr_status_update_utility/update_status`,
-        {
-          assignmentId,
-          newStatus,
-        }
-      );
+      const response = await apiClient.post(`/admin/hr_status_update_utility/update_status`, {
+        assignmentId,
+        newStatus,
+      });
 
       return response.data;
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error('Error updating status:', error);
       throw error;
     }
   },
@@ -1512,25 +1456,23 @@ getAppraiserCheckInDashboard: async ({
   searchExceptionDeleteURL: async ({ empNo }) => {
     try {
       const params = new URLSearchParams({
-        empNo: empNo || "",
+        empNo: empNo || '',
       });
 
-      const response = await apiClient.get(
-        `/admin/hr_exception_delete_urlid?${params.toString()}`
-      );
+      const response = await apiClient.get(`/admin/hr_exception_delete_urlid?${params.toString()}`);
 
       return response.data;
     } catch (error) {
-      console.error("Error fetching exception delete url:", error);
+      console.error('Error fetching exception delete url:', error);
       throw error;
     }
   },
 
-  //EXCEPTION DELETE BUTTON TO DELETE 
+  //EXCEPTION DELETE BUTTON TO DELETE
   deleteExceptionURL: async ({ urlId }) => {
     try {
       const params = new URLSearchParams({
-        urlId: urlId
+        urlId: urlId,
       });
 
       const response = await apiClient.delete(
@@ -1539,7 +1481,7 @@ getAppraiserCheckInDashboard: async ({
 
       return response.data;
     } catch (error) {
-      console.error("Error deleting exception URL:", error);
+      console.error('Error deleting exception URL:', error);
       throw error;
     }
   },
@@ -1548,25 +1490,23 @@ getAppraiserCheckInDashboard: async ({
   searchAppealDeleteURL: async ({ empNo }) => {
     try {
       const params = new URLSearchParams({
-        empNo: empNo || "",
+        empNo: empNo || '',
       });
 
-      const response = await apiClient.get(
-        `/admin/hr_appeal_delete_urlid?${params.toString()}`
-      );
+      const response = await apiClient.get(`/admin/hr_appeal_delete_urlid?${params.toString()}`);
 
       return response.data;
     } catch (error) {
-      console.error("Error fetching Appeal delete url:", error);
+      console.error('Error fetching Appeal delete url:', error);
       throw error;
     }
   },
 
-  //Appeal DELETE BUTTON TO DELETE 
+  //Appeal DELETE BUTTON TO DELETE
   deleteAppealURL: async ({ urlId }) => {
     try {
       const params = new URLSearchParams({
-        urlId: urlId
+        urlId: urlId,
       });
 
       const response = await apiClient.delete(
@@ -1575,21 +1515,19 @@ getAppraiserCheckInDashboard: async ({
 
       return response.data;
     } catch (error) {
-      console.error("Error deleting exception URL:", error);
+      console.error('Error deleting exception URL:', error);
       throw error;
     }
   },
 
   //Module Active Inactive Date
-  // GET LIST 
+  // GET LIST
   moduleActiveInactiveDateGetList: async () => {
     try {
-      const response = await apiClient.get(
-        `/admin/hr_module_active_inactive_date`
-      );
+      const response = await apiClient.get(`/admin/hr_module_active_inactive_date`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching module active/inactive list:", error);
+      console.error('Error fetching module active/inactive list:', error);
       throw error;
     }
   },
@@ -1614,34 +1552,27 @@ getAppraiserCheckInDashboard: async ({
       const response = await apiClient.post(`/admin/hr_insert_annual_roles`);
       return response.data;
     } catch (error) {
-      console.error("Error inserting annual roles:", error);
+      console.error('Error inserting annual roles:', error);
       throw error;
     }
   },
 
-
-
   // Appeal Committee APIs
   appealCommittee: {
-
     // List/History logs
     getErrorLogs: async () => {
-      const response = await apiClient.get(
-        `/admin/hr_update_appeal_committee/error_logs`
-      );
+      const response = await apiClient.get(`/admin/hr_update_appeal_committee/error_logs`);
       return response.data;
     },
 
     // Upload Excel File
     uploadFile: async ({ file }) => {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
 
-      const response = await apiClient.post(
-        `/admin/hr_update_appeal_committee/upload`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const response = await apiClient.post(`/admin/hr_update_appeal_committee/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       return response.data;
     },
 
@@ -1649,22 +1580,19 @@ getAppraiserCheckInDashboard: async ({
     downloadDataTable: async () => {
       const response = await apiClient.get(
         `/admin/hr_update_appeal_committee/download_data_table`,
-        { responseType: "blob" }
+        { responseType: 'blob' }
       );
       return response.data;
     },
 
     // Download Sample File
     downloadSample: async () => {
-      const response = await apiClient.get(
-        `/admin/hr_update_appeal_committee/download_sample`,
-        { responseType: "blob" }
-      );
+      const response = await apiClient.get(`/admin/hr_update_appeal_committee/download_sample`, {
+        responseType: 'blob',
+      });
       return response.data;
     },
-
   },
-
 };
 
 // Generic API methods
@@ -1726,10 +1654,6 @@ export const accessService = {
       throw error;
     }
   },
-
 };
-
-
-
 
 export default apiClient;
