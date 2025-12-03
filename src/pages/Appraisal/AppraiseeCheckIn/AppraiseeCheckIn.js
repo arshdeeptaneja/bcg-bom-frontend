@@ -225,6 +225,7 @@ export default function AppraiseeCheckIn() {
                       quarter,
 
                       pageType: 'self',
+                      appraisalStatus: employee.status,
                     },
                   });
                 } else {
@@ -240,6 +241,7 @@ export default function AppraiseeCheckIn() {
                           : '',
                       employee: employeeModel,
                       pageType: 'self',
+                      appraisalStatus: employee.status,
                     },
                   });
                 }
