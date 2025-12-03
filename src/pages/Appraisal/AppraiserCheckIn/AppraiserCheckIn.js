@@ -20,13 +20,13 @@ import LoadingSpinner from '../../../components/Spinner';
 
 // Status mapping for display transformation
 const STATUS_MAPPING = {
-  'complete_reva': 'Pending at Acceptor',
-  'complete_self': 'Pending at Appraiser',
-  'complete_repa': 'Pending at Reviewer',
-  'pending': 'Pending at Appraisee',
-  'submitted_appraisal': 'Completed',
-  'completed': 'Completed',
-  'complete_ac': 'Completed'
+  complete_reva: 'Pending at Acceptor',
+  complete_self: 'Pending at Appraiser',
+  complete_repa: 'Pending at Reviewer',
+  pending: 'Pending at Appraisee',
+  submitted_appraisal: 'Completed',
+  completed: 'Completed',
+  complete_ac: 'Completed',
 };
 
 // Helper function to get display status from backend status
@@ -74,7 +74,7 @@ export default function AppraiserCheckIn() {
     employeeName: '',
     primaryRole: '',
     appraiser: '',
-    status: ''
+    status: '',
   });
 
   // Filtered results state
@@ -83,12 +83,13 @@ export default function AppraiserCheckIn() {
   // React Query to fetch dashboard data
   const { data, isLoading } = useQuery({
     queryKey: ['appraiseeCheckInDashboard', financialYear, appraisalPeriod, quarter, empNo],
-    queryFn: () => appraisalAPI.getAppraiserCheckInDashboard({
-      empNo: empNo,
-      financialYear: extractYear(financialYear),
-      quarter: quarter,
-      appraisalPeriod: appraisalPeriod
-    }),
+    queryFn: () =>
+      appraisalAPI.getAppraiserCheckInDashboard({
+        empNo: empNo,
+        financialYear: extractYear(financialYear),
+        quarter: quarter,
+        appraisalPeriod: appraisalPeriod,
+      }),
     enabled: !!empNo && !!financialYear && !!appraisalPeriod && !!quarter,
   });
 
@@ -104,28 +105,28 @@ export default function AppraiserCheckIn() {
 
     // Apply Employee Number filter
     if (filters.empNumber) {
-      results = results.filter(emp => emp.EMP_ID === filters.empNumber);
+      results = results.filter((emp) => emp.EMP_ID === filters.empNumber);
     }
 
     // Apply Employee Name filter
     if (filters.employeeName) {
-      results = results.filter(emp => emp.EMP_NAME === filters.employeeName);
+      results = results.filter((emp) => emp.EMP_NAME === filters.employeeName);
     }
 
     // Apply Primary Role filter
     if (filters.primaryRole) {
-      results = results.filter(emp => emp.MAIN_ROLE === filters.primaryRole);
+      results = results.filter((emp) => emp.MAIN_ROLE === filters.primaryRole);
     }
 
     // Apply Appraiser filter
     if (filters.appraiser) {
-      results = results.filter(emp => emp.REPORTING_AUTHORITY_NAME === filters.appraiser);
+      results = results.filter((emp) => emp.REPORTING_AUTHORITY_NAME === filters.appraiser);
     }
 
     // Apply Status filter
     if (filters.status) {
       const backendStatus = getBackendStatus(filters.status);
-      results = results.filter(emp => {
+      results = results.filter((emp) => {
         const empStatus = emp.APPRAISAL_STATUS ? emp.APPRAISAL_STATUS.toLowerCase() : '';
         return empStatus === backendStatus;
       });
@@ -136,9 +137,9 @@ export default function AppraiserCheckIn() {
 
   // Handle filter change
   const handleFilterChange = (filterName, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [filterName]: value
+      [filterName]: value,
     }));
   };
 
@@ -149,7 +150,7 @@ export default function AppraiserCheckIn() {
       employeeName: '',
       primaryRole: '',
       appraiser: '',
-      status: ''
+      status: '',
     });
   };
 
@@ -158,9 +159,9 @@ export default function AppraiserCheckIn() {
     if (!data || !data.filter_data || !data.filter_data.APPRAISAL_STATUS_ARRAY) {
       return [];
     }
-    return [...new Set(data.filter_data.APPRAISAL_STATUS_ARRAY)].map(status => ({
+    return [...new Set(data.filter_data.APPRAISAL_STATUS_ARRAY)].map((status) => ({
       value: getDisplayStatus(status),
-      label: getDisplayStatus(status)
+      label: getDisplayStatus(status),
     }));
   };
 
@@ -294,11 +295,7 @@ export default function AppraiserCheckIn() {
 
         {/* Reset Button */}
         <div className="filter-actions">
-          <button
-            type="button"
-            className="btn btn-outline-primary"
-            onClick={handleReset}
-          >
+          <button type="button" className="btn btn-outline-primary" onClick={handleReset}>
             Reset
           </button>
         </div>
@@ -306,7 +303,7 @@ export default function AppraiserCheckIn() {
 
       {/* Employee Appraisal Cards */}
       <div className="employee-appraisal-cards">
-        {filteredResults.length === 0 && (Object.values(filters).some(f => f !== '')) ? (
+        {filteredResults.length === 0 && Object.values(filters).some((f) => f !== '') ? (
           <div className="text-center mt-5">
             <p className="text-muted fw-semibold">No employees match the selected filters</p>
           </div>
@@ -319,15 +316,18 @@ export default function AppraiserCheckIn() {
                   empNo: employee.EMP_ID || '',
                   employeeName: employee.EMP_NAME || '',
                   employeeScale: employee.SCALE || '',
-                  roles: employee.ADDITIONAL_ROLE_1 || employee.ADDITIONAL_ROLE_2 
-                    ? [employee.ADDITIONAL_ROLE_1, employee.ADDITIONAL_ROLE_2].filter(Boolean) 
-                    : [],
+                  roles:
+                    employee.ADDITIONAL_ROLE_1 || employee.ADDITIONAL_ROLE_2
+                      ? [employee.ADDITIONAL_ROLE_1, employee.ADDITIONAL_ROLE_2].filter(Boolean)
+                      : [],
                   appraiser: employee.REPORTING_AUTHORITY_NAME || '',
                 })
               }
-              dateRange={employee.START_DATE && employee.END_DATE 
-                ? `${employee.START_DATE} to ${employee.END_DATE}` 
-                : ''}
+              dateRange={
+                employee.START_DATE && employee.END_DATE
+                  ? `${employee.START_DATE} to ${employee.END_DATE}`
+                  : ''
+              }
               primaryRole={employee.MAIN_ROLE || ''}
               appraisalStatus={getDisplayStatus(employee.APPRAISAL_STATUS)}
               exceptionStatus="NOT CREATED"
@@ -340,18 +340,21 @@ export default function AppraiserCheckIn() {
                     financialYear,
                     appraisalPeriod,
                     quarter,
-                    dateRange: employee.START_DATE && employee.END_DATE 
-                      ? `${employee.START_DATE} to ${employee.END_DATE}` 
-                      : '',
+                    dateRange:
+                      employee.START_DATE && employee.END_DATE
+                        ? `${employee.START_DATE} to ${employee.END_DATE}`
+                        : '',
                     employee: {
                       empNo: employee.EMP_ID || '',
                       employeeName: employee.EMP_NAME || '',
                       employeeScale: employee.SCALE || '',
-                      roles: employee.ADDITIONAL_ROLE_1 || employee.ADDITIONAL_ROLE_2 
-                        ? [employee.ADDITIONAL_ROLE_1, employee.ADDITIONAL_ROLE_2].filter(Boolean) 
-                        : [],
+                      roles:
+                        employee.ADDITIONAL_ROLE_1 || employee.ADDITIONAL_ROLE_2
+                          ? [employee.ADDITIONAL_ROLE_1, employee.ADDITIONAL_ROLE_2].filter(Boolean)
+                          : [],
                       primaryRole: employee.MAIN_ROLE || '',
                       appraiser: employee.REPORTING_AUTHORITY_NAME || '',
+                      pageType: 'repa',
                     },
                   },
                 });

@@ -673,7 +673,7 @@ export const appraisalAPI = {
       appendQueryParam(params, 'appraisalStatus', appraisalStatus);
       appendQueryParam(params, 'intent', intent);
 
-      const response = await apiClient.get(`/appraisal/reviewer_appraisal?${params.toString()}`);
+      const response = await apiClient.get(`/appraisal/acceptor_appraisal?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.log('error', error);
@@ -715,7 +715,7 @@ export const appraisalAPI = {
   // GET: Fetch acceptor (reviewer) appraisal payload
   getAcceptorAppraisal: async ({
     empNo,
-    url,
+    urlId,
     roleType,
     roleId,
     zoneName,
@@ -727,7 +727,7 @@ export const appraisalAPI = {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'empNo', empNo);
-      appendQueryParam(params, 'url', url);
+      appendQueryParam(params, 'url', urlId);
       appendQueryParam(params, 'roleType', roleType);
       appendQueryParam(params, 'roleId', roleId);
       appendQueryParam(params, 'zoneName', zoneName);
@@ -920,7 +920,7 @@ export const appraisalAPI = {
   submitReviewerAppraisal: async (payload = {}) => {
     try {
       const response = await apiClient.post(
-        `${appraisalBaseUrl}/reviewer_appraisal/submit`,
+        `${appraisalBaseUrl}/acceptor_appraisal/submit`,
         payload
       );
       return response.data;

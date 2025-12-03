@@ -234,6 +234,7 @@ export default function AppraiseeCheckIn() {
                           ? `${employee.START_DATE} to ${employee.END_DATE}`
                           : '',
                       employee: employeeModel,
+                      pageType: 'self',
                     },
                   });
                 }

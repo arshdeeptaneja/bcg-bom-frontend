@@ -114,6 +114,7 @@ export const useAnnualAppraisal = () => {
     roleType,
     zoneName,
     isContextValid,
+    pageType,
   } = context;
 
   // Role state management - Annual always starts as APPRAISEE
@@ -237,11 +238,17 @@ export const useAnnualAppraisal = () => {
         roleType: roleType || 'Administrative Officers',
         financialYear: normalizedFinancialYear,
         quarter: 'Q2', // Hardcoded for annual until backend fix
-        pageType: 'repa',
-        appraisalStatus: 'complete_self',
+        pageType: pageType,
+        appraisalStatus: employee.appraisalStatus,
       };
       console.log('[useAnnualAppraisal] API call params:', apiParams);
-      return appraisalAPI.getEmployeeSelfAppraisal(apiParams);
+      if (pageType === 'self') {
+        return appraisalAPI.getEmployeeSelfAppraisal(apiParams);
+      } else if (pageType === 'repa') {
+        return appraisalAPI.getReporteeAppraisal(apiParams);
+      } else {
+        return appraisalAPI.getReviewerAppraisal(apiParams);
+      }
     },
     enabled: isQueryEnabled,
   });
@@ -552,17 +559,36 @@ export const useAnnualAppraisal = () => {
       const kraId = originalKra.AP_KRA_ID;
       const userInput = nonMeasurableScores[kraId] || {};
 
+      const scoreKey = 'SCORE';
+      if (pageType === 'repa') {
+        scoreKey = 'REPA_SCORE';
+      } else if (pageType === 'reva') {
+        scoreKey = 'REVA_SCORE';
+      }
+
+      const actualKey = 'ACTUAL';
+      if (pageType === 'repa') {
+        actualKey = 'REPA_ACTUAL';
+      } else if (pageType === 'reva') {
+        actualKey = 'REVA_ACTUAL';
+      }
+
+      const commentKey = 'COMMENT_SELF_1';
+      if (pageType === 'repa') {
+        commentKey = 'COMMENT_REPA';
+      } else if (pageType === 'reva') {
+        commentKey = 'COMMENT_REVA';
+      }
+
       return {
         // Spread all original fields from GET response
         ...originalKra,
         // Update with user input
-        SCORE: userInput.score || originalKra.SCORE,
-        ACTUAL: userInput.score || originalKra.ACTUAL,
+        [scoreKey]: userInput.score || originalKra.SCORE,
+        [actualKey]: userInput.score || originalKra.ACTUAL,
         // FIRSTCOMMENT is the appraisee's self comment
         FIRSTCOMMENT: userInput.comment || originalKra.COMMENT_SELF_1 || null,
-        COMMENT_SELF_1: userInput.comment || originalKra.COMMENT_SELF_1 || null,
-        COMMENT_REPA: userInput.appraiserComment || originalKra.COMMENT_REPA || null,
-        COMMENT_REVA: userInput.reviewerComment || originalKra.COMMENT_REVA || null,
+        [commentKey]: userInput.comment || originalKra.COMMENT_SELF_1 || null,
       };
     });
 
@@ -667,7 +693,15 @@ export const useAnnualAppraisal = () => {
   // Submit mutation (no save for annual)
   const submitMutation = useMutation({
     //TODO: direct submitAnnualSelfAppraisal and submit reportee appraisal by condition
-    mutationFn: (payload) => appraisalAPI.submitReviewerAppraisal(payload),
+    mutationFn: (payload) => {
+      if (pageType === 'self') {
+        return appraisalAPI.submitAnnualSelfAppraisal(payload);
+      } else if (pageType === 'repa') {
+        return appraisalAPI.submitReporteeAppraisal(payload);
+      } else {
+        return appraisalAPI.submitReviewerAppraisal(payload);
+      }
+    },
     onSuccess: (response) => {
       console.log('[useAnnualAppraisal] Submit success:', response);
       toast.success('Annual appraisal submitted successfully');

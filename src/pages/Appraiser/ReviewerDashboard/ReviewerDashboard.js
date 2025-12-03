@@ -341,39 +341,22 @@ export default function ReviewerDashboard() {
                 record?.APPRAISAL_STATUS !== 'complete_repa' && record?.STATUS !== 'complete_repa'
               }
               onAddCheckIn={() =>
-                appraisalPeriod === 'Annual'
-                  ? navigate('/appraisal/annual/reviewer-review', {
-                      state: {
-                        financialYear,
-                        appraisalPeriod,
-                        quarter,
-                        page_type: 'reva',
-                        dateRange,
-                        employee: employeeModel,
-                        organizationName: record?.ORGANIZATION,
-                        urlId: record?.ID,
-                        roleType: 'reviewer',
-                        pageType: 'review',
-                        intent: 'Review',
-                        appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
-                      },
-                    })
-                  : navigate('/quarterly/quaterly-reviewer-check-in', {
-                      state: {
-                        financialYear,
-                        appraisalPeriod,
-                        quarter,
-                        page_type: 'reva',
-                        dateRange,
-                        employee: employeeModel,
-                        organizationName: record?.ORGANIZATION,
-                        urlId: record?.URL_ID,
-                        roleType: 'reviewer',
-                        pageType: 'review',
-                        intent: 'Review',
-                        appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
-                      },
-                    })
+                navigate('/appraisal/check-in-form', {
+                  state: {
+                    financialYear,
+                    appraisalPeriod,
+                    quarter,
+                    page_type: 'reva',
+                    dateRange,
+                    employee: employeeModel,
+                    organizationName: record?.ORGANIZATION,
+                    urlId: record?.ID,
+                    roleType: 'reviewer',
+                    pageType: 'reva',
+                    intent: 'Review',
+                    appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                  },
+                })
               }
               onViewSummary={() => {}}
               onAddException={() => {}}

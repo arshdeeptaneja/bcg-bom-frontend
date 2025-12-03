@@ -39,7 +39,8 @@ function ReviewerMode() {
   const { getEmployeeDetails, getUserProperty } = useAuth();
   const employeeDetails = getEmployeeDetails();
   const loggedInEmpNo = getUserProperty('empNo', employeeDetails?.currentUser?.EMP_ID || '');
-  const zoneName = employeeDetails?.currentUser?.ZONE_NAME || employeeDetails?.currentUser?.zone || '';
+  const zoneName =
+    employeeDetails?.currentUser?.ZONE_NAME || employeeDetails?.currentUser?.zone || '';
 
   const {
     financialYear = 'FY 2024-25',
@@ -57,7 +58,7 @@ function ReviewerMode() {
     roleName = 'REVIEWER',
     roleId = 'REVIEWER',
     appraisalStatus = '',
-    url = employeeDetails?.currentUser?.url || employeeDetails?.currentUser?.URL_ID || '',
+    urlId,
   } = location.state || {};
 
   const reviewEmpNo = employee?.empNo || loggedInEmpNo;
@@ -77,18 +78,13 @@ function ReviewerMode() {
     [employee, reviewEmpNo]
   );
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ['acceptorAppraisal', reviewEmpNo, url, parsedFinancialYear, quarter, roleName],
-    enabled: Boolean(reviewEmpNo && url && parsedFinancialYear),
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['acceptorAppraisal', reviewEmpNo, urlId, parsedFinancialYear, quarter, roleName],
+    enabled: Boolean(reviewEmpNo && urlId && parsedFinancialYear),
     queryFn: () =>
       appraisalAPI.getAcceptorAppraisal({
         empNo: reviewEmpNo,
-        url,
+        urlId,
         roleType: roleName,
         roleId,
         zoneName,
@@ -123,7 +119,7 @@ function ReviewerMode() {
     onSuccess: () => {
       toast.success('Reviewer remarks submitted successfully');
       queryClient.invalidateQueries({
-        queryKey: ['acceptorAppraisal', reviewEmpNo, url, parsedFinancialYear, quarter, roleName],
+        queryKey: ['acceptorAppraisal', reviewEmpNo, urlId, parsedFinancialYear, quarter, roleName],
       });
       navigate(-1);
     },
@@ -139,7 +135,7 @@ function ReviewerMode() {
     }
 
     const payload = {
-      id: url,
+      id: urlId,
       empNo: reviewEmpNo,
       financialYear: parsedFinancialYear,
       appraisalPeriod,
@@ -167,7 +163,10 @@ function ReviewerMode() {
           <BackButton />
           <h1 className="dashboard-title text-primary fw-bold mb-0 ms-3">Reviewer Mode</h1>
         </div>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '40vh' }}>
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{ minHeight: '40vh' }}
+        >
           <LoadingSpinner />
         </div>
       </div>
@@ -193,7 +192,9 @@ function ReviewerMode() {
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
               <h5 className="text-primary fw-bold mb-1">KRA Review</h5>
-              <p className="text-muted mb-0">Compare appraisee & appraiser inputs before adding reviewer remarks.</p>
+              <p className="text-muted mb-0">
+                Compare appraisee & appraiser inputs before adding reviewer remarks.
+              </p>
             </div>
             <span className="badge bg-light text-primary fw-semibold">
               {kraRows.length} KRA item{kraRows.length === 1 ? '' : 's'}
