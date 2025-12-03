@@ -2,18 +2,41 @@
 .appeal-table-container {
     width: 100%;
     overflow-x: auto;
+    overflow-y: visible;
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     padding: 10px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar styling */
+.appeal-table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.appeal-table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.appeal-table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.appeal-table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 /* ========== Table ========== */
 .appeal-table {
     width: 100%;
+    min-width: 1200px;
     border-collapse: collapse;
     text-align: center;
     font-family: "Poppins", sans-serif;
+    table-layout: auto;
 }
 
 /* ========== Table Header ========== */
@@ -24,22 +47,91 @@
 }
 
 .appeal-table-header {
-    padding: 8px;
+    padding: 12px 16px;
     font-weight: 600;
-    border: 1px solid #e0e0e0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 14px;
     white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.appeal-table-header:first-child {
+    border-top-left-radius: 5px;
+}
+
+.appeal-table-header:last-child {
+    border-top-right-radius: 5px;
 }
 
 /* ========== Table Body ========== */
 .appeal-table-row {
     border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.2s ease;
+}
+
+.appeal-table-row:hover {
+    background-color: #f8f9fa;
 }
 
 .appeal-table-cell {
-    padding: 8px 0px;
+    padding: 12px 16px;
     font-size: 14px;
     color: #333;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-right: 1px solid #e0e0e0;
+}
+
+.appeal-table-cell:last-child {
+    border-right: none;
+}
+
+/* Column-specific widths for better alignment */
+.appeal-table-ticketid {
+    min-width: 100px;
+    width: 100px;
+}
+
+.appeal-table-empnumber {
+    min-width: 140px;
+    width: 140px;
+}
+
+.appeal-table-empname {
+    min-width: 180px;
+    width: 180px;
+}
+
+.appeal-table-role {
+    min-width: 250px;
+    width: 250px;
+}
+
+.appeal-table-branch {
+    min-width: 120px;
+    width: 120px;
+}
+
+.appeal-table-preappeal {
+    min-width: 180px;
+    width: 180px;
+}
+
+.appeal-table-postappeal {
+    min-width: 180px;
+    width: 180px;
+}
+
+.appeal-table-status {
+    min-width: 130px;
+    width: 130px;
+}
+
+.appeal-table-actions {
+    min-width: 150px;
+    width: 150px;
 }
 
 
@@ -68,16 +160,21 @@
     flex-direction: column;
     gap: 6px;
     align-items: center;
+    justify-content: center;
+    min-width: 130px;
 }
 
 .appeal-btn {
     border: none;
     border-radius: 5px;
-    padding: 4px 8px;
+    padding: 6px 12px;
     font-size: 12px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s ease;
+    white-space: nowrap;
+    width: 100%;
+    max-width: 130px;
 }
 
 .appeal-btn-view {
@@ -86,7 +183,9 @@
 }
 
 .appeal-btn-view:hover {
-    background-color: darken(var(--accent-color), 1%);
+    background-color: var(--accent-color);
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 .appeal-btn-review {
@@ -97,11 +196,17 @@
 
 .appeal-btn-review:hover {
     background-color: #e6f4eb;
+    transform: translateY(-1px);
 }
 
 /* ========== Empty State ========== */
+.appeal-table-row-empty {
+    border-bottom: none;
+}
+
 .appeal-table-empty {
     text-align: center;
     color: #888;
-    padding: 20px;
+    padding: 40px 20px;
+    font-size: 16px;
 }

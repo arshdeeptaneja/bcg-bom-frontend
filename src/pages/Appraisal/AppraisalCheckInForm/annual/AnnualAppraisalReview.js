@@ -362,7 +362,7 @@ const AnnualAppraisalReview = () => {
             <h5 className="text-primary fw-bold mb-3">Additional Information</h5>
             {developmentInputs.optionBased.map((input) => {
               // Determine which state and handler to use based on the input key
-              const isAppraiserField = input.key === 'integrity';
+              const isAppraiserField = true; // input.key === 'integrity';
               const currentValue = isAppraiserField
                 ? appraiserOptionResponses[input.key]
                 : selfOptionResponses[input.key] ?? input.selfResponse?.toLowerCase();

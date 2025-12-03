@@ -14,14 +14,14 @@ import { useAuth } from '../../../../contexts/AuthContext';
  * - Development input responses for Reviewing Authority
  * - Role switching between REVIEWER and ACCEPTOR
  * - Submit-only functionality (no save draft)
- * 
+ *
  * Supports both location.state and URL search params:
  * /appraisal/annual/reviewer?empNo=38965&financialYear=FY%202024-25&quarter=Q2&url=4&zoneName=Zone&roleType=Administrative%20Officers
  */
 export const useAnnualReview = () => {
   const location = useLocation();
   // const navigate = useNavigate(); // Unused but kept for future navigation needs
-  const {getUserProperty} = useAuth(); 
+  const { getUserProperty } = useAuth();
   const ecNumber = getUserProperty('empNo') || '';
   const [searchParams] = useSearchParams();
 
@@ -100,13 +100,7 @@ export const useAnnualReview = () => {
   });
 
   // Query key for reviewer appraisal data
-  const queryKey = [
-    'reviewerAppraisal',
-    empNo,
-    normalizedFinancialYear,
-    quarter,
-    url || urlId,
-  ];
+  const queryKey = ['reviewerAppraisal', empNo, normalizedFinancialYear, quarter, url || urlId];
 
   // Debug logging
   console.log('[useAnnualReview] Context values:', {
@@ -122,7 +116,11 @@ export const useAnnualReview = () => {
   });
 
   // Fetch acceptor appraisal data
-  const { data: apiResponse, isLoading, isError } = useQuery({
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey,
     queryFn: () => {
       const apiParams = {
@@ -183,7 +181,7 @@ export const useAnnualReview = () => {
       return {
         overallDevelopment: [],
         reportingReviewAuthority: [],
-        optionBased: []
+        optionBased: [],
       };
     }
 
@@ -205,18 +203,20 @@ export const useAnnualReview = () => {
     }));
 
     // Reporting/Review Authority (Editable by REVIEWER/ACCEPTOR)
-    const reportingReviewAuthority = (resultQuestions.reporting_review_authority || []).map((q) => ({
-      id: q.ID,
-      question: q.QUESTION,
-      category: q.CATEGORY,
-      subCategory: q.SUB_CATEGORY,
-      selfResponse: q.SELF_RESPONSE || '',
-      repaResponse: q.REPA_RESPONSE || '',
-      revaResponse: q.REVA_RESPONSE || '',
-      acResponse: q.AC_RESPONSE || '',
-      responseId: q.RESPONSE_ID,
-      editableBy: 'REVIEWER_ACCEPTOR',
-    }));
+    const reportingReviewAuthority = (resultQuestions.reporting_review_authority || []).map(
+      (q) => ({
+        id: q.ID,
+        question: q.QUESTION,
+        category: q.CATEGORY,
+        subCategory: q.SUB_CATEGORY,
+        selfResponse: q.SELF_RESPONSE || '',
+        repaResponse: q.REPA_RESPONSE || '',
+        revaResponse: q.REVA_RESPONSE || '',
+        acResponse: q.AC_RESPONSE || '',
+        responseId: q.RESPONSE_ID,
+        editableBy: 'REVIEWER_ACCEPTOR',
+      })
+    );
 
     // Option-based inputs
     const optionBased = [];
@@ -509,11 +509,12 @@ export const useAnnualReview = () => {
         REVA_ACTUALS: reviewerInput.score || originalKra.REVA_ACTUALS,
         COMMENT_REVA: reviewerInput.comment || originalKra.COMMENT_REVA || null,
         REVA_SCORE: reviewerInput.score || originalKra.REVA_SCORE,
-        AC_ACTUALS: reviewerInput.score || originalKra.AC_ACTUALS,
-        COMMENT_AC: reviewerInput.comment || originalKra.COMMENT_AC || null,
-        AC_SCORE: reviewerInput.score || originalKra.AC_SCORE,
+        // AC_ACTUALS: reviewerInput.score || originalKra.AC_ACTUALS,
+        // COMMENT_AC: reviewerInput.comment || originalKra.COMMENT_AC || null,
+        // AC_SCORE: reviewerInput.score || originalKra.AC_SCORE,
         // FIRSTCOMMENT field as per CURL payload
-        FIRSTCOMMENT: reviewerInput.comment || originalKra.COMMENT_REVA || originalKra.COMMENT_AC || null,
+        FIRSTCOMMENT:
+          reviewerInput.comment || originalKra.COMMENT_REVA || originalKra.COMMENT_AC || null,
       };
     });
 
@@ -523,8 +524,9 @@ export const useAnnualReview = () => {
       const reviewerResponse = reviewerDevResponses[questionId];
 
       // Determine integrityOption for integrity questions
-      const isIntegrityQuestion = originalQuestion.CATEGORY === 'Development Inputs' &&
-          originalQuestion.SUB_CATEGORY === 'Integrity';
+      const isIntegrityQuestion =
+        originalQuestion.CATEGORY === 'Development Inputs' &&
+        originalQuestion.SUB_CATEGORY === 'Integrity';
       const integrityValue = isIntegrityQuestion ? reviewerOptionResponses.integrity : null;
 
       return {
@@ -610,12 +612,16 @@ export const useAnnualReview = () => {
       // Check reviewer response
       const reviewerResponse = reviewerDevResponses[q.id];
       if (!reviewerResponse?.trim()) {
-        errors.push(`Please provide a reviewing authority response for "${q.question.substring(0, 50)}..."`);
+        errors.push(
+          `Please provide a reviewing authority response for "${q.question.substring(0, 50)}..."`
+        );
       }
       // Check reporting authority response
       const repaResponse = repaDevResponses[q.id];
       if (!repaResponse?.trim()) {
-        errors.push(`Please provide a reporting authority response for "${q.question.substring(0, 50)}..."`);
+        errors.push(
+          `Please provide a reporting authority response for "${q.question.substring(0, 50)}..."`
+        );
       }
     });
 
@@ -642,7 +648,11 @@ export const useAnnualReview = () => {
     },
     onSuccess: (response) => {
       console.log('[useAnnualReview] Submit success:', response);
-      toast.success(response?.MSG === 'success' ? 'Review submitted successfully' : (response?.MSG || 'Review submitted successfully'));
+      toast.success(
+        response?.MSG === 'success'
+          ? 'Review submitted successfully'
+          : response?.MSG || 'Review submitted successfully'
+      );
       setIsDirty(false);
       // navigate(-1);
     },

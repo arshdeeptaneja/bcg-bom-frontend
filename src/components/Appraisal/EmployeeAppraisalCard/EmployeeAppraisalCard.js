@@ -19,7 +19,7 @@ export default function EmployeeAppraisalCard({
   appraisalStatus = 'PENDING AT APPRAISEE',
   exceptionStatus = 'NOT CREATED',
 
-  userType = "self", // Two options - self, appraiser
+  userType = 'self', // Two options - self, appraiser
   // Individual additional roles
 
   additionalRoles = [],
@@ -57,7 +57,7 @@ export default function EmployeeAppraisalCard({
     // Check if it contains ISO dates (with T and Z)
     if (dateRange.includes('T')) {
       // Split by → separator
-      const parts = dateRange.split(' → ').map(d => d.trim());
+      const parts = dateRange.split(' → ').map((d) => d.trim());
       if (parts.length === 2) {
         const startDate = formatDate(parts[0]);
         const endDate = formatDate(parts[1]);
@@ -166,7 +166,9 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Number</div>
-              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{employee.empNo}</div>
+              <div className="fw-semibold" style={{ fontSize: '0.9rem' }}>
+                {employee.empNo}
+              </div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -178,7 +180,9 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Date</div>
-              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{getFormattedDateRange()}</div>
+              <div className="fw-semibold" style={{ fontSize: '0.9rem' }}>
+                {getFormattedDateRange()}
+              </div>
             </div>
           </div>
         </div>
@@ -193,7 +197,9 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Name</div>
-              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{employee.employeeName}</div>
+              <div className="fw-semibold" style={{ fontSize: '0.9rem' }}>
+                {employee.employeeName}
+              </div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -205,7 +211,9 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Primary Role</div>
-              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{primaryRole}</div>
+              <div className="fw-semibold" style={{ fontSize: '0.9rem' }}>
+                {primaryRole}
+              </div>
             </div>
           </div>
         </div>
@@ -220,7 +228,9 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Employee Scale</div>
-              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>{employee.employeeScale}</div>
+              <div className="fw-semibold" style={{ fontSize: '0.9rem' }}>
+                {employee.employeeScale}
+              </div>
             </div>
           </div>
           <div className="d-flex align-items-start gap-3 mt-3">
@@ -232,7 +242,7 @@ export default function EmployeeAppraisalCard({
             </div>
             <div>
               <div className="text-muted small">Appraiser</div>
-              <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>
+              <div className="fw-semibold" style={{ fontSize: '0.9rem' }}>
                 {employee.appraiser?.name || employee.appraiser || 'N/A'}
               </div>
             </div>
@@ -247,26 +257,24 @@ export default function EmployeeAppraisalCard({
           >
             {appraisalStatus}
           </span>
-          {
+          {}
+          {userType === 'self' && (
+            <>
+              <p className="status-label fw-bold mt-3 mb-1">
+                {appraisalPeriod === 'Quarterly' ? 'Exception Status' : 'Appeal Status'}
+              </p>
 
-          }
-            {userType === "self" && (
-              <>
-                <p className="status-label fw-bold mt-3 mb-1">
-                  {appraisalPeriod === "Quarterly" ? "Exception Status" : "Appeal Status"}
-                </p>
-
-                <span
-                  className="badge rounded-pill px-4 my-0"
-                  style={{
-                    backgroundColor: getStatusColor(exceptionStatus),
-                    color: "white",
-                  }}
-                >
-                  {exceptionStatus}
-                </span>
-              </>
-            )}
+              <span
+                className="badge rounded-pill px-4 my-0"
+                style={{
+                  backgroundColor: getStatusColor(exceptionStatus),
+                  color: 'white',
+                }}
+              >
+                {exceptionStatus}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -274,10 +282,8 @@ export default function EmployeeAppraisalCard({
       <div
         className={`actions-collapse row mt-5 ${isExpanded ? 'open' : ''}`}
         aria-hidden={!isExpanded}
-
       >
         {/* Red Result Section (if available) */}
-
 
         {/* Score Breakdown Section */}
         {/* {scoreData && scoreData.length > 0 && (
@@ -314,12 +320,14 @@ export default function EmployeeAppraisalCard({
           <div className="primary-role-badge mb-3">
             <span className="badge bg-light text-dark px-3 py-2 d-inline-flex align-items-center gap-2">
               <i className="bi bi-star-fill text-success" />
-              <span className="fw-semibold" style={{ fontSize: "1rem" }}>{primaryRole || 'N/A'}</span>
+              <span className="fw-semibold" style={{ fontSize: '1rem' }}>
+                {primaryRole || 'N/A'}
+              </span>
             </span>
           </div>
 
           {/* Additional Roles Timeline */}
-<RoleTimeline additionalRoles={additionalRoles} />
+          <RoleTimeline additionalRoles={additionalRoles} />
 
           {/* Organization */}
           <div className="organization-section">
@@ -352,31 +360,34 @@ export default function EmployeeAppraisalCard({
             </button>
           </div>
           <div className="button-row">
-          {userType === "self" && appraisalPeriod === "Quarterly" && appraisalStatus?.toUpperCase() === 'COMPLETED' && onAddException && (
-            <button
-              type="button"
-              className="btn-fade"
-              onClick={() => {
-                onAddException()
-              }}
-            >
-              Add Exception 
-              <span className="ms-2">→</span>
-            </button>
-          )}
-          {userType === "self" && appraisalPeriod === "Annual" && (
-            <button
-              type="button"
-              className="btn-fade"
-              onClick={() => {
-                onAddAppeal && onAddAppeal()
-              }}
-              disabled={!isAppealEnabled}
-            >
-              Add Appeal
-              <span className="ms-2">→</span>
-            </button>
-          )}
+            {userType === 'self' &&
+              appraisalPeriod === 'Quarterly' &&
+              appraisalStatus?.toUpperCase() === 'COMPLETED' &&
+              onAddException && (
+                <button
+                  type="button"
+                  className="btn-fade"
+                  onClick={() => {
+                    onAddException();
+                  }}
+                >
+                  Add Exception
+                  <span className="ms-2">→</span>
+                </button>
+              )}
+            {userType === 'self' && appraisalPeriod === 'Annual' && (
+              <button
+                type="button"
+                className="btn-fade"
+                onClick={() => {
+                  onAddAppeal && onAddAppeal();
+                }}
+                disabled={!isAppealEnabled}
+              >
+                Add Appeal
+                <span className="ms-2">→</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -394,16 +405,18 @@ EmployeeAppraisalCard.propTypes = {
   }).isRequired,
   dateRange: PropTypes.string,
   primaryRole: PropTypes.string,
-  additionalRoles: PropTypes.arrayOf(PropTypes.string),  // <-- Correct
+  additionalRoles: PropTypes.arrayOf(PropTypes.string), // <-- Correct
   organization: PropTypes.string,
   appraisalStatus: PropTypes.string,
   exceptionStatus: PropTypes.string,
-  scoreData: PropTypes.arrayOf(PropTypes.shape({
-    CYCLE: PropTypes.string,
-    PERCENTAGE_SCORE: PropTypes.number,
-    WEIGHTAGE: PropTypes.number,
-    WEIGHTED_SCORE: PropTypes.number,
-  })),
+  scoreData: PropTypes.arrayOf(
+    PropTypes.shape({
+      CYCLE: PropTypes.string,
+      PERCENTAGE_SCORE: PropTypes.number,
+      WEIGHTAGE: PropTypes.number,
+      WEIGHTED_SCORE: PropTypes.number,
+    })
+  ),
   onAddCheckIn: PropTypes.func,
   onViewSummary: PropTypes.func,
   onAddException: PropTypes.func,

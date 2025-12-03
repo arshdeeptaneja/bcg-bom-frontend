@@ -66,9 +66,14 @@ function AddAppeal() {
       setValidationErrors([]);
       const response = await actions.handleSubmit();
 
+      console.log('RESPONSE', response);
+
       // Extract appeal ID from response
       const responseAppealId =
-        response?.data?.appealId || response?.appealId || `APPEAL-${Date.now()}`;
+        response?.TICKETID ||
+        response?.data?.appealId ||
+        response?.appealId ||
+        `APPEAL-${Date.now()}`;
       setAppealId(responseAppealId);
       setShowSuccessModal(true);
       toast.success('Appeal submitted successfully!');

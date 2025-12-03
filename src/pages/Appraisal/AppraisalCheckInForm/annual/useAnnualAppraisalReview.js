@@ -419,11 +419,15 @@ export const useAnnualAppraisalReview = () => {
 
       return {
         ...originalKra,
-        REPA_ACTUALS: appraiserInput.score || originalKra.REPA_ACTUALS,
+        REPA_SCORE: appraiserInput.score || originalKra.REPA_ACTUALS,
         COMMENT_REPA: appraiserInput.comment || originalKra.COMMENT_REPA || null,
         FIRSTCOMMENT: appraiserInput.comment || originalKra.FIRSTCOMMENT || null,
       };
     });
+
+    console.log('Raw Question Data: ', rawQuestionsData);
+    console.log('Appraiser Dev Responses: ', appraiserDevResponses);
+    console.log('Appraiser Option Responses: ', appraiserOptionResponses);
 
     // Build questions array with appraiser responses (IDs 12-18)
     const questions = rawQuestionsData.map((originalQuestion) => {
@@ -491,9 +495,9 @@ export const useAnnualAppraisalReview = () => {
       if (!appraiserInput?.score) {
         errors.push(`Please select an appraiser score for "${kra.KRA_DESC}"`);
       }
-      if (!appraiserInput?.comment?.trim()) {
-        errors.push(`Please provide an appraiser comment for "${kra.KRA_DESC}"`);
-      }
+      // if (!appraiserInput?.comment?.trim()) {
+      //   errors.push(`Please provide an appraiser comment for "${kra.KRA_DESC}"`);
+      // }
     });
 
     // Check if all Reporting Authority questions (12-18) are filled

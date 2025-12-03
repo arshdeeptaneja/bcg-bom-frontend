@@ -394,7 +394,7 @@ export default function AppraiserCheckInDashboard() {
             appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
             employeeScale: appraisalPeriod === 'Annual' ? record?.EMP_SCALE : record?.SCALE,
             additionalRoles: buildAdditionalRoles(record),
-            branch: record?.ORGANIZATION,
+            branch: record?.ORGANIZATION || record?.ORGANISATION,
             appraiser: authEmpNo,
             primaryRole: appraisalPeriod === 'Annual' ? record?.PRIMARY_ROLE : record?.MAIN_ROLE,
           });
@@ -411,7 +411,7 @@ export default function AppraiserCheckInDashboard() {
               dateRange={dateRange}
               primaryRole={appraisalPeriod === 'Annual' ? record?.PRIMARY_ROLE : record?.MAIN_ROLE}
               additionalRoles={buildAdditionalRoles(record)}
-              organization={record?.ORGANIZATION}
+              organization={record?.ORGANIZATION || record?.ORGANISATION}
               userType="appraiser"
               appraisalStatus={getDisplayStatus(record?.APPRAISAL_STATUS || record?.STATUS)}
               exceptionStatus={record?.EXCEPTION_STATUS || 'NOT CREATED'}
