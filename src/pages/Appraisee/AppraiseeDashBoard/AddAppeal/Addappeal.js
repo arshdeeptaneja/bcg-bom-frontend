@@ -85,7 +85,8 @@ function AddAppeal() {
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-    navigate('/annual/appraisee/appraisee-dashboard');
+    // navigate(`/appraisal/appraisee-check-in?${queryParams}`);
+    navigate(-1);
   };
 
   // Loading state
@@ -314,7 +315,7 @@ function AddAppeal() {
       {/* Submit Button */}
       <div className="save-and-submit-button-section d-flex flex-column align-items-end gap-2 m-3">
         <button
-          className="btn btn-primary"
+          className={`btns btn-primarys ${(!isValid ||formState.uploadedFiles.length==0 || actions.isSubmitting) ? 'disabled-btn' : ''}`}
           onClick={handleSubmit}
           disabled={!isValid || actions.isSubmitting}
           title={!isValid ? 'Please select at least one KRA and provide justification' : ''}

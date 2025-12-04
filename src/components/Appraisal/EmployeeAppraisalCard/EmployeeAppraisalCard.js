@@ -346,7 +346,7 @@ export default function EmployeeAppraisalCard({
           <div className="button-row">
             <button
               type="button"
-              className="butns "
+              className={`btns btn-primarys ${(isCheckInDisabled) ? 'disabled-btn' : ''}`}
               data-bs-toggle="modal"
               data-bs-target={`#${`addCheckInModal-${employee.empNo}`}`}
               disabled={isCheckInDisabled}
@@ -378,7 +378,8 @@ export default function EmployeeAppraisalCard({
             {userType === 'self' && appraisalPeriod === 'Annual' && (
               <button
                 type="button"
-                className="btn-fade"
+                // className="btn-fade"
+                className={`btns btn-primarys ${(!isAppealEnabled) ? 'disabled-btn' : ''}`}
                 onClick={() => {
                   onAddAppeal && onAddAppeal();
                 }}
