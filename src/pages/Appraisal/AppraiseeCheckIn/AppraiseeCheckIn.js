@@ -108,6 +108,7 @@ export default function AppraiseeCheckIn() {
           cardData?.ADDITIONAL_ROLE_4,
         ],
         appraiser: cardData?.reporting_authority_ecno || 'N/A',
+        appraiserName: cardData?.reporting_authority_name || 'N/A',
         primaryRole: cardData?.primary,
       })
     : null;
@@ -273,6 +274,7 @@ export default function AppraiseeCheckIn() {
                   empNo: employeeModel?.empNo || '',
                   employeeName: employeeModel?.employeeName || '',
                   primaryRole: employeeModel?.primaryRole || '',
+                  appraiser:employeeModel.appraiserName|| '',
                 }).toString();
                 navigate(`/annual/add-appeal?${queryParams}`);
               }}
