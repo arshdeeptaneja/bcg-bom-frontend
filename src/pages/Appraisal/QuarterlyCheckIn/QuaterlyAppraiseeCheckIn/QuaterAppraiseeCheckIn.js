@@ -111,6 +111,7 @@ function QuaterlyAppraiseeCheckIn() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+    const [isSaveing, setIsSaveing] = useState(false);
 
   // Submit mutation for quarterly appraisee check-in
   const submitMutation = useMutation({
@@ -320,8 +321,7 @@ function QuaterlyAppraiseeCheckIn() {
     if (!validateComments()) return;
 
     try {
-      setIsSubmitting(true);
-
+      setIsSaveing(true);
       const kraDataPayload = buildKraDataPayload();
       const measurableCommentsPayload = buildPerformanceMeasurableComments();
 
@@ -357,7 +357,7 @@ function QuaterlyAppraiseeCheckIn() {
       console.error(err);
       toast.error('Failed to save!');
     } finally {
-      setIsSubmitting(false);
+      setIsSaveing(false);
     }
   };
 
@@ -414,12 +414,12 @@ function QuaterlyAppraiseeCheckIn() {
     developmentInputsData.length > 0
       ? developmentInputsData
       : [
-          {
-            question: 'Please mention the highlights of your performance on this KRA',
-            required: true,
-          },
-          { question: 'Please mention the areas for improvement on this KRA', required: true },
-        ];
+        {
+          question: 'Please mention the highlights of your performance on this KRA',
+          required: true,
+        },
+        { question: 'Please mention the areas for improvement on this KRA', required: true },
+      ];
 
   if (!financialYear || !appraisalPeriod || !quarter) {
     return (
@@ -618,11 +618,12 @@ function QuaterlyAppraiseeCheckIn() {
       </div>
 
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
-        <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSubmitting}>
-          Save
+        <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSaved}>
+          {isSaveing ? 'Saving...' : isSaved ? 'Saved' : 'Save as Draft'}
         </button>
+
         <button
-          className="btns btn-primarys"
+          className={`btns btn-primarys ${(!isSaved || isSubmitting) ? 'disabled-btn' : ''}`}
           onClick={handleSubmit}
           disabled={!isSaved || isSubmitting}
         >
