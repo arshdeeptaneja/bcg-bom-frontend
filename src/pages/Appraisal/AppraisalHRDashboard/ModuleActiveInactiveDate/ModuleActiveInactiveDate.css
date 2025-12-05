@@ -28,17 +28,21 @@ section {
   padding: 8px 20px;
 }
 
-.edit-button {
-  background-color: var(--accent-color);
-  color: var(--bs-light);
-}
 
-.delete-button {
- border: 2px solid var(--accent-color);
+
+.action-button {
+ border: 1px solid var(--accent-color);
   color:var(--accent-color);
-      padding: 8px 12px;
+      padding: 6px 10px;
     border-radius: 8px;
     font-weight: 600;
     transition: all 0.2s ease;
     background-color: transparent;
+}
+.action-button:hover {
+  background-color: var(--accent-color);
+  color: var(--bs-light);
+}
+.action-button:active {
+  transform: scale(0.98);
 }

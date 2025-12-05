@@ -101,7 +101,8 @@ const financialYear = searchParams.get("financialYear");
   // React Query mutation: Download sample file
   const downloadSampleMutation = useMutation({
     mutationFn: async () => {
-          const blob = await appraisalAPI.reportingAuthorityReviewingAuthorityBulkDownloadSample({
+      const blob =
+        await appraisalAPI.reportingAuthorityBulkDownloadSample({
             roleName: roleName,   
             regionCode: sol,  
             quarter: quarter,         
@@ -275,7 +276,7 @@ const financialYear = searchParams.get("financialYear");
                     </div>
 
                     <div className="d-flex gap-2">
-                        {/* <button 
+                        <button 
                             className="btn btn-primary d-flex align-items-center gap-2" 
                             onClick={() => downloadSampleMutation.mutate()}
                             disabled={downloadSampleMutation.isPending}
@@ -288,7 +289,7 @@ const financialYear = searchParams.get("financialYear");
                             ) : (
                                 "Download Sample"
                             )}
-                        </button> */}
+                        </button> 
                         <button 
                             className="btn btn-primary d-flex align-items-center gap-2 " 
                             onClick={() => downloadDataTableMutation.mutate()}

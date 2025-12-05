@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./ModuleActiveInactiveDate.css";
 import { BackButton } from "../../../../components/common";
@@ -81,9 +81,32 @@ const closeEditModal = () => {
         retry: false,
     });
 
-    // Extract results and filter options from API response
-    const results = apiData?.results || [];
+    // Extract and normalize results and filter options from API response
+    const rawResults = Array.isArray(apiData?.results) ? apiData.results : [];
     const filterOptions = apiData?.filter_data || {};
+
+    // Helper to format ISO date strings to yyyy-mm-dd
+    const formatDate = (value) => {
+      if (!value) return "";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toISOString().slice(0, 10);
+    };
+
+    // Normalize API results into UI-friendly shape
+    const results = rawResults.map((item) => ({
+      moduleName: item.MODULE_NAME || "",
+      financialYear: item.FY ?? "",
+      quarter: item.QUARTER || "",
+      // SCALE may be missing in response; default to empty string
+      scale: item.SCALE ?? "",
+      empNumber: item.EMP_ID || item.EMP_NUMBER || "",
+      status: item.MODULE_STATUS || "",
+      activeDate: formatDate(item.MODULE_ACTIVE_DATE),
+      inactiveDate: formatDate(item.MODULE_INACTIVE_DATE),
+      // Keep raw for debugging if needed
+      _raw: item,
+    }));
 
       const extractYear = (fy) => {
                          const match = fy.match(/FY (\d{4})/);
@@ -111,40 +134,6 @@ const closeEditModal = () => {
                      const [searchParams] = useSearchParams();
                                     // Q1
                      const financialYear = searchParams.get("financialYear"); 
-
-const handleSearch = () => {
-    let filtered = results;
-
-    if (filters.moduleName && filters.moduleName !== "-Select-") {
-        filtered = filtered.filter(item =>
-            item.moduleName.toLowerCase().includes(filters.moduleName.toLowerCase())
-        );
-    }
-
-    if (filters.financialYear && filters.financialYear !== "-Select-") {
-        filtered = filtered.filter(item =>
-            item.financialYear.toString() === filters.financialYear
-        );
-    }
-
-    if (filters.quarter && filters.quarter !== "-Select-") {
-        filtered = filtered.filter(item =>
-            item.quarter === filters.quarter
-        );
-    }
-
-    if (filters.scale && filters.scale !== "-Select-") {
-        filtered = filtered.filter(item =>
-            item.scale.toString() === filters.scale
-        );
-    }
-
-    // override current paginated data
-    setCurrentPage(1);
-    setFilteredData(filtered);
-};
-
-
 
   // React Query mutation: Insert module
   const insertMutation = useMutation({
@@ -291,6 +280,36 @@ const handleDelete = (row) => {
 const totalPages = Math.ceil(listToUse.length / itemsPerPage);
 const startIndex = (currentPage - 1) * itemsPerPage;
 const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
+
+// Automatically filter when filters or results change
+useEffect(() => {
+  let filtered = results;
+
+  if (filters.moduleName) {
+    filtered = filtered.filter((item) =>
+      item.moduleName.toLowerCase().includes(filters.moduleName.toLowerCase())
+    );
+  }
+
+  if (filters.financialYear) {
+    filtered = filtered.filter(
+      (item) => String(item.financialYear) === String(filters.financialYear)
+    );
+  }
+
+  if (filters.quarter) {
+    filtered = filtered.filter((item) => item.quarter === filters.quarter);
+  }
+
+  if (filters.scale) {
+    filtered = filtered.filter(
+      (item) => String(item.scale) === String(filters.scale)
+    );
+  }
+
+  setCurrentPage(1);
+  setFilteredData(filtered);
+}, [results, filters]);
 
 
 
@@ -589,9 +608,12 @@ const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
                                 setFilters({ ...filters, moduleName: e.target.value })
                             }
                         >
-                            <option>-Select-</option>
-                            <option>appeal</option>
-                            <option>appraisal</option>
+                            <option value="">-Select-</option>
+                            {(filterOptions.MODULE_NAME || []).map((m) => (
+                              <option key={m} value={m}>
+                                {m}
+                              </option>
+                            ))}
                         </select>
                     </div>
 
@@ -604,9 +626,12 @@ const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
                                 setFilters({ ...filters, financialYear: e.target.value })
                             }
                         >
-                            <option>-Select-</option>
-                            <option>2025</option>
-                            <option>2026</option>
+                            <option value="">-Select-</option>
+                            {(filterOptions.FY || []).map((fy) => (
+                              <option key={fy} value={fy}>
+                                {fy}
+                              </option>
+                            ))}
                         </select>
                     </div>
 
@@ -619,12 +644,12 @@ const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
                                 setFilters({ ...filters, quarter: e.target.value })
                             }
                         >
-                            <option>-Select-</option>
-                            <option>Q1</option>
-                            <option>Q2</option>
-                            <option>Q3</option>
-                            <option>Q4</option>
-                            <option>ANNUAL</option>
+                            <option value="">-Select-</option>
+                            {(filterOptions.QUARTER || []).map((q) => (
+                              <option key={q} value={q}>
+                                {q}
+                              </option>
+                            ))}
                         </select>
                     </div>
 
@@ -637,22 +662,20 @@ const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
                                 setFilters({ ...filters, scale: e.target.value })
                             }
                         >
-                            <option>-Select-</option>
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
+                            <option value="">-Select-</option>
+                            {(filterOptions.SCALE || []).map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
                         </select>
                     </div>
 
                     <div className="col-md-2 d-flex gap-2">
-    {/* <button className="reset-btn px-3" >
-        Search
-    </button> */}
-
-    <button className="reset-btn px-3" onClick={handleReset}>
-        Reset ↻
-    </button>
-</div>
+                      <button className="reset-btn px-3" onClick={handleReset}>
+                        Reset ↻
+                      </button>
+                    </div>
 
                 </div>
 
@@ -682,7 +705,7 @@ const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
                                     <td>{row.inactiveDate}</td>
                                     <td className="text-center">
                                         <button
-                                            className="btn btn-sm edit-button me-2"
+                                            className="btn-sm action-button me-2"
                                             onClick={() => openEditModal(row)}
                                             disabled={deleteMutation.isPending}
                                         >
@@ -690,7 +713,7 @@ const currentData = listToUse.slice(startIndex, startIndex + itemsPerPage);
                                         </button>
 
                                         <button
-                                            className="btn btn-sm delete-button"
+                                            className="btn-sm action-button"
                                             onClick={() => handleDelete(row)}
                                         >
                                             Delete

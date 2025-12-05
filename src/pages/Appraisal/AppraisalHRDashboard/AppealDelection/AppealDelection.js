@@ -53,8 +53,8 @@ const AppealDeletion = () => {
     queryFn: async () => {
       const res = await appraisalAPI.searchAppealDeleteURL({
         searchEmpNo: empNumber,
-        roleName: roleName,
-        sol: sol,
+        roleName: "Super Admin",
+        sol: "25896",
         financialYear: extractYear(financialYear),
       });
       // Handle response structure: { "list_data": [...] } or { "list_data": null }
@@ -64,8 +64,23 @@ const AppealDeletion = () => {
     retry: false,
   });
 
-  // Extract list_data from response, handle null case
-  const tableData = searchResponse?.list_data || (Array.isArray(searchResponse) ? searchResponse : []);
+  // Extract and normalize list_data from response for table rendering
+  const rawList =
+    (searchResponse && Array.isArray(searchResponse.list_data)
+      ? searchResponse.list_data
+      : []) || [];
+
+  const tableData = rawList.map((item) => ({
+    // Normalize keys to what the table expects
+    ecNumber: item.EMP_NUMBER || item.empnumber || "",
+    employeeName: item.EMP_NAME || item.emp_name || "",
+    urlId: item.E_URL_ID || item.urlId || "",
+    period: item.PERIOD || "",
+    zoneName: item.ZNNAME || item.REGNM || "",
+    status: item.APPRAISAL_STATUS || "",
+    // Keep original item if needed later
+    _raw: item,
+  }));
 
   // Check if no data found after search
   const noData = shouldSearch && !loading && (!tableData || tableData.length === 0);
@@ -91,12 +106,12 @@ const AppealDeletion = () => {
   // React Query mutation: Delete appeal record
   const deleteAppealMutation = useMutation({
     mutationFn: async ({ urlId }) => {
-      const item = tableData.find(r => r.urlId === urlId);
+      const item = tableData.find((r) => r.urlId === urlId);
       const payload = {
         deleteRequests: [
           {
             empnumber: empNumber,
-            urlid: urlId,
+            urlid: item.urlId,
             period: item?.period || "annual",
             comment: "Deleting appeal as per HR request"
           },
@@ -215,7 +230,7 @@ const AppealDeletion = () => {
                                     <th>Quarter</th>
                                     <th>Zone</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    <th>Action</th>    
                                 </tr>
                             </thead>
 

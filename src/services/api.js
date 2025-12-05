@@ -1103,6 +1103,11 @@ if (filterStatus) params.append("STATUS", filterStatus);
       const response = await apiClient.get(
         `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_sample?${params.toString()}`,
         {
+          headers: {
+            // Match Postman cURL Accept header for Excel
+            Accept:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
           responseType: "blob",
         }
       );
@@ -1541,31 +1546,43 @@ insertAnnualRoles: async () => {
   appealCommittee: {
 
     // List/History logs
-    getErrorLogs: async () => {
-      const response = await apiClient.get(
-        `/admin/hr_update_appeal_committee/error_logs`
-      );
+    getErrorLogs: async ({ financialYear, roleName }) => {
+      // Build query string manually to match working cURL:
+      // /appraisal/admin/hr_update_appeal_committee/error_logs?financialYear=2025&roleName=Super%20Admin
+      const queryParams = [];
+      if (financialYear)
+        queryParams.push(
+          `financialYear=${encodeURIComponent(String(financialYear))}`
+        );
+      if (roleName)
+        queryParams.push(`roleName=${encodeURIComponent(roleName)}`);
+
+      const queryString = queryParams.join("&");
+      const fullUrl = `/appraisal/admin/hr_update_appeal_committee/error_logs?${
+        queryString || ""
+      }`;
+
+      const response = await apiClient.get(fullUrl);
       return response.data;
     },
 
     // Upload Excel File
     uploadFile: async ({ file, sol, roleName, empNo }) => {
       const formData = new FormData();
-      // Include filename explicitly to match typical multipart form behaviour
+      // Include filename explicitly to match typical multipart behaviour
       formData.append("file", file, file?.name);
 
-      const response = await apiClient.post(
-        `/appraisal/admin/hr_update_appeal_committee/upload`,
-        formData,
-        {
-          // Let the browser set the correct multipart boundary
-          params: {
-            sol,
-            roleName,
-            empNo,
-          },
-        }
-      );
+      // Build query string manually so spaces become %20 (not "+")
+      // and the final URL matches the working Postman cURL exactly.
+      const queryParams = [];
+      if (sol) queryParams.push(`sol=${encodeURIComponent(String(sol))}`);
+      if (roleName) queryParams.push(`roleName=${encodeURIComponent(roleName)}`);
+      if (empNo) queryParams.push(`empNo=${encodeURIComponent(String(empNo))}`);
+      const queryString = queryParams.join("&");
+
+      const fullUrl = `/appraisal/admin/hr_update_appeal_committee/upload?${queryString}`;
+
+      const response = await apiClient.post(fullUrl, formData);
       return response.data;
     },
 //appeal commitee download data table
@@ -1589,22 +1606,26 @@ downloadDataTable: async ({ roleName, regionCode, quarter, financialYear }) => {
 
 
     // Download Sample File
-   // Download Sample File ApppealComittee
-downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
-  const response = await apiClient.get(
-    `/admin/hr_update_appeal_committee/download_sample`,
-    {
-      params: {
-        roleName,
-        regionCode,
-        quarter,
-        financialYear,
-      },
-      responseType: "blob",
-    }
-  );
-  return response.data;
-},
+    // Download Sample File AppealCommittee
+    downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
+      // Build query string manually to match cURL format
+      const queryParams = [];
+      if (roleName) queryParams.push(`roleName=${encodeURIComponent(roleName)}`);
+      if (regionCode) queryParams.push(`regionCode=${encodeURIComponent(String(regionCode))}`);
+      if (quarter) queryParams.push(`quarter=${encodeURIComponent(quarter)}`);
+      if (financialYear) queryParams.push(`financialYear=${encodeURIComponent(String(financialYear))}`);
+      
+      const queryString = queryParams.join('&');
+      const fullUrl = `/appraisal/admin/hr_update_appeal_committee/download_sample?${queryString}`;
+      
+      const response = await apiClient.get(
+        fullUrl,
+        {
+          responseType: "blob",
+        }
+      );
+      return response.data;
+    },
 
 
   },
@@ -1739,6 +1760,11 @@ downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
         });
 
         const response = await apiClient.get(fullUrl, {
+          headers: {
+            // Match Excel content type expected by backend (like Postman cURL)
+            Accept:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
           responseType: "blob",
         });
 
@@ -1747,6 +1773,335 @@ downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
         console.error("Error downloading validator sample:", error);
         throw error;
       }
+    },
+  },
+
+  // Logs APIs
+  logs: {
+    // Quarterly Appraisal Status Log
+    getQuarterlyAppraisalStatusLog: async ({ financialYear }) => {
+      // Matches cURL:
+      // /appraisal/admin/logs/quarterly-appraisal-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/quarterly-appraisal-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q1 Appraisal Status Log
+    getQ1StatusLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q1-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q1-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q2 Appraisal Status Log
+    getQ2StatusLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q2-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q2-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q3 Appraisal Status Log
+    getQ3StatusLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q3-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q3-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q4 Appraisal Status Log
+    getQ4StatusLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q4-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q4-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Annual Appraisal Status Log
+    getAnnualAppraisalStatusLog: async ({ financialYear }) => {
+      // Matches cURL:
+      // /appraisal/admin/logs/annual-appraisal-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/annual-appraisal-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Download annual appraiser details
+    getAnnualAppraiserDetails: async ({ financialYear }) => {
+      // Matches cURL:
+      // /appraisal/admin/logs/annual-appraiser-details?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/annual-appraiser-details`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Annual Score Log
+    getAnnualScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/annual-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/annual-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Appeal Report Log
+    getAppealReportLog: async ({ financialYear }) => {
+      // Matches cURL:
+      // /appraisal/admin/logs/appeal-report?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/appeal-report`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q1 Appraisal Score Log
+    getQ1ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q1-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q1-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q2 Appraisal Score Log
+    getQ2ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q2-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q2-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q3 Appraisal Score Log
+    getQ3ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q3-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q3-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q4 Appraisal Score Log
+    getQ4ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q4-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q4-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q4 Appraisal Score Log
+    getQ4ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q4-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q4-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Final Score Log
+    getFinalScoreLog: async ({ financialYear, empNumber }) => {
+      // /appraisal/admin/logs/final-score?financialYear=2025&empNumber=36663
+      const year = String(financialYear);
+      const empNo = String(empNumber);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/final-score`,
+        {
+          params: {
+            financialYear: year,
+            empNumber: empNo,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Quarterly Exception Log
+    getQuarterlyExceptionLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/quarterly-exception?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/quarterly-exception`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Development Inputs Log
+    getDevelopmentInputsLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/development-inputs?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/development-inputs`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Integrity Inputs Log
+    getIntegrityInputsLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/integrity-inputs?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/integrity-inputs`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Repa, Reva, and AC Remarks Log
+    getRepaRevaAcRemarksLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/repa-reva-ac-remarks?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/repa-reva-ac-remarks`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Exception Approval List Log
+    getExceptionApprovalListLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/exception-approval-list?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/exception-approval-list`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
     },
   },
 

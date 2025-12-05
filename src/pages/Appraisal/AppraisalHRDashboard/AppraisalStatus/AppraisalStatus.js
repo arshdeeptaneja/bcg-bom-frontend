@@ -109,10 +109,9 @@ const AppraiserStatus = () => {
         solId: item.LOCATION_ID || item.SOL_ID || "",
         zone: item.ZNNAME || item.REGNM || "",
         appraisalstatus: item.APPRAISAL_STATUS || item.appraisalStatus || "",
-        score:
-          item.TOTAL_MEASURABLE_PERFORMANCE_SCORE ??
+        score:item.TOTAL_MEASURABLE_PERFORMANCE_SCORE??
           item.MEASURABLE_PERFORMANCE_SCORE ??
-          "",
+          "0.0",
         // Format dates to "yyyy-mm-dd"
         startDate: formatDate(item.ROLE_START_DATE),
         endDate: formatDate(item.ROLE_END_DATE),

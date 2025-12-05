@@ -43,29 +43,28 @@ const HrDashboard = () => {
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
   const navigate = useNavigate();
-      const [searchParams] = useSearchParams();
-      const quarter = searchParams.get("quarter");               // Q1
-//const financialYear = searchParams.get("financialYear");
+  const [searchParams] = useSearchParams();
 
-  // Derive backend appraisalPeriod in the format expected by the API (e.g. 2024Q1)
+  // Derive values for API call
   const backendYear = financialYear.replace('FY ', '').split('-')[0];
-  const backendAppraisalPeriod =
+  // For API: annual -> "annual", quarterly -> "q1" | "q2" | "q3" | "q4"
+  const appraisalPeriodForApi =
     appraisalPeriod === 'Quarterly'
-      ? `${backendYear}${selectedQuarter}` // e.g. 2024Q1
-      : backendYear; // e.g. 2024 for annual – adjust if backend needs a different format
+      ? selectedQuarter.toLowerCase()
+      : 'annual';
 
   const { data: hrData, isLoading, isError } = useQuery({
     queryKey: [
       'hrDashboard',
       empNo,
-      appraisalPeriod,
-      financialYear,
+      appraisalPeriodForApi,
+      backendYear,
     ],
     queryFn: async () => {
       try {
         return await appraisalAPI.getHrDashboard({
           empNo,
-          appraisalPeriod:appraisalPeriod == "Quarterly" ?quarter: 'annual',
+          appraisalPeriod: appraisalPeriodForApi,
           financialYear: backendYear,
         });
       } catch (error) {
@@ -295,14 +294,87 @@ const HrDashboard = () => {
             </button>
           </div>
         </section>
-<UtilitiesSection 
-  financialYear={financialYear}
-  quarter={selectedQuarter}
-/>
-         <LogsAndAutoAnnuals/>
-        {/* <ReportingAuthority /> */}
+        <UtilitiesSection
+          financialYear={financialYear}
+          quarter={selectedQuarter}
+        />
+        <LogsAndAutoAnnuals financialYear={financialYear} />
 
-        {/* <AppraiserUpdate/> */}
+        {/* Auto Annual / Quarterly Appraisal Section */}
+        {appraisalPeriod === 'Annual' && (
+          <div className="card border-0 shadow-sm mt-4">
+            <div className="card-body">
+              <h5 className="section-title mb-4">Auto Annual Appraisal</h5>
+
+              <div className="row">
+                <div className="col-md-3 fw-bold blue-text">
+                  APPRAISAL PERIOD
+                </div>
+                <div className="col fw-bold blue-text">ACTION</div>
+              </div>
+
+              <hr />
+
+              <div className="row align-items-center mb-3">
+                <div className="col-md-3">
+                  Annual Appraisal
+                </div>
+                <div className="col-md-9">
+                  <div className="row g-2">
+                    {Array.from({ length: 8 }, (_, i) => (
+                      <div className="col-md-3 col-sm-6" key={i}>
+                        <button className="action-btn w-100">
+                          Auto Submit Appraisee Scale {i + 1}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {appraisalPeriod === 'Quarterly' && (
+          <div className="card border-0 shadow-sm mt-4">
+            <div className="card-body">
+              <h5 className="section-title mb-4">Auto Add Appraisal Quarterly</h5>
+
+              <div className="row">
+                <div className="col-md-3 fw-bold blue-text">
+                  APPRAISAL PERIOD
+                </div>
+                <div className="col fw-bold blue-text">ACTION</div>
+              </div>
+
+              <hr />
+
+              {['Q1', 'Q2', 'Q3', 'Q4'].map((q) => (
+                <div className="row align-items-center mb-3" key={q}>
+                  <div className="col-md-3">
+                    Quarter {q}
+                  </div>
+                  <div className="col-md-9">
+                    <div className="row g-2">
+                      <div className="col-md-3 col-sm-6">
+                        <button className="action-btn w-100">
+                          Auto Submit Appraisee
+                        </button>
+                      </div>
+                      <div className="col-md-3 col-sm-6">
+                        <button className="action-btn w-100">
+                          Auto Submit Appraiser
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
       </div>
 
     </div>

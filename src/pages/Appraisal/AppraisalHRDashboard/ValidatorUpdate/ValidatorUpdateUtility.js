@@ -233,7 +233,7 @@ const ValidatorUpdateUtility = () => {
   const downloadDataTableMutation = useMutation({
     mutationFn: async () => {
       const blob = await appraisalAPI.validatorUpdate.downloadDataTable({
-        roleName: roleName,
+        roleName: "Super Admin",
         regionCode: sol,
         quarter: quarter || "Q1",
         financialYear: extractYear(financialYear),

@@ -98,7 +98,7 @@ const AppraiserUpdate = () => {
         searchEmpNo: ecNumber,
         empNo: empNo,
         appraisalPeriod: appraisalPeriodValue, // "q1", "q2", etc. or "annual"
-        quarter: appraisalPeriod === "Quarterly" ? selectedQuarter : null,
+        quarter: appraisalPeriod === "Quarterly" ? selectedQuarter : "annual",
         financialYear: extractYear(financialYear),
       });
 
@@ -129,7 +129,8 @@ const AppraiserUpdate = () => {
         additionalRole2: item.TERTIARY_ROLE || "",
         startDate: formatDate(item.ROLE_START_DATE),
         endDate: formatDate(item.ROLE_END_DATE),
-        repaName: item.VALIDATOR_NAME || "",
+        repaName: item.REPA_NAME || "",
+        revaName: item.VALIDATOR_NAME || "",
         branch: item.BRNAME || item.ORGANIZATION_NAME || "",
         // keep raw reference if needed for future logic
         raw: item,
@@ -326,9 +327,9 @@ const AppraiserUpdate = () => {
 
           {/* Right boxed options */}
           <div className="col-12 col-md-5">
-             <div className="appraisal-box d-flex justify-content-between align-items-start p-3">
+             {/* <div className="appraisal-box d-flex justify-content-between align-items-start p-3"> */}
               {/* Appraisal Period */}
-              <div className="period-section">
+              {/* <div className="period-section">
                 <label className="period-title">Appraisal Period</label>
                 <div className="period-btns mt-2" role="group">
                   <div
@@ -342,10 +343,10 @@ const AppraiserUpdate = () => {
                     Annual Year
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Quarterly Period */}
-              {appraisalPeriod === 'Quarterly' &&
+              {/* {appraisalPeriod === 'Quarterly' &&
                 <div className="period-section">
                   <label className="period-title">Quarterly Period</label>
                   <div className="period-btns mt-2" role="group">
@@ -379,8 +380,8 @@ const AppraiserUpdate = () => {
                     </div>
                   </div>
                 </div>
-              }
-            </div>
+              } */}
+            {/* </div> */}
           </div>
 
           {/* <div className="col-12 col-md-2">
@@ -426,6 +427,7 @@ const AppraiserUpdate = () => {
                   <th>Start Date</th>
                   <th>End Date</th>
                   <th>Repa Name</th>
+                  <th>Reva Name</th>
                   <th>Branch</th>
                   <th>Update</th>
 
@@ -449,6 +451,7 @@ const AppraiserUpdate = () => {
                       <td>{item.startDate}</td>
                       <td>{item.endDate}</td>
                       <td>{item.repaName}</td>
+                      <td>{item.revaName}</td>
                       <td>{item.branch}</td>
                       <td>
                         <button 
