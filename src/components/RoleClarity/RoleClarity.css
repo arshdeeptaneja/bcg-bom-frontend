@@ -1,5 +1,5 @@
 .role-clarity {
-  box-shadow: 0px 3px 10px #0389d036;
+  box-shadow: 0px 3px 10px #185f7336;
   border-radius: 10px !important;
   padding: 15px 20px;
   margin-bottom: 25px;
@@ -9,7 +9,7 @@
 .role-clarity h2 {
   font-size: 20px;
   font-weight: bold;
-  color: #0389d0;
+  color: #185f73;
   margin: 0 0 20px 0;
 }
 
@@ -25,7 +25,7 @@
   margin-bottom: 16px;
   box-shadow: 0px 3px 10px #1C724F21;
   padding: 20px;
-  border-left: 0.4rem solid #0389d0;
+  border-left: 0.4rem solid #185f73;
 }
 
 .role-info {
@@ -95,8 +95,8 @@
 }
 
 .status.accepted {
-  background: #0389d026;
-  color: #0389d0;
+  background: #185f7326;
+  color: #185f73;
 }
 
 .timeline-line {
@@ -114,7 +114,7 @@
 .view-history-btn {
   background: none;
   border: none;
-  color: #0389d0;
+  color: #185f73;
   font-size: 14px;
   cursor: pointer;
   display: flex;

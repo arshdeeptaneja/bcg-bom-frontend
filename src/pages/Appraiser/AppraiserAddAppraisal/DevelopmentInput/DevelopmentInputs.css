@@ -1,5 +1,5 @@
 :root {
-  --accent-color: #0389d0;
+  --accent-color: #185f73;
   --muted-color: #6c757d;
   --text-dark: #111;
 }
@@ -7,7 +7,7 @@
 /* Container card styling */
 .development-inputs .dev-card {
   background: #fff;
-  border: 1px solid rgba(3, 137, 208, 0.06);
+  border: 1px solid rgba(24, 95, 115, 0.06);
   box-shadow: 0 1px 0 rgba(0,0,0,0.02);
 }
 

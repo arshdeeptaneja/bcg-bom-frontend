@@ -254,7 +254,7 @@ const AppealComittee = () => {
         </div>
 
         {/* Upload + Buttons */}
-        <section className="card">
+        <section className="cards">
 
           <div className="d-flex justify-content-between align-items-center flex-wrap mb-4">
 

@@ -2,12 +2,12 @@ import { useState } from "react";
 import { HashLoader } from "react-spinners";
 
 const override = {
-  borderColor: "#0389d0",
+  borderColor: "#185f73",
 };
 
 function LoadingSpinner() {
   const [loading, setLoading] = useState(true);
-  const [color, setColor] = useState("#0389d0"); 
+  const [color, setColor] = useState("#185f73"); 
 
   return (
     <div>    

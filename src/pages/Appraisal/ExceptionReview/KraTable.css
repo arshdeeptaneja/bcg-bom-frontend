@@ -1,6 +1,6 @@
 :root {
-    --accent-color: #0389d0;
-    --header-bg: #0389d0;
+    --accent-color: #185f73;
+    --header-bg: #185f73;
     /* optional if you want green header in some places */
     --text: #222;
     --muted: #888;
@@ -245,10 +245,10 @@ input.single {
 }
 
 .submit-btn.inactive {
-    background: rgba(3, 137, 208, 0.18);
+    background: rgba(24, 95, 115, 0.18);
     color: #2f3f45;
     cursor: not-allowed;
-    border-color: rgba(3, 137, 208, 0.18);
+    border-color: rgba(24, 95, 115, 0.18);
 }
 
 .submit-btn.active {
@@ -293,7 +293,7 @@ input.single {
 }
 
 .ok-btn:hover {
-    background: rgba(3, 137, 208, 0.06);
+    background: rgba(24, 95, 115, 0.06);
 }
 
 

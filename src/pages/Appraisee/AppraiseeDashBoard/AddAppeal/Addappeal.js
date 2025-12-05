@@ -473,7 +473,7 @@ function AddAppeal() {
               </p>
               <button
                 className="btn mt-2 text-white"
-                style={{ background: "#0389d0", width: "120px" }}
+                style={{ background: "#185f73", width: "120px" }}
                 onClick={handlePopupClose}
               >
                 OK

@@ -173,18 +173,22 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="login-container container-fluid vh-100">
-      <div className="row h-100">
-        <div className="login-left col-md-6 d-none d-md-block">
-
+      <div className="row h-100 g-0">
+        <div className="login-left col-md-6 d-none d-md-flex">
+          <div className="login-left-content">
+            <div className="bank-logo-section">
+            </div>
+           
+          </div>
         </div>
 
-        <div className="login-right col-md-6 col-12 d-flex align-items-center justify-content-center">
+         <div className="login-right col-md-6  d-flex align-items-center justify-content-center">
           <div className="login-form-container card border-0" style={{ width: '100%' }}>
             <div className="card-body">
               <h2 className="login-title text-center mb-4 fw-bold text-dark">Employee Login</h2>
 
               <form onSubmit={handleSubmit} className="login-form">
-                <div className="form-group position-relative bg-dark bg-opacity-10 rounded">
+                <div className="form-group position-relative bg-darks bg-opacity-10 rounded">
                   <div className="input-group border p-3 rounded">
 
                     <input
@@ -200,7 +204,7 @@ const Login = ({ onLogin }) => {
                   </div>
                 </div>
 
-                <div className="form-group mb-3 position-relative bg-dark bg-opacity-10 rounded">
+                <div className="form-group mb-3 position-relative bg-darks bg-opacity-10 rounded">
                   <div className="input-group border p-3 rounded">
 
                     <input
@@ -221,7 +225,7 @@ const Login = ({ onLogin }) => {
 
                     {/* CAPTCHA Image & Refresh */}
                     <div
-                      className="captcha-image-box border rounded p-2 flex-grow-1 d-flex align-items-center justify-content-between"
+                      className="captcha-image-box border rounded p-2 d-flex align-items-center justify-content-between"
                       style={{ height: '60px', minWidth: '150px', maxWidth: '50%' }}
                     >
                       {captchaLoading ? (
@@ -248,7 +252,7 @@ const Login = ({ onLogin }) => {
                     </div>
 
                     {/* CAPTCHA Input */}
-                    <div className="flex-grow-1 bg-dark bg-opacity-10 rounded">
+                    <div className="flex-grow-1 bg-darks bg-opacity-10 rounded">
                       <div className="input-group border p-3 rounded">
                         <input
                           type="text"

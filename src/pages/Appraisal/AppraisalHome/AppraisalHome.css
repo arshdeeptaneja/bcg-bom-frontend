@@ -16,14 +16,10 @@
 
 
 
-.btn-primary {
-  /* background-color: #e9ecef; */
-  border-color: var(--accent-color);
-  color: var(--accent-color); /* optional, keeps text visible on grey */
-}
 
-.btn-outline-primary {
+
+/* .btn-outline-primary {
   background-color: transparent;
   color: var(--bs-dark);
-}
+} */
 

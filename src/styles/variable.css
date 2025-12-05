@@ -10,9 +10,9 @@
   --bs-dark: #000000;
 
   /* Design tokens used across base.css */
-  --accent-color: #0389d0;
-  --main-color: #185f73;
+  --accent-color: #185f73;
   --primary-color: white;
+  --main-color: #185f73;
   --secondary-color: var(--bs-secondary);
   --success-color: var(--bs-success);
   --info-color: var(--bs-info);
