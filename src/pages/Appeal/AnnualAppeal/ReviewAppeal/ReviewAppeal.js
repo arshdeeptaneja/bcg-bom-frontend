@@ -17,7 +17,7 @@ function ReviewAppeal() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [responseData, setResponseData] = useState(null);
-
+  const enabled = (context.viewOnly) ? false : true;
   // Handle submit with confirmation
   const handleSubmitClick = () => {
     if (!isValid) {
@@ -152,7 +152,10 @@ function ReviewAppeal() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.finalScoreSummary.map((row, idx) => {
+                  {data.finalScoreSummary
+                  .filter(row => row.KraName == 'Business Dimension')
+                  
+                  .map((row, idx) => {
                     const categoryId = `summary-${row.KraName}-${idx}`;
                     const isSelected = formState.selectedKras?.has(categoryId);
                     const action = formState.kraActions?.get(categoryId);
@@ -175,6 +178,7 @@ function ReviewAppeal() {
                               checked={isSelected || false}
                               onChange={() => actions.handleKraSelection(categoryId)}
                               style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                              disabled={!enabled}
                             />
                           )}
                         </td>
@@ -230,6 +234,7 @@ function ReviewAppeal() {
                               min="0"
                               step="0.1"
                               placeholder="0.0"
+                              disabled={!enabled}
                             />
                           </div>
                         </td>
@@ -250,6 +255,7 @@ function ReviewAppeal() {
                               min="0"
                               step="0.1"
                               placeholder="0.0"
+                                 disabled={!enabled}
                             />
                           ) : (
                             <input
@@ -260,6 +266,7 @@ function ReviewAppeal() {
                               }
                               readOnly
                               style={{ backgroundColor: '#f8f9fa' }}
+                                 disabled={!enabled}
                             />
                           )}
                         </td>
@@ -277,6 +284,7 @@ function ReviewAppeal() {
                                   onChange={(e) =>
                                     actions.handleActionChange(categoryId, e.target.value)
                                   }
+                                     disabled={!enabled}
                                 />
                                 <span className="action-label">ACCEPT AS IT IS</span>
                               </label>
@@ -289,6 +297,7 @@ function ReviewAppeal() {
                                   onChange={(e) =>
                                     actions.handleActionChange(categoryId, e.target.value)
                                   }
+                                     disabled={!enabled}
                                 />
                                 <span className="action-label">ACCEPT AND EDIT</span>
                               </label>
@@ -301,6 +310,7 @@ function ReviewAppeal() {
                                   onChange={(e) =>
                                     actions.handleActionChange(categoryId, e.target.value)
                                   }
+                                     disabled={!enabled}
                                 />
                                 <span className="action-label">REJECT</span>
                               </label>
@@ -343,6 +353,7 @@ function ReviewAppeal() {
               onSelectedScoreChange={actions.handleSelectedScoreChange}
               onCommentChange={actions.handleCommentChange}
               type="non-measurable"
+              disabled={!enabled}
             />
           </div>
         )}
@@ -367,6 +378,7 @@ function ReviewAppeal() {
               onSelectedScoreChange={actions.handleSelectedScoreChange}
               onCommentChange={actions.handleCommentChange}
               type="measurable"
+              disabled={!enabled}
             />
           </div>
         )}
@@ -399,6 +411,7 @@ function ReviewAppeal() {
             placeholder="Enter your overall comment for this appeal review..."
             value={formState.overallComment}
             onChange={(e) => actions.handleOverallCommentChange(e.target.value)}
+            disabled={!enabled}
           />
           {formState.overallComment.trim() === '' && formState.selectedKras.size > 0 && (
             <div className="text-danger small mt-1">
@@ -414,7 +427,7 @@ function ReviewAppeal() {
         <button
           className="btn btn-primary btn-lg"
           onClick={handleSubmitClick}
-          disabled={!isValid || actions.isSubmitting}
+          disabled={!isValid || actions.isSubmitting || !enabled}
         >
           {actions.isSubmitting ? (
             <>

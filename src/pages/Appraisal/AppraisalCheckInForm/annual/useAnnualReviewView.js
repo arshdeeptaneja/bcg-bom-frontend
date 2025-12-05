@@ -31,8 +31,8 @@ export const useAnnualReviewView = () => {
   const stateOrQuery = location.state || {};
 
   // Extract parameters from URL search params or location state
-  const empNo = stateOrQuery.empNo || queryParams.empNo || '';
-  const url = stateOrQuery.url || queryParams.url || '';
+  const empNo = stateOrQuery.employee.empNo || queryParams.empNo || '';
+  const url = stateOrQuery.urlId || queryParams.url || '';
   const zoneName = stateOrQuery.zoneName || queryParams.zoneName || '';
   const roleType = stateOrQuery.roleType || queryParams.roleType || '';
   const financialYear = stateOrQuery.financialYear || queryParams.financialYear || '';

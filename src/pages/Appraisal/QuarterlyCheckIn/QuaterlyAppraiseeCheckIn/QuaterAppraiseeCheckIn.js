@@ -62,6 +62,8 @@ function QuaterlyAppraiseeCheckIn() {
     roleType,
   } = location.state;
 
+  const enabled = (intent==="View") ? false : true;
+
   console.log('EMPLOYEE IS: ', employee);
   // Get employee number from auth context as fallback
   const { getEmployeeDetails, getUserProperty } = useAuth();
@@ -236,8 +238,8 @@ function QuaterlyAppraiseeCheckIn() {
       }
 
       // Set non-measurable KRA data
-      if (responseData?.results_KRA_LIST?.['non measurable']) {
-        setNonMeasurableKraListData(responseData.results_KRA_LIST['non measurable']);
+      if (responseData?.results_KRA_LIST?.['non_measurable']) {
+        setNonMeasurableKraListData(responseData.results_KRA_LIST['non_measurable']);
       }
 
       // Set development inputs from API response questions
@@ -330,9 +332,13 @@ function QuaterlyAppraiseeCheckIn() {
         quarter: quarter,
         empNumber: employee?.empNo,
         urlId: employee?.url || 'U-34545',
-        kraData: kraDataPayload,
+        // kraData: kraDataPayload,
+        kraData:[
+          ...measurableKraListData,
+          ...nonMeasurableKraListData
+        ],
         submittype: page_type,
-
+        
         startDate: location.state?.dateRange?.split(' - ')[0]?.trim() || '2024-07-01 00:00:00.0',
         endDate: location.state?.dateRange?.split(' - ')[1]?.trim() || '2024-09-30 00:00:00.0',
 
@@ -373,7 +379,10 @@ function QuaterlyAppraiseeCheckIn() {
       quarter: quarter || '',
       empNumber: employee?.empNo,
       urlId: employee?.URL_ID || employee?.url || 'U-34545',
-      kraData: measurableKraListData,
+      kraData: [
+    ...measurableKraListData,
+    ...nonMeasurableKraListData
+  ],
       submittype: page_type,
       startDate: location.state?.dateRange?.split(' - ')[0]?.trim() || '2024-07-01 00:00:00.0',
       endDate: location.state?.dateRange?.split(' - ')[1]?.trim() || '2024-09-30 00:00:00.0',
@@ -606,6 +615,7 @@ function QuaterlyAppraiseeCheckIn() {
                     maxLength={COMMENT_CHAR_LIMIT}
                     value={fieldValue}
                     onChange={(e) => handleCommentChange(index, e.target.value)}
+                    disabled={!enabled}
                   />
                   <small className="text-muted text-end">
                     {fieldValue.length}/{COMMENT_CHAR_LIMIT} characters
@@ -617,7 +627,7 @@ function QuaterlyAppraiseeCheckIn() {
         </div>
       </div>
 
-      <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
+{enabled?<div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button className="btn btn-outline-primary" onClick={handleSave} disabled={isSaved}>
           {isSaveing ? 'Saving...' : isSaved ? 'Saved' : 'Save as Draft'}
         </button>
@@ -629,7 +639,8 @@ function QuaterlyAppraiseeCheckIn() {
         >
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
-      </div>
+      </div> :null}
+      
     </div>
   );
 }

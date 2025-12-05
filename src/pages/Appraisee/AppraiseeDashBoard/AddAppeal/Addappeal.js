@@ -21,6 +21,8 @@ function AddAppeal() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [appealId, setAppealId] = useState('');
   const [validationErrors, setValidationErrors] = useState([]);
+  console.log('Add Appeal Task', context.task);
+  const enabled = (context.task =="view")?true:false;
 
   // Handle file upload with error handling
   const handleFileUpload = (files) => {
@@ -214,7 +216,8 @@ function AddAppeal() {
             onSelectionChange={actions.handleCategorySelection}
             finalScoreEdits={formState.finalScoreEdits}
             onFinalScoreChange={actions.handleFinalScoreChange}
-            isEditable={true}
+            isEditable={enabled}
+            viewType="addAppeal"
           />
         </div>
 
@@ -237,6 +240,7 @@ function AddAppeal() {
                 groupName={groupName}
                 totalActualScore={data.totalMeasurableActual}
                 totalMaxScore={data.totalMeasurableMax}
+                enabled={enabled}
               />
             </div>
           ))}
@@ -282,6 +286,7 @@ function AddAppeal() {
                 groupName={groupName}
                 totalActualScore={data.totalNonMeasurableActual}
                 totalMaxScore={data.totalNonMeasurableMax}
+                enabled={enabled}
               />
             </div>
           ))}
@@ -304,16 +309,17 @@ function AddAppeal() {
         {/* File Upload Section */}
         <div className="file-upload-section d-flex flex-column shadow-sm p-3">
           <h5 className="text-primary fw-bold mb-3">Supporting Documents</h5>
-          <FileUploadSection
+          {(!enabled)?<FileUploadSection
             files={formState.uploadedFiles}
             onFileUpload={handleFileUpload}
             onFileRemove={actions.handleFileRemove}
-          />
+            // enabled={!enabled}
+          />:null}
         </div>
       </div>
 
       {/* Submit Button */}
-      <div className="save-and-submit-button-section d-flex flex-column align-items-end gap-2 m-3">
+      {(!enabled)?<div className="save-and-submit-button-section d-flex flex-column align-items-end gap-2 m-3">
         <button
           className={`btns btn-primarys ${(!isValid ||formState.uploadedFiles.length==0 || actions.isSubmitting) ? 'disabled-btn' : ''}`}
           onClick={handleSubmit}
@@ -342,7 +348,7 @@ function AddAppeal() {
             Please select at least one KRA to enable submission
           </div>
         )}
-      </div>
+      </div> : null}
 
       {/* Success Modal */}
       {showSuccessModal && (

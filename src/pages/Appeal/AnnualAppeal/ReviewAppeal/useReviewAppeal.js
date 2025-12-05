@@ -31,6 +31,7 @@ export const useReviewAppeal = () => {
       custTicketId: location.state?.ticketId || searchParams.get('custTicketId') || '',
       appraiser: location.state?.appraiser || searchParams.get('appraiser') || '',
       role: searchParams.get('role') || location.state?.role || 'APPRAISER', // APPRAISER or REVIEWER
+      viewOnly: location.state?.viewOnly || searchParams.get('viewOnly') === 'true' || false,
     }),
     [location.state, searchParams]
   );
@@ -59,13 +60,24 @@ export const useReviewAppeal = () => {
       context.empNo,
       context.financialYear,
     ],
-    queryFn: () =>
-      appraisalAPI.getAppealCommitteeReviewData({
+    queryFn: () =>{
+      if(context.viewOnly){
+        return appraisalAPI.getAppealCommitteeReviewDataView({
         roleId: context.roleId,
         roleType: context.roleType,
         empNo: context.empNo,
         financialYear: context.financialYear,
-      }),
+      });
+      }
+
+       return appraisalAPI.getAppealCommitteeReviewData({
+        roleId: context.roleId,
+        roleType: context.roleType,
+        empNo: context.empNo,
+        financialYear: context.financialYear,
+      });
+    },
+     
     enabled: !!(context.roleId && context.roleType && context.empNo && context.financialYear),
   });
 

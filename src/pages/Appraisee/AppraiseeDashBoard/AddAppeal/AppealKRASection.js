@@ -29,6 +29,7 @@ const AppealKRASection = ({
   groupName = '',
   totalActualScore = 0,
   totalMaxScore = 0,
+  enabled=true,
 }) => {
   const [expandedComments, setExpandedComments] = useState(new Set());
 
@@ -252,6 +253,7 @@ const AppealKRASection = ({
                       checked={isSelected(kra.KraId)}
                       onChange={() => onKraSelect(kra.KraId)}
                       style={{ cursor: 'pointer' }}
+                      disabled={enabled}
                     />
                   </td>
                   <td
@@ -296,6 +298,7 @@ const AppealKRASection = ({
                               onActualChange && onActualChange(kra.KraId, e.target.value)
                             }
                             placeholder="Enter"
+                            disabled={enabled}
                           />
                         </div>
                       </td>
@@ -354,6 +357,7 @@ const AppealKRASection = ({
                             placeholder="Enter"
                             min="1"
                             max="5"
+                            disabled={enabled}
                           />
                         </div>
                       </td>
@@ -451,6 +455,7 @@ const AppealKRASection = ({
                         value={getAppealText(kra.KraId)}
                         onChange={(e) => onAppealTextChange(kra.KraId, e.target.value)}
                         required
+                        disabled={enabled}
                       />
                       {getAppealText(kra.KraId).trim() === '' && (
                         <div className="text-danger small mt-1">

@@ -28,9 +28,12 @@ export const useAddAppeal = () => {
     },
     role: searchParams.get('role') || location.state?.role || "APPRAISEE",
     roleId: searchParams.get('roleId') || location.state?.roleId,
-    roleType: searchParams.get('roleType') || location.state?.roleType
+    roleType: searchParams.get('roleType') || location.state?.roleType,
+    task:searchParams.get('task')
   }), [location.state, searchParams]);
 
+  console.log("DLADf:",context);
+  
   // Form state management
   const [selectedKras, setSelectedKras] = useState(new Set());
   const [appealTexts, setAppealTexts] = useState(new Map());
@@ -45,10 +48,22 @@ export const useAddAppeal = () => {
   // Fetch appeal report data using actual API endpoint
   const { data: apiResponse, isLoading, isError, error } = useQuery({
     queryKey: ['appealReport', context.roleId, context.roleType],
-    queryFn: () => appraisalAPI.getAppealReport({
+    queryFn: () => { 
+
+      if(context.task =="view"){
+        return appraisalAPI.getAppealReportView({
+          roleId: context.roleId,
+          roleType: context.roleType,
+          empNo: context.employee.empNo,
+          financialYear: context.financialYear,
+          appraisalPeriod: context.appraisalPeriod 
+        });
+      }
+      
+      return appraisalAPI.getAppealReport({
       roleId: context.roleId,
       roleType: context.roleType,
-    }),
+    })},
     enabled: !!(context.roleId && context.roleType),
   });
 

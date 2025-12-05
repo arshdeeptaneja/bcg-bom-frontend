@@ -125,6 +125,8 @@ export default function QuarterlyAppraisee() {
   const maxScore = responseData?.overall_max_score ?? 0;
   const cardData = responseData?.result?.[0] || responseData?.redresult?.[0] || null;
 
+  console.log("card Data : ",cardData);
+
   const additionalRoles = [
     cardData?.ADDITIONAL_ROLE_1,
     cardData?.ADDITIONAL_ROLE_2,
@@ -198,6 +200,7 @@ export default function QuarterlyAppraisee() {
             appraisalPeriod={appraisalPeriod}
             scoreData={appraisalScoreDash}
             isCheckInDisabled={cardData?.appraisal_status !== 'pending'}
+            // isCheckInDisabled={false}
             isExceptionDisabled={cardData?.appraisal_status !== 'complete'}
             onAddCheckIn={() => {
               console.log("Add checkin is working")
@@ -213,7 +216,20 @@ export default function QuarterlyAppraisee() {
                 },
               });
             }}
-            onViewSummary={() => { }}
+            isViewOnly={cardData?.appraisal_status == 'pending' ? false : true}
+            onViewSummary={() => {
+                navigate('/quarterly/quaterly-appraisee-check-in', {
+                state: {
+                  financialYear,
+                  appraisalPeriod,
+                  quarter,
+                  page_type: "self",
+                  dateRange: cardDateRange,
+                  employee: employeeModel,
+                  intent: "View", 
+                },
+              });
+             }}
             onAddException={() => {
               navigate('/appraisal/exception-quarterly', {
                 state: {

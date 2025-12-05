@@ -35,6 +35,7 @@ export const useAppraisalContext = () => {
   const intent = stateOrQuery.intent || queryParams.intent;
   const initialAppraisalStatus = stateOrQuery.appraisalStatus || queryParams.appraisalStatus;
 
+  
   // Zone information (from employee data or direct state)
   // const zoneName = stateOrQuery.zoneName || stateOrQuery.employee?.zoneName || stateOrQuery.employee?.ZNNAME || queryParams.zoneName;
 
@@ -68,6 +69,10 @@ export const useAppraisalContext = () => {
   // Validation: check if required context is available
   const isContextValid = !!(employeeNumber && financialYear && appraisalPeriod);
 
+  const task = stateOrQuery.task;
+
+  console.log("TASK IN STATE :",task);
+  
   return {
     // Navigation
     navigate,
@@ -97,5 +102,8 @@ export const useAppraisalContext = () => {
     // Derived values
     deriveRole,
     isContextValid,
+
+    task,
   };
+
 };

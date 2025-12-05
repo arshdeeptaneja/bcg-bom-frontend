@@ -14,8 +14,11 @@ const AnnualCheckIn = () => {
   // Use the annual-specific hook directly
   const { data, developmentInputs, isLoading, isError, context, roleState, formState, actions } =
     useAnnualAppraisal();
-  const { employee, dateRange, metadata } = context;
+  const { employee, dateRange, metadata ,page_type,task} = context;
+  console.log('task in annual checkin:', context);
   const { currentRole, isEditableBy } = roleState;
+  console.log("current Rol :", currentRole);
+  
   const { nonMeasurableScores, developmentResponses, optionResponses } = formState;
   const {
     handleSubmit,
@@ -48,6 +51,8 @@ const AnnualCheckIn = () => {
   const totalNonMeasurableActual = data?.totalNonMeasurableActual || 0;
   const totalNonMeasurableMax = data?.totalNonMeasurableMax || 0;
   const validationMessage = data?.validationMessage || '';
+
+  const enabled = (task=="view")?false:true;
 
   // Handle missing context
   if (!context.financialYear || !context.appraisalPeriod) {
@@ -108,7 +113,7 @@ const AnnualCheckIn = () => {
         </div>
         <div className="final-score-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
-          <FinalScoreSummaryTable kraListData={kraData} />
+          <FinalScoreSummaryTable kraListData={kraData}  viewType={page_type}/>
         </div>
         {Object.keys(actualScoreData).length > 0 && (
           <div className="check-in-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
@@ -131,6 +136,7 @@ const AnnualCheckIn = () => {
                   totalActualScore={totalMeasurableActual}
                   totalMaxScore={totalMeasurableMax}
                   kraListData={measurableKraListData}
+                  enabled={false}
                 />
               </div>
             )}
@@ -220,8 +226,9 @@ const AnnualCheckIn = () => {
                                             : 'annual-score-btn-outline'
                                         }`}
                                         onClick={() => handleNonMeasurableScoreChange(kraId, score)}
-                                        disabled={!isAppraiseeEditable}
-                                      >
+                                        disabled={!isAppraiseeEditable || !enabled }
+                                      
+                                        >
                                         {score}
                                       </button>
                                     ))}
@@ -363,7 +370,8 @@ const AnnualCheckIn = () => {
                   onChange={(e) =>
                     handleDevelopmentInputChange(input.id, e.target.value, 'response')
                   }
-                  disabled={!isEditableBy.APPRAISEE}
+                  disabled={currentRole === "REVIEWER" ? true : !isEditableBy.APPRAISEE || !enabled}
+                  // disabled={false}
                 />
               </div>
             ))}
@@ -437,7 +445,7 @@ const AnnualCheckIn = () => {
                           value={option.value}
                           checked={optionResponses[input.key] === option.value}
                           onChange={() => handleOptionChange(input.key, option.value)}
-                          disabled={isQuestionDisabled}
+                          disabled={isQuestionDisabled || !enabled}
                         />
                         <label
                           className="form-check-label"
@@ -483,11 +491,12 @@ const AnnualCheckIn = () => {
           </div>
         )}
       </div>
+      {(enabled)?
       <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
-      </div>
+      </div> : null}
     </div>
   );
 };

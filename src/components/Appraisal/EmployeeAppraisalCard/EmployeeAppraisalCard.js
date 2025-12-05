@@ -29,6 +29,9 @@ export default function EmployeeAppraisalCard({
   onViewSummary,
   onAddException,
   onAddAppeal,
+  isViewAppealOnly=false,
+  onViewAppeal,
+  isViewOnly = false,
   isCheckInDisabled = false,
   isAppealEnabled = false,
 }) {
@@ -354,7 +357,11 @@ export default function EmployeeAppraisalCard({
               Add Check-In Summary
               <span className="ms-2">→</span>
             </button>
-            <button type="button" className="btn-fade" onClick={onViewSummary}>
+            <button type="button" 
+            className={`btns btn-primarys ${(!isViewOnly) ? 'disabled-btn' : ''}`} 
+            onClick={onViewSummary}
+            disabled={!isViewOnly}
+            >
               View Check-In Summary
               <span className="ms-2">→</span>
             </button>
@@ -389,6 +396,24 @@ export default function EmployeeAppraisalCard({
                 <span className="ms-2">→</span>
               </button>
             )}
+
+
+            {userType === 'self' && appraisalPeriod === 'Annual' && (
+              <button
+                type="button"
+                // className="btn-fade"
+                className={`btns btn-primarys ${(!isViewAppealOnly) ? 'disabled-btn' : ''}`}
+                onClick={() => {
+                  onViewAppeal && onViewAppeal();
+                }}
+                disabled={!isViewAppealOnly}
+              >
+                View Appeal
+                <span className="ms-2">→</span>
+              </button>
+            )}
+
+
           </div>
         </div>
       </div>

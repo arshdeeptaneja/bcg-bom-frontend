@@ -631,17 +631,52 @@ export const appraisalAPI = {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'empNo', empNo);
-      appendQueryParam(params, 'url', url);
+      appendQueryParam(params, 'url', '4');
       appendQueryParam(params, 'zoneName', zoneName);
-      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'roleType', 'Administrative Officers');
       appendQueryParam(params, 'financialYear', financialYear);
       appendQueryParam(params, 'quarter', quarter);
       appendQueryParam(params, 'pageType', pageType);
-      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
+      appendQueryParam(params, 'appraisalStatus', 'pending');
       appendQueryParam(params, 'intent', intent);
 
       const response = await apiClient.get(
         `/appraisal/employee_self_appraisal?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
+///View Only
+   getEmployeeSelfAppraisalViewOnly: async ({
+    empNo,
+    url,
+    zoneName,
+    roleType,
+    financialYear,
+    quarter,
+    pageType,
+    appraisalStatus,
+    intent,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'url', '4');
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'roleType', 'Administrative Officers');
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'pageType', pageType);
+      // appendQueryParam(params, 'appraisalStatus', 'pending');
+      // appendQueryParam(params, 'intent', intent);
+      appendQueryParam(params, 'appraisalStatus', 'complete_self');
+
+      const response = await apiClient.get(
+        `/appraisal/employee_self_appraisal/view?${params.toString()}`
       );
       return response.data;
     } catch (error) {
@@ -744,6 +779,8 @@ export const appraisalAPI = {
       throw error;
     }
   },
+
+
 
   // Reporting and reviewing authority update by emp number
   appraisalUpdate: async ({
@@ -1045,6 +1082,23 @@ export const appraisalAPI = {
     }
   },
 
+    getAppealReportView: async ({ roleId, roleType ,empNo,financialYear,appraisalPeriod}) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'appraisalPeriod', appraisalPeriod);
+
+      const response = await apiClient.get(`/appraisal/appeal_report/view?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching appeal report:', error);
+      throw error;
+    }
+  },
+
   // Bulk upload for reporting authority update
   reportingAuthorityBulkUpload: async ({ file, sol, roleName, empNo }) => {
     try {
@@ -1210,6 +1264,22 @@ export const appraisalAPI = {
       appendQueryParam(params, 'empNo', empNo);
       appendQueryParam(params, 'financialYear', financialYear);
       const response = await apiClient.get(`/appraisal/appeal_report/review?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('getAppealCommitteeReviewData error', error);
+      throw error;
+    }
+  },
+
+
+   getAppealCommitteeReviewDataView: async ({ roleId, roleType, empNo, financialYear }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'financialYear', financialYear);
+      const response = await apiClient.get(`/appraisal/appeal_report/view?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('getAppealCommitteeReviewData error', error);

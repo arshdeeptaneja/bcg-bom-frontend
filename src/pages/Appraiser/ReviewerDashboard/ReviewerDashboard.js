@@ -358,7 +358,26 @@ export default function ReviewerDashboard() {
                   },
                 })
               }
-              onViewSummary={() => {}}
+              isViewOnly={true}
+              onViewSummary={() => {
+                 navigate('/appraisal/annual/view', {
+                  state: {
+                    financialYear,
+                    appraisalPeriod,
+                    quarter,
+                    page_type: 'reva',
+                    dateRange,
+                    employee: employeeModel,
+                    zoneName:"",
+                    organizationName: record?.ORGANIZATION,
+                    urlId: record?.ID,
+                    roleType: 'reviewer',
+                    pageType: 'reva',
+                    intent: 'Review',
+                    appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                  },
+                })
+              }}
               onAddException={() => {}}
             />
           );

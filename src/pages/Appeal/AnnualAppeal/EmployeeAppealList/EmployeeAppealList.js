@@ -227,14 +227,37 @@ const EmployeeAppealList = () => {
    */
   const handleViewAppraisal = (row) => {
     // Navigate to appraisal view (adjust route as needed)
-    navigate('/appraisal/view', {
-      state: {
-        empNo: row.empNumber,
-        empName: row.empName,
-        financialYear: financialYearForAPI,
-        quarter: filters.quarter,
-      },
-    });
+    // navigate('/appraisal/view', {
+    //   state: {
+    //     empNo: row.empNumber,
+    //     empName: row.empName,
+    //     financialYear: financialYearForAPI,
+    //     quarter: filters.quarter,
+    //   },
+    // });
+    console.log("vSDpvapvadmv:",row);
+    
+    // const empNumber = row.empNumber;
+    // const primaryRole = row.primaryRole;
+    // const queryParams = new URLSearchParams({
+    //                 financialYearForAPI,
+    //                 empNumber,
+    //                 urlId:  row.empID || '',
+    //                 roleName: primaryRole || '',
+    //                 roleType: primaryRole || 'Administrative Officers',
+    //               }).toString();
+    // navigate(`/appraisal/check-in-form?${queryParams}`, {
+    //       state: {
+    //         employee: employeeModel,
+    //         dateRange: cardDateRange,
+    //         financialYear,
+    //         appraisalPeriod,
+    //         quarter,
+
+    //         pageType: 'self',
+    //         appraisalStatus: employee.status,
+    //       },
+    //     });
   };
 
   const handleReset = () => {

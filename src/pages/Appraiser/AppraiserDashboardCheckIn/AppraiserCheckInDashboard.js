@@ -449,12 +449,64 @@ export default function AppraiserCheckInDashboard() {
                         urlId: record?.URL_ID,
                         roleType: 'appraiser',
                         pageType: 'review',
-                        intent: 'Review',
+                        intent: 'Fill',
                         appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
                       },
                     })
               }
-              onViewSummary={() => {}}
+              isViewOnly={(record?.APPRAISAL_STATUS=="complete_repa")}
+              onViewSummary={() => {
+                if (appraisalPeriod === 'Annual') {
+                  // // Annual: pass as query params
+                  // const queryParams = new URLSearchParams({
+                  //   financialYear,
+                  //   appraisalPeriod,
+                  //   urlId: employee.id || '',
+                  //   roleName: employee.primary || '',
+                  //   roleType: employee.primary || 'Administrative Officers',
+                  // }).toString();
+                  navigate(`/appraisal/annual/appraiser-review`, {
+                    state: {
+                      financialYear,
+                        appraisalPeriod,
+                        quarter,
+                        page_type: 'repa',
+                        dateRange,
+                        employee: employeeModel,
+                        organizationName: record?.ORGANIZATION,
+                        urlId: record?.ID,
+                        roleType: 'appraiser',
+                        pageType: 'review',
+                        intent: 'Review',
+                        appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                        task:'view'
+                    },
+
+                    
+                  });
+                } 
+
+                 else{
+                 navigate('/quarterly/quaterly-appraisee-check-in', {
+                      state: {
+                        financialYear,
+                        appraisalPeriod,
+                        quarter,
+                        page_type: 'repa',
+                        dateRange,
+                        employee: employeeModel,
+                        organizationName: record?.ORGANIZATION,
+                        urlId: record?.URL_ID,
+                        roleType: 'appraiser',
+                        pageType: 'review',
+                        intent: 'View',
+                        appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                      },
+                    })
+                } 
+
+                
+              }}
               onAddException={() => {}}
             />
           );

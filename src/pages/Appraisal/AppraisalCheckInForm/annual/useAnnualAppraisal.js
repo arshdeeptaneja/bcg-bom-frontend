@@ -115,8 +115,11 @@ export const useAnnualAppraisal = () => {
     zoneName,
     isContextValid,
     pageType,
+    task,
   } = context;
 
+  console.log("Task in context : ",task);
+  
   // Role state management - Annual always starts as APPRAISEE
   const [currentRole, setCurrentRole] = useState('APPRAISEE');
 
@@ -198,6 +201,7 @@ export const useAnnualAppraisal = () => {
     appraisalPeriod,
     isContextValid,
     employee,
+    task,
   });
 
   // Log which values are undefined/missing
@@ -241,8 +245,12 @@ export const useAnnualAppraisal = () => {
         pageType: pageType,
         appraisalStatus: employee.appraisalStatus,
       };
+      console.log("employee.appraisalStatus:",employee.appraisalStatus);
       console.log('[useAnnualAppraisal] API call params:', apiParams);
       if (pageType === 'self') {
+        if(task == "view"){
+          return appraisalAPI.getEmployeeSelfAppraisalViewOnly(apiParams);
+        }
         return appraisalAPI.getEmployeeSelfAppraisal(apiParams);
       } else if (pageType === 'repa') {
         return appraisalAPI.getReporteeAppraisal(apiParams);
@@ -657,6 +665,8 @@ export const useAnnualAppraisal = () => {
       warningFlag: false,
       warningComment: '',
       varianceFlag: false,
+
+      
     };
   };
 
@@ -754,6 +764,7 @@ export const useAnnualAppraisal = () => {
       appraisalPeriod,
       dateRange,
       metadata: transformedData?.metadata || {},
+      task,
     },
 
     // Role state
