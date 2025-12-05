@@ -5,6 +5,7 @@ const FileUploadSection = ({
   onFileUpload,
   onFileRemove,
   maxSize = 5,
+  enabled = true,
   allowedTypes = ['.zip', '.pdf', '.jpeg', '.jpg', '.png']
 }) => {
   const [error, setError] = useState('');
@@ -84,12 +85,14 @@ const FileUploadSection = ({
         multiple
         accept={allowedTypes.join(',')}
         onChange={handleFileChange}
+        disabled={!enabled}
       />
 
       <button
         type="button"
         className="btn btn-select-file"
         onClick={handleSelectFileClick}
+        disabled={!enabled}
       >
         Select a File
       </button>
@@ -110,6 +113,7 @@ const FileUploadSection = ({
             className="btn-close btn-close-sm ms-2" 
             onClick={() => setError('')}
             aria-label="Close"
+            disabled={!enabled}
           ></button>
         </div>
       )}

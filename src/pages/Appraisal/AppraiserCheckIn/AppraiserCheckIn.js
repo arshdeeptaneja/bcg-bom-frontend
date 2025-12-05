@@ -354,6 +354,11 @@ export default function AppraiserCheckIn() {
                           : [],
                       primaryRole: employee.MAIN_ROLE || '',
                       appraiser: employee.REPORTING_AUTHORITY_NAME || '',
+                      appraisalStatus:
+                        employee.APPRAISAL_STATUS ||
+                        employee.STATUS ||
+                        employee.status ||
+                        'pending',
                       pageType: 'repa',
                     },
                   },

@@ -29,6 +29,9 @@ export default function EmployeeAppraisalCard({
   onViewSummary,
   onAddException,
   onAddAppeal,
+  isViewAppealOnly = false,
+  onViewAppeal,
+  isViewOnly = false,
   isCheckInDisabled = false,
   isAppealEnabled = false,
 }) {
@@ -99,7 +102,7 @@ export default function EmployeeAppraisalCard({
 
     // Green/Success statuses
     if (
-      statusUpper.includes('COMPLETED') ||
+      statusUpper.includes('COMPLETE') ||
       statusUpper.includes('APPROVED') ||
       statusUpper.includes('SUBMITTED') ||
       statusUpper.includes('CREATED')
@@ -346,7 +349,7 @@ export default function EmployeeAppraisalCard({
           <div className="button-row">
             <button
               type="button"
-              className="butns "
+              className={`btns btn-primarys ${isCheckInDisabled ? 'disabled-btn' : ''}`}
               data-bs-toggle="modal"
               data-bs-target={`#${`addCheckInModal-${employee.empNo}`}`}
               disabled={isCheckInDisabled}
@@ -354,7 +357,12 @@ export default function EmployeeAppraisalCard({
               Add Check-In Summary
               <span className="ms-2">→</span>
             </button>
-            <button type="button" className="btn-fade" onClick={onViewSummary}>
+            <button
+              type="button"
+              className={`btns btn-primarys ${!isViewOnly ? 'disabled-btn' : ''}`}
+              onClick={onViewSummary}
+              disabled={!isViewOnly}
+            >
               View Check-In Summary
               <span className="ms-2">→</span>
             </button>
@@ -378,13 +386,29 @@ export default function EmployeeAppraisalCard({
             {userType === 'self' && appraisalPeriod === 'Annual' && (
               <button
                 type="button"
-                className="btn-fade"
+                // className="btn-fade"
+                className={`btns btn-primarys ${!isAppealEnabled ? 'disabled-btn' : ''}`}
                 onClick={() => {
                   onAddAppeal && onAddAppeal();
                 }}
                 disabled={!isAppealEnabled}
               >
                 Add Appeal
+                <span className="ms-2">→</span>
+              </button>
+            )}
+
+            {userType === 'self' && appraisalPeriod === 'Annual' && (
+              <button
+                type="button"
+                // className="btn-fade"
+                className={`btns btn-primarys ${!isViewAppealOnly ? 'disabled-btn' : ''}`}
+                onClick={() => {
+                  onViewAppeal && onViewAppeal();
+                }}
+                disabled={!isViewAppealOnly}
+              >
+                View Appeal
                 <span className="ms-2">→</span>
               </button>
             )}

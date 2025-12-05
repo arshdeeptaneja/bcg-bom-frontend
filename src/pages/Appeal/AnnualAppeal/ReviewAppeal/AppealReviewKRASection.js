@@ -18,6 +18,7 @@ function AppealReviewKRASection({
   onSelectedScoreChange,
   onCommentChange,
   type,
+  disabled = false,
 }) {
   const [expandedCommentKra, setExpandedCommentKra] = useState(null);
 
@@ -78,6 +79,7 @@ function AppealReviewKRASection({
                         onChange={() => onKraSelect(kraId)}
                         className="form-check-input kra-checkbox"
                         style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        disabled={disabled}
                       />
                     </td>
 
@@ -141,6 +143,7 @@ function AppealReviewKRASection({
                           step="0.1"
                           placeholder="0.0"
                           style={{ width: '60px' }}
+                          disabled={!(isSelected && action === 'ACCEPT_AND_EDIT')}
                         />
                       </div>
                     </td>
@@ -170,14 +173,18 @@ function AppealReviewKRASection({
                           min="0"
                           step="0.1"
                           placeholder="0.0"
+                          disabled={disabled}
                         />
                       ) : (
                         <input
                           type="text"
                           className="appeal-score-input"
-                          value={kra.newScore || ''}
+                          value={
+                            action === 'ACCEPT_AS_IS' ? kra.newScore || '' : kra.oldScore || ''
+                          }
                           readOnly
                           style={{ backgroundColor: '#f8f9fa' }}
+                          disabled={disabled}
                         />
                       )}
                     </td>
@@ -197,6 +204,7 @@ function AppealReviewKRASection({
                           borderRadius: '4px',
                           padding: '4px 8px',
                         }}
+                        disabled={disabled}
                       >
                         <i
                           className={`bi bi-chat-left-text-fill ${
@@ -217,6 +225,7 @@ function AppealReviewKRASection({
                               value="ACCEPT_AS_IS"
                               checked={action === 'ACCEPT_AS_IS'}
                               onChange={(e) => onActionChange(kraId, e.target.value)}
+                              disabled={disabled}
                             />
                             <span className="action-label">ACCEPT AS IT IS</span>
                           </label>
@@ -227,6 +236,7 @@ function AppealReviewKRASection({
                               value="ACCEPT_AND_EDIT"
                               checked={action === 'ACCEPT_AND_EDIT'}
                               onChange={(e) => onActionChange(kraId, e.target.value)}
+                              disabled={disabled}
                             />
                             <span className="action-label">ACCEPT AND EDIT</span>
                           </label>
@@ -237,6 +247,7 @@ function AppealReviewKRASection({
                               value="REJECT"
                               checked={action === 'REJECT'}
                               onChange={(e) => onActionChange(kraId, e.target.value)}
+                              disabled={disabled}
                             />
                             <span className="action-label">REJECT</span>
                           </label>
@@ -273,6 +284,7 @@ function AppealReviewKRASection({
                               value={comment}
                               onChange={(e) => handleAppellateCommentChange(kraId, e.target.value)}
                               maxLength={300}
+                              disabled={disabled}
                             />
                             <div className="textarea-footer">
                               <span className="min-char-hint">Minimum 20 character.</span>

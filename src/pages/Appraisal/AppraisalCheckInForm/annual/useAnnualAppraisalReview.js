@@ -39,7 +39,9 @@ export const useAnnualAppraisalReview = () => {
     page_type,
     roleType,
     urlId,
+    task
   } = location.state;
+  console.log('Location State task :', task);
   const url = urlId;
   const dateRangeFromState = dateRange;
   const employeeFromState = employee;
@@ -109,6 +111,7 @@ export const useAnnualAppraisalReview = () => {
     zoneName,
     roleType,
     isContextValid,
+    task
   });
 
   // Fetch reportee appraisal data
@@ -583,6 +586,7 @@ export const useAnnualAppraisalReview = () => {
           ? `${dateRangeFromState.startDate} - ${dateRangeFromState.endDate}`
           : '',
       metadata: transformedData?.metadata || {},
+      task: task,
     },
 
     // Form state

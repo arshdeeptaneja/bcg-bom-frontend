@@ -21,13 +21,16 @@ const STATUS_MAPPING = {
   complete_repa: 'Pending at Reviewer',
   pending: 'Pending at Appraisee',
   complete: 'Completed',
+  appeal_approved: 'Appeal Approved',
+  appeal_rejected: 'Appeal Rejected',
+  appeal_submitted: 'Appeal Submitted',
 };
 
 // Helper function to get display status from backend status
 const getDisplayStatus = (backendStatus) => {
   if (!backendStatus) return 'Pending';
   const status = backendStatus.toLowerCase();
-  return STATUS_MAPPING[status] || 'Pending';
+  return STATUS_MAPPING[status] || backendStatus;
 };
 
 // Helper function to get backend status from display status
@@ -108,6 +111,9 @@ export default function AppraiseeCheckIn() {
           cardData?.ADDITIONAL_ROLE_4,
         ],
         appraiser: cardData?.reporting_authority_ecno || 'N/A',
+        appraiserName: cardData?.reporting_authority_name || 'N/A',
+        appraisalStatus:
+          cardData?.STATUS || cardData?.APPRAISAL_STATUS || cardData?.status || 'pending',
         primaryRole: cardData?.primary,
       })
     : null;
@@ -198,11 +204,13 @@ export default function AppraiseeCheckIn() {
               //   : ''}
               dateRange={cardDateRange}
               primaryRole={employeeModel.primaryRole || ''}
-              appraisalStatus={employee.status}
-              exceptionStatus={employee.APPEAL_STATUS}
+              appraisalStatus={getDisplayStatus(employee.status)}
+              exceptionStatus={getDisplayStatus(employee.APPEAL_STATUS)}
               isCheckInDisabled={employee.status?.toLowerCase() !== 'pending'}
-              isAppealEnabled={employee.status?.toLowerCase() === 'complete'}
-              organization={employee.ORGANIZATION || ''}
+              isAppealEnabled={
+                employee.status?.toLowerCase() === 'complete' && employee.APPEAL_STATUS == 'NA'
+              }
+              organization={employee.organization || ''}
               quarter={appraisalPeriod === 'Quarterly' ? quarter : ''}
               appraisalPeriod={appraisalPeriod}
               scoreData={scoreData}
@@ -246,7 +254,33 @@ export default function AppraiseeCheckIn() {
                   });
                 }
               }}
-              onViewSummary={() => {}}
+              isViewOnly={employee.status?.toLowerCase() !== 'pending'}
+              onViewSummary={() => {
+                console.log('View Summary');
+
+                if (appraisalPeriod === 'Annual') {
+                  // Annual: pass as query params
+                  const queryParams = new URLSearchParams({
+                    financialYear,
+                    appraisalPeriod,
+                    urlId: employee.id || '',
+                    roleName: employee.primary || '',
+                    roleType: employee.primary || 'Administrative Officers',
+                  }).toString();
+                  navigate(`/appraisal/check-in-form?${queryParams}`, {
+                    state: {
+                      employee: employeeModel,
+                      dateRange: cardDateRange,
+                      financialYear,
+                      appraisalPeriod,
+                      quarter,
+                      pageType: 'self',
+                      appraisalStatus: employee.status,
+                      task: 'view',
+                    },
+                  });
+                }
+              }}
               onAddException={() => {
                 console.log('button pressed');
                 navigate('/appraisal/exception-quarterly', {
@@ -273,6 +307,27 @@ export default function AppraiseeCheckIn() {
                   empNo: employeeModel?.empNo || '',
                   employeeName: employeeModel?.employeeName || '',
                   primaryRole: employeeModel?.primaryRole || '',
+                  appraiser: employeeModel.appraiserName || '',
+                }).toString();
+                navigate(`/annual/add-appeal?${queryParams}`);
+              }}
+              isViewAppealOnly={employee.APPEAL_STATUS == 'NA' ? false : true}
+              onViewAppeal={() => {
+                const queryParams = new URLSearchParams({
+                  roleId: employee.id || employee.URL_ID || '',
+                  roleType:
+                    employee.primary || employeeModel?.primaryRole || 'Administrative Officer',
+                  financialYear:
+                    financialYear
+                      ?.replace('FY ', '') // remove FY prefix → "2025-26"
+                      ?.split('-')[0] || // take only before dash → "2025"
+                    '2025',
+                  appraisalPeriod: 'Annual',
+                  empNo: employeeModel?.empNo || '',
+                  employeeName: employeeModel?.employeeName || '',
+                  primaryRole: employeeModel?.primaryRole || '',
+                  appraiser: employeeModel.appraiserName || '',
+                  task: 'view',
                 }).toString();
                 navigate(`/annual/add-appeal?${queryParams}`);
               }}

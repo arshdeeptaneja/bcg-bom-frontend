@@ -227,14 +227,58 @@ const EmployeeAppealList = () => {
    */
   const handleViewAppraisal = (row) => {
     // Navigate to appraisal view (adjust route as needed)
-    navigate('/appraisal/view', {
+
+    // // Annual: pass as query params
+    // const queryParams = new URLSearchParams({
+    //   financialYear,
+    //   appraisalPeriod,
+    //   urlId: employee.id || '',
+    //   roleName: employee.primary || '',
+    //   roleType: employee.primary || 'Administrative Officers',
+    // }).toString();
+    navigate(`/appraisal/check-in-form`, {
       state: {
-        empNo: row.empNumber,
-        empName: row.empName,
-        financialYear: financialYearForAPI,
-        quarter: filters.quarter,
+        financialYear: 'FY 2025-26',
+        appraisalPeriod: 'Annual',
+        quarter: 'quarter',
+        page_type: 'reva',
+        dateRange: '',
+        employee: {
+          empNo: row?.empNumber,
+        },
+        organizationName: row?.branch,
+        urlId: row?.roleId,
+        roleType: 'Reviewer',
+        pageType: 'reva',
+        intent: 'Review',
+        appraisalStatus: 'complete_reva',
+        task: 'view',
       },
     });
+
+    console.log('vSDpvapvadmv:', row);
+
+    // const empNumber = row.empNumber;
+    // const primaryRole = row.primaryRole;
+    // const queryParams = new URLSearchParams({
+    //                 financialYearForAPI,
+    //                 empNumber,
+    //                 urlId:  row.empID || '',
+    //                 roleName: primaryRole || '',
+    //                 roleType: primaryRole || 'Administrative Officers',
+    //               }).toString();
+    // navigate(`/appraisal/check-in-form?${queryParams}`, {
+    //       state: {
+    //         employee: employeeModel,
+    //         dateRange: cardDateRange,
+    //         financialYear,
+    //         appraisalPeriod,
+    //         quarter,
+
+    //         pageType: 'self',
+    //         appraisalStatus: employee.status,
+    //       },
+    //     });
   };
 
   const handleReset = () => {

@@ -633,7 +633,7 @@ export const appraisalAPI = {
       appendQueryParam(params, 'empNo', empNo);
       appendQueryParam(params, 'url', url);
       appendQueryParam(params, 'zoneName', zoneName);
-      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'roleType', 'Administrative Officers');
       appendQueryParam(params, 'financialYear', financialYear);
       appendQueryParam(params, 'quarter', quarter);
       appendQueryParam(params, 'pageType', pageType);
@@ -642,6 +642,41 @@ export const appraisalAPI = {
 
       const response = await apiClient.get(
         `/appraisal/employee_self_appraisal?${params.toString()}`
+      );
+      return response.data;
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  },
+
+  ///View Only
+  getEmployeeSelfAppraisalViewOnly: async ({
+    empNo,
+    url,
+    zoneName,
+    roleType,
+    financialYear,
+    quarter,
+    pageType,
+    appraisalStatus,
+    intent,
+  }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'url', url);
+      appendQueryParam(params, 'zoneName', zoneName);
+      appendQueryParam(params, 'roleType', 'Administrative Officers');
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'pageType', pageType);
+      // appendQueryParam(params, 'appraisalStatus', 'pending');
+      // appendQueryParam(params, 'intent', intent);
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
+
+      const response = await apiClient.get(
+        `/appraisal/employee_self_appraisal/view?${params.toString()}`
       );
       return response.data;
     } catch (error) {
@@ -897,7 +932,15 @@ export const appraisalAPI = {
   },
 
   // GET: Get reportee appraisal data for appraiser/reviewer review
-  getReporteeAppraisal: async ({ empNo, financialYear, quarter, url, zoneName, roleType }) => {
+  getReporteeAppraisal: async ({
+    empNo,
+    financialYear,
+    quarter,
+    url,
+    zoneName,
+    roleType,
+    appraisalStatus,
+  }) => {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'empNo', empNo);
@@ -906,6 +949,7 @@ export const appraisalAPI = {
       appendQueryParam(params, 'url', url);
       appendQueryParam(params, 'zoneName', zoneName);
       appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
 
       const response = await apiClient.get(
         `${appraisalBaseUrl}/reportee_appraisal?${params.toString()}`
@@ -1038,6 +1082,23 @@ export const appraisalAPI = {
       appendQueryParam(params, 'roleType', roleType);
 
       const response = await apiClient.get(`/appraisal/appeal_report?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching appeal report:', error);
+      throw error;
+    }
+  },
+
+  getAppealReportView: async ({ roleId, roleType, empNo, financialYear, appraisalPeriod }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'financialYear', financialYear);
+      appendQueryParam(params, 'appraisalPeriod', appraisalPeriod);
+
+      const response = await apiClient.get(`/appraisal/appeal_report/view?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching appeal report:', error);
@@ -1210,6 +1271,21 @@ export const appraisalAPI = {
       appendQueryParam(params, 'empNo', empNo);
       appendQueryParam(params, 'financialYear', financialYear);
       const response = await apiClient.get(`/appraisal/appeal_report/review?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('getAppealCommitteeReviewData error', error);
+      throw error;
+    }
+  },
+
+  getAppealCommitteeReviewDataView: async ({ roleId, roleType, empNo, financialYear }) => {
+    try {
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'roleId', roleId);
+      appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'financialYear', financialYear);
+      const response = await apiClient.get(`/appraisal/appeal_report/view?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('getAppealCommitteeReviewData error', error);

@@ -446,6 +446,17 @@ function AppContent() {
               }
             />
 
+             <Route
+              path=""
+              element={
+                isAuthenticated ? (
+                  <EmployeeQuarterlyExceptionListLayout onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+
             <Route
               path="/appeal-resolutions/annual-appeal/employee-appeal-list"
               element={
@@ -1031,6 +1042,18 @@ const ReviewQuarterlyExceptionLayout = ({ onLogout }) => {
 
 //Employee Quarterly Exception
 const EmployeeQuarterlyExceptionListLayout = ({ onLogout }) => {
+  return (
+    <>
+      <TopBar onLogout={onLogout} />
+      <LeftNavigation />
+      {/* <EmployeeQuarterlyExceptions /> */}
+      <EmployeeQuarterlyException />
+    </>
+  );
+};
+
+
+const EmployeeAppraisalCheckInView = ({ onLogout }) => {
   return (
     <>
       <TopBar onLogout={onLogout} />

@@ -11,8 +11,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 export const useAppraisalContext = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const {getUserProperty} = useAuth();
-  const zoneName = getUserProperty('ZNNAME', 'Central Zone') || "";
+  const { getUserProperty } = useAuth();
+  const zoneName = getUserProperty('ZNNAME', 'Central Zone') || '';
   console.log('[useAppraisalContext] zoneName from auth context:', zoneName);
   // Parse query parameters
   const searchParams = new URLSearchParams(location.search);
@@ -20,6 +20,7 @@ export const useAppraisalContext = () => {
 
   // Extract data from location state or fallback to query params
   const stateOrQuery = location.state || {};
+  console.log('stateOrQuery in useAppraisalContext:', stateOrQuery);
 
   // Core identifiers
   const empNo = stateOrQuery.employee?.empNo || queryParams.empNo;
@@ -43,10 +44,7 @@ export const useAppraisalContext = () => {
   const employeeNumber = employee?.empNo || '';
 
   // Normalize financial year to plain year format (e.g., "FY 2024-25" -> "2024")
-  const normalizedFinancialYear = useMemo(
-    () => extractYear(financialYear),
-    [financialYear]
-  );
+  const normalizedFinancialYear = useMemo(() => extractYear(financialYear), [financialYear]);
 
   // Determine if this is a quarterly flow
   const isQuarterlyFlow = useMemo(() => {
@@ -68,11 +66,15 @@ export const useAppraisalContext = () => {
   // Validation: check if required context is available
   const isContextValid = !!(employeeNumber && financialYear && appraisalPeriod);
 
+  const task = stateOrQuery.task;
+
+  console.log('TASK IN STATE :', task);
+
   return {
     // Navigation
     navigate,
     location,
-    
+
     // Core context values
     employee,
     employeeNumber,
@@ -97,5 +99,7 @@ export const useAppraisalContext = () => {
     // Derived values
     deriveRole,
     isContextValid,
+
+    task,
   };
 };

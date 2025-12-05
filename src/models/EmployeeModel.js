@@ -8,9 +8,10 @@ appraiser, and primary role. */
  * @param {string} props.employeeScale - The employee scale.
  * @param {string} props.roles - The employee roles.
  * @param {string} props.appraiser - The employee appraiser.
+ * @param {string} props.name - The employee appraiser name.
  */
 export default class User {
-  constructor({ empNo, employeeName, employeeScale, additionalRoles, appraiser, primaryRole, branch, url, appraisalStatus }) {
+  constructor({ empNo, employeeName, employeeScale, additionalRoles, appraiser, primaryRole, branch, url, appraisalStatus, appraiserName }) {
     this.empNo = empNo;
     this.employeeName = employeeName;
     this.employeeScale = employeeScale;
@@ -20,6 +21,7 @@ export default class User {
     this.branch = branch
     this.url = url
     this.appraisalStatus = appraisalStatus
+    this.appraiserName = appraiserName;
   }
 
   getFirstName() {

@@ -21,7 +21,7 @@ const AnnualAppraisalReview = () => {
   const { data, developmentInputs, isLoading, isError, context, formState, actions } =
     useAnnualAppraisalReview();
 
-  const { employee, dateRange, metadata } = context;
+  const { employee, dateRange, metadata ,task} = context;
   const {
     appraiserScores,
     appraiserDevResponses,
@@ -55,6 +55,8 @@ const AnnualAppraisalReview = () => {
   const nonMeasurableKraListData = data?.nonMeasurableKras || {};
   const totalNonMeasurableActual = data?.totalNonMeasurableActual || 0;
   const totalNonMeasurableMax = data?.totalNonMeasurableMax || 0;
+  console.log('Task in AnnualAppraisalReview :', task);
+  const enabled = (task === 'view') ? false : true;
 
   // Handle missing context
   if (!context.financialYear || !context.appraisalPeriod) {
@@ -119,7 +121,7 @@ const AnnualAppraisalReview = () => {
         {/* Final Score Summary (Read-only) */}
         <div className="final-score-summary-table-section d-flex flex-column shadow-sm m-1 p-3">
           <h5 className="text-primary fw-bold mb-3">Final Score Summary</h5>
-          <FinalScoreSummaryTable kraListData={kraData} />
+          <FinalScoreSummaryTable kraListData={kraData}  viewType={"repa"}/>
         </div>
 
         {/* Non-Measurable KRAs with Appraiser Scoring */}
@@ -209,6 +211,7 @@ const AnnualAppraisalReview = () => {
                                           : 'annual-score-btn-outline'
                                       }`}
                                       onClick={() => handleAppraiserScoreChange(kraId, score)}
+                                      disabled={!enabled}
                                     >
                                       {score}
                                     </button>
@@ -300,6 +303,7 @@ const AnnualAppraisalReview = () => {
                     placeholder="Enter Response"
                     value={selfInput.response ?? input.selfResponse ?? ''}
                     onChange={(e) => handleSelfDevInputChange(input.id, 'response', e.target.value)}
+                    disabled={true}
                   />
                   {(input.selfResponse2 || selfInput.response2) && (
                     <div className="mt-2">
@@ -350,6 +354,7 @@ const AnnualAppraisalReview = () => {
                   placeholder="Enter Response"
                   value={appraiserDevResponses[input.id] || ''}
                   onChange={(e) => handleAppraiserDevInputChange(input.id, e.target.value)}
+                  disabled={!enabled}
                 />
               </div>
             ))}
@@ -384,6 +389,7 @@ const AnnualAppraisalReview = () => {
                           value={option.value}
                           checked={currentValue === option.value}
                           onChange={() => handleChange(option.value)}
+                          disabled={!enabled}
                         />
                         <label
                           className="form-check-label"
@@ -401,7 +407,7 @@ const AnnualAppraisalReview = () => {
         )}
       </div>
 
-      <div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
+      {(enabled)?<div className="save-and-submit-button-section d-flex flex-row justify-content-end gap-3 m-3">
         <button
           type="submit"
           className="btn btn-primary"
@@ -410,7 +416,7 @@ const AnnualAppraisalReview = () => {
         >
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
-      </div>
+      </div>:null}
     </div>
   );
 };
