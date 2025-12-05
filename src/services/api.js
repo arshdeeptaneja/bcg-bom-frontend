@@ -631,13 +631,13 @@ export const appraisalAPI = {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'empNo', empNo);
-      appendQueryParam(params, 'url', '4');
+      appendQueryParam(params, 'url', url);
       appendQueryParam(params, 'zoneName', zoneName);
       appendQueryParam(params, 'roleType', 'Administrative Officers');
       appendQueryParam(params, 'financialYear', financialYear);
       appendQueryParam(params, 'quarter', quarter);
       appendQueryParam(params, 'pageType', pageType);
-      appendQueryParam(params, 'appraisalStatus', 'pending');
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
       appendQueryParam(params, 'intent', intent);
 
       const response = await apiClient.get(
@@ -650,8 +650,8 @@ export const appraisalAPI = {
     }
   },
 
-///View Only
-   getEmployeeSelfAppraisalViewOnly: async ({
+  ///View Only
+  getEmployeeSelfAppraisalViewOnly: async ({
     empNo,
     url,
     zoneName,
@@ -665,7 +665,7 @@ export const appraisalAPI = {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'empNo', empNo);
-      appendQueryParam(params, 'url', '4');
+      appendQueryParam(params, 'url', url);
       appendQueryParam(params, 'zoneName', zoneName);
       appendQueryParam(params, 'roleType', 'Administrative Officers');
       appendQueryParam(params, 'financialYear', financialYear);
@@ -673,7 +673,7 @@ export const appraisalAPI = {
       appendQueryParam(params, 'pageType', pageType);
       // appendQueryParam(params, 'appraisalStatus', 'pending');
       // appendQueryParam(params, 'intent', intent);
-      appendQueryParam(params, 'appraisalStatus', 'complete_self');
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
 
       const response = await apiClient.get(
         `/appraisal/employee_self_appraisal/view?${params.toString()}`
@@ -779,8 +779,6 @@ export const appraisalAPI = {
       throw error;
     }
   },
-
-
 
   // Reporting and reviewing authority update by emp number
   appraisalUpdate: async ({
@@ -934,7 +932,15 @@ export const appraisalAPI = {
   },
 
   // GET: Get reportee appraisal data for appraiser/reviewer review
-  getReporteeAppraisal: async ({ empNo, financialYear, quarter, url, zoneName, roleType }) => {
+  getReporteeAppraisal: async ({
+    empNo,
+    financialYear,
+    quarter,
+    url,
+    zoneName,
+    roleType,
+    appraisalStatus,
+  }) => {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'empNo', empNo);
@@ -943,6 +949,7 @@ export const appraisalAPI = {
       appendQueryParam(params, 'url', url);
       appendQueryParam(params, 'zoneName', zoneName);
       appendQueryParam(params, 'roleType', roleType);
+      appendQueryParam(params, 'appraisalStatus', appraisalStatus);
 
       const response = await apiClient.get(
         `${appraisalBaseUrl}/reportee_appraisal?${params.toString()}`
@@ -1082,7 +1089,7 @@ export const appraisalAPI = {
     }
   },
 
-    getAppealReportView: async ({ roleId, roleType ,empNo,financialYear,appraisalPeriod}) => {
+  getAppealReportView: async ({ roleId, roleType, empNo, financialYear, appraisalPeriod }) => {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'roleId', roleId);
@@ -1271,8 +1278,7 @@ export const appraisalAPI = {
     }
   },
 
-
-   getAppealCommitteeReviewDataView: async ({ roleId, roleType, empNo, financialYear }) => {
+  getAppealCommitteeReviewDataView: async ({ roleId, roleType, empNo, financialYear }) => {
     try {
       const params = new URLSearchParams();
       appendQueryParam(params, 'roleId', roleId);

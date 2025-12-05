@@ -60,24 +60,24 @@ export const useReviewAppeal = () => {
       context.empNo,
       context.financialYear,
     ],
-    queryFn: () =>{
-      if(context.viewOnly){
+    queryFn: () => {
+      if (context.viewOnly) {
         return appraisalAPI.getAppealCommitteeReviewDataView({
-        roleId: context.roleId,
-        roleType: context.roleType,
-        empNo: context.empNo,
-        financialYear: context.financialYear,
-      });
+          roleId: context.roleId,
+          roleType: context.roleType,
+          empNo: context.empNo,
+          financialYear: context.financialYear,
+        });
       }
 
-       return appraisalAPI.getAppealCommitteeReviewData({
+      return appraisalAPI.getAppealCommitteeReviewData({
         roleId: context.roleId,
         roleType: context.roleType,
         empNo: context.empNo,
         financialYear: context.financialYear,
       });
     },
-     
+
     enabled: !!(context.roleId && context.roleType && context.empNo && context.financialYear),
   });
 
@@ -402,18 +402,29 @@ export const useReviewAppeal = () => {
           return {
             target: {
               action: mapAction(action),
-              appraisee_score: toStringOrDefaultZero(kraObject?.appraiseeScore),
-              new_mpb: toStringOrDefaultZero(kraObject?.mpbNewValue),
+              appraisee_score: parseInt(toStringOrDefaultZero(kraObject?.appraiseeScore)),
+              new_mpb: parseInt(toStringOrDefaultZero(kraObject?.mpbNewValue)),
               appeal_id: String(appeal_id || ''),
               comment: comment || '',
               kra_type: kraObject?.kraType || '',
-              new_score: action === 'ACCEPT_AND_EDIT' ? toStringOrDefaultZero(score) : '0',
-              new_target: toStringOrDefaultZero(kraObject?.targetNewValue || kraObject?.target),
-              new_actual: toStringOrDefaultZero(newActualValue),
-              prev_target: toStringOrDefaultZero(kraObject?.targetOldValue || kraObject?.target),
-              prev_actual: toStringOrDefaultZero(kraObject?.actualOldValue || kraObject?.actual),
-              old_target: toStringOrDefaultZero(kraObject?.targetOldValue || kraObject?.target),
-              old_actual: toStringOrDefaultZero(kraObject?.actualOldValue || kraObject?.actual),
+              new_score:
+                action === 'ACCEPT_AND_EDIT' ? parseInt(toStringOrDefaultZero(score)) : '0',
+              new_target: parseInt(
+                toStringOrDefaultZero(kraObject?.targetNewValue || kraObject?.target)
+              ),
+              new_actual: parseInt(toStringOrDefaultZero(newActualValue)),
+              prev_target: parseInt(
+                toStringOrDefaultZero(kraObject?.targetOldValue || kraObject?.target)
+              ),
+              prev_actual: parseInt(
+                toStringOrDefaultZero(kraObject?.actualOldValue || kraObject?.actual)
+              ),
+              old_target: parseInt(
+                toStringOrDefaultZero(kraObject?.targetOldValue || kraObject?.target)
+              ),
+              old_actual: parseInt(
+                toStringOrDefaultZero(kraObject?.actualOldValue || kraObject?.actual)
+              ),
               AP_KRA_ID: String(kraObject?.kraId || ''),
             },
           };

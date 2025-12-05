@@ -118,8 +118,8 @@ export const useAnnualAppraisal = () => {
     task,
   } = context;
 
-  console.log("Task in context : ",task);
-  
+  console.log('Task in context : ', task);
+
   // Role state management - Annual always starts as APPRAISEE
   const [currentRole, setCurrentRole] = useState('APPRAISEE');
 
@@ -238,17 +238,17 @@ export const useAnnualAppraisal = () => {
       const apiParams = {
         empNo: employeeNumber,
         url: urlId,
-        zoneName: zoneName,
+        zoneName: zoneName || 'Central Zone',
         roleType: roleType || 'Administrative Officers',
         financialYear: normalizedFinancialYear,
-        quarter: 'Q2', // Hardcoded for annual until backend fix
+        quarter: 'Q2', // Hardcoded for annual since it is not used
         pageType: pageType,
         appraisalStatus: employee.appraisalStatus,
       };
-      console.log("employee.appraisalStatus:",employee.appraisalStatus);
+      console.log('employee.appraisalStatus:', employee.appraisalStatus);
       console.log('[useAnnualAppraisal] API call params:', apiParams);
       if (pageType === 'self') {
-        if(task == "view"){
+        if (task == 'view') {
           return appraisalAPI.getEmployeeSelfAppraisalViewOnly(apiParams);
         }
         return appraisalAPI.getEmployeeSelfAppraisal(apiParams);
@@ -563,6 +563,7 @@ export const useAnnualAppraisal = () => {
    */
   const buildAnnualSubmitPayload = () => {
     // Build kraData array - spread original KRA fields, update with user input
+    console.log('rawKraData', rawKraData);
     const kraData = rawKraData.map((originalKra) => {
       const kraId = originalKra.AP_KRA_ID;
       const userInput = nonMeasurableScores[kraId] || {};
@@ -592,7 +593,8 @@ export const useAnnualAppraisal = () => {
         // Spread all original fields from GET response
         ...originalKra,
         // Update with user input
-        [scoreKey]: userInput.score || originalKra.SCORE,
+        [scoreKey]:
+          (parseInt(userInput.score) / 5) * parseInt(originalKra.MAX_SCORE) || originalKra.SCORE, // Score Calculation normalised
         [actualKey]: userInput.score || originalKra.ACTUAL,
         // FIRSTCOMMENT is the appraisee's self comment
         FIRSTCOMMENT: userInput.comment || originalKra.COMMENT_SELF_1 || null,
@@ -665,8 +667,6 @@ export const useAnnualAppraisal = () => {
       warningFlag: false,
       warningComment: '',
       varianceFlag: false,
-
-      
     };
   };
 
@@ -765,6 +765,7 @@ export const useAnnualAppraisal = () => {
       dateRange,
       metadata: transformedData?.metadata || {},
       task,
+      pageType,
     },
 
     // Role state

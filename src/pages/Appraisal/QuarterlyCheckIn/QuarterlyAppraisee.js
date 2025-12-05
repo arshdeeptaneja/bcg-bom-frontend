@@ -42,9 +42,9 @@ export default function QuarterlyAppraisee() {
   const getDisplayStatus = (status) => {
     if (!status) return 'Pending at Appraisee';
     const statusMap = {
-      'pending': 'Pending at Appraisee',
-      'complete_self': 'Pending at Appraiser',
-      'complete': 'Completed'
+      pending: 'Pending at Appraisee',
+      complete_self: 'Pending at Appraiser',
+      complete: 'Completed',
     };
     return statusMap[status] || status;
   };
@@ -57,7 +57,7 @@ export default function QuarterlyAppraisee() {
         empNo: empNo,
         role: role,
         financialYear: parseInt(extractYear(financialYear)),
-        appraisalPeriod: appraisalPeriod.toLowerCase() === "quarterly" ? "quarter" : "",
+        appraisalPeriod: appraisalPeriod.toLowerCase() === 'quarterly' ? 'quarter' : '',
         quarter: quarter || '',
       }),
     enabled: !!empNo && !!financialYear && !!appraisalPeriod && !!quarter,
@@ -74,7 +74,9 @@ export default function QuarterlyAppraisee() {
     return (
       <div className="pageWrapper">
         <div className="text-center mt-5">
-          <p className="text-danger fw-semibold">Missing financial year, appraisal period, or quarter</p>
+          <p className="text-danger fw-semibold">
+            Missing financial year, appraisal period, or quarter
+          </p>
         </div>
       </div>
     );
@@ -118,21 +120,20 @@ export default function QuarterlyAppraisee() {
   const responseData = data?.data || data;
   const redResult = responseData?.redresult || [];
 
-
   const appraisalScoreDash = responseData?.appraisal_score_dash || [];
   const averageScore = responseData?.overall_avg_score ?? 0;
-            
+
   const maxScore = responseData?.overall_max_score ?? 0;
   const cardData = responseData?.result?.[0] || responseData?.redresult?.[0] || null;
 
-  console.log("card Data : ",cardData);
+  console.log('card Data : ', cardData);
 
   const additionalRoles = [
     cardData?.ADDITIONAL_ROLE_1,
     cardData?.ADDITIONAL_ROLE_2,
     cardData?.ADDITIONAL_ROLE_3,
     cardData?.ADDITIONAL_ROLE_4,
-  ].filter(role => role && role !== "none");
+  ].filter((role) => role && role !== 'none');
 
   const hasCardData = !!cardData;
 
@@ -140,19 +141,25 @@ export default function QuarterlyAppraisee() {
 
   const employeeModel = hasCardData
     ? new EmployeeModel({
-      empNo: cardData?.pf_number || 'N/A',
-      employeeName: cardData?.emp_name || 'N/A',
-      employeeScale: cardData?.scale || 'N/A',
-      branch: cardData?.organization,
-      url: cardData?.url_id,
-      roles: [cardData?.secondary, cardData?.tertiary, cardData?.ADDITIONAL_ROLE_3, cardData?.ADDITIONAL_ROLE_4 ],
-      appraiser: cardData?.reporting_authority_ecno || 'N/A',
-      primaryRole: cardData?.primary
-    })
+        empNo: cardData?.pf_number || 'N/A',
+        employeeName: cardData?.emp_name || 'N/A',
+        employeeScale: cardData?.scale || 'N/A',
+        branch: cardData?.organization,
+        url: cardData?.url_id,
+        roles: [
+          cardData?.secondary,
+          cardData?.tertiary,
+          cardData?.ADDITIONAL_ROLE_3,
+          cardData?.ADDITIONAL_ROLE_4,
+        ],
+        appraiser: cardData?.reporting_authority_ecno || 'N/A',
+        appraisalStatus: cardData?.appraisal_status || cardData?.status || 'pending',
+        primaryRole: cardData?.primary,
+      })
     : null;
-  console.log("RED RESULT:", redResult);
-  console.log("CARD DATA:", cardData);
-  console.log("EMPLOYEE MODEL:", employeeModel);
+  console.log('RED RESULT:', redResult);
+  console.log('CARD DATA:', cardData);
+  console.log('EMPLOYEE MODEL:', employeeModel);
 
   return (
     <div className="pageWrapper">
@@ -184,7 +191,9 @@ export default function QuarterlyAppraisee() {
         {!hasCardData ? (
           <div className="text-center mt-5">
             <p className="text-muted fw-semibold">No appraisal data available for this period</p>
-            <p className="text-muted">Please check back later or contact HR if you believe this is an error.</p>
+            <p className="text-muted">
+              Please check back later or contact HR if you believe this is an error.
+            </p>
           </div>
         ) : (
           <EmployeeAppraisalCard
@@ -203,43 +212,43 @@ export default function QuarterlyAppraisee() {
             // isCheckInDisabled={false}
             isExceptionDisabled={cardData?.appraisal_status !== 'complete'}
             onAddCheckIn={() => {
-              console.log("Add checkin is working")
+              console.log('Add checkin is working');
               navigate('/quarterly/quaterly-appraisee-check-in', {
                 state: {
                   financialYear,
                   appraisalPeriod,
                   quarter,
-                  page_type: "self",
+                  page_type: 'self',
                   dateRange: cardDateRange,
                   employee: employeeModel,
-                  intent: "Fill"
+                  intent: 'Fill',
                 },
               });
             }}
             isViewOnly={cardData?.appraisal_status == 'pending' ? false : true}
             onViewSummary={() => {
-                navigate('/quarterly/quaterly-appraisee-check-in', {
+              navigate('/quarterly/quaterly-appraisee-check-in', {
                 state: {
                   financialYear,
                   appraisalPeriod,
                   quarter,
-                  page_type: "self",
+                  page_type: 'self',
                   dateRange: cardDateRange,
                   employee: employeeModel,
-                  intent: "View", 
+                  intent: 'View',
                 },
               });
-             }}
+            }}
             onAddException={() => {
               navigate('/appraisal/exception-quarterly', {
                 state: {
                   financialYear,
                   appraisalPeriod,
                   quarter,
-                  page_type: "self",
+                  page_type: 'self',
                   dateRange: cardDateRange,
                   employee: employeeModel,
-                  intent: "Fill"
+                  intent: 'Fill',
                 },
               });
             }}

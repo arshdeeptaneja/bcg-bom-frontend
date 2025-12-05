@@ -179,7 +179,9 @@ function AppealReviewKRASection({
                         <input
                           type="text"
                           className="appeal-score-input"
-                          value={kra.newScore || ''}
+                          value={
+                            action === 'ACCEPT_AS_IS' ? kra.newScore || '' : kra.oldScore || ''
+                          }
                           readOnly
                           style={{ backgroundColor: '#f8f9fa' }}
                           disabled={disabled}

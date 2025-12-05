@@ -9,8 +9,8 @@
 //  * @param {boolean} props.isEditable - Whether the table is editable
 //  * @returns
 //  */
-// export default function FinalScoreSummaryTable({ 
-//   kraListData, 
+// export default function FinalScoreSummaryTable({
+//   kraListData,
 //   selectedCategories = new Set(),
 //   onSelectionChange,
 //   finalScoreEdits = new Map(),
@@ -55,7 +55,7 @@
 //         </thead>
 //         <tbody>
 //           {kraListData
-//             .filter(kra => kra.Category === "Business Dimension")  
+//             .filter(kra => kra.Category === "Business Dimension")
 //           .map((kra) => (
 //             <tr key={kra.KraName} style={{ backgroundColor: isSelected(kra.KraName) ? '#e7f3ff' : 'transparent' }}>
 //               <td className="text-center" style={{ padding: "12px 16px", border: "1px solid #ddd", verticalAlign: 'middle' }}>
@@ -94,15 +94,13 @@
 //   );
 // }
 
-
-
 /**
  * Final Score Summary Table (Dynamic by View Type)
  * @param {Array} kraListData
  * @param {string} viewType = "self" | "repa" | "reva" | "addAppeal" | "appealReview"
  * @param {Function} onFinalScoreChange (only when viewType === 'addAppeal')
  */
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 /**
  * FinalScoreSummaryTable
@@ -110,10 +108,10 @@ import React, { useState } from "react";
  */
 export default function FinalScoreSummaryTable({
   kraListData = [],
-  viewType = "self",
+  viewType = 'self',
   finalScoreEdits = new Map(),
   onFinalScoreChange,
-  isEditable = false
+  isEditable = false,
 }) {
   // hooks always at top
   const [editableRows, setEditableRows] = useState({}); // { [kraName]: true }
@@ -123,33 +121,35 @@ export default function FinalScoreSummaryTable({
   // Column configuration
   const viewConfig = {
     self: [
-      { key: "KraName", label: "KRAs" },
-      { key: "KraWeight", label: "Weightage" },
+      { key: 'KraName', label: 'KRAs' },
+      { key: 'KraWeight', label: 'Weightage' },
     ],
     repa: [
-      { key: "KraName", label: "KRAs" },
-      { key: "KraWeight", label: "Weightage" },
-      { key: "ReportingAuthorityScore", label: "Reporting Score" },
+      { key: 'KraName', label: 'KRAs' },
+      { key: 'KraWeight', label: 'Weightage' },
+      { key: 'SelfScore', label: 'Score' },
+      { key: 'ReportingAuthorityScore', label: 'Reporting Authority Score' },
     ],
     reva: [
-      { key: "KraName", label: "KRAs" },
-      { key: "KraWeight", label: "Weightage" },
-      { key: "ReportingAuthorityScore", label: "Reporting Score" },
-      { key: "ReviewingAuthorityScore", label: "Reviewing Authority" },
+      { key: 'KraName', label: 'KRAs' },
+      { key: 'KraWeight', label: 'Weightage' },
+      { key: 'SelfScore', label: 'Score' },
+      { key: 'ReportingAuthorityScore', label: 'Reporting Authority Score' },
+      { key: 'ReviewingAuthorityScore', label: 'Reviewing Authority Score' },
     ],
     addAppeal: [
-      { key: "Action", label: "" },
-      { key: "KraName", label: "KRAs" },
-      { key: "KraWeight", label: "Weightage" },
-      { key: "Score", label: "Score" },
-      { key: "FinalScore", label: "Final Score" },
+      { key: 'Action', label: '' },
+      { key: 'KraName', label: 'KRAs' },
+      { key: 'KraWeight', label: 'Weightage' },
+      { key: 'SelfScore', label: 'Score' },
+      { key: 'FinalScore', label: 'Final Score' },
     ],
     appealReview: [
-      { key: "Category", label: "Category" },
-      { key: "Roles", label: "Roles" },
-      { key: "Actual", label: "Actual" },
-      { key: "KraWeight", label: "Weightage" },
-      { key: "Score", label: "Score" },
+      { key: 'Category', label: 'Category' },
+      { key: 'Roles', label: 'Roles' },
+      { key: 'Actual', label: 'Actual' },
+      { key: 'KraWeight', label: 'Weightage' },
+      { key: 'SelfScore', label: 'Score' },
     ],
   };
 
@@ -158,12 +158,12 @@ export default function FinalScoreSummaryTable({
   const getFinalScore = (kra) =>
     finalScoreEdits && finalScoreEdits.has(kra.KraName)
       ? finalScoreEdits.get(kra.KraName)
-      : kra.FinalScore ?? "";
+      : kra.PostAppealScore ?? kra.FinalScore ?? '';
 
   // For self view show only Business Dimension
   const filteredData =
-    (viewType === "self" )
-      ? kraListData.filter((kra) => kra.Category === "Business Dimension")
+    viewType === 'addAppeal' || viewType === 'appealReview'
+      ? kraListData.filter((kra) => kra.KraName === 'Business Dimension')
       : kraListData;
 
   const toggleEditable = (kraName) => {
@@ -172,14 +172,17 @@ export default function FinalScoreSummaryTable({
 
   return (
     <div className="table-responsive">
-      <table className="table text-start final-score-summary-table" style={{ borderCollapse: "collapse" }}>
+      <table
+        className="table text-start final-score-summary-table"
+        style={{ borderCollapse: 'collapse' }}
+      >
         <thead>
           <tr>
             {columns.map((col) => (
               <th
                 key={col.key}
                 className="text-center"
-                style={{ padding: "10px 12px", borderBottom: "1px solid #ddd" }}
+                style={{ padding: '10px 12px', borderBottom: '1px solid #ddd' }}
               >
                 {col.label}
               </th>
@@ -196,16 +199,25 @@ export default function FinalScoreSummaryTable({
               <tr key={kraKey}>
                 {columns.map((col) => {
                   // FinalScore cell in addAppeal - editable only when checkbox checked
-                  if (viewType === "addAppeal" && col.key === "FinalScore") {
+                  if (viewType === 'addAppeal' && col.key === 'FinalScore') {
                     return (
-                      <td key={col.key} className="text-center" style={{ padding: "8px 12px",display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <td
+                        key={col.key}
+                        className="text-center"
+                        style={{
+                          padding: '8px 12px',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
                         <input
                           type="number"
                           className="form-control form-control-sm text-center"
                           style={{
-                            maxWidth: "100px",
-                            background: isRowEditable ? "white" : "#f3f3f3",
-                            cursor: isRowEditable ? "text" : "not-allowed",
+                            maxWidth: '100px',
+                            background: isRowEditable ? 'white' : '#f3f3f3',
+                            cursor: isRowEditable ? 'text' : 'not-allowed',
                           }}
                           disabled={!isRowEditable}
                           value={getFinalScore(kra)}
@@ -217,10 +229,17 @@ export default function FinalScoreSummaryTable({
                   }
 
                   // Action column in addAppeal - checkbox to enable edit
-                  if (viewType === "addAppeal" && col.key === "Action") {
+                  if (viewType === 'addAppeal' && col.key === 'Action') {
                     return (
-                      <td key={col.key} className="text-center" style={{ padding: "8px 12px" }}>
-                        <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                      <td key={col.key} className="text-center" style={{ padding: '8px 12px' }}>
+                        <label
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            cursor: 'pointer',
+                          }}
+                        >
                           <input
                             type="checkbox"
                             checked={isRowEditable}
@@ -236,8 +255,8 @@ export default function FinalScoreSummaryTable({
 
                   // Score cell in other views — default render (and for addAppeal Score column)
                   return (
-                    <td key={col.key} className="text-center" style={{ padding: "8px 12px" }}>
-                      {kra[col.key] ?? "-"}
+                    <td key={col.key} className="text-center" style={{ padding: '8px 12px' }}>
+                      {kra[col.key] ?? '-'}
                     </td>
                   );
                 })}
@@ -249,8 +268,6 @@ export default function FinalScoreSummaryTable({
     </div>
   );
 }
-
-
 
 // export default function FinalScoreSummaryTable({
 //   kraListData,
@@ -323,7 +340,7 @@ export default function FinalScoreSummaryTable({
 //           {filteredData.map((kra) => (
 //             <tr key={kra.KraName}>
 //               {columns
-              
+
 //               .map((col) => {
 //                 // 👇 Editable final score input for addAppeal
 //                 if (col.key === "FinalScore" && viewType === "addAppeal") {

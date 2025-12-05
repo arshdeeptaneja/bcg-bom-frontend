@@ -20,7 +20,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
 
 const STATUS_MAPPING = {
-  complete_reva: 'Pending at Acceptor',
+  complete_reva: 'Completed',
   complete_self: 'Pending at Appraiser',
   complete_repa: 'Pending at Reviewer',
   pending: 'Pending at Appraisee',
@@ -312,12 +312,13 @@ export default function ReviewerDashboard() {
             empNo: record?.EMP_ID,
             employeeName: record?.EMP_NAME,
             url: record?.URL_ID,
-            appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
             employeeScale: appraisalPeriod === 'Annual' ? record?.EMP_SCALE : record?.SCALE,
             additionalRoles: buildAdditionalRoles(record),
             branch: record?.ORGANIZATION || record?.ORGANISATION,
             appraiser: record?.REPORTING_AUTHORITY_NO || authEmpNo,
             primaryRole: appraisalPeriod === 'Annual' ? record?.PRIMARY_ROLE : record?.MAIN_ROLE,
+            appraisalStatus:
+              record?.APPRAISAL_STATUS || record?.STATUS || record?.status || 'pending',
           });
 
           const dateRange = buildDateRange(
@@ -337,9 +338,7 @@ export default function ReviewerDashboard() {
               appraisalStatus={getDisplayStatus(record?.APPRAISAL_STATUS || record?.STATUS)}
               exceptionStatus={record?.EXCEPTION_STATUS || 'NOT CREATED'}
               scoreData={scoreTable}
-              isCheckInDisabled={
-                record?.APPRAISAL_STATUS !== 'complete_repa' && record?.STATUS !== 'complete_repa'
-              }
+              isCheckInDisabled={employeeModel.appraisalStatus !== 'complete_repa'}
               onAddCheckIn={() =>
                 navigate('/appraisal/check-in-form', {
                   state: {
@@ -358,25 +357,52 @@ export default function ReviewerDashboard() {
                   },
                 })
               }
-              isViewOnly={true}
+              isViewOnly={employeeModel.appraisalStatus === 'complete_reva'}
               onViewSummary={() => {
-                 navigate('/appraisal/annual/view', {
-                  state: {
-                    financialYear,
-                    appraisalPeriod,
-                    quarter,
-                    page_type: 'reva',
-                    dateRange,
-                    employee: employeeModel,
-                    zoneName:"",
-                    organizationName: record?.ORGANIZATION,
-                    urlId: record?.ID,
-                    roleType: 'reviewer',
-                    pageType: 'reva',
-                    intent: 'Review',
-                    appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
-                  },
-                })
+                if (appraisalPeriod === 'Annual') {
+                  // // Annual: pass as query params
+                  // const queryParams = new URLSearchParams({
+                  //   financialYear,
+                  //   appraisalPeriod,
+                  //   urlId: employee.id || '',
+                  //   roleName: employee.primary || '',
+                  //   roleType: employee.primary || 'Administrative Officers',
+                  // }).toString();
+                  navigate(`/appraisal/check-in-form`, {
+                    state: {
+                      financialYear,
+                      appraisalPeriod,
+                      quarter,
+                      page_type: 'reva',
+                      dateRange,
+                      employee: employeeModel,
+                      organizationName: record?.ORGANIZATION,
+                      urlId: record?.ID,
+                      roleType: 'reviewer',
+                      pageType: 'reva',
+                      intent: 'Review',
+                      appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                      task: 'view',
+                    },
+                  });
+                } else {
+                  navigate('/quarterly/quaterly-appraisee-check-in', {
+                    state: {
+                      financialYear,
+                      appraisalPeriod,
+                      quarter,
+                      page_type: 'reva',
+                      dateRange,
+                      employee: employeeModel,
+                      organizationName: record?.ORGANIZATION,
+                      urlId: record?.URL_ID,
+                      roleType: 'reviewer',
+                      pageType: 'reva',
+                      intent: 'View',
+                      appraisalStatus: record?.APPRAISAL_STATUS || record?.STATUS,
+                    },
+                  });
+                }
               }}
               onAddException={() => {}}
             />

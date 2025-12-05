@@ -1,10 +1,14 @@
 import { RoleTimeline } from '..';
 import './CheckInDescriptionSection.css';
 
-export default function CheckInDescriptionSection({ employee, dateRange, showDownloadButton = false, onDownload }) {
+export default function CheckInDescriptionSection({
+  employee,
+  dateRange,
+  showDownloadButton = false,
+  onDownload,
+}) {
   return (
-    <div className="check-in-description-section" style={{padding: '16px'}}>
-
+    <div className="check-in-description-section" style={{ padding: '16px' }}>
       <div className="row">
         {/* Column 1 */}
         <div className="col-md-3">
@@ -19,24 +23,22 @@ export default function CheckInDescriptionSection({ employee, dateRange, showDow
               <div className="text-muted small">Employee Number</div>
               <div className="fw-semibold">{employee.empNo}</div>
             </div>
-     
           </div>
 
-          <div className="d-flex align-items-start gap-3 mt-3">
-            <div
-              className="rounded bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
-              style={{ width: 40, height: 40 }}
-            >
-              <i className="bi bi-calendar-event" />
+          {dateRange && (
+            <div className="d-flex align-items-start gap-3 mt-3">
+              <div
+                className="rounded bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                style={{ width: 40, height: 40 }}
+              >
+                <i className="bi bi-calendar-event" />
+              </div>
+              <div>
+                <div className="text-muted small">Duration</div>
+                <div className="fw-semibold">{dateRange}</div>
+              </div>
             </div>
-            <div>
-              <div className="text-muted small">Duration</div>
-              <div className="fw-semibold">{dateRange}</div>
-            </div>
-          </div>
-
-          
-
+          )}
         </div>
 
         {/* Column 2 */}
@@ -121,12 +123,12 @@ export default function CheckInDescriptionSection({ employee, dateRange, showDow
             <button
               className="btn"
               style={{
-                backgroundColor: "var(--accent-color)",
-                color: "#fff",
-                borderRadius: "20px",
-                padding: "8px 20px",
-                fontSize: "14px",
-                whiteSpace: "nowrap"
+                backgroundColor: 'var(--accent-color)',
+                color: '#fff',
+                borderRadius: '20px',
+                padding: '8px 20px',
+                fontSize: '14px',
+                whiteSpace: 'nowrap',
               }}
               onClick={onDownload}
             >

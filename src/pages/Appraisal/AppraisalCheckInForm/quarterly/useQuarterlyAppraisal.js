@@ -7,7 +7,7 @@ import { useAppraisalContext } from '../useAppraisalContext';
 
 /**
  * Quarterly Appraisal Hook
- * 
+ *
  * Handles all quarterly-specific logic including:
  * - Data fetching via getQuarterlyCheckInReport
  * - Month-based KRA grouping (O(1) lookup for tab switching)
@@ -80,7 +80,11 @@ export const useQuarterlyAppraisal = () => {
   ];
 
   // Fetch quarterly appraisal data
-  const { data: apiResponse, isLoading, isError } = useQuery({
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey,
     queryFn: () =>
       appraisalAPI.getQuarterlyCheckInReport({
@@ -90,7 +94,7 @@ export const useQuarterlyAppraisal = () => {
         financialYear: normalizedFinancialYear,
         quarter: quarter || '',
         pageType: pageType || 'self',
-        appraisalStatus: initialAppraisalStatus || 'pending',
+        appraisalStatus: employee?.appraisalStatus || 'pending',
         intent: intent || 'Fill',
         roleId: employee?.primaryRole || 'default',
       }),
@@ -123,7 +127,8 @@ export const useQuarterlyAppraisal = () => {
         performanceNonMeasurable: rawData.performanceNonMeasurableComment || '',
         semiMeasurable: rawData.performanceSemiMeasurableComment || '',
         highlights: rawData.performancePeriodComment || rawData.HIGHLIGHTS_COMMENTS || '',
-        areasOfImprovement: rawData.areasPerformanceComment || rawData.BELOW_EXPECTATIONS_COMMENTS || '',
+        areasOfImprovement:
+          rawData.areasPerformanceComment || rawData.BELOW_EXPECTATIONS_COMMENTS || '',
       };
 
       return {
