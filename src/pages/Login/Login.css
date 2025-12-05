@@ -1,18 +1,24 @@
 :root {
-  --bs-primary: #0389d0;
-  --bs-primary-rgb: 3, 137, 208;
+  --bs-primary: #185f73;
+  --bs-primary-rgb: 24, 95, 115;
   --bs-btn-font-family: "Lato", sans-serif;
 }
 
 .btn-primary {
-  --bs-btn-bg: var(--bs-primary);
-  --bs-btn-hover-bg: #0273b0;
+  background-color: #185f73 !important;
+  color: white;
+}
+
+.btn-primary:hover {
+  /* background-color: #e9ecef; */
+  border-color: var(--accent-color) !important;
+  color: var(--accent-color) !important; /* optional, keeps text visible on grey */
 }
 
 .login-container {
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: url("../../assets/login-bg.png") no-repeat left top;
+   background: url("../../assets/login-bg.jpeg") no-repeat left top;
   background-size: cover;
 }
 
@@ -113,7 +119,10 @@
   width: 40px;
   height: 70px;
 }
+.bg-darks {
+  background-color:#e2e3e3;
 
+}
 .growth-plants {
   position: absolute;
   top: 0;
@@ -164,7 +173,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding-right: 40px;
 }
 
 .login-form-container {

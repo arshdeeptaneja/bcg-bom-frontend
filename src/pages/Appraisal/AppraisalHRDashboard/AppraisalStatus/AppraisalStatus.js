@@ -7,88 +7,227 @@
  * appraisal period and quarterly period, a table displaying appraisal data with options to update
  * status, and buttons for actions like search and reset.
  */
-// AppraiserPage.jsx
+/**
+ * Appraisal Status Change Utility
+ * Allows HR admins to search and update appraisal status for employees
+ */
+import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../../../../contexts/AuthContext";
 import { BackButton } from '../../../../components/common';
 import { FaInfoCircle } from "react-icons/fa";
 import { appraisalAPI } from '../../../../services/api';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 import "./AppraisalStatus.css";
 import { useState } from 'react';
 
 const AppraiserStatus = () => {
-  const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
-  const [selectedQuarter, setSelectedQuarter] = useState('Q1');
-  const [ecNumber, setEcNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [tableData, setTableData] = useState([]);
-  const [noData, setNoData] = useState(false);
+  // State management
+  const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly'); // 'Quarterly' or 'Annual'
+  const [selectedQuarter, setSelectedQuarter] = useState('Q1'); // Q1, Q2, Q3, Q4
+  const [ecNumber, setEcNumber] = useState(""); // Employee EC number for search
+  const [shouldSearch, setShouldSearch] = useState(false); // Controls when to trigger search query
+  const [rowStatus, setRowStatus] = useState({}); // Local selected status per row (by urlId)
+  const queryClient = useQueryClient();
 
+  // Format date strings like "2024-06-29T18:30:00.000+00:00" -> "2024-06-30"
+  const formatDate = (value) => {
+    if (!value) return "";
+    try {
+      const d = new Date(value);
+      // Handle invalid date
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toISOString().slice(0, 10);
+    } catch {
+      return "";
+    }
+  };
 
-  const handleSearch = async () => {
+  // Extract year from financial year string (e.g., "FY 2024" -> "2024")
+  const extractYear = (fy) => {
+    const match = fy.match(/FY (\d{4})/);
+    return match ? match[1] : new Date().getFullYear().toString();
+  };
+
+  // Get user data from auth context
+  const { getUserProperty } = useAuth();
+  const sol = getUserProperty("sol") 
+           || getUserProperty("LOCATION") 
+           || getUserProperty("solId");
+  const empNo = getUserProperty("empNo") 
+             || getUserProperty("EMP_ID");
+  const roleName = getUserProperty("ROLE_TYPE") 
+                || getUserProperty("roleType") 
+                || getUserProperty("designation")
+                || getUserProperty("ROLE_NAME");
+
+  // Get query params from URL
+  const [searchParams] = useSearchParams();
+  const quarter = searchParams.get("quarter"); // Q1, Q2, Q3, Q4
+  const financialYear = searchParams.get("financialYear"); 
+
+  // Determine appraisal period value to send in API:
+  // use the selectedQuarter from UI when Quarterly, else "Annual"
+  const appraisalPeriodValue = appraisalPeriod === "Quarterly" ? selectedQuarter : "Annual";
+
+  // React Query: Search HR status records
+  const {
+    data: tableData = [],
+    isLoading: loading,
+    isError: isSearchError,
+    error: searchError,
+    refetch: refetchSearch,
+  } = useQuery({
+    queryKey: ["hrStatusSearch", ecNumber, extractYear(financialYear), appraisalPeriodValue],
+    queryFn: async () => {
+      const res = await appraisalAPI.searchHRStatusUpdate({
+        financialYear: extractYear(financialYear),
+        appraisalPeriod: appraisalPeriodValue, // Q1/Q2/Q3/Q4 or "Annual"
+        empNo: empNo,
+        searchEmpNo: ecNumber,
+      });
+
+      // API response shape:
+      // {
+      //   results: [
+      //     {
+      //       VARFY: 2025,
+      //       ROLE_END_DATE: "...",
+      //       APPRAISAL_STATUS: "NA",
+      //       PRIMARY_ROLE: "...",
+      //       ORGANIZATION_NAME: "...",
+      //       EMP_NAME: "...",
+      //       EMP_ID: "36663",
+      //       URL_ID: "S-29364",
+      //       LOCATION_ID: 903400,
+      //       BRNAME: "...",
+      //       ZNNAME: "Central Zone",
+      //       ...
+      //     }
+      //   ]
+      // }
+
+      const rawRows = Array.isArray(res?.results) ? res.results : [];
+
+      // Map backend fields into the shape used by the table body
+      const mapped = rawRows.map((item) => ({
+        urlId: item.URL_ID || item.urlId || item.UrlId || "",
+        ecNumber: item.EMP_ID || item.empNo || item.EC_NUMBER || "",
+        employeeName: item.EMP_NAME || item.empName || "",
+        solId: item.LOCATION_ID || item.SOL_ID || "",
+        zone: item.ZNNAME || item.REGNM || "",
+        appraisalstatus: item.APPRAISAL_STATUS || item.appraisalStatus || "",
+        score:item.TOTAL_MEASURABLE_PERFORMANCE_SCORE??
+          item.MEASURABLE_PERFORMANCE_SCORE ??
+          "0.0",
+        // Format dates to "yyyy-mm-dd"
+        startDate: formatDate(item.ROLE_START_DATE),
+        endDate: formatDate(item.ROLE_END_DATE),
+        reason: item.REMARKS || item.reason || "",
+        // Keep original fields if needed later (e.g., for payload)
+        raw: item,
+        roleCode: item.ROLE_CODE || item.ROLECODE || "",
+      }));
+
+      return mapped;
+    },
+    // Only run automatically when user has initiated a search;
+    // prevents calls while typing before Search is clicked.
+    enabled: shouldSearch && !!ecNumber.trim() && !!appraisalPeriodValue,
+    retry: false,
+  });
+
+  // Check if no data found after search
+  const noData = shouldSearch && !loading && tableData.length === 0;
+
+  // Trigger search query
+  const handleSearch = () => {
     if (!ecNumber.trim()) {
-      alert("Please enter EC Number");
+      toast.error("Please enter EC Number");
+      return;
+    }
+    setShouldSearch(true);
+    refetchSearch();
+  };
+
+
+
+  // Reset search form and clear query cache
+  const handleReset = () => {
+    setEcNumber("");
+    setShouldSearch(false);
+    queryClient.removeQueries({ queryKey: ["hrStatusSearch"] });
+  };
+
+
+  // React Query mutation: Update appraisal status (can send multiple rows in one payload)
+  const statusUpdateMutation = useMutation({
+    mutationFn: async ({ statusUpdates }) => {
+      const empName = getUserProperty("name");
+      const numericFY = Number(extractYear(financialYear));
+
+      const payload = {
+        statusUpdates,
+        roleName: roleName,
+        solId: sol,
+        // Match backend expectations: "annual" or "quarterly"
+        appraisalPeriod: appraisalPeriod === "Annual" ? "annual" : "quarterly",
+        quarter: appraisalPeriod === "Annual" ? null : selectedQuarter,
+        financialYear: Number(numericFY),
+        empNo: empNo,
+        empName: empName
+      };
+
+      return await appraisalAPI.updateHRStatus(payload);
+    },
+    onSuccess: () => {
+      toast.success("Status updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["hrStatusSearch"] }); // Refresh search results
+      setRowStatus({}); // clear local selections
+    },
+    onError: (error) => {
+      console.error("Status update error:", error);
+      toast.error("Failed to update status!");
+    },
+  });
+
+  // Track dropdown selection per row (but don't call API yet)
+  const handleStatusSelectChange = (item, newStatus) => {
+    setRowStatus((prev) => ({
+      ...prev,
+      [item.urlId]: newStatus,
+    }));
+  };
+
+  // Trigger update API for all rows that have a selected status
+  const handleBulkUpdate = () => {
+    const statusUpdates = (tableData || [])
+      .map((item) => {
+        const selectedStatus = rowStatus[item.urlId];
+        if (!selectedStatus) return null;
+        return {
+          urlid: item.urlId,
+          rolecode: item.roleCode || "",
+          status: (selectedStatus || "").toLowerCase(),
+          comment: item.reason || "",
+        };
+      })
+      .filter(Boolean);
+
+    if (!statusUpdates.length) {
+      toast.error("Please select a status for at least one row before updating.");
       return;
     }
 
-    try {
-      setLoading(true);
-      setNoData(false);
-
-      const res = await appraisalAPI.searchHRStatusUpdate({ empNo: ecNumber });
-
-      if (res && res.length > 0) {
-        setTableData(res);
-      } else {
-        setTableData([]);
-        setNoData(true);
-      }
-
-    } catch (error) {
-      console.error(error);
-      setNoData(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  const handleReset = () => {
-    setEcNumber("");
-    setTableData([]);
-    setNoData(false);
-  };
-
-
-  const handleStatusChange = async (assignmentId, newStatus) => {
-  if (!newStatus) return;
-
-  try {
     const confirmUpdate = window.confirm(
-      `Are you sure you want to update status to "${newStatus}"?`
+      `Are you sure you want to update status for ${statusUpdates.length} record(s)?`
     );
-
     if (!confirmUpdate) return;
 
-    const res = await appraisalAPI.updateHRStatus({
-      assignmentId,
-      newStatus,
-    });
+    statusUpdateMutation.mutate({ statusUpdates });
+  };
 
-    alert("Status updated successfully!");
-
-    // update UI instantly
-    setTableData((prev) =>
-      prev.map((row) =>
-        row.assignmentId === assignmentId
-          ? { ...row, action: newStatus }
-          : row
-      )
-    );
-  } catch (error) {
-    alert("Failed to update status!");
-    console.error(error);
-  }
-};
 
 
 
@@ -133,7 +272,11 @@ const AppraiserStatus = () => {
                   className="form-control ec-input"
                   placeholder="Enter EC Number"
                   value={ecNumber}
-                  onChange={(e) => setEcNumber(e.target.value)}
+                  onChange={(e) => {
+                    setEcNumber(e.target.value);
+                    // Avoid triggering search while typing; require Search button click
+                    setShouldSearch(false);
+                  }}
                 />
 
               </div>
@@ -176,46 +319,64 @@ const AppraiserStatus = () => {
               {appraisalPeriod === 'Quarterly' &&
                 <div className="period-section">
                   <label className="period-title">Quarterly Period</label>
-                  <div className="btn-group mt-2" role="group">
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q1' ? 'btn-primary text-white' : 'btn-outline-primary'
+                  <div className="period-btns mt-2" role="group">
+                    <div 
+                      className={`period-btn ${selectedQuarter === 'Q1' ? 'active' : ''
                         }`}
                       onClick={() => setSelectedQuarter('Q1')}
                     >
                       Q1
-                    </button>
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q2' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q2' ? 'active' : ''
                         }`}
                       onClick={() => setSelectedQuarter('Q2')}
                     >
                       Q2
-                    </button>
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q3' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q3' ? 'active' : ''
                         }`}
                       onClick={() => setSelectedQuarter('Q3')}
                     >
                       Q3
-                    </button>
-                    <button type="button"
-                      className={`btns px-2 ${selectedQuarter === 'Q4' ? 'btn-primary text-white' : 'btn-outline-primary'
+                    </div>
+                    <div
+                      className={`period-btn ${selectedQuarter === 'Q4' ? 'active' : ''
                         }`}
                       onClick={() => setSelectedQuarter('Q4')}
                     >
                       Q4
-                    </button>
+                    </div>
                   </div>
                 </div>
               }
             </div>
           </div>
+          <div className="col-12 col-md-2">
+
+              <div className="mb-2">
+                <button
+                  className="btn-reset d-flex"
+                  style={{ justifyContent: 'left' }}
+                  onClick={handleBulkUpdate}
+                  disabled={statusUpdateMutation.isPending}
+                >
+                  {statusUpdateMutation.isPending ? "Updating..." : "Update"}
+                </button>
+              </div>
+              </div>
+
         </div>
 
-        {/* No data found */}
-        <div className="mb-2">
-          <small className="text-muted">No data found!</small>
-        </div>
+        {/* Error message */}
+        {isSearchError && (
+          <div className="mb-2">
+            <small className="text-danger">
+              Error: {searchError?.message || "Failed to fetch data"}
+            </small>
+          </div>
+        )}
 
         {/* Table */}
         <div className="table-wrap">
@@ -235,6 +396,7 @@ const AppraiserStatus = () => {
                   <th>End Date</th>
                   <th>Select Status</th>
                   <th>Reason</th>
+                  <th>Update</th>
                 </tr>
               </thead>
               <tbody>
@@ -257,8 +419,8 @@ const AppraiserStatus = () => {
                       <td>
                         <select
                           className="form-select custom-select"
-                          value={item.action}
-                          onChange={(e) => handleStatusChange(item.assignmentId, e.target.value)}
+                          value={rowStatus[item.urlId] || ""}
+                          onChange={(e) => handleStatusSelectChange(item, e.target.value)}
                         >
                           <option value="">-Select-</option>
                           <option value="Approved">Approved</option>
@@ -268,6 +430,16 @@ const AppraiserStatus = () => {
                       </td>
 
                       <td>{item.reason}</td>
+
+                      <td>
+                      <button 
+                className="btn-reset d-flex" 
+                onClick={handleBulkUpdate}
+                disabled={tableData.length === 0 || statusUpdateMutation.isPending}
+              >
+                {statusUpdateMutation.isPending ? "Updating..." : "Update"}
+              </button>                      </td>
+
                     </tr>
                   ))
                 ) : (

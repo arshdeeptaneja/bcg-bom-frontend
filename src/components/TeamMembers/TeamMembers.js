@@ -201,7 +201,7 @@ const TeamMembers = ({ dashboardData: propDashboardData }) => {
                           style={{
                             backgroundColor:
                               ROLE_NAME == "Branch Officer"
-                                ? "#0389d0"
+                                ? "#185f73"
                                 : member.STATUS
                                   ? member.STATUS
                                   : "#00000",

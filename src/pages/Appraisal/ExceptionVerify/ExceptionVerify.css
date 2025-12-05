@@ -15,22 +15,17 @@
 }
 
 .btn-primary {
-  background-color: #0389d0;
+  background-color: #185f73 !important;
   color: white;
 }
 
 .btn-primary:hover {
   /* background-color: #e9ecef; */
-  border-color: var(--bs-primary);
-  color: var(--bs-primary); /* optional, keeps text visible on grey */
+  border-color: var(--accent-color) !important;
+  color: var(--accent-color) !important; /* optional, keeps text visible on grey */
 }
 
 .btn-outline-primary {
   background-color: white;
-  /* color: var(--bs-primary); */
 }
 
-.btn-outline-primary:hover {
-  background-color: #e9ecef;
-  /* color: var(--bs-primary); */
-}

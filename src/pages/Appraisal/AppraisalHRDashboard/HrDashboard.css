@@ -58,7 +58,7 @@
 
 .form-select-inline:focus {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 0.15rem rgba(3, 137, 208, 0.15);
+  box-shadow: 0 0 0 0.15rem rgba(24, 95, 115, 0.15);
   outline: none;
 }
 
@@ -84,7 +84,7 @@
 }
 
 .btn-accent:hover {
-  background-color: #0389d0;
+  background-color: #185f73;
   color: #3d3c3c;
   border: 1px solid var(--accent-color);
 }
@@ -282,7 +282,8 @@
 
 .download-list-btn:hover {
   background-color: #f9fafb;
-  border-color: var(--accent-color);
+  color:var(--accent-color);
+  border-color: 1px solid var(--accent-color);
 }
 
 /* Responsive Design */

@@ -103,12 +103,10 @@ export default function QuaterlyMeasurableKraTable({ data = [], activeMonth }) {
               <th style={{ width: "35%" }}>KRA</th>
               <th>Unit</th>
               <th>
-                Actual
-                <i className="bi bi-info-circle ms-1"></i>
+                Actual <i className="bi bi-info-circle ms-1" />
               </th>
               <th>
-                Target
-                <i className="bi bi-info-circle ms-1"></i>
+                Target <i className="bi bi-info-circle ms-1" />
               </th>
               <th>Max Score</th>
               <th>Actual Score</th>

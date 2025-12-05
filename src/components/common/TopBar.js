@@ -1,6 +1,6 @@
 import React from 'react';
 import './TopBar.css';
-import logo from '../../assets/Bank_of_Maharashtra_logo.svg';
+import logo from '../../assets/Bank_of_Maharashtra_logo.jpg';
 import logout from '../../assets/logout.svg';
 
 const TopBar = ({ onLogout }) => {

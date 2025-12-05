@@ -1,6 +1,6 @@
 :root {
-  --bs-primary: #0389d0;
-  --bs-primary-rgb: 3, 137, 208;
+  --bs-primary: #185f73;
+  --bs-primary-rgb: 24, 95, 115;
   --bs-btn-font-family: "Lato", sans-serif;
 }
 
@@ -22,6 +22,6 @@
 }
 
 .back-button:hover {
-  background-color: #0389d0 !important;
+  background-color: #185f73; 
   color: white !important;
 }

@@ -19,6 +19,7 @@ const appendQueryParam = (searchParams, key, value) => {
 
 const unauthClient = axios.create({
   baseURL: AUTH_BASE_URL,
+  baseURL: AUTH_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -69,7 +70,6 @@ const addAuthTokenInterceptor = (client) => {
 addAuthTokenInterceptor(authClient);
 addAuthTokenInterceptor(appraisalClient);
 
-// Response interceptor to handle token refresh (shared by both clients)
 const addRefreshTokenInterceptor = (client) => {
   client.interceptors.response.use(
     (response) => {
@@ -80,7 +80,6 @@ const addRefreshTokenInterceptor = (client) => {
 
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
-
         try {
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
@@ -119,6 +118,7 @@ export const authAPI = {
   login: async (credentials) => {
     try {
       console.log('Sending login request:', {
+        url: `${AUTH_BASE_URL}/identity/auth/login`,
         url: `${AUTH_BASE_URL}/identity/auth/login`,
 
         method: 'POST',
@@ -718,15 +718,29 @@ export const appraisalAPI = {
 
   // GET: Get Admin HR Dashboard data
   getHrDashboard: async ({ empNo, appraisalPeriod, financialYear }) => {
-    const res = await axios.get(`/appraisal/admin/hr_dashboard`, {
-      params: {
-        empNo,
-        appraisalPeriod,
-        financialYear,
-      },
-    });
-    return res.data;
-  },
+    try {
+      const params = new URLSearchParams({
+      empNo,
+      appraisalPeriod,
+      financialYear,
+  });
+
+      // Use the shared appraisal API client so the request actually goes to 8084
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_dashboard?${params.toString()}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching HR dashboard:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url,
+      });
+      throw error;
+    }
+},
   appraisalStatusChange: async ({ empNo, appraisalPeriod, searchEmpNo, financialYear }) => {
     try {
       const params = new URLSearchParams({
@@ -1033,6 +1047,28 @@ export const appraisalAPI = {
     }
   },
 
+
+
+   // GET: Get quarterly exception report data
+ getQuarterlyExceptionReport: async ({ urlId, financialYear, quarter }) => {
+  try {
+    const params = new URLSearchParams({
+      urlId,
+      financialYear,
+      quarter,
+    });
+
+    const response = await apiClient.get(
+      `/appraisal/quarterly_exception_report?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("getQuarterlyExceptionReport error", error);
+    throw error;
+  }
+},
+
+
   // POST: Submit quarterly exception report with file attachment
   submitQuarterlyExceptionReport: async (payload, attachment) => {
     try {
@@ -1141,7 +1177,7 @@ export const appraisalAPI = {
     roleName,
     roleId,
     zone,
-    custTicketId,
+    //custTicketId,
   }) => {
     try {
       const params = new URLSearchParams();
@@ -1151,7 +1187,7 @@ export const appraisalAPI = {
       appendQueryParam(params, 'roleName', roleName);
       appendQueryParam(params, 'roleId', roleId);
       appendQueryParam(params, 'zone', zone);
-      appendQueryParam(params, 'custTicketId', custTicketId);
+    //  appendQueryParam(params, 'custTicketId', custTicketId);
 
       const response = await apiClient.get(
         `/appraisal/exception_quarterly_verify/review?${params.toString()}`
@@ -1358,7 +1394,12 @@ export const appraisalAPI = {
       const response = await apiClient.get(
         `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_sample?${params.toString()}`,
         {
-          responseType: 'blob',
+          headers: {
+            // Match Postman cURL Accept header for Excel
+            Accept:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+          responseType: "blob",
         }
       );
 
@@ -1370,33 +1411,33 @@ export const appraisalAPI = {
   },
 
   // Download sample Excel for reporting authority bulk update
-  reportingAuthorityBulkDownloadDataTable: async ({
-    roleName,
-    regionCode,
-    quarter,
-    financialYear,
-  }) => {
-    try {
-      const params = new URLSearchParams({
-        roleName,
-        regionCode,
-        quarter,
-        financialYear,
-      });
+ reportingAuthorityBulkDownloadDataTable: async ({
+  roleName,
+  regionCode,
+  quarter,
+  financialYear,
+}) => {
+  try {
+    const params = new URLSearchParams({
+      roleName,
+      regionCode,
+      quarter,
+      financialYear,
+    });
 
-      const response = await apiClient.get(
-        `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_data_table?${params.toString()}`,
-        {
-          responseType: 'blob',
-        }
-      );
+    const response = await apiClient.get(
+      `/appraisal/admin/hr_update_quarterly_repa_reva_surl/download_data_table?${params.toString()}`,
+      {
+        responseType: "blob",
+      }
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error('Error downloading sample file:', error);
-      throw error;
-    }
-  },
+    return response.data;
+  } catch (error) {
+    console.error("Error downloading sample file:", error);
+    throw error;
+  }
+},
 
   // Get error logs for reporting authority bulk update
   reportingAuthorityBulkErrorLogs: async ({ financialYear }) => {
@@ -1464,21 +1505,22 @@ export const appraisalAPI = {
   // Upload Annually reporting and reviewing
   reportingAuthorityAndReviewAnnualUpload: async ({ file, sol, roleName, empNo }) => {
     try {
-      const params = new URLSearchParams({
-        sol,
-        roleName,
-        empNo,
-      });
+      // Build query string manually to match cURL format
+      // POST /appraisal/admin/hr_update_annual_repa_reva_surl/upload?sol=256214&roleName=admin&empNo=38096
+      const queryParams = [];
+      if (sol) queryParams.push(`sol=${encodeURIComponent(String(sol))}`);
+      if (roleName) queryParams.push(`roleName=${encodeURIComponent(roleName)}`);
+      if (empNo) queryParams.push(`empNo=${encodeURIComponent(String(empNo))}`);
+      const queryString = queryParams.join("&");
 
       const formData = new FormData();
-      formData.append('file', file);
+      // Include filename explicitly to match typical multipart behavior
+      formData.append("file", file, file?.name);
 
       const response = await apiClient.post(
-        `/appraisal/admin/hr_update_annual_repa_reva_surl/upload?${params.toString()}`,
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }
+        `/appraisal/admin/hr_update_annual_repa_reva_surl/upload?${queryString}`,
+        formData
+        // Let the browser set Content-Type with boundary
       );
 
       return response.data;
@@ -1519,121 +1561,179 @@ export const appraisalAPI = {
   },
 
   // SEARCH EMPLOYEE STATUS CHANGE LIST
-  searchHRStatusUpdate: async ({ empNo }) => {
-    try {
-      const params = new URLSearchParams({
-        empNo: empNo || '',
-      });
+searchHRStatusUpdate: async ({ 
+  financialYear, 
+  appraisalPeriod,
+  
+  empNo,
+  searchEmpNo
+}) => {
 
-      const response = await apiClient.get(`/admin/hr_status_update_utility?${params.toString()}`);
+  try {
+    const params = new URLSearchParams({
+      financialYear,
+      appraisalPeriod,
+      
+      empNo,
+      searchEmpNo
+    });
+
+    const response = await apiClient.get(
+      `/appraisal/admin/hr_status_update_utility?${params.toString()}`
+    );
+
+    return response.data;
+
+  } catch (error) {
+    console.error("HR Status Search Error:", error);
+    throw error;
+  }
+},
+
+
+
+  // Appraisal Status Change Utility -- Update Status
+  // Expects full payload as per backend cURL, e.g.:
+  // {
+  //   "statusUpdates": [{ "urlid": "...", "rolecode": "...", "status": "approved", "comment": "..." }],
+  //   "roleName": "HR Admin",
+  //   "solId": "12345",
+  //   "appraisalPeriod": "annual" | "quarterly",
+  //   "quarter": "Q1" | null,
+  //   "financialYear": 2024,
+  //   "empNo": "EMP001",
+  //   "empName": "John Doe"
+  // }
+  updateHRStatus: async (payload) => {
+    try {
+      const response = await apiClient.post(
+        `${appraisalBaseUrl}/admin/hr_status_update_utility/update_status`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       return response.data;
     } catch (error) {
-      console.error('HR Status Search Error:', error);
-      throw error;
-    }
-  },
-
-  //Appraisal Status Change Utility--Update Status
-  updateHRStatus: async ({ assignmentId, newStatus }) => {
-    try {
-      const response = await apiClient.post(`/admin/hr_status_update_utility/update_status`, {
-        assignmentId,
-        newStatus,
+      console.error("Error updating status:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url,
       });
-
-      return response.data;
-    } catch (error) {
-      console.error('Error updating status:', error);
       throw error;
     }
   },
 
   // SEARCH EMP EXCEPTION DELETE URL LIST
-  searchExceptionDeleteURL: async ({ empNo }) => {
-    try {
-      const params = new URLSearchParams({
-        empNo: empNo || '',
-      });
+ searchExceptionDeleteURL: async ({
+  searchEmpNo,
+  roleName,
+  sol,
+  financialYear,
+}) => {
+  try {
+    // Ensure roleName is decoded (replace + with space) before encoding
+    const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
 
-      const response = await apiClient.get(`/admin/hr_exception_delete_urlid?${params.toString()}`);
+    // Build query string manually to match cURL format (using %20 for spaces)
+    const queryParams = [];
+    if (searchEmpNo) queryParams.push(`searchEmpNo=${encodeURIComponent(String(searchEmpNo))}`);
+    if (decodedRoleName) queryParams.push(`roleName=${encodeURIComponent(decodedRoleName)}`); // Encodes space as %20
+    if (sol) queryParams.push(`sol=${encodeURIComponent(String(sol))}`);
+    if (financialYear) queryParams.push(`financialYear=${encodeURIComponent(String(financialYear))}`);
 
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching exception delete url:', error);
-      throw error;
-    }
-  },
+    const queryString = queryParams.join('&');
 
-  //EXCEPTION DELETE BUTTON TO DELETE
-  deleteExceptionURL: async ({ urlId }) => {
-    try {
-      const params = new URLSearchParams({
-        urlId: urlId,
-      });
+    const response = await apiClient.get(
+      `/appraisal/admin/hr_exception_delete_urlid?${queryString}`
+    );
 
-      const response = await apiClient.delete(
-        `/admin/hr_exception_delete_urlid/delete?${params.toString()}`
-      );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching exception delete URL:", error);
+    throw error;
+  }
+}
+,
 
-      return response.data;
-    } catch (error) {
-      console.error('Error deleting exception URL:', error);
-      throw error;
-    }
-  },
+  //EXCEPTION DELETE BUTTON TO DELETE 
+deleteExceptionURL: async (payload) => {
+  try {
+    const response = await apiClient.post(
+      `/appraisal/admin/hr_exception_delete_urlid/delete`,
+      payload
+    );
+    return response.data;
 
-  //SEARCH APPEAL DELECTION
-  searchAppealDeleteURL: async ({ empNo }) => {
-    try {
-      const params = new URLSearchParams({
-        empNo: empNo || '',
-      });
+  } catch (error) {
+    console.error("Error deleting exception URL:", error);
+    throw error;
+  }
+},
 
-      const response = await apiClient.get(`/admin/hr_appeal_delete_urlid?${params.toString()}`);
 
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching Appeal delete url:', error);
-      throw error;
-    }
-  },
 
-  //Appeal DELETE BUTTON TO DELETE
-  deleteAppealURL: async ({ urlId }) => {
-    try {
-      const params = new URLSearchParams({
-        urlId: urlId,
-      });
+// SEARCH APPEAL DELETION
+searchAppealDeleteURL: async ({ searchEmpNo, roleName, sol, financialYear }) => {
+  try {
+    const params = new URLSearchParams({
+      searchEmpNo,
+      roleName,
+      sol,
+      financialYear,
+    });
 
-      const response = await apiClient.delete(
-        `/admin/hr_appeal_delete_urlid/delete?${params.toString()}`
-      );
+    const response = await apiClient.get(
+      `/appraisal/admin/hr_appeal_delete_urlid?${params.toString()}`
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error('Error deleting exception URL:', error);
-      throw error;
-    }
-  },
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Appeal delete url:", error);
+    throw error;
+  }
+},
+
+
+ 
+ // APPEAL DELETE API - CORRECT ONE
+deleteAppealURL: async (payload) => {
+  try {
+    const response = await apiClient.post(
+      `/appraisal/admin/hr_appeal_delete_urlid/delete`,
+      payload  // JSON body
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting appeal URL:", error);
+    throw error;
+  }
+},
+
 
   //Module Active Inactive Date
-  // GET LIST
-  moduleActiveInactiveDateGetList: async () => {
-    try {
-      const response = await apiClient.get(`/admin/hr_module_active_inactive_date`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching module active/inactive list:', error);
-      throw error;
-    }
-  },
+  // GET LIST 
+moduleActiveInactiveDateGetList: async () => { 
+  try {
+    const response = await apiClient.get(`/appraisal/admin/hr_module_active_inactive_date`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching module active/inactive list:", error);
+    throw error;
+  }
+},
+
 
   // COMMON UPDATE API (INSERT / UPDATE / DELETE)
   moduleActiveInactiveDateUpdate: async ({ intent, payload }) => {
     try {
       const response = await apiClient.post(
-        `/admin/hr_module_active_inactive_date/${intent}`,
+        `/appraisal/admin/hr_module_active_inactive_date/${intent}`,
         payload
       );
       return response.data;
@@ -1643,13 +1743,95 @@ export const appraisalAPI = {
     }
   },
 
-  //insert Annual Roles
-  insertAnnualRoles: async () => {
+ 
+ // Insert Annual Roles
+insertAnnualRoles: async () => {
+  try {
+    const response = await apiClient.get(`/appraisal/admin/hr_insert_annual_roles`);
+    return response.data;
+  } catch (error) {
+    console.error("Error inserting annual roles:", error);
+    throw error;
+  }
+},
+
+
+
+  // Search HR Repa/Reva by EC Number
+  searchHRRepaRevaByEC: async ({
+    searchEmpNo,
+    empNo,
+    appraisalPeriod,
+    quarter,
+    financialYear,
+  }) => {
     try {
-      const response = await apiClient.post(`/admin/hr_insert_annual_roles`);
+      const params = new URLSearchParams();
+      appendQueryParam(params, 'searchEmpNo', searchEmpNo);
+      appendQueryParam(params, 'empNo', empNo);
+      appendQueryParam(params, 'appraisalPeriod', appraisalPeriod);
+      appendQueryParam(params, 'quarter', quarter);
+      appendQueryParam(params, 'financialYear', financialYear);
+
+      const response = await apiClient.get(
+        `/appraisal/admin/hr_update_repa_reva_by_ec?${params.toString()}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error inserting annual roles:', error);
+      console.error("Error searching HR Repa/Reva by EC:", error);
+      throw error;
+    }
+  },
+
+  // Update HR Repa/Reva by EC Number
+  updateHRRepaRevaByEC: async ({
+    ecno,
+    urlId,
+    RA_Ecno,
+    RE_Ecno,
+    AC_Ecno,
+    financialYear,
+    appraisalPeriod,
+    quarter,
+    empNo,
+    selfEmpNo,
+    solId,
+    roleName,
+  }) => {
+    try {
+      // Ensure roleName is decoded (replace + with space) before sending
+      const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
+
+      const payload = {
+        ecno: String(ecno),
+        urlId: String(urlId),
+        RA_Ecno: String(RA_Ecno),
+        RE_Ecno: String(RE_Ecno),
+        AC_Ecno: String(AC_Ecno || ""),
+        financialYear: Number(financialYear),
+        appraisalPeriod: String(appraisalPeriod),
+        quarter: quarter === null || quarter === undefined ? null : String(quarter),
+        empNo: String(empNo),
+        selfEmpNo: String(selfEmpNo),
+        solId: String(solId),
+        roleName: decodedRoleName,
+      };
+
+      console.log("Update HR Repa/Reva by EC - Payload:", payload);
+
+      const response = await apiClient.post(
+        `/appraisal/admin/hr_update_repa_reva_by_ec/update`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating HR Repa/Reva by EC:", error);
       throw error;
     }
   },
@@ -1657,37 +1839,562 @@ export const appraisalAPI = {
   // Appeal Committee APIs
   appealCommittee: {
     // List/History logs
-    getErrorLogs: async () => {
-      const response = await apiClient.get(`/admin/hr_update_appeal_committee/error_logs`);
+    getErrorLogs: async ({ financialYear, roleName }) => {
+      // Build query string manually to match working cURL:
+      // /appraisal/admin/hr_update_appeal_committee/error_logs?financialYear=2025&roleName=Super%20Admin
+      const queryParams = [];
+      if (financialYear)
+        queryParams.push(
+          `financialYear=${encodeURIComponent(String(financialYear))}`
+        );
+      if (roleName)
+        queryParams.push(`roleName=${encodeURIComponent(roleName)}`);
+
+      const queryString = queryParams.join("&");
+      const fullUrl = `/appraisal/admin/hr_update_appeal_committee/error_logs?${
+        queryString || ""
+      }`;
+
+      const response = await apiClient.get(fullUrl);
       return response.data;
     },
 
     // Upload Excel File
-    uploadFile: async ({ file }) => {
+    uploadFile: async ({ file, sol, roleName, empNo }) => {
       const formData = new FormData();
-      formData.append('file', file);
+      // Include filename explicitly to match typical multipart behaviour
+      formData.append("file", file, file?.name);
 
-      const response = await apiClient.post(`/admin/hr_update_appeal_committee/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Build query string manually so spaces become %20 (not "+")
+      // and the final URL matches the working Postman cURL exactly.
+      const queryParams = [];
+      if (sol) queryParams.push(`sol=${encodeURIComponent(String(sol))}`);
+      if (roleName) queryParams.push(`roleName=${encodeURIComponent(roleName)}`);
+      if (empNo) queryParams.push(`empNo=${encodeURIComponent(String(empNo))}`);
+      const queryString = queryParams.join("&");
+
+      const fullUrl = `/appraisal/admin/hr_update_appeal_committee/upload?${queryString}`;
+
+      const response = await apiClient.post(fullUrl, formData);
       return response.data;
     },
+//appeal commitee download data table
+downloadDataTable: async ({ roleName, regionCode, quarter, financialYear }) => {
+  const response = await apiClient.get(
+    `/appraisal/admin/hr_update_appeal_committee/download_data_table`,
+    {
+      params: {
+        roleName,
+        regionCode,
+        quarter,
+        financialYear,
+      },
+      responseType: "blob",
+    }
+  );
 
-    // Download Data Table
-    downloadDataTable: async () => {
+  return response.data;
+},
+
+
+
+    // Download Sample File
+    // Download Sample File AppealCommittee
+    downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
+      // Build query string manually to match cURL format
+      const queryParams = [];
+      if (roleName) queryParams.push(`roleName=${encodeURIComponent(roleName)}`);
+      if (regionCode) queryParams.push(`regionCode=${encodeURIComponent(String(regionCode))}`);
+      if (quarter) queryParams.push(`quarter=${encodeURIComponent(quarter)}`);
+      if (financialYear) queryParams.push(`financialYear=${encodeURIComponent(String(financialYear))}`);
+      
+      const queryString = queryParams.join('&');
+      const fullUrl = `/appraisal/admin/hr_update_appeal_committee/download_sample?${queryString}`;
+      
       const response = await apiClient.get(
-        `/admin/hr_update_appeal_committee/download_data_table`,
-        { responseType: 'blob' }
+        fullUrl,
+        {
+          responseType: "blob",
+        }
       );
       return response.data;
     },
 
-    // Download Sample File
-    downloadSample: async () => {
-      const response = await apiClient.get(`/admin/hr_update_appeal_committee/download_sample`, {
-        responseType: 'blob',
+
+  },
+
+  // Validator Update APIs
+  validatorUpdate: {
+    // Upload Excel File
+    uploadFile: async ({ file, empNo }) => {
+      const formData = new FormData();
+      formData.append("file", file, file?.name);
+
+      // Build query string manually to match cURL format (only empNo)
+      const queryParams = [];
+      if (empNo) queryParams.push(`empNo=${encodeURIComponent(String(empNo))}`);
+
+      const queryString = queryParams.join('&');
+      const fullUrl = `/appraisal/admin/hr_update_validator/upload?${queryString}`;
+
+      // Debug logging
+      console.log("Validator upload API - Full URL:", fullUrl);
+      console.log("Validator upload API - Parameters:", { 
+        empNo,
+        file: { name: file?.name, size: file?.size, type: file?.type }
       });
-      return response.data;
+      
+      // Check if token exists
+      const accessToken = localStorage.getItem('accessToken');
+      console.log("Access token exists:", !!accessToken);
+      if (!accessToken) {
+        console.error("No access token found! User may need to log in again.");
+      }
+
+      try {
+        // Don't pass headers object - let the interceptor handle Authorization
+        // and let browser set Content-Type automatically for FormData
+        const response = await apiClient.post(
+          fullUrl,
+          formData
+        );
+
+        return response.data;
+      } catch (error) {
+        // Log detailed error information
+        console.error("Validator upload error details:", {
+          status: error?.response?.status,
+          statusText: error?.response?.statusText,
+          data: error?.response?.data,
+          message: error?.message,
+          config: {
+            url: error?.config?.url,
+            method: error?.config?.method,
+            headers: error?.config?.headers,
+            dataType: error?.config?.data?.constructor?.name,
+            isFormData: error?.config?.data instanceof FormData,
+          }
+        });
+        throw error;
+      }
+    },
+
+    // Get error logs
+    getErrorLogs: async ({ financialYear, roleName }) => {
+      try {
+        // Ensure roleName is decoded (replace + with space) before encoding
+        const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
+
+        // Build query string manually to match cURL format (using %20 for spaces like cURL)
+        const queryParams = [];
+        if (financialYear) queryParams.push(`financialYear=${encodeURIComponent(financialYear)}`);
+        if (decodedRoleName) queryParams.push(`roleName=${encodeURIComponent(decodedRoleName)}`); // This will encode space as %20
+
+        const queryString = queryParams.join('&');
+
+        const response = await apiClient.get(
+          `/appraisal/admin/hr_update_validator/error_logs?${queryString}`
+        );
+
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching validator error logs:", error);
+        throw error;
+      }
+    },
+
+    // Download data table
+    downloadDataTable: async ({ roleName, regionCode, quarter, financialYear }) => {
+      try {
+        const params = new URLSearchParams({
+          roleName,
+          regionCode,
+          quarter,
+          financialYear,
+        });
+
+        const response = await apiClient.get(
+          `/appraisal/admin/hr_update_validator/download_data_table?${params.toString()}`,
+          {
+            responseType: "blob",
+          }
+        );
+
+        return response.data;
+      } catch (error) {
+        console.error("Error downloading validator data table:", error);
+        throw error;
+      }
+    },
+
+    // Download sample file
+    downloadSample: async ({ roleName, regionCode, quarter, financialYear }) => {
+      try {
+        // Ensure roleName is decoded (replace + with space) before encoding
+        const decodedRoleName = roleName ? roleName.replace(/\+/g, ' ') : roleName;
+
+        // Build query string manually to match cURL format exactly (using %20 for spaces)
+        const queryParams = [];
+        if (decodedRoleName) queryParams.push(`roleName=${encodeURIComponent(decodedRoleName)}`);
+        if (regionCode) queryParams.push(`regionCode=${encodeURIComponent(String(regionCode))}`);
+        if (quarter) queryParams.push(`quarter=${encodeURIComponent(quarter)}`);
+        if (financialYear) queryParams.push(`financialYear=${encodeURIComponent(String(financialYear))}`);
+
+        const queryString = queryParams.join('&');
+        const fullUrl = `/appraisal/admin/hr_update_validator/download_sample?${queryString}`;
+
+        console.log("Download sample API - Full URL:", fullUrl);
+        console.log("Download sample API - Parameters:", {
+          roleName,
+          decodedRoleName,
+          regionCode,
+          quarter,
+          financialYear,
+        });
+
+        const response = await apiClient.get(fullUrl, {
+          headers: {
+            // Match Excel content type expected by backend (like Postman cURL)
+            Accept:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+          responseType: "blob",
+        });
+
+        return response.data;
+      } catch (error) {
+        console.error("Error downloading validator sample:", error);
+        throw error;
+      }
+    },
+  },
+
+  // Logs APIs
+  logs: {
+    // Quarterly Appraisal Status Log
+    getQuarterlyAppraisalStatusLog: async ({ financialYear }) => {
+      // Matches cURL:
+      // /appraisal/admin/logs/quarterly-appraisal-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/quarterly-appraisal-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q1 Appraisal Status Log
+    getQ1StatusLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q1-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q1-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q2 Appraisal Status Log
+    getQ2StatusLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q2-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q2-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q3 Appraisal Status Log
+    getQ3StatusLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q3-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q3-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q4 Appraisal Status Log
+    getQ4StatusLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q4-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q4-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Annual Appraisal Status Log
+    getAnnualAppraisalStatusLog: async ({ financialYear }) => {
+      // Matches cURL:
+      // /appraisal/admin/logs/annual-appraisal-status?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/annual-appraisal-status`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Download annual appraiser details
+    getAnnualAppraiserDetails: async ({ financialYear }) => {
+      // Matches cURL:
+      // /appraisal/admin/logs/annual-appraiser-details?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/annual-appraiser-details`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Annual Score Log
+    getAnnualScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/annual-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/annual-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Appeal Report Log
+    getAppealReportLog: async ({ financialYear }) => {
+      // Matches cURL:
+      // /appraisal/admin/logs/appeal-report?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/appeal-report`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q1 Appraisal Score Log
+    getQ1ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q1-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q1-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q2 Appraisal Score Log
+    getQ2ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q2-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q2-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q3 Appraisal Score Log
+    getQ3ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q3-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q3-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q4 Appraisal Score Log
+    getQ4ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q4-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q4-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Q4 Appraisal Score Log
+    getQ4ScoreLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/q4-score?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/q4-score`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Final Score Log
+    getFinalScoreLog: async ({ financialYear, empNumber }) => {
+      // /appraisal/admin/logs/final-score?financialYear=2025&empNumber=36663
+      const year = String(financialYear);
+      const empNo = String(empNumber);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/final-score`,
+        {
+          params: {
+            financialYear: year,
+            empNumber: empNo,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Quarterly Exception Log
+    getQuarterlyExceptionLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/quarterly-exception?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/quarterly-exception`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Development Inputs Log
+    getDevelopmentInputsLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/development-inputs?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/development-inputs`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Integrity Inputs Log
+    getIntegrityInputsLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/integrity-inputs?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/integrity-inputs`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Repa, Reva, and AC Remarks Log
+    getRepaRevaAcRemarksLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/repa-reva-ac-remarks?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/repa-reva-ac-remarks`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
+    },
+
+    // Exception Approval List Log
+    getExceptionApprovalListLog: async ({ financialYear }) => {
+      // /appraisal/admin/logs/exception-approval-list?financialYear=2025
+      const year = String(financialYear);
+      const response = await apiClient.get(
+        `/appraisal/admin/logs/exception-approval-list`,
+        {
+          params: {
+            financialYear: year,
+          },
+          responseType: "blob",
+        }
+      );
+      return response.data; // XLSX blob
     },
   },
 };

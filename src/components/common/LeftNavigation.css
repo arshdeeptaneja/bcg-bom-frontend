@@ -4,20 +4,20 @@
   top: 75px;
   width: 80px;
   height: calc(100vh - 85px);
-  background: #0389d0;
+  background: #185f73;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   z-index: 999;
   padding: 20px 0;
   border-radius: 0 20px 20px 0;
-
+ 
 }
-
+ 
 .nav-menu {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
+ 
 .nav-item {
   display: flex;
   flex-direction: column;
@@ -30,17 +30,17 @@
   margin: 0 8px;
   position: relative;
 }
-
+ 
 .nav-item:hover {
   color: white;
   border-radius: 8px;
 }
-
+ 
 .nav-item.active {
   color: white;
   border-radius: 8px;
 }
-
+ 
 .nav-icon {
   font-size: 24px;
   margin-bottom: 4px;
@@ -53,13 +53,13 @@
   align-items: center;
   justify-content: center;
 }
-
+ 
 .nav-icon img {
   width: 20px;
   height: 20px;
-
+ 
 }
-
+ 
 .nav-label {
   font-size: 14px;
   font-weight: 500;
@@ -67,18 +67,18 @@
   line-height: 1.2;
   color: #fff;
 }
-
+ 
 .dropdown-arrow {
   font-size: 10px;
   color: #fff;
   margin-top: 2px;
   transition: transform 0.3s ease;
 }
-
+ 
 .dropdown-arrow.expanded {
   transform: rotate(180deg);
 }
-
+ 
 .submenu {
   position: absolute;
   left: 80px;
@@ -91,7 +91,7 @@
   z-index: 1001;
   animation: slideRight 0.3s ease-out;
 }
-
+ 
 .submenu-item {
   padding: 6px 20px;
   color: rgba(0, 0, 0, 1);
@@ -103,11 +103,11 @@
   white-space: nowrap;
   text-align: left;
 }
-
+ 
 .submenu-item:hover {
   color: var(--bs-primary);
 }
-
+ 
 @keyframes slideRight {
   from {
     opacity: 0;
@@ -118,7 +118,7 @@
     transform: translateX(0);
   }
 }
-
+ 
 @keyframes slideDown {
   from {
     opacity: 0;

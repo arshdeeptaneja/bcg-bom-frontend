@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import './HrDashboard.css';
+import { useSearchParams } from "react-router-dom";
 import { KpiTab } from '../../../components/common';
 import { BackButton } from '../../../components/common';
 import UtilitiesSection from './PanelUtilities/Utilities';
@@ -19,11 +20,19 @@ import { useNavigate } from 'react-router-dom';
 import LogsAndAutoAnnuals from './LogsAndAutoAnnuals/LogsAndAutoAnnual ';
 import { useQuery } from '@tanstack/react-query';
 import { appraisalAPI } from '../../../services/api';
+import { toast } from 'react-toastify';
+import { useAuth } from '../../../contexts/AuthContext';
 
 
 
 const HrDashboard = () => {
-const employee = JSON.parse(localStorage.getItem("adminData"));
+  const { getEmployeeDetails, getUserProperty } = useAuth();
+  const employeeDetails = getEmployeeDetails();
+  // Use same empNo derivation pattern as ReportingReviewBulk for consistency
+  const empNo = getUserProperty(
+    'empNo',
+    employeeDetails?.currentUser?.[0]?.EMP_ID || ''
+  );
 
   const [appraisalPeriod, setAppraisalPeriod] = useState('Quarterly');
   const [selectedQuarter, setSelectedQuarter] = useState('Q1');
@@ -43,28 +52,43 @@ const employee = JSON.parse(localStorage.getItem("adminData"));
   const financialYears = getFinancialYears();
   const [financialYear, setFinancialYear] = useState(financialYears[0]);
   const navigate = useNavigate();
-  
+  const [searchParams] = useSearchParams();
 
- const { data: hrData, isLoading, isError } = useQuery({
-  queryKey: [
-    'hrDashboard',
-    employee?.empNo,
-    appraisalPeriod,
-    selectedQuarter,
-    financialYear
-  ],
-  queryFn: () =>
-    appraisalAPI.getHrDashboard({
-      empNo: employee?.empNo,
-      appraisalPeriod: appraisalPeriod.toLowerCase(),
-      financialYear: financialYear.replace("FY ", "").split("-")[0],
-    }),
-  enabled: !!employee?.empNo && !!financialYear && !!appraisalPeriod,
-});
+  // Derive values for API call
+  const backendYear = financialYear.replace('FY ', '').split('-')[0];
+  // For API: annual -> "annual", quarterly -> "q1" | "q2" | "q3" | "q4"
+  const appraisalPeriodForApi =
+    appraisalPeriod === 'Quarterly'
+      ? selectedQuarter.toLowerCase()
+      : 'annual';
 
+  const { data: hrData, isLoading, isError } = useQuery({
+    queryKey: [
+      'hrDashboard',
+      empNo,
+      appraisalPeriodForApi,
+      backendYear,
+    ],
+    queryFn: async () => {
+      try {
+        return await appraisalAPI.getHrDashboard({
+          empNo,
+          appraisalPeriod: appraisalPeriodForApi,
+          financialYear: backendYear,
+        });
+      } catch (error) {
+        const backendMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          'Failed to load HR dashboard data.';
+        toast.error(backendMessage);
+        throw error;
+      }
+    },
+    enabled: !!empNo && !!backendYear && !!appraisalPeriod,
+  });
 
-
-  
 
   return (
     <div className="pageWrapper">
@@ -279,11 +303,87 @@ const employee = JSON.parse(localStorage.getItem("adminData"));
             </button>
           </div>
         </section>
-        <UtilitiesSection />
-         <LogsAndAutoAnnuals/>
-        {/* <ReportingAuthority /> */}
+        <UtilitiesSection
+          financialYear={financialYear}
+          quarter={selectedQuarter}
+        />
+        <LogsAndAutoAnnuals financialYear={financialYear} />
 
-        {/* <AppraiserUpdate/> */}
+        {/* Auto Annual / Quarterly Appraisal Section */}
+        {appraisalPeriod === 'Annual' && (
+          <div className="card border-0 shadow-sm mt-4">
+            <div className="card-body">
+              <h5 className="section-title mb-4">Auto Annual Appraisal</h5>
+
+              <div className="row">
+                <div className="col-md-3 fw-bold blue-text">
+                  APPRAISAL PERIOD
+                </div>
+                <div className="col fw-bold blue-text">ACTION</div>
+              </div>
+
+              <hr />
+
+              <div className="row align-items-center mb-3">
+                <div className="col-md-3">
+                  Annual Appraisal
+                </div>
+                <div className="col-md-9">
+                  <div className="row g-2">
+                    {Array.from({ length: 8 }, (_, i) => (
+                      <div className="col-md-3 col-sm-6" key={i}>
+                        <button className="action-btn w-100">
+                          Auto Submit Appraisee Scale {i + 1}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {appraisalPeriod === 'Quarterly' && (
+          <div className="card border-0 shadow-sm mt-4">
+            <div className="card-body">
+              <h5 className="section-title mb-4">Auto Add Appraisal Quarterly</h5>
+
+              <div className="row">
+                <div className="col-md-3 fw-bold blue-text">
+                  APPRAISAL PERIOD
+                </div>
+                <div className="col fw-bold blue-text">ACTION</div>
+              </div>
+
+              <hr />
+
+              {['Q1', 'Q2', 'Q3', 'Q4'].map((q) => (
+                <div className="row align-items-center mb-3" key={q}>
+                  <div className="col-md-3">
+                    Quarter {q}
+                  </div>
+                  <div className="col-md-9">
+                    <div className="row g-2">
+                      <div className="col-md-3 col-sm-6">
+                        <button className="action-btn w-100">
+                          Auto Submit Appraisee
+                        </button>
+                      </div>
+                      <div className="col-md-3 col-sm-6">
+                        <button className="action-btn w-100">
+                          Auto Submit Appraiser
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
       </div>
 
     </div>

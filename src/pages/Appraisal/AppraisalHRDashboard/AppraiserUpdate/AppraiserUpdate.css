@@ -114,7 +114,7 @@
 
 /* Active button (filled green like your screenshot) */
 .active {
-  background-color: var(--accent-color);
+  background-color: #185f73;
   color: #fff;
 }
 

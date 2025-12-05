@@ -1,4 +1,4 @@
- .page {
+.page {
     background-color: var(--secondary-color);
 }
 
@@ -12,7 +12,7 @@
 .back-button {
     border: var(--default-border);
     padding: var(--default-padding);
-    color: var(--secondary-color);
+    /* color: var(--secondary-color); */
     box-shadow: var(--shadows);
 }
 
@@ -40,8 +40,8 @@
 section {
     background-color: white;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadows);
-    padding: var(--space-lg);
+    /* box-shadow: var(--shadows); */
+    /* padding: var(--space-lg); */
 }
 
 section h2 {
@@ -57,7 +57,7 @@ section h2 {
 input {
     border: var(--default-border);
     background-color: transparent;
-    color: var(--secondary-color);
+    /* color: var(--secondary-color); */
     border-radius: var(--border-radius);
 }
 
@@ -85,17 +85,17 @@ table thead {
     padding: var(--default-padding);
     color: var(--primary-color);
 }
-table tbody {
+/* table tbody {
     padding: var(--default-padding);
-}
+} */
 
-.nav {
+/* .nav {
     background-color: var(--accent-color);
     position: fixed; 
     top: 0;
     left: 0;
     padding-top: calc(var(--default-padding) * 2);
-}
+} */
 
 .nav ul {
     list-style: none;
@@ -157,7 +157,7 @@ select.form-select:focus,
 input.form-control:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(3, 137, 208, 0.1);
+    box-shadow: 0 0 0 3px rgba(24, 95, 115, 0.1);
 }
 
 input.form-control::placeholder {

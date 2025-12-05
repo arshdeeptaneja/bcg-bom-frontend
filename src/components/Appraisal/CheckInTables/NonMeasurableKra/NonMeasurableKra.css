@@ -1,7 +1,7 @@
-.table-header-bar {
+/* .table-header-bar {
     background-color: var(--accent-color);
     color: white;
-}
+} */
 
 .non-measurable-kra-section-headline {
     color: var(--bs-primary);
@@ -43,12 +43,14 @@ td[colspan="4"] {
 }
 
 .btn-primarys {
-    background-color: var(--accent-color);
-    border-color: var(--bs-primary);
+  background-color: #185f73; 
+    border-color: #185f73;   
     color: white;
 }
 
 .btn-outline-primarys {
     background-color: white;
+        border-color: #185f73;   
+
     color: #595959cc;
 }

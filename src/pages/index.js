@@ -47,7 +47,7 @@ export {
   AnnualReviewView,
 } from './Appraisal/AppraisalCheckInForm/annual';
 //export { AnnualAppraisalReview, AnnualReview } from './Appraisal/AppraisalCheckInForm/annual';
-export { default as QuaterlyAppraiserCheckIn } from './Appraisal/QuarterlyCheckIn/QuaterlyAppraiserCheckIn/QuaterlyAppraiserCheckIn';
+//export { default as QuaterlyAppraiserCheckIn } from './Appraisal/QuarterlyCheckIn/QuaterlyAppraiserCheckIn/QuaterlyAppraiserCheckIn';
 export { default as ManageFiles } from './Skills/Admin/ManageFiles/ManageFiles';
 export { default as GenerateDetailedReport } from './Skills/Admin/GenerateDetailedReport/GenerateDetailedReport';
 export { default as GenerateIDPs } from './Skills/Admin/GenerateIDPs/GenerateIDPs';
@@ -56,3 +56,7 @@ export { default as ProfilerLandingPage } from './Skills/ProfilerLandingPage/Pro
 export { default as AdminLanding } from './Skills/Admin/AdminLanding/AdminLanding';
 export { default as SkillsDashboard } from './Skills/Dashboard/Dashboard';
 export { default as Guidelines } from './Skills/Dashboard/DashboardTabs/Guidelines/Guidelines';
+//export {default as AnnualAppraisalReview, AnnualReview } from './Appraisal/';
+export {default as QuaterlyAppraiserCheckIn} from './Appraisal/QuarterlyCheckIn/QuaterlyAppraiseeCheckIn/QuaterAppraiseeCheckIn';
+export {default as ReportingAuthorityReviewBulk} from './Appraisal/AppraisalHRDashboard/ReportingAuthorityBulk/ReportingAuthorityReviewBulk';
+//export {default as ReportingReviewBulk} from './Appraisal/AppraisalHRDashboard/ReportingReviewBulk/ReportingReviewBulk';

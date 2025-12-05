@@ -6,8 +6,8 @@ padding-right: 2rem;
     padding-left: 6rem;
  }
 
-.card {
-  background-color: var(--bs-primary);
+.cards {
+  background-color: #185f73;
   border-radius: 20px;
   box-shadow: var(--shadows);
   padding: 20px;
@@ -34,10 +34,6 @@ h2 {
   border-radius: var(--border-radius);
 }
 
-.table-header {
-  background-color: var(--accent-color);
-  color: var(--bs-primary);
-}
 
 .table-header th,
 .table-header td {

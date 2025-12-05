@@ -48,22 +48,20 @@
     /* Background color is set dynamically via inline styles based on status */
 }
 
-.btn-primary:hover {
-    color: var(--text-color);
-}
+
 .butns {
        border-radius: 6px;
     padding: 7px 13px;
     font-weight: 600;
-    border: 1px solid var(--accent-color);
-     background-color: var(--bs-primary); 
-    border-color: var(--accent-color); 
-     color: var(--accent-color); 
+    border: 1px solid #185f73 !important;
+     background-color: #185f73; 
+    border-color: #185f73; 
+     color: #f0f0f0; 
 }
  .butns:hover {
-      background-color: var(--accent-color);
-    border-color: var(--bs-primary);
-    color: white;}
+    border-color: #185f73;
+      color:#185f73 !important;
+}
 
 .btn-fade {
       border-radius: 6px;
@@ -76,7 +74,7 @@
     }
 
 .btn-fade:hover {
-         background-color: var(--accent-color)! important;
-    border-color: var(--bs-primary)!important;
+  background-color: #185f73; 
+    border-color: #185f73;     
     color: white; 
 }

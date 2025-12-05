@@ -319,7 +319,7 @@ const EmployeeExceptionList = () => {
           <button className="btn search-btn px-4" onClick={handleSearch}>
             Search
           </button>
-          <button className="btn clear-btn" onClick={handleClear}>
+          <button className="clear-btn" onClick={handleClear}>
             Clear Filter
           </button>
         </div>

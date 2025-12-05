@@ -31,13 +31,14 @@ function QuarterlyException() {
   const { financialYear, appraisalPeriod, quarter, dateRange, employee, role } = location.state || {
     financialYear: '2025',
     appraisalPeriod: 'Quarterly',
-    quarter: 'Q1',
-    dateRange: '01 Apr 2025 - 30 Jun 2025',
+    quarter: 'Q2',
+    dateRange: '10 Apr 2025 - 30 Jun 2025',
     employee: {
       empNo: user?.empNo || 'arogya',
       employeeName: user?.EMP_NAME || 'Employee Name',
       branch: user?.BRANCH_UNIT_TYPE || 'Branch',
       primaryRole: 'Primary Role',
+      url: "U-34545",
       appraiser: 'Appraiser Name',
       roles: user?.roles || [],
     },

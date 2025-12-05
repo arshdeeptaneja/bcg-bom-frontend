@@ -42,33 +42,36 @@ export default function CheckInDescriptionSection({
         </div>
 
         {/* Column 2 */}
-        <div className="col-md-3">
-          <div className="d-flex align-items-start gap-3">
-            <div
-              className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
-              style={{ width: 40, height: 40 }}
-            >
-              <i className="bi bi-person-check" />
-            </div>
-            <div>
-              <div className="text-muted small">Employee Name</div>
-              <div className="fw-semibold">{employee.employeeName}</div>
-            </div>
-          </div>
+      {employee.appraiseeContact && (
+  <div className="d-flex align-items-start gap-3 mt-3">
+    <div
+      className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+      style={{ width: 40, height: 40 }}
+    >
+      <i className="bi bi-phone" />
+    </div>
+    <div>
+      <div className="text-muted small">Contact No</div>
+      <div className="fw-semibold">{employee.appraiseeContact}</div>
+    </div>
+  </div>
+)}
 
-          <div className="d-flex align-items-start gap-3 mt-3">
-            <div
-              className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
-              style={{ width: 40, height: 40 }}
-            >
-              <i className="bi bi-briefcase" />
-            </div>
-            <div>
-              <div className="text-muted small">Branch/Office</div>
-              <div className="fw-semibold">{employee.branch}</div>
-            </div>
-          </div>
-        </div>
+{employee.appraiseeEmail && (
+  <div className="d-flex align-items-start gap-3 mt-3">
+    <div
+      className="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+      style={{ width: 40, height: 40 }}
+    >
+      <i className="bi bi-envelope" />
+    </div>
+    <div>
+      <div className="text-muted small">Email</div>
+      <div className="fw-semibold">{employee.appraiseeEmail}</div>
+    </div>
+  </div>
+)}
+
 
         {/* Column 3 */}
         <div className="col-md-2">
