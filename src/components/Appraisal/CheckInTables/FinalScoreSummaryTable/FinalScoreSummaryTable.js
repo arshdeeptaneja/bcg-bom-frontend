@@ -127,13 +127,13 @@ export default function FinalScoreSummaryTable({
     repa: [
       { key: 'KraName', label: 'KRAs' },
       { key: 'KraWeight', label: 'Weightage' },
-      { key: 'SelfScore', label: 'Score' },
+      //{ key: 'SelfScore', label: 'Score' },
       { key: 'ReportingAuthorityScore', label: 'Reporting Authority Score' },
     ],
     reva: [
       { key: 'KraName', label: 'KRAs' },
       { key: 'KraWeight', label: 'Weightage' },
-      { key: 'SelfScore', label: 'Score' },
+      //{ key: 'SelfScore', label: 'Score' },
       { key: 'ReportingAuthorityScore', label: 'Reporting Authority Score' },
       { key: 'ReviewingAuthorityScore', label: 'Reviewing Authority Score' },
     ],

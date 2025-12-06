@@ -245,6 +245,10 @@ const EmployeeAppealList = () => {
         dateRange: '',
         employee: {
           empNo: row?.empNumber,
+          employeeName: row?.empName,
+          appraiser: row?.appraiser,
+          primaryRole: row?.primaryRole,
+          branch: row?.branch
         },
         organizationName: row?.branch,
         urlId: row?.roleId,
@@ -253,10 +257,9 @@ const EmployeeAppealList = () => {
         intent: 'Review',
         appraisalStatus: 'complete_reva',
         task: 'view',
+        //TODO: Also need to pass date range here
       },
     });
-
-    console.log('vSDpvapvadmv:', row);
 
     // const empNumber = row.empNumber;
     // const primaryRole = row.primaryRole;

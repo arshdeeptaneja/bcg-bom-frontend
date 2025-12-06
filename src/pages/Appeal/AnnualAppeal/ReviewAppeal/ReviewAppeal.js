@@ -13,7 +13,9 @@ function ReviewAppeal() {
 
   const { data, context, formState, actions, isValid, isLoading, isError, error } =
     useReviewAppeal();
+    
 
+    console.log("appeal data is: ", data)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [responseData, setResponseData] = useState(null);
@@ -52,6 +54,7 @@ function ReviewAppeal() {
       branch: data?.employee?.branch || '-',
       primaryRole: data?.employee?.primaryRole || '-',
       appraiser: data?.employee?.appraiser || '-',
+      reviewer: data?.employee?.reviewer || '-'
     }),
     [data, context.empNo]
   );

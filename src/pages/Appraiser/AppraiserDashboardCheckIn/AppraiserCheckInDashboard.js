@@ -20,7 +20,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import LoadingSpinner from '../../../components/Spinner';
 
 const STATUS_MAPPING = {
-  complete_reva: 'Pending at Acceptor',
+  complete_reva: 'Completed',
   complete_self: 'Pending at Appraiser',
   complete_repa: 'Pending at Reviewer',
   pending: 'Pending at Appraisee',

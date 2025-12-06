@@ -286,7 +286,7 @@ function QuaterlyAppraiseeCheckIn() {
   };
 
   // Character limit for comment fields
-  const COMMENT_CHAR_LIMIT = 30;
+  const MIN_COMMENT_CHAR_LIMIT = 30;
 
   // Validation for mandatory comments
   const validateComments = () => {
@@ -298,22 +298,31 @@ function QuaterlyAppraiseeCheckIn() {
       toast.error('Please fill in the areas for improvement');
       return false;
     }
+    if (formInputs.performancePeriodComment.trim().length < MIN_COMMENT_CHAR_LIMIT) {
+      toast.error(`Highlights must be at least ${MIN_COMMENT_CHAR_LIMIT} characters`);
+      return false;
+    }
+  
+    if (formInputs.areasPerformanceComment.trim().length < MIN_COMMENT_CHAR_LIMIT) {
+      toast.error(`Areas for improvement must be at least ${MIN_COMMENT_CHAR_LIMIT} characters`);
+      return false;
+    }
     return true;
   };
 
   // Handler for development input comments with character limit
   const handleCommentChange = (questionIndex, value) => {
     // Enforce 30 character limit
-    const limitedValue = value.slice(0, COMMENT_CHAR_LIMIT);
+    //const limitedValue = value.slice(0, COMMENT_CHAR_LIMIT);
 
     setFormInputs((prev) => {
       // Map question index to the appropriate field
       // Index 0 = highlights -> performancePeriodComment
       // Index 1 = areas for improvement -> areasPerformanceComment
       if (questionIndex === 0) {
-        return { ...prev, performancePeriodComment: limitedValue };
+        return { ...prev, performancePeriodComment: value };
       } else if (questionIndex === 1) {
-        return { ...prev, areasPerformanceComment: limitedValue };
+        return { ...prev, areasPerformanceComment: value };
       }
       return prev;
     });
@@ -612,13 +621,13 @@ function QuaterlyAppraiseeCheckIn() {
                     className="form-control"
                     placeholder="Enter your Response"
                     rows={3}
-                    maxLength={COMMENT_CHAR_LIMIT}
+                    //maxLength={COMMENT_CHAR_LIMIT}
                     value={fieldValue}
                     onChange={(e) => handleCommentChange(index, e.target.value)}
                     disabled={!enabled}
                   />
                   <small className="text-muted text-end">
-                    {fieldValue.length}/{COMMENT_CHAR_LIMIT} characters
+                    Minimum {MIN_COMMENT_CHAR_LIMIT} characters
                   </small>
                 </div>
               );
