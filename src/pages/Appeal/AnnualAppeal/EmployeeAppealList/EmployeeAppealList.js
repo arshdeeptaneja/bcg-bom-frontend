@@ -238,11 +238,11 @@ const EmployeeAppealList = () => {
     // }).toString();
     navigate(`/appraisal/check-in-form`, {
       state: {
-        financialYear: 'FY 2025-26',
+        financialYear: financialYearForAPI,
         appraisalPeriod: 'Annual',
         quarter: 'quarter',
         page_type: 'reva',
-        dateRange: '',
+        dateRange: row.duration,
         employee: {
           empNo: row?.empNumber,
           employeeName: row?.empName,
